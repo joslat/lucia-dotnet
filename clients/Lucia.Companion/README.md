@@ -71,9 +71,9 @@ The prototype temporarily opts out of predictive Back in its manifest. On the te
 
 ## Status and engineering boundaries
 
-Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. Real history sources, authentication and live integration are not implemented yet.
+Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host now has an opt-in native-session foundation. Owner pairing, native client authentication/storage, real history sources and live integration remain unimplemented.
 
-- Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. Server code is unchanged.
+- Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. The separate host-side security module does not add server dependencies to the native client.
 - HomeViewModel owns shared selection and pins without UI dependencies. HomeEditorViewModel owns draft edits. HomeProfileSession coordinates persistence/recovery; LocalHomeStore owns file I/O. Controls raise named intents, not service calls.
 - Reuse controls before inventing base classes. One class per C# file. No empty ports, DI container or generic repositories. Local persistence now exists because Save and preference restoration need it.
 - Freshness is qualified at the data boundary, not guessed by UI timers. Unknown never means zero. Stale/unavailable values stay last-known. Closed is not locked; completed requests are not physical results.
@@ -97,6 +97,26 @@ Customize at the bottom of Home, or Options then Customize Home, changes the ord
 The binding picker reports rejected duplicate assignments beside its own controls, focuses the error and names the existing place plus the removal step. Missing discovery never deletes existing metadata. Removing a place removes its draft connections and bindings; Cancel leaves the saved setup untouched. A bound place without readings says so rather than claiming no bindings exist.
 
 Current verification includes core/configuration tests and native headless phone/tablet checks, not a production data boundary or full platform qualification. Production Story history, authorized discovery/import and live adapters remain future work. BUILD-PLAN.md tracks the active full-application goal; this checkpoint does not complete it.
+
+## Native-session host foundation
+
+This is server-side groundwork, not a working sign-in flow. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The native app still runs offline and has no credentials or network client. Do not give it a dashboard key or internal service token to bypass the unfinished pairing work.
+
+The host registers `LuciaCompanion` as an explicit authentication scheme. It is not part of the existing default API-key/internal-token scheme, `Administrator`, or `ExternalOrInternal` policies. The native credential carries no broad scope or administrator role. Dashboard headers/cookies and internal credentials are not accepted as a companion identity. `GET /api/companion/homes/{homeId}/session` returns only that device's session/grant metadata and uses `Cache-Control: no-store`, including denied responses. Insecure companion requests fail without redirecting a credential to another address. Disabled routes return 404.
+
+An owner-assigned `CompanionGrant` identifies one home and member, explicit place IDs and observation fields. Activity, history and Engine access default to false. There are no wildcard grants. IDs compare exactly; names and physical connections grant no access. `CompanionHome` checks the identity and route home only. Future projections must filter each place, field, event, history interval and aggregate against the current grant. A home-level policy alone does not authorize returning all household data. Engine permission will authorize sanitized administrator aggregates, not general appliance administration or raw personal transcripts.
+
+The shared relational session service uses the existing SQLite/PostgreSQL configuration database. Configuration schema 4 adds session and spent-refresh tables without converting existing keys. PostgreSQL queries explicitly name the public schema. Both access and refresh credentials contain 256 random bits and have separate prefixes; the server stores their SHA-256 hashes, never the credentials. The credential response redacts its `ToString()` output and must never be logged or put in a URL.
+
+Defaults are five-minute access, seven-day idle refresh and a thirty-day absolute device session. Configuration validates positive, ascending lifetimes, with maximums of fifteen minutes, thirty days and ninety days respectively. Renewal atomically replaces both credentials and invalidates the previous access credential. It never extends the absolute session expiry. A spent refresh credential revokes the entire device session, including the newly rotated access credential. Clients must serialize renewal; ambiguous delivery failure requires re-pairing rather than blindly replaying the old refresh credential. Logout/revocation will invalidate the durable session, not just erase local preferences.
+
+These options are read at host startup. Restart after changing them; use durable device revocation for immediate access removal rather than relying on a configuration reload.
+
+Authentication reads current durable state on each request, with no API-key cache involved. A revoked device is refused immediately by other instances using that database. Expired credentials always fail, regardless of cleanup. A host worker removes expired replay metadata and sessions in bounded batches every fifteen minutes, including when companion routes are disabled. A large backlog may take multiple batches. It is not an audit-log retention service.
+
+The design reuses ASP.NET Core's [explicit scheme policies](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/authorize-with-a-specific-scheme?view=aspnetcore-10.0) and applies [refresh-rotation guidance](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14). This Lucia-specific device-session foundation is not an OAuth/OIDC authorization server or a claim of RFC conformance. Owner-approved pairing remains the selected local-pilot direction. A supported identity-provider integration would instead require a separate [native browser/PKCE design](https://www.rfc-editor.org/rfc/rfc8252.html).
+
+Current proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. This does not qualify native storage, pairing, production TLS/reverse proxies, real projections or a third-party security audit. Owner approval, one-time pending-device possession, abuse/CSRF protections, membership management, platform storage and the connected app remain required work.
 
 ## StoryOrbit Day
 

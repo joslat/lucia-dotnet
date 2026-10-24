@@ -13,6 +13,8 @@ public static class SqliteDbNames
     [
         "configuration",
         "api_keys",
+        "companion_sessions",
+        "companion_refresh_history",
         "model_providers",
         "agent_definitions",
         "mcp_tool_servers",

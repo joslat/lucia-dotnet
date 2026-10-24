@@ -1,6 +1,10 @@
 using A2A;
 using lucia.Agents.Abstractions;
 using lucia.Agents.Auth;
+using lucia.Agents.Companion;
+using lucia.Data.Companion;
+using System.Data.Common;
+using Microsoft.Extensions.Options;
 using lucia.Agents.CommandTracing;
 using lucia.Agents.DataStores;
 using lucia.Agents.Services;
@@ -132,6 +136,9 @@ public static class ServiceCollectionExtensions
 
         // luciaconfig repositories
         builder.Services.AddSingleton<IConfigStoreWriter, SqliteConfigStoreWriter>();
+        builder.Services.AddSingleton<ICompanionSessionService>(sp => new RelationalCompanionSessionService(
+            _ => ValueTask.FromResult<DbConnection>(sp.GetRequiredKeyedService<SqliteConnectionFactory>(SqliteDbNames.Config).CreateConnection()),
+            sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));
         builder.Services.AddSingleton<IModelProviderRepository, SqliteModelProviderRepository>();
         builder.Services.AddSingleton<IAgentDefinitionRepository, SqliteAgentDefinitionRepository>();
         builder.Services.AddSingleton<IPresenceSensorRepository, SqlitePresenceSensorRepository>();
@@ -199,6 +206,9 @@ public static class ServiceCollectionExtensions
 
         // luciaconfig repositories
         builder.Services.AddSingleton<IConfigStoreWriter, PostgresConfigStoreWriter>();
+        builder.Services.AddSingleton<ICompanionSessionService>(sp => new RelationalCompanionSessionService(
+            async cancellationToken => await sp.GetRequiredKeyedService<PostgresConnectionFactory>(PostgresDbNames.Config).CreateConnectionAsync(cancellationToken).ConfigureAwait(false),
+            sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));
         builder.Services.AddSingleton<IModelProviderRepository, PostgresModelProviderRepository>();
         builder.Services.AddSingleton<IAgentDefinitionRepository, PostgresAgentDefinitionRepository>();
         builder.Services.AddSingleton<IPresenceSensorRepository, PostgresPresenceSensorRepository>();

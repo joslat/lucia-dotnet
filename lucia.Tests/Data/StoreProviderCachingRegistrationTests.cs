@@ -2,6 +2,8 @@ using lucia.Data.Redis;
 using FakeItEasy;
 using lucia.Agents.Abstractions;
 using lucia.Agents.Auth;
+using lucia.Agents.Companion;
+using lucia.Data.Companion;
 using lucia.Agents.Services;
 using lucia.Data.Extensions;
 using lucia.Data.InMemory;
@@ -30,6 +32,7 @@ public sealed class StoreProviderCachingRegistrationTests
 
         Assert.IsType<CachedApiKeyService>(provider.GetRequiredService<IApiKeyService>());
         Assert.IsType<CachedSpeakerProfileStore>(provider.GetRequiredService<ISpeakerProfileStore>());
+        Assert.IsType<RelationalCompanionSessionService>(provider.GetRequiredService<ICompanionSessionService>());
     }
 
     [Theory]
@@ -41,6 +44,7 @@ public sealed class StoreProviderCachingRegistrationTests
 
         Assert.IsType<CachedApiKeyService>(provider.GetRequiredService<IApiKeyService>());
         Assert.IsType<CachedSpeakerProfileStore>(provider.GetRequiredService<ISpeakerProfileStore>());
+        Assert.IsType<RelationalCompanionSessionService>(provider.GetRequiredService<ICompanionSessionService>());
     }
 
     [Fact]

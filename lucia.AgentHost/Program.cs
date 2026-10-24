@@ -5,6 +5,7 @@ using lucia.AgentHost;
 using lucia.AgentHost.Apis;
 using lucia.AgentHost.Appliance;
 using lucia.AgentHost.Auth;
+using lucia.AgentHost.Companion;
 using lucia.AgentHost.Hosting;
 using lucia.AgentHost.Conversation;
 using lucia.AgentHost.Conversation.Execution;
@@ -276,54 +277,7 @@ builder.Services.AddSingleton<HmacSessionService>();
 builder.Services.AddSingleton<ISessionService>(sp => sp.GetRequiredService<HmacSessionService>());
 builder.Services.AddSingleton<IAsyncInitializable>(sp => sp.GetRequiredService<HmacSessionService>());
 
-// Bind internal token options (injected by Aspire/K8s as env var InternalAuth__Token)
-builder.Services.Configure<InternalTokenOptions>(
-    builder.Configuration.GetSection(InternalTokenOptions.SectionName));
-
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = "MultiScheme";
-        options.DefaultChallengeScheme = "MultiScheme";
-    })
-    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
-        AuthOptions.AuthenticationScheme, _ => { })
-    .AddScheme<AuthenticationSchemeOptions, InternalTokenAuthenticationHandler>(
-        InternalTokenDefaults.AuthenticationScheme, _ => { })
-    .AddPolicyScheme("MultiScheme", "API Key or Internal Token", options =>
-    {
-        // Route to the correct handler based on the request
-        options.ForwardDefaultSelector = context =>
-        {
-            // Bearer token → internal token handler
-            var authHeader = context.Request.Headers.Authorization.ToString();
-            if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-            {
-                return InternalTokenDefaults.AuthenticationScheme;
-            }
-
-            // Everything else → API key handler (which also checks session cookies)
-            return AuthOptions.AuthenticationScheme;
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(
-        AuthOptions.AdministratorPolicy,
-        policy => policy.RequireRole(AuthOptions.AdministratorRole));
-
-    // Internal-only: only platform-injected token (agent → registry)
-    options.AddPolicy("InternalOnly", policy =>
-        policy.AddAuthenticationSchemes(InternalTokenDefaults.AuthenticationScheme)
-              .RequireAuthenticatedUser());
-
-    // External or internal: either API key/session OR internal token
-    options.AddPolicy("ExternalOrInternal", policy =>
-        policy.AddAuthenticationSchemes(
-                AuthOptions.AuthenticationScheme,
-                InternalTokenDefaults.AuthenticationScheme)
-              .RequireAuthenticatedUser());
-});
+builder.Services.AddLuciaAuthentication(builder.Configuration);
 
 builder.Services.AddHttpClient("AgentProxy");
 builder.Services.AddHttpClient("OllamaModels", client =>
@@ -426,6 +380,7 @@ app.MapOpenApi()
 app.MapScalarApiReference();
 
 app.UseForwardedHeaders();
+app.UseMiddleware<CompanionBoundaryMiddleware>();
 app.UseAntiforgery();
 app.UseCors("Dashboard");
 app.UseStaticFiles();
@@ -449,6 +404,7 @@ else
     app.UseDeveloperExceptionPage();
 }
 app.MapAuthApi();
+app.MapCompanionSessionApi();
 app.MapSetupApi();
 app.MapApiKeyManagementApi(isInstalledAppliance);
 app.MapAgentRegistryApiV1();

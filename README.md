@@ -14,6 +14,8 @@ Lucia *(pronounced LOO-sha)* is an open-source, privacy-focused AI assistant tha
 
 An experimental [native mobile/tablet companion](clients/Lucia.Companion/README.md) provides an offline Avalonia Home, local setup, Story Day and a reusable control lab, with Android Back, draft recovery and text-scaling checks. It is separate from the React administration dashboard and is not a connected or release-ready mobile app.
 
+The host also has an opt-in native-session foundation, disabled by default. It separates companion credentials from dashboard keys and internal service tokens, with home/place/observation grants and durable expiry, rotation and revocation in SQLite or PostgreSQL. Owner pairing, native secure storage and live projections are not connected yet. See the [boundary and remaining gates](clients/Lucia.Companion/README.md#native-session-host-foundation).
+
 ## ☀️ About the Name
 
 Lucia is named after **Lucia**, the ancient Nordic sun goddess associated with light, wisdom, and bringing illumination during the darkest time of year. In Norse mythology, Lucia represents the return of light and the power to guide through darkness—a fitting name for an AI assistant that brings intelligent automation and insight to your home.
