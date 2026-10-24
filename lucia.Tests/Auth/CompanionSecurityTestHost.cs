@@ -48,8 +48,9 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         this.database = database; this.app = app; this.certificate = certificate; Client = client; Sessions = sessions; Pairings = pairings; Keys = keys;
     }
 
-    public static async Task<CompanionSecurityTestHost> StartAsync()
+    public static async Task<CompanionSecurityTestHost> StartAsync(TimeProvider? clock = null)
     {
+        clock ??= TimeProvider.System;
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         var names = new SubjectAlternativeNameBuilder();
@@ -84,11 +85,12 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
             new Claim(ClaimTypes.NameIdentifier, "owner-a"), new Claim(ClaimTypes.Role, AuthOptions.AdministratorRole)]);
         builder.Services.AddSingleton(keys);
         builder.Services.AddSingleton(cookies);
+        builder.Services.AddSingleton<TimeProvider>(clock);
         var sessions = new RelationalCompanionSessionService(_ => ValueTask.FromResult<DbConnection>(database.ConnectionFactory.CreateConnection()),
-            new() { Enabled = true, HomeId = "home-a" }, TimeProvider.System);
+            new() { Enabled = true, HomeId = "home-a" }, clock);
         builder.Services.AddSingleton<ICompanionSessionService>(sessions);
         var pairings = new RelationalCompanionPairingService(_ => ValueTask.FromResult<DbConnection>(database.ConnectionFactory.CreateConnection()),
-            new() { Enabled = true, HomeId = "home-a" }, TimeProvider.System);
+            new() { Enabled = true, HomeId = "home-a" }, clock);
         builder.Services.AddSingleton<ICompanionPairingService>(pairings);
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         builder.Services.AddLuciaAuthentication(builder.Configuration);

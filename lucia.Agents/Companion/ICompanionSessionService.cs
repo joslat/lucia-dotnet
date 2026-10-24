@@ -7,6 +7,7 @@ public interface ICompanionSessionService
     Task<CompanionSession?> AuthenticateAsync(string accessToken, CancellationToken cancellationToken = default);
     Task<CompanionSessionTokens?> RenewAsync(string refreshToken, CancellationToken cancellationToken = default);
     Task<bool> RevokeAsync(string sessionId, string homeId, CancellationToken cancellationToken = default);
+    Task RevokeWithRefreshAsync(string refreshToken, CancellationToken cancellationToken = default);
     Task<int> PruneExpiredAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<CompanionSession>> ListActiveAsync(string homeId, CancellationToken cancellationToken = default);
 }

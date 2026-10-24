@@ -27,6 +27,28 @@ public sealed class PostgresCompanionSessionTests(PostgresMigrationFixture fixtu
 
     [Fact]
     [Trait("Category", "Integration")]
+    public async Task RefreshProofRevokesOnlyItsDeviceEvenWithShadowedSearchPath()
+    {
+        await using var databases = await fixture.CreateDatabasesAsync();
+        await MigrateAsync(databases);
+        var phone = await Service(databases.Config).CreateAsync(new("home-a", "member-a", []), "Phone");
+        var tablet = await Service(databases.Config).CreateAsync(new("home-a", "member-b", []), "Tablet");
+        var rotated = (await Service(databases.Config).RenewAsync(phone.RefreshToken))!;
+        await using (var connection = await databases.Config.CreateConnectionAsync())
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "CREATE SCHEMA evil; SET search_path TO evil; " + CompanionSchema.Sql;
+            await command.ExecuteNonQueryAsync();
+        }
+        await using var shadowed = new PostgresConnectionFactory(new NpgsqlConnectionStringBuilder(databases.Config.ConnectionString) { SearchPath = "evil,public" }.ConnectionString);
+        await Service(shadowed).RevokeWithRefreshAsync(phone.RefreshToken);
+        Assert.Null(await Service(databases.Config).AuthenticateAsync(rotated.AccessToken));
+        Assert.Null(await Service(databases.Config).RenewAsync(rotated.RefreshToken));
+        Assert.NotNull(await Service(databases.Config).AuthenticateAsync(tablet.AccessToken));
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
     public async Task SearchPathCannotRedirectSessionStorage()
     {
         await using var databases = await fixture.CreateDatabasesAsync();

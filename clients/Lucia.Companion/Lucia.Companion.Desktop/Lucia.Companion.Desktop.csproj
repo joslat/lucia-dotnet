@@ -2,6 +2,8 @@
   <PropertyGroup><OutputType>WinExe</OutputType></PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <ProjectReference Include="../Lucia.Companion.Connection/Lucia.Companion.Connection.csproj" />
     <ProjectReference Include="../Lucia.Companion.App/Lucia.Companion.App.csproj" />
   </ItemGroup>
 </Project>

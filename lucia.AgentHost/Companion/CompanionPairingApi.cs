@@ -14,6 +14,7 @@ public static class CompanionPairingApi
         anonymous.MapPost("/pairings", StartAsync).RequireRateLimiting(CompanionRateLimits.Start);
         anonymous.MapPost("/pairings/redeem", RedeemAsync).RequireRateLimiting(CompanionRateLimits.Credentials);
         anonymous.MapPost("/session/renew", RenewAsync).RequireRateLimiting(CompanionRateLimits.Credentials);
+        anonymous.MapPost("/session/revoke", RevokeAsync).RequireRateLimiting(CompanionRateLimits.Credentials);
         var owner = app.MapGroup("/api/companion/owner").WithTags("Companion management")
             .RequireAuthorization(CompanionAuthentication.OwnerPolicy).RequireRateLimiting(CompanionRateLimits.Owner)
             .AddEndpointFilter<CompanionOwnerFilter>();
@@ -74,6 +75,14 @@ public static class CompanionPairingApi
         if (request is null) { return Results.BadRequest(); }
         var review = await pairings.ReviewAsync(request.UserCode, context.RequestAborted).ConfigureAwait(false);
         return review is null ? Results.NotFound(new { error = "pairing_not_found_or_expired" }) : Results.Json(review, CompanionApiJson.Options);
+    }
+
+    private static async Task<IResult> RevokeAsync(ICompanionSessionService sessions, HttpContext context)
+    {
+        var request = await CompanionApiJson.ReadAsync<CompanionRenewRequest>(context).ConfigureAwait(false);
+        if (request is null) { return Results.BadRequest(new { error = "invalid_refresh_credential" }); }
+        await sessions.RevokeWithRefreshAsync(request.RefreshToken, context.RequestAborted).ConfigureAwait(false);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> ApproveAsync(string pairingId, ICompanionPairingService pairings, HttpContext context)

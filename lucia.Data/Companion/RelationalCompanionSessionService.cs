@@ -117,6 +117,19 @@ public sealed class RelationalCompanionSessionService : ICompanionSessionService
         return removed + await sessions.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task RevokeWithRefreshAsync(string refreshToken, CancellationToken cancellationToken = default)
+    {
+        if (!CompanionTokens.HasFormat(refreshToken, CompanionTokens.RefreshPrefix)) { return; }
+        await using var connection = await openConnection(cancellationToken).ConfigureAwait(false);
+        // Spent proof is intentional: a client that died during rotation can revoke the newly issued orphan too.
+        await using var command = Command(connection, null, """
+            UPDATE companion_sessions SET revoked_at = @now
+            WHERE home_id = @home AND revoked_at IS NULL AND
+              (refresh_hash = @hash OR id IN (SELECT session_id FROM companion_refresh_history WHERE hash = @hash));
+            """, ("now", clock.GetUtcNow().ToUnixTimeMilliseconds()), ("home", options.HomeId), ("hash", CompanionTokens.Hash(refreshToken)));
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task<IReadOnlyList<CompanionSession>> ListActiveAsync(string homeId, CancellationToken cancellationToken = default)
     {
         if (homeId != options.HomeId) { return []; }

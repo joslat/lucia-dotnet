@@ -34,7 +34,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-Tests use headless Avalonia with the real Skia renderer, not HTML. The 128 cases cover shared semantics, binding validation/persistence/recovery, competing local writers, explicit conflict recovery, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
+The 128 UI/core cases use headless Avalonia with the real Skia renderer, not HTML. They cover shared semantics, binding validation/persistence/recovery, competing local writers, explicit conflict recovery, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. Added transport/vault/session cases cover hostile responses and recovery. Windows-only DPAPI tests explicitly skip on other operating systems. None of these tests qualifies physical-device accessibility, safe areas or performance.
 
 ### Android
 
@@ -71,7 +71,7 @@ The prototype temporarily opts out of predictive Back in its manifest. On the te
 
 ## Status and engineering boundaries
 
-Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. The owner approval UI, native client authentication/storage, real history sources and live integration remain unimplemented.
+Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. Native transport/session coordination and a Windows protected vault exist, but owner/native connection UI, mobile storage, real history sources and live integration remain open.
 
 - Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. The separate host-side security module does not add server dependencies to the native client.
 - HomeViewModel owns shared selection and pins without UI dependencies. HomeEditorViewModel owns draft edits. HomeProfileSession coordinates persistence/recovery; LocalHomeStore owns file I/O. Controls raise named intents, not service calls.
@@ -100,7 +100,7 @@ Current verification includes core/configuration tests and native headless phone
 
 ## Native-session host foundation
 
-This is not yet a connected native sign-in screen. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The app still runs offline. A separate native transport library now passes HTTPS integration tests, but platform storage/session coordination and screen wiring remain open. Do not give the app a dashboard key or internal service token to bypass that work.
+This is not yet a connected native sign-in screen. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The app still runs offline. Native transport/session coordination and Windows protected storage pass local tests, but mobile storage and screen wiring remain open. Do not give the app a dashboard key or internal service token to bypass that work.
 
 The host registers `LuciaCompanion` as an explicit authentication scheme. It is not part of the existing default API-key/internal-token scheme, `Administrator`, or `ExternalOrInternal` policies. The native credential carries no broad scope or administrator role. Dashboard headers/cookies and internal credentials are not accepted as a companion identity. `GET /api/companion/homes/{homeId}/session` returns only that device's session/grant metadata and uses `Cache-Control: no-store`, including denied responses. Insecure companion requests fail without redirecting a credential to another address. Disabled routes return 404.
 
@@ -116,7 +116,7 @@ Authentication reads current durable state on each request, with no API-key cach
 
 The design reuses ASP.NET Core's [explicit scheme policies](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/authorize-with-a-specific-scheme?view=aspnetcore-10.0) and applies [refresh-rotation guidance](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14). This Lucia-specific device-session foundation is not an OAuth/OIDC authorization server or a claim of RFC conformance. Owner-approved pairing remains the selected local-pilot direction. A supported identity-provider integration would instead require a separate [native browser/PKCE design](https://www.rfc-editor.org/rfc/rfc8252.html).
 
-Current proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, pairing, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. This does not qualify native storage, production TLS/reverse proxies, real projections or a third-party security audit. Owner UI, membership management, platform storage and the connected app remain required work.
+Current proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, pairing, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. This does not qualify mobile storage, production TLS/reverse proxies, real projections or a third-party security audit. Owner UI, membership management, mobile storage and the connected app remain required work.
 
 ### Owner-approved pairing API
 
@@ -127,6 +127,7 @@ Pairing uses two separate codes. The native device retains a 256-bit `deviceCode
 | `POST /pairings` | Anonymous HTTPS JSON `{deviceName}`. Returns codes, expiry and five-second poll interval |
 | `POST /pairings/redeem` | Device JSON `{deviceCode}`. Pending 202, slow polling 429, denied 403, expired/consumed 410, invalid 401; success returns credentials once |
 | `POST /session/renew` | Device JSON `{refreshToken}`. Rotates both credentials or returns 401 |
+| `POST /session/revoke` | Device JSON `{refreshToken}`. Current or spent refresh proof revokes only its session, without issuing new credentials. Idempotent 204 does not reveal whether a credential existed |
 | `GET /session` | Native Bearer. Learns its approved home/member/grant without a client-supplied home hint |
 | `POST /session/logout` | Native Bearer. Durably revokes that session without a home hint |
 | `GET /homes/{homeId}/session` | Native Bearer. Returns own current session/grant only |
@@ -154,9 +155,25 @@ The owner assigns an opaque member ID with the grant. There is no separate membe
 
 Pairing/refresh secrets travel in JSON bodies only; access credentials use a per-request Bearer header. Methods do not retry credential-changing requests. Pairing reports pending, throttle, denial, expiry and consumed intent separately. Session metadata reveals only the current device grant, not a household catalog. Wire parsing rejects missing required constructor inputs, malformed credentials, invalid fields and duplicate places. Exceptions and credential `ToString()` output omit response bodies and raw transport diagnostics.
 
-Responses are limited to 64 KiB. Headers and content each have a thirty-second deadline; caller cancellation remains cancellation. Content needs a separate deadline because [ResponseHeadersRead ends HttpClient's timeout at the headers](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpcompletionoption?view=net-10.0). An ambiguous renewal/redemption must not replay an old credential. The forthcoming session coordinator must serialize renewals, save replacements securely before use, and clear protected state after revocation/logout.
+Responses are limited to 64 KiB. Headers and content each have a thirty-second deadline; caller cancellation remains cancellation. Content needs a separate deadline because [ResponseHeadersRead ends HttpClient's timeout at the headers](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpcompletionoption?view=net-10.0). An ambiguous renewal/redemption must not replay an old credential. The session coordinator serializes renewal and protects replacements before use.
 
-Proof includes scripted hostile responses and the actual transport against isolated loopback Kestrel HTTPS with real SQLite pairing/session services. It covers successful approval/grant discovery/renewal/logout, old-access rejection, pending/throttle/denial, certificate rejection, bounded/stalled bodies, cancellation and redacted errors. It does not qualify a platform vault, installed Android networking, production deployment or connected UI.
+Proof includes scripted hostile responses and the actual transport/coordinator against isolated loopback Kestrel HTTPS with real SQLite pairing/session services. It covers approval/grant discovery/renewal/logout, old-access rejection, pending/throttle/denial, certificate rejection, bounded/stalled bodies, cancellation and redacted errors. These HTTPS tests use ephemeral test encryption, not a production platform key. Separate Windows tests check actual DPAPI and protected-file reopening. Installed Android networking/storage, production deployment and connected UI remain unqualified.
+
+### Protected sessions and recovery
+
+`ProtectedSessionVault` writes only ciphertext to `session.bin` in its supplied private directory, separate from `offline-home.json`. The stored schema contains endpoint, credential set, verification phase and approved home/member identifiers. It contains no observations, source catalog, grants or task history. The visible app does not instantiate the vault yet; these paths are exercised with synthetic temporary directories only.
+
+`ISessionVaultLease` holds the `.session.lock` file exclusively across cooperating instances, including credential-changing HTTP requests. Other callers wait with cancellation, bounded at 75 seconds. The sidecar is not deleted or replaced. Writes protect bytes first, flush a same-directory temporary file, then replace ciphertext. Corrupt, oversized, unreadable or unsupported-schema files fail closed and cannot be overwritten by ordinary Save. Explicit Forget is local-only recovery. Protection failure and cancelled writes preserve the prior file. This is not protection against a same-user malicious process, arbitrary editors, filesystem rollback or device compromise.
+
+The Windows launcher provides `WindowsDeviceSecretProtector` using [CurrentUser DPAPI](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=net-10.0), with a Lucia-specific purpose. Microsoft package `System.Security.Cryptography.ProtectedData` 10.0.12 is its only new direct dependency. The app does not store its own Windows key. Android Keystore and iOS Keychain adapters are not implemented yet. Unsupported targets must not fall back to plaintext. Plaintext buffers are cleared after serialization/parsing; managed credential strings cannot be guaranteed erased from memory.
+
+`DeviceSessionCoordinator` protects newly redeemed credentials in Verifying state before reading the grant. A temporary grant-read outage can recover without repeating redemption. It returns permissions only after a successful server read and stores exact approved home/member identity for later comparison. A foreign endpoint receives no stored credential. Revocation or identity changes clear the local connection; ordinary network failures do not fabricate an offline grant or silently switch to sample data.
+
+Before renewal, the coordinator durably writes Renewing. It then sends the refresh once, checks the replacement session identity, and protects replacement credentials before any authenticated read. If cancellation, lost delivery or saving fails after that marker, the next restore never replays the old refresh. It removes local credentials, attempts bounded refresh-proof revocation and requires pairing again. Real SQLite/HTTPS tests prove that spent refresh proof revokes a newly rotated orphan; PostgreSQL verifies the same query with a shadowed search path.
+
+Disconnect clears local ciphertext before a bounded revocation attempt. It returns false when only local removal is confirmed, including an offline host. The owner can revoke that device remotely. It does not claim logout succeeded if local storage could not be cleared. Forget deliberately claims no remote revocation. UI must expose these distinctions when connection screens are wired.
+
+Tests cover separate coordinators issuing one renewal, marker/write ordering, failed protection before sending, failed replacement storage, caller cancellation, interrupted renewal recovery, delayed verification, endpoint/identity mismatch, offline disconnect, revocation and corruption preservation. Windows tests reopen the actual DPAPI-backed file through a new protector instance and launch a hidden synthetic probe process to verify file-lease exclusion. Android/iOS, actual process termination at each write boundary, filesystem power-loss guarantees, backup/restore and full release security review remain open gates.
 
 ## StoryOrbit Day
 

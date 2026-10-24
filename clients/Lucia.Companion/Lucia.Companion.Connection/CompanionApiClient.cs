@@ -24,11 +24,8 @@ public sealed class CompanionApiClient : IDisposable
     // Only test assemblies can provide a handler. Production never installs a certificate-validation bypass.
     internal CompanionApiClient(Uri endpoint, HttpMessageHandler handler, TimeSpan? bodyTimeout = null)
     {
-        ArgumentNullException.ThrowIfNull(endpoint);
-        if (!endpoint.IsAbsoluteUri || endpoint.Scheme != Uri.UriSchemeHttps || string.IsNullOrEmpty(endpoint.Host)
-            || endpoint.UserInfo.Length > 0 || endpoint.AbsolutePath != "/" || endpoint.Query.Length > 0 || endpoint.Fragment.Length > 0)
-        { handler.Dispose(); throw new ArgumentException("Use an HTTPS host address without a path, query, fragment or credentials.", nameof(endpoint)); }
-        Endpoint = endpoint;
+        try { Endpoint = CompanionEndpoint.Validate(endpoint); }
+        catch { handler.Dispose(); throw; }
         this.bodyTimeout = bodyTimeout ?? TimeSpan.FromSeconds(30);
         client = new HttpClient(handler) { BaseAddress = endpoint, Timeout = TimeSpan.FromSeconds(30) };
     }
@@ -90,6 +87,14 @@ public sealed class CompanionApiClient : IDisposable
     public async Task LogoutAsync(string accessToken, CancellationToken cancellationToken = default)
     {
         using var request = Authorized(HttpMethod.Post, "session/logout", accessToken);
+        using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+        Require(response, HttpStatusCode.NoContent);
+    }
+
+    public async Task RevokeAsync(string refreshToken, CancellationToken cancellationToken = default)
+    {
+        WireValue.Secret(refreshToken, "lcr_");
+        using var request = Post("session/revoke", new { refreshToken });
         using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
         Require(response, HttpStatusCode.NoContent);
     }
