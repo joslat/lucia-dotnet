@@ -4,13 +4,14 @@ using Lucia.Companion.Core;
 namespace Lucia.Companion.App.ViewModels;
 
 /// <summary>Shared screen state. No Avalonia, transport, storage or device actions.</summary>
-public sealed class HomeViewModel(HomeTopology home) : INotifyPropertyChanged
+public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSource>? sources = null) : INotifyPropertyChanged
 {
     private readonly HashSet<string> pinnedIds = new(StringComparer.Ordinal);
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action? PreferencesChanged;
     public HomeTopology Home { get; private set; } = home ?? throw new ArgumentNullException(nameof(home));
+    public IReadOnlyList<ObservationSource> SourceCatalog { get; } = Array.AsReadOnly((sources ?? []).ToArray());
     public Place? SelectedPlace { get; private set; }
     public bool IsActionsOpen { get; private set; }
     public bool IsDetailOpen { get; private set; }

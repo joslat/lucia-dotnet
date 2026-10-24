@@ -3,7 +3,8 @@ namespace Lucia.Companion.Core;
 /// <summary>A validated, immutable home read model. Layout and physical adjacency remain separate.</summary>
 public sealed class HomeTopology
 {
-    public HomeTopology(string id, string name, IEnumerable<Place> places, IEnumerable<PlaceConnection> connections)
+    public HomeTopology(string id, string name, IEnumerable<Place> places, IEnumerable<PlaceConnection> connections,
+        IEnumerable<ObservationBinding>? bindings = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -46,14 +47,27 @@ public sealed class HomeTopology
             }
         }
 
+        var bound = (bindings ?? []).ToArray();
+        var assignedRoles = new HashSet<(string, ObservationRole)>();
+        if (bound.Length > 2000) { throw new ArgumentException("A home supports at most 2000 observation bindings.", nameof(bindings)); }
+        foreach (var binding in bound)
+        {
+            ArgumentNullException.ThrowIfNull(binding);
+            if (!ids.Contains(binding.PlaceId) || !assignedRoles.Add((binding.SourceId, binding.Role)))
+            {
+                throw new ArgumentException("A source role must belong to exactly one configured place in this home.", nameof(bindings));
+            }
+        }
         Id = id;
         Name = name;
         Places = Array.AsReadOnly(snapshot);
         Connections = Array.AsReadOnly(edges);
+        Bindings = Array.AsReadOnly(bound);
     }
 
     public string Id { get; }
     public string Name { get; }
     public IReadOnlyList<Place> Places { get; }
     public IReadOnlyList<PlaceConnection> Connections { get; }
+    public IReadOnlyList<ObservationBinding> Bindings { get; }
 }

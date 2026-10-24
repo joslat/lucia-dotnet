@@ -146,7 +146,7 @@ components:
 
 Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.
 
-This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup, Customize section ordering, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, live household and sensor bindings, and import remain unbuilt. This record describes the current UI; BUILD-PLAN.md owns the remaining work toward the full application.
+This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup and source-binding metadata editor, Customize section ordering, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, authorized live source adapters and real source import remain unbuilt. This record describes the current UI; BUILD-PLAN.md owns the remaining work toward the full application.
 
 Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
@@ -162,6 +162,7 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Home and Bloom remain static; Story optionally transitions only its selected time hand.
 - Platform text settings resize individual type roles, with layout adaptations for larger text.
 - Customize changes the order of the three Home sections without hiding any section or rearranging places.
+- Source-binding metadata remains separate from physical neighbors, source access and qualified readings.
 
 ## Colors
 
@@ -293,7 +294,7 @@ Native Back and Escape first close Home's open Bloom, then compact place detail,
 
 Android temporarily sets `android:enableOnBackInvokedCallback="false"` in its manifest. In the API 36 emulator, default predictive Back bypassed the app callbacks even though the headless route checks passed. The checked APK with this compatibility opt-out returned from native Garden detail to Home instead of the launcher. Predictive Back and its gesture animation still need separate qualification before this temporary opt-out can be removed.
 
-The Android activity reuses one cached view only within the running process. An API 36 emulator density change and reset triggered recorded activity destruction and recreation in the same process, retaining an edited setup draft. This is not unsaved-draft storage. Process death restores saved setup metadata, pins and section-order preferences only.
+The Android activity reuses one cached view only within the running process. An API 36 emulator density change and reset triggered recorded activity destruction and recreation in the same process, retaining an edited setup draft. This is not unsaved-draft storage. Process death restores saved setup metadata, binding IDs and roles, pins and section-order preferences only.
 
 ### PlaceOrb
 
@@ -317,7 +318,9 @@ A retained old value appears as "Last known" with its observation time. It never
 
 ### PlaceDetail and detail panels
 
-PlaceDetail contains the selected icon, name, written state and reason, a Place actions button, named physical connections and ObservationRows. It explains when there are no configured connections or observation bindings. Tablet shows it alongside the graph; phone shows it in the separate detail view. The workbench retains its simpler selected-place panel.
+PlaceDetail contains the selected icon, name, written state and reason, a Place actions button, named physical connections and ObservationRows. It displays qualified observations when supplied and a written empty state otherwise. A saved binding alone supplies no reading. Tablet shows it alongside the graph; phone shows it in the separate detail view. The workbench retains its simpler selected-place panel.
+
+With no supplied observations, the empty text checks home.Bindings for the selected place. It says "Observation bindings configured. No readings available." when bindings exist, or "No observation bindings configured for this place." otherwise. ObservationBinding.MissingReadingsReason also supplies the reason for unobserved Unavailable places edited in setup and newly restored places. This wording distinguishes metadata from readings without inferring a value, health or a successful connection.
 
 ### BloomActions and BloomActionButton
 
@@ -339,11 +342,25 @@ The compact fixture has three equal columns. Received · done is a sage outlined
 
 ### HomeEditorScreen
 
-Setup uses labelled native TextBoxes for home and place names, a place ListBox or ComboBox according to width, an icon ComboBox and named neighbor CheckBoxes. TextBoxes and chooser/neighbor targets have a 48-unit minimum height where set by source. Inputs use DM Sans body typography, with Fluent field, selection and focus presentation.
+Setup uses labelled native TextBoxes for home and place names, a place ListBox or ComboBox according to width, an icon ComboBox, named neighbor CheckBoxes and SourceBindingPicker. TextBoxes and chooser/neighbor targets have a 48-unit minimum height where set by source. Inputs use DM Sans body typography, with Fluent field, selection and focus presentation. The binding picker follows the physical-neighbor controls inside the same scrolling place form.
 
-Add place, Move earlier, Move later and Remove place edit a draft. Removal reveals Confirm removal and Keep place inline. Validation and unreadable-profile replacement warnings use ProblemBrush and written text. Save setup or Replace saved setup and Cancel sit below the scrolling header and form. Local storage contains setup metadata, pins and Home section order only. It does not establish visual tokens or persist sensor readings.
+Add place, Move earlier, Move later, source-binding changes and Remove place edit a draft. Removal reveals Confirm removal and Keep place inline, and removing a place also removes its draft connections and bindings. Validation and unreadable-profile replacement warnings use ProblemBrush and written text. Save setup or Replace saved setup and Cancel sit below the scrolling header and form. Local storage contains setup metadata, binding IDs and roles, pins and Home section order only. It does not establish visual tokens or persist the source catalog, sensor readings or task history.
 
-Back or Escape first closes an open removal question. With pending draft changes it asks "Discard the unsaved setup changes?" with Keep editing and Discard changes. The pending-change check includes invalid, uncommitted field text, icon changes and neighbor changes. While this question is visible, editing is disabled and normal Save/Cancel commands hide. Focus starts on Keep editing. Back again closes the question and retains the draft. With no changes, Back returns Home directly. The explicit Cancel command still leaves setup immediately without saving.
+Back or Escape first closes an open removal question. With pending draft changes it asks "Discard the unsaved setup changes?" with Keep editing and Discard changes. The pending-change check includes invalid, uncommitted field text, icon changes, neighbor changes and applied binding changes. While this question is visible, editing is disabled and normal Save/Cancel commands hide. Focus starts on Keep editing. Back again closes the question and retains the draft. With no changes, Back returns Home directly. The explicit Cancel command still leaves setup immediately without saving.
+
+### SourceBindingPicker
+
+The picker is a named native UserControl in the place editor. It uses an Outfit section heading, body-size labels and instructions, muted status text, and the existing theme buttons. Its main stack has an 8-unit gap. Existing binding rows have a 12-unit gap, with 6-unit gaps within each row. No new palette, font family or field theme is introduced.
+
+Source and Reports label native ComboBoxes with 48-unit minimum heights and accessible names Observation source and Source observation role. Source names wrap in their native items. Choosing a source clears the role selection and exposes only that source's supported roles. Reports stays disabled until a source is chosen; Bind source stays disabled until a supported role is selected. The supported role vocabulary is Temperature, Humidity, Moisture, Light, Contact, Motion and Leak.
+
+Existing rows show the role and source name, or the stored source ID when absent from the current catalog. Each row has an explicit Remove binding button whose accessible name includes the role and source. Missing sources or unsupported stored roles stay visible with a muted written warning: "Binding kept; no current reading is inferred." No-source status explains that existing bindings remain available for review while additions are disabled. Successful adding or removing returns focus to Source when enabled, otherwise the picker itself can receive focus.
+
+ObservationSource describes available names and supported roles; ObservationBinding associates a place ID, source ID and role. The same source-role pair can belong to at most one place in the home. A conflicting assignment leaves metadata unchanged and shows BindingError inside the picker. This wrapping, focusable ProblemBrush TextBlock names the current owner and tells the user to remove that binding before reassignment. The picker focuses the error and brings it into view; Source does not take focus while the error is visible. Choosing another source or role clears the error. Physical-neighbor connections do not determine source ownership. A binding changes metadata only, grants no access and creates no current reading.
+
+The shell supplies SampleObservationSources with visibly Sample-named synthetic choices. The catalog is an in-memory input, not a persisted discovery record. The optional Bindings field extends the existing version-1 profile with IDs and roles only; a missing field restores no bindings. Binding edits remain in the setup draft until Save and participate in Back protection. There is no authorized source host, live discovery, real import or authentication flow in this increment.
+
+The picker's phone/tablet and normal/large-text captures are native desktop/headless evidence. A final debug APK installed on a dedicated API 36 emulator also showed the sample source catalog, offered only Temperature for Sample temperature sensor, added its binding, and retained the living-room binding after Save and a force-stop/cold restart. Scoped JSON inspection found metadata only, without observations or catalog values. This bounded emulator result does not qualify physical devices, TalkBack, iOS or performance, or complete the wider application.
 
 ### Customize and HomeSectionOrder
 
@@ -355,7 +372,7 @@ Moving swaps adjacent sections, retains focus on an available movement button fo
 
 HomeViewModel owns the order and preference notification; controls only request changes. HomeProfileSession saves it with local setup and pins. SectionOrder is an optional additive field in the existing version-1 profile, and a missing field restores the default. Loading restores the preference without initiating an automatic save. The visible storage status remains the authority for whether saving succeeded.
 
-This increment has native desktop/headless evidence. It does not establish an installed Android or real-device result for Customize; earlier emulator checks belong to their stated increments.
+Customize also has bounded installed-APK evidence on a dedicated API 36 emulator. Options to Customize Home opened and scrolled the footer; moving Lucia now earlier produced Your places, Lucia now, Needs a look. That chosen order persisted through Save and a force-stop/cold restart together with the source binding. This supplements the native desktop/headless captures without qualifying physical devices, TalkBack, iOS, performance or completion of the wider application.
 
 ### PlaceIcons
 
@@ -408,13 +425,14 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do keep all Bloom actions reachable in its large-text list.
 - Do preserve pending setup changes on Back until the user chooses Discard changes.
 - Do keep every Home section present when reordering and expose named movement controls with disabled boundaries.
+- Do retain missing source bindings with a written warning and require explicit removal.
 
 ### Don't:
 
 - Don't use color as the only indication of place state or selection.
 - Don't promote an old reading to the current-value position.
 - Don't infer locked from closed, occupancy from Quiet, or a physical result from a completed request.
-- Don't present authentication, live bindings or import as built.
+- Don't present authentication, authorized live source adapters or real source import as built.
 - Don't claim real-device accessibility, safe-area or performance qualification from desktop renders.
 - Don't treat illustrative sidecar HTML/CSS or generated color ramps as native implementation tokens.
 - Don't treat configured graph connections or static layout offsets as a measured floor plan.
@@ -424,3 +442,4 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't treat the in-process activity-view cache as persisted unsaved drafts.
 - Don't claim TalkBack, device, iOS or performance qualification from text-resource mapping or headless checks.
 - Don't confuse Home section order with the stable order of places in the graph.
+- Don't infer source ownership from physical adjacency or promote a saved binding into a current reading.

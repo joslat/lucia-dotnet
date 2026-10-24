@@ -27,7 +27,9 @@ public sealed partial class PlaceDetail : UserControl
         var observations = this.FindControl<StackPanel>("Observations")!;
         observations.Children.Clear();
         foreach (var observation in place.Observations) { observations.Children.Add(new ObservationRow(observation)); }
-        this.FindControl<TextBlock>("EmptyText")!.IsVisible = place.Observations.Count == 0;
+        var empty = this.FindControl<TextBlock>("EmptyText")!;
+        empty.IsVisible = place.Observations.Count == 0;
+        empty.Text = ObservationBinding.MissingReadingsReason(home.Bindings.Any(binding => binding.PlaceId == place.Id));
     }
 
     public void FocusActions() => this.FindControl<Button>("ActionsButton")!.Focus();

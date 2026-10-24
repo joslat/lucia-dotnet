@@ -21,7 +21,7 @@ public sealed partial class CompanionShell : UserControl
     private readonly MenuItem customizeHome = new() { Header = "Customize Home" };
     private TopLevel? attachedTopLevel;
 
-    public CompanionShell() : this(new HomeViewModel(SampleHome.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
+    public CompanionShell() : this(new HomeViewModel(SampleHome.Create(), SampleObservationSources.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
     public CompanionShell(HomeViewModel state, LocalHomeStore? store)
     {
@@ -83,7 +83,7 @@ public sealed partial class CompanionShell : UserControl
 
     private void OpenEditor()
     {
-        var editor = new HomeEditorScreen(home.State.Home);
+        var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog);
         if (profileSession.HasUnreadableProfile) { editor.WarnAboutReplacement(); }
         editor.CancelRequested += ShowHome;
         editor.SaveRequested += updated =>

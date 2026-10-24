@@ -6,7 +6,7 @@ The user renewed autonomous implementation authority after the offline checkpoin
 
 | Wave | Tasks | Exit evidence | Current status |
 |---|---|---|---|
-| W1 Configuration | C01 persisted Customize section order; C02 typed sensor-role bindings and review; C03 authorized discovery/import with explicit merge; C04 revision/conflict and corrupt-profile recovery | Unit/native tests for persistence, migration, cancel, invalid/removed bindings, import idempotence and conflict preservation | C01 implemented/reviewed with 95 passing tests; C02 next; C03/C04 pending |
+| W1 Configuration | C01 persisted Customize section order; C02 typed sensor-role bindings and review; C03 authorized discovery/import with explicit merge; C04 revision/conflict and corrupt-profile recovery | Unit/native tests for persistence, migration, cancel, invalid/removed bindings, import idempotence and conflict preservation | C01/C02 implemented and reviewed; 110 tests pass; C03/C04 next. Authorized discovery is wired only after W2's secure boundary |
 | W2 Secure connection | S01 inspect/reuse host identity and define native session threat model; S02 host-enforced member/home/field/admin policy; S03 pairing or supported native identity, expiry/renewal/revocation; S04 platform secure storage and connection/logout UI | Reviewed protocol plus adversarial authorization, expiry/replay/revocation tests and local HTTPS client/server integration | Pending |
 | W3 Live Home | H01 typed authorized observations with timestamps/quality; H02 scoped discovery/configuration endpoints; H03 household-safe correlated task projections; H04 revisioned snapshots/updates and reconnect/background recovery; H05 connect shared UI with explicit demo/live states | Real application transport against an isolated local host, source-adapter tests, no fixture substitution in connected mode, permission and reconnect tests | Pending |
 | W4 Story | T01 authorized historical source and boundary samples; T02 effective-dated bindings, coverage and retention; T03 deterministic evidence-linked chapters; T04 Day/date navigation and Week where supported; T05 shared selection and failures | Host/client integration, timezone/DST and missing-track tests, phone/tablet captures; real source availability recorded | Pending |
@@ -25,7 +25,7 @@ Approved 24 October 2026. Build native Constellation controls, not an HTML wrapp
 | Compositions | HomeConstellation, physical connections, attention and read-only details | Implemented; empty/single/40-place layout tests |
 | Interactions | Shared selection, named BloomActions, context menu, pins and Back | Implemented; device qualification remains open |
 | Screens | Home and local setup; then StoryOrbit Day | Home/setup and thin Story Day implemented with fixtures; live history remains open |
-| Local metadata | Add/name/icon/connect/reorder/remove places, save/cancel, pins and section order | Implemented; source import and binding editor remain open |
+| Local metadata | Add/name/icon/connect/reorder/remove places, bind/unbind source roles, save/cancel, pins and section order | Implemented; authorized discovery/import and revision handling remain open |
 | Live boundary | Native session, secure storage, authorization, projections | Must precede live household data |
 | Qualification | Devices, accessibility, lifecycle, performance, distribution | Offline API 36 navigation/recreation/text checks complete; physical devices and release gates remain open |
 
@@ -39,7 +39,7 @@ One selection state drives constellation and detail. Narrow layouts open detail 
 
 Home puts Your places first, then attention and a clearly synthetic Lucia now example. Build your home stages edits until Save. New places have no bindings/readings and remain unavailable. Pin preferences persist without reordering places automatically.
 
-LocalHomeStore writes versioned metadata, pins and Home section order, never observations or task history. Writes are serialized and replace a same-directory temporary file. A corrupt setup is preserved and blocks automatic writes until the user explicitly chooses Replace saved setup. Failed writes leave session state and offer Retry. Source import and binding editing remain future work. The following original acceptance scope is retained so those gaps remain visible.
+LocalHomeStore writes versioned metadata, source ID/role bindings, pins and Home section order, never observations or task history. Writes are serialized and replace a same-directory temporary file. A corrupt setup is preserved and blocks automatic writes until the user explicitly chooses Replace saved setup. Failed writes leave session state and offer Retry. The binding editor keeps missing sources explicit and prevents duplicate source-role ownership. Authorized source import and revision/conflict handling remain open. The following original acceptance scope is retained so those gaps remain visible.
 
 Compose Your places first, read-only Lucia now and Customize. Add only the configuration storage/state management needed here. Add/import place, choose icon, review bindings, save/cancel; no host mutations until an authenticated boundary exists. Preferences may reorder sections deliberately, not unexpectedly.
 

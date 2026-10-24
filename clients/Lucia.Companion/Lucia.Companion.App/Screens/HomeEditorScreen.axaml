@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
              x:Class="Lucia.Companion.App.Screens.HomeEditorScreen" Background="{DynamicResource CanvasBrush}">
   <Grid RowDefinitions="*,Auto" Margin="16" RowSpacing="16">
     <ScrollViewer Name="EditorScroll" HorizontalScrollBarVisibility="Disabled">
@@ -31,14 +31,15 @@
             <TextBlock Text="Connects to" />
             <TextBlock Text="Optional. Select physical neighbors, not sensor owners." Classes="muted" FontSize="{DynamicResource TextSize13}" />
             <StackPanel Name="ConnectionsList" Spacing="6" />
-            <TextBlock Text="New places have no observation bindings. They stay unavailable until a source is configured." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            <TextBlock Text="New places stay unavailable until an authorized source provides qualified readings. A saved binding alone does not create readings." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            <c:SourceBindingPicker Name="BindingPicker" />
             <WrapPanel>
               <Button Name="MoveEarlier" Content="Move earlier" Classes="theme" Margin="0,0,8,8" />
               <Button Name="MoveLater" Content="Move later" Classes="theme" Margin="0,0,8,8" />
             </WrapPanel>
             <Button Name="RemovePlace" Content="Remove place" Classes="theme" HorizontalAlignment="Left" />
             <StackPanel Name="RemovalConfirmation" IsVisible="False" Spacing="8">
-              <TextBlock Text="Remove this place and its connections from the draft? You can still discard all edits with Cancel." Classes="muted" />
+              <TextBlock Text="Remove this place, its connections and observation bindings from the draft? You can still discard all edits with Cancel." Classes="muted" />
               <WrapPanel>
                 <Button Name="ConfirmRemove" Content="Confirm removal" Classes="theme" Margin="0,0,8,8" Foreground="{DynamicResource ProblemBrush}" />
                 <Button Name="KeepPlace" Content="Keep place" Classes="theme" />

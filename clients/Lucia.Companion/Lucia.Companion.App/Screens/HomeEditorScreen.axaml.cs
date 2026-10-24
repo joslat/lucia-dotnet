@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Lucia.Companion.App.ViewModels;
+using Lucia.Companion.App.Controls;
 using Lucia.Companion.Core;
 
 namespace Lucia.Companion.App.Screens;
@@ -9,6 +10,7 @@ namespace Lucia.Companion.App.Screens;
 public sealed partial class HomeEditorScreen : UserControl
 {
     private readonly HomeEditorViewModel draft;
+    private readonly IReadOnlyList<ObservationSource> sources;
     private string? selectedId;
     private bool filling;
     public event Action<HomeTopology>? SaveRequested;
@@ -16,10 +18,20 @@ public sealed partial class HomeEditorScreen : UserControl
 
     public HomeEditorScreen() : this(SampleHome.Create()) { }
 
-    public HomeEditorScreen(HomeTopology home)
+    public HomeEditorScreen(HomeTopology home, IReadOnlyList<ObservationSource>? sources = null)
     {
         draft = new(home);
+        this.sources = Array.AsReadOnly((sources ?? []).ToArray());
         AvaloniaXamlLoader.Load(this);
+        var bindings = this.FindControl<SourceBindingPicker>("BindingPicker")!;
+        bindings.BindingRequested += (source, role) =>
+        {
+            if (selectedId is not null && RunEdit(() => draft.BindSource(selectedId, source, role), bindings.ShowError)) { RefreshBindings(); }
+        };
+        bindings.RemovalRequested += (sourceId, role) =>
+        {
+            if (selectedId is not null && RunEdit(() => draft.UnbindSource(selectedId, sourceId, role), bindings.ShowError)) { RefreshBindings(); }
+        };
         this.FindControl<TextBox>("HomeNameInput")!.Text = home.Name;
         this.FindControl<ComboBox>("IconInput")!.ItemsSource = Enum.GetValues<PlaceIcon>();
         this.FindControl<ListBox>("PlacesList")!.SelectionChanged += (_, _) => SelectFromList();
@@ -156,10 +168,16 @@ public sealed partial class HomeEditorScreen : UserControl
         {
             connections.Children.Add(new CheckBox { Content = neighbor.Name, Tag = neighbor.Id, IsChecked = neighborIds.Contains(neighbor.Id), MinHeight = 48 });
         }
+        RefreshBindings();
 
         var index = draft.Places.ToList().FindIndex(candidate => candidate.Id == id);
         this.FindControl<Button>("MoveEarlier")!.IsEnabled = index > 0;
         this.FindControl<Button>("MoveLater")!.IsEnabled = index < draft.Places.Count - 1;
+    }
+
+    private void RefreshBindings()
+    {
+        if (selectedId is not null) { this.FindControl<SourceBindingPicker>("BindingPicker")!.SetContext(selectedId, sources, draft.Bindings); }
     }
 
     private bool TryApplyCurrent()
@@ -181,10 +199,10 @@ public sealed partial class HomeEditorScreen : UserControl
         });
     }
 
-    private bool RunEdit(Action action)
+    private bool RunEdit(Action action, Action<string>? reportError = null)
     {
         try { action(); this.FindControl<TextBlock>("ErrorText")!.IsVisible = false; return true; }
-        catch (ArgumentException error) { ShowError(error.Message.Split(Environment.NewLine)[0]); return false; }
+        catch (ArgumentException error) { (reportError ?? ShowError)(error.Message.Split(Environment.NewLine)[0]); return false; }
     }
 
     private void ShowError(string message)

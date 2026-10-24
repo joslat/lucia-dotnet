@@ -25,7 +25,7 @@ dotnet build clients/Lucia.Companion/Lucia.Companion.slnx
 
 Click/tap an orb or use Tab and Enter/Space to select sample observations. Phone opens a detail view with Back; tablet keeps details beside the graph. Place actions opens named Bloom shortcuts for readings, pinning and dismissal. Context menus offer the same actions. Options, then Appearance offers System, Light and Dark. All readings and task stages are synthetic.
 
-Build your home stages place names/icons, physical connections, ordering and removal until Save. New places are unavailable until observation bindings exist. There is no source import or real binding editor yet.
+Build your home stages place names/icons, physical connections, ordering, observation bindings and removal until Save. Choose a source and a supported report role; a source-role pair belongs to one place in the home. Existing bindings remain visible if a source disappears from discovery, with explicit removal. New places stay unavailable until qualified readings arrive. The default app offers labelled sample sources; real authorized discovery/import is not connected yet.
 
 Optional native screenshots:
 
@@ -34,7 +34,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-Tests use headless Avalonia with the real Skia renderer, not HTML. The 95 cases cover shared semantics, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
+Tests use headless Avalonia with the real Skia renderer, not HTML. The 110 cases cover shared semantics, binding validation/persistence/recovery, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
 
 ### Android
 
@@ -54,6 +54,8 @@ dotnet build clients/Lucia.Companion/Lucia.Companion.Android -p:AndroidSdkDirect
 Debug packages embed their assemblies and can be installed directly without IDE fast-deployment side files. Android backup is disabled for the local setup. Debug signing is not a distribution release.
 
 API 36 x86_64 emulator checks confirm direct APK installation, startup, place detail, Bloom actions, saved pins, Story scrolling and chapter/cursor selection. They also cover system Back, rotation, same-process activity recreation with an unsaved setup draft, a focused field above the keyboard, native font preference 2.0 and corrupt-setup preservation. These are bounded offline checks, not physical-device or full mobile qualification.
+
+A later installed-build check also opens Customize through Options, moves a section and verifies its saved order. Native source/role choosers select a labelled sample temperature source, add its binding, save and restore it after a cold process restart. Only metadata is stored. This does not qualify live discovery or real household access.
 
 ### Native navigation and text
 
@@ -80,13 +82,15 @@ See [font provenance and licenses](Lucia.Companion.App/Assets/Fonts/README.md) a
 
 ## Local setup storage
 
-The prototype saves `Lucia/Companion/offline-home.json` under the platform's local application-data folder. It contains setup metadata and pin preferences, never readings or task history. New places retain unavailable state until bindings exist. Metadata does not grant access to a household or device.
+The prototype saves `Lucia/Companion/offline-home.json` under the platform's local application-data folder. It contains setup metadata, source ID/role bindings and preferences, never readings, source catalogs, credentials or task history. Optional schema-1 bindings default to empty for older files. New places retain unavailable state until qualified readings arrive, even when bindings are configured. Metadata does not grant access to a household or device.
 
 Writes use a same-directory temporary file and serialized replacement. Invalid schema, invalid topology or unreadable JSON leaves the original file untouched and disables automatic saving. Build your home then offers an explicit Replace saved setup action. An I/O failure leaves the session usable and offers Retry save.
 
 Customize at the bottom of Home, or Options then Customize Home, changes the order of Your places, Needs a look and Lucia now. Named earlier/later buttons work without dragging. Restore default order resets the preference. All sections remain present and room positions stay unchanged. Phone follows the chosen order; tablet prioritizes the first section while keeping the room graph in the wide column. Back collapses Customize before leaving Home. The additive optional schema-1 preference defaults for older saved files.
 
-Current verification includes core/configuration tests and native headless phone/tablet checks, not a production data boundary or full platform qualification. Production Story history, source import and observation-binding editing remain future work. BUILD-PLAN.md tracks the active full-application goal; this checkpoint does not complete it.
+The binding picker reports rejected duplicate assignments beside its own controls, focuses the error and names the existing place plus the removal step. Missing discovery never deletes existing metadata. Removing a place removes its draft connections and bindings; Cancel leaves the saved setup untouched. A bound place without readings says so rather than claiming no bindings exist.
+
+Current verification includes core/configuration tests and native headless phone/tablet checks, not a production data boundary or full platform qualification. Production Story history, authorized discovery/import and live adapters remain future work. BUILD-PLAN.md tracks the active full-application goal; this checkpoint does not complete it.
 
 ## StoryOrbit Day
 
