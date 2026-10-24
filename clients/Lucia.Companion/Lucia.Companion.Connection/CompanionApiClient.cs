@@ -13,7 +13,7 @@ public sealed class CompanionApiClient : IDisposable
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         RespectRequiredConstructorParameters = true,
-        Converters = { new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false) }
+        Converters = { new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false), new JsonStringEnumConverter<ObservationQuality>(allowIntegerValues: false) }
     };
     private readonly HttpClient client;
     private readonly TimeSpan bodyTimeout;
@@ -91,6 +91,28 @@ public sealed class CompanionApiClient : IDisposable
         Require(response, HttpStatusCode.NoContent);
     }
 
+    public async Task<HomeSnapshot> GetHomeAsync(string accessToken, DeviceSession session, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        using var request = Authorized(HttpMethod.Get, $"homes/{session.HomeId}/snapshot", accessToken);
+        using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+        Require(response, HttpStatusCode.OK);
+        var snapshot = await ReadAsync<HomeSnapshot>(response, cancellationToken, 524_288).ConfigureAwait(false);
+        snapshot.RequireGrant(session);
+        return snapshot;
+    }
+
+    public async Task<HomeCatalog> GetDiscoveryAsync(string accessToken, DeviceSession session, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        using var request = Authorized(HttpMethod.Get, $"homes/{session.HomeId}/discovery", accessToken);
+        using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+        Require(response, HttpStatusCode.OK);
+        var catalog = await ReadAsync<HomeCatalog>(response, cancellationToken, 524_288).ConfigureAwait(false);
+        catalog.RequireGrant(session);
+        return catalog;
+    }
+
     public async Task RevokeAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         WireValue.Secret(refreshToken, "lcr_");
@@ -119,7 +141,7 @@ public sealed class CompanionApiClient : IDisposable
         { throw new CompanionConnectionException(ConnectionFailure.Transport); }
     }
 
-    private async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+    private async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken, long maximumBytes = 65_536)
     {
         // HttpClient's ResponseHeadersRead timeout ends at the headers. Content needs its own deadline.
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -127,7 +149,7 @@ public sealed class CompanionApiClient : IDisposable
         try
         {
             if (!string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json", StringComparison.OrdinalIgnoreCase)) { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
-            await response.Content.LoadIntoBufferAsync(65_536, deadline.Token).ConfigureAwait(false);
+            await response.Content.LoadIntoBufferAsync(maximumBytes, deadline.Token).ConfigureAwait(false);
             return await response.Content.ReadFromJsonAsync<T>(JsonOptions, deadline.Token).ConfigureAwait(false)
                 ?? throw new CompanionConnectionException(ConnectionFailure.InvalidResponse);
         }

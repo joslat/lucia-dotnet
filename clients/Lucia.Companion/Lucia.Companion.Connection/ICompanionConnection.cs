@@ -10,4 +10,6 @@ public interface ICompanionConnection
     Task<PairingUpdate> PollAsync(CancellationToken cancellationToken = default);
     Task<bool> DisconnectAsync(CancellationToken cancellationToken = default);
     Task ForgetAsync(CancellationToken cancellationToken = default);
+    Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default);
+    Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default);
 }

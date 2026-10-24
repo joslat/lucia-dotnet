@@ -24,6 +24,11 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
     public async Task<DeviceSession?> RestoreAsync(CancellationToken cancellationToken = default)
     {
         await using var lease = await vault.OpenAsync(cancellationToken).ConfigureAwait(false);
+        return await RestoreCoreAsync(lease, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<DeviceSession?> RestoreCoreAsync(ISessionVaultLease lease, CancellationToken cancellationToken)
+    {
         var stored = await lease.ReadAsync(cancellationToken).ConfigureAwait(false);
         if (stored is null) { return null; }
         RequireEndpoint(stored);
@@ -52,6 +57,25 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
             await lease.SaveAsync(stored, cancellationToken).ConfigureAwait(false);
         }
         return await VerifyAsync(lease, stored, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default) => ReadAuthorizedAsync(api.GetHomeAsync, cancellationToken);
+    public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => ReadAuthorizedAsync(api.GetDiscoveryAsync, cancellationToken);
+
+    private async Task<T> ReadAuthorizedAsync<T>(Func<string, DeviceSession, CancellationToken, Task<T>> read, CancellationToken cancellationToken)
+    {
+        // Keep renewal, verification and data read under the same cross-instance lease. No token is returned to the app.
+        await using var lease = await vault.OpenAsync(cancellationToken).ConfigureAwait(false);
+        var metadata = await RestoreCoreAsync(lease, cancellationToken).ConfigureAwait(false)
+            ?? throw new SessionStateException(SessionStateFailure.ConnectionRequired);
+        var stored = await lease.ReadAsync(cancellationToken).ConfigureAwait(false)
+            ?? throw new SessionStateException(SessionStateFailure.ConnectionRequired);
+        try { return await read(stored.Credentials.AccessToken, metadata, cancellationToken).ConfigureAwait(false); }
+        catch (CompanionConnectionException error) when (error.Failure == ConnectionFailure.Unauthorized || error.StatusCode == HttpStatusCode.Forbidden)
+        {
+            await lease.ClearAsync(cancellationToken).ConfigureAwait(false);
+            throw;
+        }
     }
 
     /// <returns>True only when the host confirmed revocation, or there was no stored connection. False means local removal only.</returns>

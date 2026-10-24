@@ -20,6 +20,8 @@ internal sealed class TestCompanionConnection : ICompanionConnection
     public Task<PairingUpdate> PollAsync(CancellationToken cancellationToken = default) { PollCalls++; return Poll(); }
     public async Task<bool> DisconnectAsync(CancellationToken cancellationToken = default) { var result = await Disconnect(); HasSavedConnection = false; return result; }
     public Task ForgetAsync(CancellationToken cancellationToken = default) { HasSavedConnection = false; return Task.CompletedTask; }
+    public Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default) => throw new SessionStateException(SessionStateFailure.ConnectionRequired);
+    public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => throw new SessionStateException(SessionStateFailure.ConnectionRequired);
     internal static ConnectionSession Session() => new(new Uri("https://synthetic.invalid"), new DeviceSession(new string('a', 32), "Phone",
         DateTimeOffset.UtcNow.AddDays(30), "home-a", "member-a", [new("porch", [Core.ObservationRole.Contact])], canReadHistory: true));
 }

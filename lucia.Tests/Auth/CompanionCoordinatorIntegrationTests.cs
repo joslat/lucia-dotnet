@@ -9,6 +9,38 @@ namespace lucia.Tests.Auth;
 public sealed class CompanionCoordinatorIntegrationTests
 {
     [Fact]
+    public async Task UiSafeConnectionReadsRealSourceProtocolThroughHttpsProtectedRenewalAndRevocation()
+    {
+        await using var source = await SyntheticCompanionHomeSource.StartAsync();
+        var clock = new FakeTimeProvider(DateTimeOffset.UtcNow.AddSeconds(5));
+        await using var host = await CompanionSecurityTestHost.StartAsync(clock, homeSource: source.Client, sourceBaseUrl: source.Origin);
+        var directory = Directory.CreateTempSubdirectory("lucia-native-home-e2e-");
+        try
+        {
+            var vault = new ProtectedSessionVault(directory.FullName, EphemeralProtector());
+            using var connection = new CompanionConnection(vault, _ => host.CreateNativeClient(), clock);
+            var prompt = await connection.BeginAsync(host.Client.BaseAddress!, "Synthetic phone");
+            var intent = (await host.Pairings.ReviewAsync(prompt.UserCode))!;
+            Assert.True(await host.Pairings.ApproveAsync(intent.Id, new("home-a", "member-a", [new("porch", [CompanionField.Temperature])]), "owner-a"));
+            var paired = (await connection.PollAsync()).Connection!;
+            Assert.Single((await connection.DiscoverAsync()).Places);
+            var first = await connection.ReadHomeAsync();
+            Assert.Equal(21.5, Assert.Single(Assert.Single(first.Places).Readings).NumberValue);
+            string firstAccess;
+            await using (var lease = await vault.OpenAsync()) { firstAccess = (await lease.ReadAsync())!.Credentials.AccessToken; }
+            clock.Advance(TimeSpan.FromMinutes(6));
+            Assert.Equal("porch", Assert.Single((await connection.ReadHomeAsync()).Places).PlaceId);
+            Assert.Null(await host.Sessions.AuthenticateAsync(firstAccess));
+            Assert.True(await host.Sessions.RevokeAsync(paired.Session.SessionId, "home-a"));
+            Assert.Equal(ConnectionFailure.Unauthorized, (await Assert.ThrowsAsync<CompanionConnectionException>(() => connection.ReadHomeAsync())).Failure);
+            Assert.False(connection.HasSavedConnection);
+            await using var cleared = await vault.OpenAsync();
+            Assert.Null(await cleared.ReadAsync());
+        }
+        finally { directory.Delete(recursive: true); }
+    }
+
+    [Fact]
     public async Task NativeCoordinatorProtectsRestoresRenewsAndRemovesRevokedSessionOverRealHttps()
     {
         var clock = new FakeTimeProvider(DateTimeOffset.UtcNow);

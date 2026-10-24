@@ -115,12 +115,36 @@ public sealed class CompanionConnection : ICompanionConnection, IDisposable
         finally { gate.Release(); }
     }
 
+    public Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default) => ReadAsync((coordinator, ct) => coordinator.ReadHomeAsync(ct), cancellationToken);
+    public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => ReadAsync((coordinator, ct) => coordinator.DiscoverAsync(ct), cancellationToken);
+
+    private async Task<T> ReadAsync<T>(Func<DeviceSessionCoordinator, CancellationToken, Task<T>> read, CancellationToken cancellationToken)
+    {
+        await EnterAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            StoredDeviceSession? stored;
+            await using (var lease = await vault.OpenAsync(cancellationToken).ConfigureAwait(false))
+            { stored = await lease.ReadAsync(cancellationToken).ConfigureAwait(false); }
+            HasSavedConnection = stored is not null;
+            if (stored is null) { throw new SessionStateException(SessionStateFailure.ConnectionRequired); }
+            return await read(new DeviceSessionCoordinator(ClientFor(stored.Endpoint), vault, clock), cancellationToken).ConfigureAwait(false);
+        }
+        catch (CompanionConnectionException error) when (error.Failure == ConnectionFailure.Unauthorized || error.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        { HasSavedConnection = false; throw; }
+        catch (SessionStateException error) when (error.Failure == SessionStateFailure.ConnectionRequired)
+        { HasSavedConnection = false; throw; }
+        catch (SessionStorageException) { HasSavedConnection = true; throw; }
+        finally { gate.Release(); }
+    }
+
     private CompanionApiClient ClientFor(Uri endpoint)
     {
         if (client is null || client.Endpoint != endpoint) { client?.Dispose(); client = createClient(endpoint); }
         Endpoint = client.Endpoint;
         return client;
     }
+
     private async Task EnterAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(disposed, this);

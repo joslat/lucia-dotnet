@@ -27,4 +27,20 @@ internal static class WireValue
         { throw new ArgumentException("Use a readable device name of at most 80 characters."); }
         return value;
     }
+
+    public static string Label(string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
+        if (value.Length > 200 || value.Any(character => char.IsControl(character) || char.GetUnicodeCategory(character) == UnicodeCategory.Format))
+        { throw new ArgumentException("The source label is invalid."); }
+        return value;
+    }
+
+    public static string SourceIdentifier(string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
+        if (value.Length > 256 || value.Any(character => char.IsControl(character) || char.IsWhiteSpace(character) || char.GetUnicodeCategory(character) == UnicodeCategory.Format))
+        { throw new ArgumentException("The source identifier is invalid."); }
+        return value;
+    }
 }
