@@ -18,6 +18,18 @@ public sealed class MainActivity : AvaloniaMainActivity
         ApplyTextSizes();
     }
 
+    protected override void OnPause()
+    {
+        (Avalonia.Application.Current as App.App)?.SuspendConnectionPolling();
+        base.OnPause();
+    }
+
+    protected override void OnResume()
+    {
+        base.OnResume();
+        (Avalonia.Application.Current as App.App)?.VerifyConnectionForeground();
+    }
+
     public override void OnConfigurationChanged(Configuration newConfig)
     {
         base.OnConfigurationChanged(newConfig);

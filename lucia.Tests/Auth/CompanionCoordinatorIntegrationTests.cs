@@ -36,6 +36,34 @@ public sealed class CompanionCoordinatorIntegrationTests
     }
 
     [Fact]
+    public async Task UiSafeConnectionPairsProtectsRestoresAndDisconnectsWithoutExposingTokens()
+    {
+        await using var host = await CompanionSecurityTestHost.StartAsync();
+        var directory = Directory.CreateTempSubdirectory("lucia-ui-safe-e2e-");
+        try
+        {
+            var vault = new ProtectedSessionVault(directory.FullName, EphemeralProtector());
+            using var connection = new CompanionConnection(vault, endpoint =>
+            {
+                Assert.Equal(host.Client.BaseAddress, endpoint);
+                return host.CreateNativeClient();
+            });
+            var prompt = await connection.BeginAsync(host.Client.BaseAddress!, "Synthetic phone");
+            var intent = (await host.Pairings.ReviewAsync(prompt.UserCode))!;
+            Assert.True(await host.Pairings.ApproveAsync(intent.Id, new("home-a", "member-a", [new("porch", [CompanionField.Contact])]), "owner-a"));
+            var paired = await connection.PollAsync();
+            Assert.Equal(PairingPollStatus.Success, paired.Status);
+            Assert.Equal("home-a", paired.Connection!.Session.HomeId);
+            Assert.True(connection.HasSavedConnection);
+            Assert.Equal(paired.Connection.Session.SessionId, (await connection.RestoreAsync())!.Session.SessionId);
+            Assert.True(await connection.DisconnectAsync());
+            Assert.False(connection.HasSavedConnection);
+            Assert.Empty(await host.Sessions.ListActiveAsync("home-a"));
+        }
+        finally { directory.Delete(recursive: true); }
+    }
+
+    [Fact]
     public async Task CrashRecoveryRevokesARealRotationWhoseReplyWasLostWithoutReplayingRefresh()
     {
         await using var host = await CompanionSecurityTestHost.StartAsync();

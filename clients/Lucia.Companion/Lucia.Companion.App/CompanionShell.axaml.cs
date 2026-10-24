@@ -21,6 +21,8 @@ public sealed partial class CompanionShell : UserControl
     private readonly MenuItem customizeHome = new() { Header = "Customize Home" };
     private TopLevel? attachedTopLevel;
     public HomeProfileSession ProfileSession => profileSession;
+    public event Action? ConnectionRequested;
+    public void RequestConnection() => ConnectionRequested?.Invoke();
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create(), SampleObservationSources.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
@@ -31,12 +33,14 @@ public sealed partial class CompanionShell : UserControl
         AvaloniaXamlLoader.Load(this);
         this.FindControl<ContentControl>("ScreenHost")!.Content = home;
         var appearance = this.FindControl<Button>("AppearanceButton")!;
+        var connectionItem = new MenuItem { Header = "Connection" };
+        connectionItem.Click += (_, _) => RequestConnection();
         appearance.ContextMenu = new ContextMenu
         {
             ItemsSource = new[] { new MenuItem { Header = "Appearance", ItemsSource = new[]
             {
                 ThemeItem("System", ThemeVariant.Default), ThemeItem("Light", ThemeVariant.Light), ThemeItem("Dark", ThemeVariant.Dark)
-            }}, customizeHome, controlLab }
+            }}, customizeHome, connectionItem, controlLab }
         };
         appearance.Click += (_, _) => appearance.ContextMenu.Open(appearance);
         this.FindControl<Button>("BuildHomeButton")!.Click += (_, _) => OpenEditor();

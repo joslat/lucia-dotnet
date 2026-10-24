@@ -1,6 +1,6 @@
 # Lucia Companion (experimental)
 
-Native Avalonia foundation for the Constellation mobile/tablet client. This is an **offline Home, local setup and Story Day prototype**, not a connected household app or completed MVP. No network clients, credentials, model calls or physical actions. The control workbench remains available through Options, then Control lab.
+Native Avalonia client for the Constellation mobile/tablet design. It opens a real HTTPS device-connection preview, with protected storage on Windows and Android. Home, local setup and Story Day remain an explicitly selected synthetic demo. Owner dashboard approval UI and live household views are not built yet, so this is not a completed MVP. No model calls or physical actions. The demo control workbench remains available through Options, then Control lab.
 
 ## Smallest shared architecture
 
@@ -10,6 +10,8 @@ Desktop launcher ─┐
 Android launcher ┘     └─ Core: platform-independent observation/place semantics
 Tests ──────────────────┴─ unit + native headless interaction/render tests
 ```
+
+App uses the separate Connection library for HTTPS pairing and session operations. Connection references Core only. Platform launchers supply protected storage; the shared screen never receives raw credentials or the pending device secret.
 
 Phone and tablet share state and controls. Layout follows available width, including split view and landscape, not device-model checks. Launchers own platform lifecycle/integration only. No duplicate phone/tablet applications or WebView. Core is reusable by another .NET client without Avalonia; App is reusable by Avalonia clients, not automatically by React. Add iOS/browser launchers only when needed. iOS requires a Mac, signing and runtime qualification; none is claimed here.
 
@@ -23,7 +25,7 @@ dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 dotnet build clients/Lucia.Companion/Lucia.Companion.slnx
 ```
 
-Click/tap an orb or use Tab and Enter/Space to select sample observations. Phone opens a detail view with Back; tablet keeps details beside the graph. Place actions opens named Bloom shortcuts for readings, pinning and dismissal. Context menus offer the same actions. Options, then Appearance offers System, Light and Dark. All readings and task stages are synthetic.
+Choose Explore the demo explicitly to open sample observations. Click/tap an orb or use Tab and Enter/Space to select them. Phone opens a detail view with Back; tablet keeps details beside the graph. Place actions opens named Bloom shortcuts for readings, pinning and dismissal. Context menus offer the same actions. Options, then Appearance offers System, Light and Dark. All demo readings and task stages are synthetic. Options, then Connection returns to connection management without discarding the demo session.
 
 Build your home stages place names/icons, physical connections, ordering, observation bindings and removal until Save. Choose a source and a supported report role; a source-role pair belongs to one place in the home. Existing bindings remain visible if a source disappears from discovery, with explicit removal. New places stay unavailable until qualified readings arrive. The default app offers labelled sample sources; real authorized discovery/import is not connected yet.
 
@@ -34,7 +36,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-The 128 UI/core cases use headless Avalonia with the real Skia renderer, not HTML. They cover shared semantics, binding validation/persistence/recovery, competing local writers, explicit conflict recovery, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. Added transport/vault/session cases cover hostile responses and recovery. Windows-only DPAPI tests explicitly skip on other operating systems. None of these tests qualifies physical-device accessibility, safe areas or performance.
+The 178 client tests cover semantics, transport, protected storage, session recovery and native interactions. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover binding validation, competing local writers, conflict recovery, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. Connection checks include explicit demo separation, approval identity, grant disclosure and focus continuity. Windows-only DPAPI tests explicitly skip on other operating systems. None of these tests qualifies physical-device accessibility, safe areas or performance.
 
 ### Android
 
@@ -59,11 +61,13 @@ A later installed-build check also opens Customize through Options, moves a sect
 
 The installed conflict-recovery check deliberately changes the synthetic saved file while a session has another draft. Saving refuses the stale overwrite. Review shows both versions; system Back preserves the session; explicit reload uses the saved setup; explicit replacement saves the session version and survives a cold restart with bindings and section order retained. The original synthetic setup was restored afterward and the emulator shut down. These checks do not qualify arbitrary external-editor races, hardware accessibility or production household data.
 
+The connection-preview APK also passes a bounded API 36 installed check. Cold startup opens connection first. A closed emulator-loopback HTTPS port produces a written error, saves no session and never opens the demo automatically. Explicit demo entry, Options then Connection, and system Back return work. The native keyboard can consume the first Back to hide itself. With the soft keyboard enabled, the focused host field remains above it. Native 200% text changes the form layout. The existing synthetic setup hash stays unchanged; the crash buffer is empty. These checks do not establish successful installed TLS pairing, real-source integration, TalkBack or hardware qualification.
+
 ### Native navigation and text
 
 Back closes Bloom before phone detail, then returns Story or the control lab to Home. At Home root it lets Android leave the app. Setup Back first closes a removal question, then asks before discarding changed fields, including invalid unsaved text. Keep editing preserves those fields; Discard changes never saves them. Explicit Cancel remains an intentional discard. The keyboard can consume the first Back to hide itself.
 
-The single Android activity reuses its view within the application process. Rotation and activity recreation retain the current screen, selection and draft. Process death starts from saved setup metadata and pins only. Unsaved drafts, readings and Story history are not written to disk.
+The single Android activity reuses its view within the application process. Rotation and activity recreation retain the current screen, selection and draft. After process death the app starts at connection verification. Demo setup metadata and pins restore only on explicit demo entry. Unsaved drafts, readings and Story history are not written to disk.
 
 Android maps each of the seven base font sizes through native SP conversion. Layout expands with text rather than zooming all geometry. At larger text, Home uses fewer columns, Bloom offers a scrollable action list, and Story prints the selected time below the dial. Normal text retains the radial composition.
 
@@ -71,7 +75,7 @@ The prototype temporarily opts out of predictive Back in its manifest. On the te
 
 ## Status and engineering boundaries
 
-Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. Native transport/session coordination and Windows/Android protection adapters exist, but owner/native connection UI, iOS storage, real history sources and live integration remain open.
+Implemented: connection-first native preview, protected restoration/recovery, observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. Owner browser approval UI, iOS storage, authorized source projections, real history and live views remain open.
 
 - Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. The separate host-side security module does not add server dependencies to the native client.
 - HomeViewModel owns shared selection and pins without UI dependencies. HomeEditorViewModel owns draft edits. HomeProfileSession coordinates persistence/recovery; LocalHomeStore owns file I/O. Controls raise named intents, not service calls.
@@ -100,7 +104,9 @@ Current verification includes core/configuration tests and native headless phone
 
 ## Native-session host foundation
 
-This is not yet a connected native sign-in screen. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The app still runs offline. Native transport/session coordination and Windows/Android protected storage have local proof, but iOS storage and screen wiring remain open. Do not give the app a dashboard key or internal service token to bypass that work.
+The native connection screen calls the real session API, but the owner approval experience and live household adapters remain unfinished. Companion host access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. Windows and Android use protected storage; unavailable protection shows an error and an explicit demo choice, never a plaintext fallback. Do not give the app a dashboard key or internal service token.
+
+Enter the intended HTTPS origin and a device name. The waiting screen retains the canonical host, exact submitted name and human approval code while checks run or pause. The owner must match the code and choose exact read access through the management API for now. Verified state discloses the device grant, not sample household readings. Foreground entry revalidates an existing connection. Retry, local forgetting and disconnect are separate actions; removal requires confirmation. Offline disconnect says local removal only when host revocation cannot be confirmed. Credentials are never shown to the screen.
 
 The host registers `LuciaCompanion` as an explicit authentication scheme. It is not part of the existing default API-key/internal-token scheme, `Administrator`, or `ExternalOrInternal` policies. The native credential carries no broad scope or administrator role. Dashboard headers/cookies and internal credentials are not accepted as a companion identity. `GET /api/companion/homes/{homeId}/session` returns only that device's session/grant metadata and uses `Cache-Control: no-store`, including denied responses. Insecure companion requests fail without redirecting a credential to another address. Disabled routes return 404.
 
@@ -116,7 +122,7 @@ Authentication reads current durable state on each request, with no API-key cach
 
 The design reuses ASP.NET Core's [explicit scheme policies](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/authorize-with-a-specific-scheme?view=aspnetcore-10.0) and applies [refresh-rotation guidance](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14). This Lucia-specific device-session foundation is not an OAuth/OIDC authorization server or a claim of RFC conformance. Owner-approved pairing remains the selected local-pilot direction. A supported identity-provider integration would instead require a separate [native browser/PKCE design](https://www.rfc-editor.org/rfc/rfc8252.html).
 
-Current host proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, pairing, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. Host tests alone do not qualify platform storage; separate Windows/Android checks are described below. Production TLS/proxies, real projections, owner UI, membership management, iOS storage, connected screens and release security review remain open.
+Current host proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, pairing, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. Host tests alone do not qualify platform storage; separate Windows/Android checks are described below. Production TLS/proxies, real projections, owner UI, membership management, iOS storage, installed successful sign-in and release security review remain open.
 
 ### Owner-approved pairing API
 
@@ -149,7 +155,7 @@ The owner assigns an opaque member ID with the grant. There is no separate membe
 
 ### Native transport library
 
-`Lucia.Companion.Connection` references Core only, not Avalonia, AgentHost, HA or model packages. It owns HTTP and validated immutable wire types; Core remains independent of network I/O. The visible app does not call it yet. There is no new NuGet package.
+`Lucia.Companion.Connection` references Core only, not Avalonia, AgentHost, HA or model packages. It owns HTTP and validated immutable wire types; Core remains independent of network I/O. The visible app calls its UI-safe `ICompanionConnection` boundary. It exposes display codes and verified session metadata, never credential sets or the pending device secret. There is no new NuGet package.
 
 `CompanionApiClient` accepts one HTTPS origin with no embedded credentials, query, fragment or path prefix. Reverse-proxy path-prefix hosting is not supported yet. Production uses the platform certificate trust policy, disables redirects, cookies and default credentials, and never sends an owner key. Test-only constructors are internal to the two test assemblies; the integration host pins only its own temporary certificate. The public constructor refuses that untrusted certificate.
 
@@ -161,7 +167,7 @@ Proof includes scripted hostile responses and the actual transport/coordinator a
 
 ### Protected sessions and recovery
 
-`ProtectedSessionVault` writes only ciphertext to `session.bin` in its supplied private directory, separate from `offline-home.json`. The stored schema contains endpoint, credential set, verification phase and approved home/member identifiers. It contains no observations, source catalog, grants or task history. The visible app does not instantiate the vault yet; these paths are exercised with synthetic temporary directories only.
+`ProtectedSessionVault` writes only ciphertext to `session.bin` in its supplied private directory, separate from `offline-home.json`. The stored schema contains endpoint, credential set, verification phase and approved home/member identifiers. It contains no observations, source catalog, grants or task history. The Windows launcher supplies `Lucia/Companion/secure-session` under local application data with CurrentUser DPAPI. Android supplies `NoBackupFilesDir/lucia-session` with its Keystore protector. No app-unlock or biometric requirement is claimed.
 
 `ISessionVaultLease` holds the `.session.lock` file exclusively across cooperating instances, including credential-changing HTTP requests. Other callers wait with cancellation, bounded at 75 seconds. The sidecar is not deleted or replaced. Writes protect bytes first, flush a same-directory temporary file, then replace ciphertext. Corrupt, oversized, unreadable or unsupported-schema files fail closed and cannot be overwritten by ordinary Save. Explicit Forget is local-only recovery. Protection failure and cancelled writes preserve the prior file. This is not protection against a same-user malicious process, arbitrary editors, filesystem rollback or device compromise.
 
@@ -171,7 +177,7 @@ The Windows launcher provides `WindowsDeviceSecretProtector` using [CurrentUser 
 
 Before renewal, the coordinator durably writes Renewing. It then sends the refresh once, checks the replacement session identity, and protects replacement credentials before any authenticated read. If cancellation, lost delivery or saving fails after that marker, the next restore never replays the old refresh. It removes local credentials, attempts bounded refresh-proof revocation and requires pairing again. Real SQLite/HTTPS tests prove that spent refresh proof revokes a newly rotated orphan; PostgreSQL verifies the same query with a shadowed search path.
 
-Disconnect clears local ciphertext before a bounded revocation attempt. It returns false when only local removal is confirmed, including an offline host. The owner can revoke that device remotely. It does not claim logout succeeded if local storage could not be cleared. Forget deliberately claims no remote revocation. UI must expose these distinctions when connection screens are wired.
+Disconnect clears local ciphertext before a bounded revocation attempt. It returns false when only local removal is confirmed, including an offline host. The owner can revoke that device remotely. It does not claim logout succeeded if local storage could not be cleared. Forget deliberately claims no remote revocation. The connection screen names these distinctions and asks for confirmation before either removal.
 
 Tests cover separate coordinators issuing one renewal, marker/write ordering, failed protection before sending, failed replacement storage, caller cancellation, interrupted renewal recovery, delayed verification, endpoint/identity mismatch, offline disconnect, revocation and corruption preservation. Windows tests reopen the actual DPAPI-backed file through a new protector instance and launch a hidden synthetic probe process to verify file-lease exclusion. Full installed Android/iOS connection qualification, process termination at every write boundary, filesystem power-loss guarantees, backup/restore and release security review remain open gates.
 

@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Screens.ConnectionScreen" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: Owner-approved read access, never an owner key or substituted demo home.
+       OWN-WORLD: Existing Observatory roles, Outfit headings, DM Sans controls and outline home language.
+       STORY: Enter HTTPS host, match the approval code, verify the grant, recover or disconnect explicitly.
+       FIRST VIEWPORT: One native form beside a quiet introduction on expanded width, stacked on phone/large text.
+       FORM: Local Operate extension of the approved Constellation world; no new identity or concept roll.
+       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+  <ScrollViewer Name="ConnectionScroll" HorizontalScrollBarVisibility="Disabled">
+    <Grid Name="ConnectionLayout" ColumnDefinitions="*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="32" RowSpacing="24" Margin="20,32" MaxWidth="1020" HorizontalAlignment="Center">
+      <StackPanel Name="Introduction" Spacing="16">
+        <Path Name="HomeMark" Data="{x:Static c:PlaceIcons.Home}" Width="44" Height="44" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7" HorizontalAlignment="Left" />
+        <TextBlock Name="ConnectionTitle" Text="Connect to Lucia" Classes="title" TextWrapping="Wrap" />
+        <TextBlock Text="Connect with the home owner's approval." TextWrapping="Wrap" />
+      </StackPanel>
+      <Border Name="ConnectionPanel" Grid.Row="1" Classes="panel">
+        <StackPanel Spacing="20">
+          <TextBlock Name="StatusNotice" TextWrapping="Wrap" Focusable="True" AutomationProperties.LiveSetting="Polite" />
+          <StackPanel Name="HostForm" Spacing="12">
+            <TextBlock Text="Lucia host" />
+            <TextBox Name="HostAddress" MaxLength="512" AutomationProperties.Name="Lucia HTTPS host" AutomationProperties.HelpText="An HTTPS host only, with no path, query or embedded key." />
+            <TextBlock Text="For example, https://lucia.example" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            <TextBlock Text="Device name" />
+            <TextBox Name="DeviceName" MaxLength="80" AutomationProperties.Name="Name shown to the home owner" />
+            <Button Name="StartConnection" Classes="theme" HorizontalAlignment="Left" BorderBrush="{DynamicResource AccentBrush}"><TextBlock Text="Request approval code" TextWrapping="Wrap" /></Button>
+          </StackPanel>
+          <StackPanel Name="ApprovalPrompt" IsVisible="False" Spacing="12">
+            <TextBlock Text="Approve this device" Classes="section" TextWrapping="Wrap" />
+            <TextBlock Name="ApprovalCode" Focusable="True" FontFamily="{DynamicResource DisplayFont}" FontSize="{DynamicResource TextSize34}" TextWrapping="Wrap" FontWeight="SemiBold" AutomationProperties.Name="Owner approval code" />
+            <StackPanel Spacing="4">
+              <TextBlock Text="Host" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+              <TextBlock Name="ApprovalHost" TextWrapping="Wrap" />
+              <TextBlock Text="Device" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+              <TextBlock Name="ApprovalDevice" TextWrapping="Wrap" />
+            </StackPanel>
+            <TextBlock Text="The owner must match this code, check the device name and choose its exact read access." Classes="muted" />
+            <TextBlock Name="CodeExpiry" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            <WrapPanel>
+              <Button Name="StopWaiting" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Stop waiting" TextWrapping="Wrap" /></Button>
+              <Button Name="ResumeWaiting" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Resume waiting" TextWrapping="Wrap" /></Button>
+              <Button Name="ChangeHost" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Use another host" TextWrapping="Wrap" /></Button>
+            </WrapPanel>
+          </StackPanel>
+          <StackPanel Name="VerifiedConnection" IsVisible="False" Spacing="12">
+            <TextBlock Name="VerifiedTitle" Focusable="True" Text="Connection verified" Classes="section" TextWrapping="Wrap" Foreground="{DynamicResource SageBrush}" />
+            <TextBlock Name="SessionSummary" TextWrapping="Wrap" />
+            <Expander Name="ApprovedAccess" Header="Approved access" HorizontalAlignment="Stretch">
+              <TextBlock Name="GrantDetails" TextWrapping="Wrap" Margin="0,12,0,0" />
+            </Expander>
+            <TextBlock Text="Live Home, Story and Engine data are not wired into this build yet. No sample readings will be substituted for your home." Classes="muted" />
+          </StackPanel>
+          <WrapPanel Name="RecoveryActions" IsVisible="False">
+            <Button Name="RetryConnection" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Retry saved connection" TextWrapping="Wrap" /></Button>
+            <Button Name="AskForget" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Forget local connection" TextWrapping="Wrap" /></Button>
+          </WrapPanel>
+          <Button Name="AskDisconnect" IsVisible="False" Classes="theme" HorizontalAlignment="Left"><TextBlock Text="Disconnect this device" TextWrapping="Wrap" /></Button>
+          <StackPanel Name="RemovalConfirmation" IsVisible="False" Spacing="12">
+            <Separator />
+            <TextBlock Name="RemovalQuestion" TextWrapping="Wrap" />
+            <WrapPanel>
+              <Button Name="KeepConnection" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Keep connection" TextWrapping="Wrap" /></Button>
+              <Button Name="ConfirmRemoval" Classes="theme" Margin="0,0,8,8" Foreground="{DynamicResource ProblemBrush}"><TextBlock Name="RemovalAction" Text="Disconnect" TextWrapping="Wrap" /></Button>
+            </WrapPanel>
+          </StackPanel>
+          <TextBlock Text="This connection preview uses the real device-session API. Owner approvals currently use the management API; the dashboard approval screen is still being added." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        </StackPanel>
+      </Border>
+      <StackPanel Name="DemoChoice" Grid.Row="2" Spacing="8">
+        <Button Name="ExploreDemo" Classes="theme" HorizontalAlignment="Left"><TextBlock Text="Explore the demo" TextWrapping="Wrap" /></Button>
+        <TextBlock Text="Synthetic home. No household connection." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+      </StackPanel>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

@@ -89,6 +89,7 @@ public sealed class PlatformNavigationTests
     {
         var app = Assert.IsType<Lucia.Companion.App.App>(Avalonia.Application.Current);
         Assert.Same(app.CreateActivityView(), app.CreateActivityView());
+        Assert.IsType<CompanionRoot>(app.CreateActivityView());
     }
 
     private static bool Back(Window window)

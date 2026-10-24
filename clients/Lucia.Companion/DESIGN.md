@@ -1,6 +1,6 @@
 ---
 name: Lucia Companion
-description: Native Constellation Home, offline StoryOrbit Day, contextual Bloom actions and local setup in an Observatory palette.
+description: Connection-first native companion with owner-approved read access and an explicit Constellation demo in an Observatory palette.
 colors:
   light-canvas: "#f1f2ef"
   light-panel: "#ffffff"
@@ -146,7 +146,7 @@ components:
 
 Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.
 
-This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup and source-binding metadata editor, local save-conflict recovery, Customize section ordering, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, authorized live source adapters and real source import remain unbuilt. This record describes the current UI; BUILD-PLAN.md owns the remaining work toward the full application.
+The app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Explore the demo explicitly opens the cached synthetic Home shell. That shell contains HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup and source-binding metadata, local save-conflict recovery, Customize section ordering, offline StoryOrbit Day and the control workbench. Home carries its offline demo badge, synthetic reading time and written attention summary. Story links a one-day dial, authored chapters and readable place timelines through one selection state. The connection preview uses the real device-session API. The owner dashboard approval screen, authorized live Home, Story and Engine adapters, and real source import remain unbuilt. BUILD-PLAN.md owns the remaining full-application work, including motion, performance, platform and release gates.
 
 Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
@@ -164,6 +164,9 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Customize changes the order of the three Home sections without hiding any section or rearranging places.
 - Source-binding metadata remains separate from physical neighbors, source access and qualified readings.
 - Save-conflict recovery shows both metadata alternatives and requires an explicit checked choice.
+- Connection keeps the canonical HTTPS host and submitted device name beside the approval code.
+- Verified access discloses exact grants without substituting sample household data.
+- Recovery distinguishes retry, local forgetting and a request to revoke the device session.
 
 ## Colors
 
@@ -177,7 +180,7 @@ Warm amber marks attention and selection. Blue marks work in progress, muted red
 ### Secondary
 
 - Blue activity uses light-info and dark-info for Working.
-- Sage uses light-sage and dark-sage for the completed Received step in the compact Lucia now fixture.
+- Sage uses light-sage and dark-sage for the completed Received step in the compact Lucia now fixture and the Connection verified heading.
 - Story reuses blue for Lucia request reports and sage for motion reports. These report kinds do not inherit Home's status meanings.
 
 ### Tertiary
@@ -209,7 +212,7 @@ Text uses dynamic resources TextSize12, TextSize13, TextSize14, TextSize16, Text
 
 ### Hierarchy
 
-- Display names the workbench, Home setup and Story.
+- Display names Connection, the workbench, Home setup and Story. The approval code reuses its size and family with SemiBold weight.
 - Headline names sections and the selected place.
 - Body carries explanations, observation labels and theme-button text.
 - Value carries workbench place names and current observation values.
@@ -226,6 +229,12 @@ Line height and tracking use native defaults. No custom scale ratio, uppercase l
 **The Native Text Rule.** Bind text to its matching TextSize resource. Keep geometry independent of the platform's per-role text mapping, and adapt constrained compositions when text needs more room.
 
 ## Layout
+
+### Connection
+
+Connection uses one vertical ScrollViewer with horizontal scrolling disabled. Its centered grid has a 1020-unit maximum width, 20-unit horizontal and 32-unit vertical margins, 32-unit column gaps and 24-unit row gaps. At its own width of at least 960 units, and only while the mapped StatusNotice font is at most 20 units, an introduction takes the left 0.8-share column and the panel takes the right 1.2-share column. Explore the demo follows the introduction. Narrower widths or larger mapped body text stack introduction, panel and demo choice in reading order. The guard reads the actual status text role and responds to its font-size changes.
+
+The introduction uses the authored 44-unit Home outline with the shared 1.7-unit stroke. The panel reuses the existing panel radius, padding and border. Major panel groups use 20-unit spacing; forms, approval details and confirmation content use 12 units. Host and device identity wrap beside the approval code. Action rows wrap, and each button's maximum width follows the available screen width, clamped between 120 and 550 units. Fluent fields and theme buttons retain their shared 48-unit minimum height.
 
 ### Home and setup
 
@@ -289,11 +298,23 @@ Story adds concentric time rings, rounded place-filter pills and circular outlin
 
 ## Components
 
+### CompanionRoot and ConnectionScreen
+
+CompanionRoot starts with ConnectionScreen. A failed restore or unavailable protected storage stays in a written connection state. Explore the demo is an explicit synthetic-home choice; its shell instance is created once and reused in memory. Options > Connection returns to the connection screen and rechecks saved access when no pairing prompt or operation is active. Back closes a removal confirmation first. If Connection was opened from the demo and has no verified connection, Back returns to that cached demo. A connected state does not take that return path.
+
+The host form labels Lucia host and Device name. A host without a scheme gains HTTPS; validation rejects paths, queries and embedded credentials. Request approval code disables while busy. The code state keeps the canonical submitted host and trimmed device name visible, includes expiry, and explains exact matching and owner approval. Stop waiting pauses future checks, not an approval already completing. Resume waiting retains the current code until expiry. Use another host abandons the local prompt and explains that its code expires automatically. Polling follows the server's retry interval and slowdown responses; a one-second UI timer does not mean one-second network requests.
+
+Connection verified uses sage and written text. Its summary names the verified device and host and counts approved places. Approved access expands the home and member IDs, every approved place and field, and explicit Allowed or Not allowed activity, history and Engine grants. A verified session does not open a live household view. The same panel states that live Home, Story and Engine data are not wired and sample readings will not stand in for that home. Owner approval currently uses the management API; its dashboard screen remains absent.
+
+Startup restores protected credentials and asks the host to verify access. The UI holds connection metadata, never credential text. Retry saved connection retains protected state after a recoverable network failure. Storage failure has written guidance and no plaintext fallback. Forget local connection asks a separate inline question and states that local removal does not revoke host access. Disconnect this device asks to remove local credentials and request host revocation. If the host cannot confirm revocation, the resulting status says removal was local only and directs the owner to connected devices. Keep connection receives focus when either question opens. Closing with Keep connection, Back or Escape restores the invoking action when available.
+
+StatusNotice is focusable and declares a polite live setting. Form, approval, paused, verified and recovery stages have explicit focus destinations at Host, approval code, Resume waiting, verified heading and Retry respectively. Busy transitions use the status message. The screen repairs focus when its current control hides or disables; status messages use written text with MutedBrush or ProblemBrush. These code paths and native layout tests are bounded evidence, not hardware-keyboard or TalkBack qualification. The finish review resolved all four material findings and returned disposition ship for this connection/recovery preview only. No regression from the fix batch was observed. The full application goal and its platform, live-data, motion, performance and release gates remain open.
+
 ### Theme buttons and shell
 
 System, Light and Dark are native buttons that change the application's RequestedThemeVariant. Their minimum height is 48 units. They explicitly use body typography and the control/text brush pair. Each has an accessible name that says which theme it selects. Their hover, focus, pressed and disabled presentation otherwise belongs to the installed Fluent template; no custom primary, destructive or ghost button family exists.
 
-CompanionShell exposes Options, Setup and Story. Its Options context menu contains an Appearance submenu for System, Light and Dark and separate Customize Home and Control lab entries. Story opens Story Day and becomes Home while that screen is visible. Customize Home returns to Home, closes detail and actions, expands the Customize footer, and brings it into view with focus. Setup disables Setup, Story, Customize Home and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save for storage failures or Review save conflict for a stale saved revision. Review save conflict is disabled while editing or reading storage. Opening the conflict review hides the duplicate storage footer, disables Setup, Story, Customize Home and Control lab, and focuses the review title after reading. Appearance remains available. There is no tab bar.
+CompanionShell exposes Options, Setup and Story. Its Options context menu contains an Appearance submenu for System, Light and Dark and separate Customize Home, Connection and Control lab entries. Story opens Story Day and becomes Home while that screen is visible. Customize Home returns to Home, closes detail and actions, expands the Customize footer, and brings it into view with focus. Setup disables Setup, Story, Customize Home and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save for storage failures or Review save conflict for a stale saved revision. Review save conflict is disabled while editing or reading storage. Opening the conflict review hides the duplicate storage footer, disables Setup, Story, Customize Home and Control lab, and focuses the review title after reading. Appearance remains available. There is no tab bar.
 
 Native Back and Escape first close Home's open Bloom, then compact place detail, then an expanded Customize footer. Collapsing Customize focuses its Expander. Back from Story, Control lab or save-conflict review returns Home. Leaving conflict review makes no storage or session choice and does not resume automatic saving. At the Home root with no open context the request stays unhandled so the OS can leave the app. Setup handles Back through its draft-discard question. The shell subscribes to its current TopLevel's BackRequested event while attached and unsubscribes when detached.
 
@@ -367,7 +388,7 @@ A removed saved file has written guidance that keeping session changes creates i
 
 If a review read fails because access is unavailable or the file is oversized, no safe snapshot is available. Both choice buttons stay disabled, the session remains untouched, and Read saved setup again remains the recovery action when storage becomes available. A storage failure while applying a choice leaves that choice unapplied and keeps the session changes. At startup, explicit setup replacement is enabled only after the existing file's revision was safely captured; an unread file without that baseline cannot be blindly replaced through setup.
 
-This C04 increment is documented from its native source and phone/tablet, light/dark, normal/large-text captures. These captures do not establish an installed-APK or physical-device result for C04; earlier installed-APK evidence belongs to its stated increments. No automatic merge, durable unsaved-draft recovery, live authorization or completion of the wider application is claimed.
+This C04 metadata-conflict increment is documented from its native source and phone/tablet, light/dark, normal/large-text captures. These captures do not establish an installed-APK or physical-device result for C04; earlier installed-APK evidence belongs to its stated increments. The conflict editor supplies no automatic merge, durable unsaved-draft recovery or live household data. ConnectionScreen owns the separate owner-approved device session. The wider application remains unfinished.
 
 ### SourceBindingPicker
 
@@ -379,7 +400,7 @@ Existing rows show the role and source name, or the stored source ID when absent
 
 ObservationSource describes available names and supported roles; ObservationBinding associates a place ID, source ID and role. The same source-role pair can belong to at most one place in the home. A conflicting assignment leaves metadata unchanged and shows BindingError inside the picker. This wrapping, focusable ProblemBrush TextBlock names the current owner and tells the user to remove that binding before reassignment. The picker focuses the error and brings it into view; Source does not take focus while the error is visible. Choosing another source or role clears the error. Physical-neighbor connections do not determine source ownership. A binding changes metadata only, grants no access and creates no current reading.
 
-The shell supplies SampleObservationSources with visibly Sample-named synthetic choices. The catalog is an in-memory input, not a persisted discovery record. The optional Bindings field extends the existing version-1 profile with IDs and roles only; a missing field restores no bindings. Binding edits remain in the setup draft until Save and participate in Back protection. There is no authorized source host, live discovery, real import or authentication flow in this increment.
+The demo shell supplies SampleObservationSources with visibly Sample-named synthetic choices. The catalog is an in-memory input, not a persisted discovery record. The optional Bindings field extends the existing version-1 profile with IDs and roles only; a missing field restores no bindings. Binding edits remain in the setup draft until Save and participate in Back protection. This metadata editor supplies no live discovery or real source import. Its sample catalog is separate from ConnectionScreen's owner-approved device session and exact access grants.
 
 The picker's phone/tablet and normal/large-text captures are native desktop/headless evidence. A final debug APK installed on a dedicated API 36 emulator also showed the sample source catalog, offered only Temperature for Sample temperature sensor, added its binding, and retained the living-room binding after Save and a force-stop/cold restart. Scoped JSON inspection found metadata only, without observations or catalog values. This bounded emulator result does not qualify physical devices, TalkBack, iOS or performance, or complete the wider application.
 
@@ -448,13 +469,16 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do keep every Home section present when reordering and expose named movement controls with disabled boundaries.
 - Do retain missing source bindings with a written warning and require explicit removal.
 - Do show both local metadata alternatives and recheck the reviewed revision before a save-conflict choice.
+- Do keep canonical host, submitted device name, code expiry and exact approved grants readable in connection states.
+- Do distinguish local forgetting from confirmed host revocation and keep removal choices explicit.
 
 ### Don't:
 
 - Don't use color as the only indication of place state or selection.
 - Don't promote an old reading to the current-value position.
 - Don't infer locked from closed, occupancy from Quiet, or a physical result from a completed request.
-- Don't present authentication, authorized live source adapters or real source import as built.
+- Don't present verified device access as live Home, Story or Engine data, a shipped owner approval dashboard, or real source import.
+- Don't replace a failed household connection with an automatic synthetic Home.
 - Don't claim real-device accessibility, safe-area or performance qualification from desktop renders.
 - Don't treat illustrative sidecar HTML/CSS or generated color ramps as native implementation tokens.
 - Don't treat configured graph connections or static layout offsets as a measured floor plan.

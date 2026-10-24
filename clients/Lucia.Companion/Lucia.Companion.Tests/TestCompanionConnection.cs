@@ -1,0 +1,25 @@
+using Lucia.Companion.Connection;
+
+namespace Lucia.Companion.Tests;
+
+internal sealed class TestCompanionConnection : ICompanionConnection
+{
+    public Uri? Endpoint { get; set; }
+    public bool HasSavedConnection { get; set; }
+    public int BeginCalls { get; private set; }
+    public int PollCalls { get; private set; }
+    public Func<Task<ConnectionSession?>> Restore { get; set; } = () => Task.FromResult<ConnectionSession?>(null);
+    public Func<Task<PairingUpdate>> Poll { get; set; } = () => Task.FromResult(new PairingUpdate(PairingPollStatus.Pending, TimeSpan.FromSeconds(5)));
+    public Func<Task<bool>> Disconnect { get; set; } = () => Task.FromResult(true);
+    public Task<ConnectionSession?> RestoreAsync(CancellationToken cancellationToken = default) => Restore();
+    public Task<PairingPrompt> BeginAsync(Uri endpoint, string deviceName, CancellationToken cancellationToken = default)
+    {
+        BeginCalls++; Endpoint = endpoint;
+        return Task.FromResult(new PairingPrompt("ABCDE-FGHJK", DateTimeOffset.UtcNow.AddMinutes(10), 5));
+    }
+    public Task<PairingUpdate> PollAsync(CancellationToken cancellationToken = default) { PollCalls++; return Poll(); }
+    public async Task<bool> DisconnectAsync(CancellationToken cancellationToken = default) { var result = await Disconnect(); HasSavedConnection = false; return result; }
+    public Task ForgetAsync(CancellationToken cancellationToken = default) { HasSavedConnection = false; return Task.CompletedTask; }
+    internal static ConnectionSession Session() => new(new Uri("https://synthetic.invalid"), new DeviceSession(new string('a', 32), "Phone",
+        DateTimeOffset.UtcNow.AddDays(30), "home-a", "member-a", [new("porch", [Core.ObservationRole.Contact])], canReadHistory: true));
+}
