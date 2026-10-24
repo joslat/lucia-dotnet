@@ -12,6 +12,14 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" />
+    <ProjectReference Include="../Lucia.Companion.Connection/Lucia.Companion.Connection.csproj" />
     <ProjectReference Include="../Lucia.Companion.App/Lucia.Companion.App.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Qualification/**/*.cs" />
+    <Compile Include="Qualification/**/*.cs" Condition="'$(EnableCompanionQualification)' == 'true' and '$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+  <Target Name="RejectReleaseQualification" BeforeTargets="PrepareForBuild" Condition="'$(EnableCompanionQualification)' == 'true' and '$(Configuration)' != 'Debug'">
+    <Error Text="Companion qualification instrumentation is permitted only in an explicit Debug build." />
+  </Target>
 </Project>

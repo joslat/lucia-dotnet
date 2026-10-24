@@ -71,7 +71,7 @@ The prototype temporarily opts out of predictive Back in its manifest. On the te
 
 ## Status and engineering boundaries
 
-Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. Native transport/session coordination and a Windows protected vault exist, but owner/native connection UI, mobile storage, real history sources and live integration remain open.
+Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. Native transport/session coordination and Windows/Android protection adapters exist, but owner/native connection UI, iOS storage, real history sources and live integration remain open.
 
 - Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. The separate host-side security module does not add server dependencies to the native client.
 - HomeViewModel owns shared selection and pins without UI dependencies. HomeEditorViewModel owns draft edits. HomeProfileSession coordinates persistence/recovery; LocalHomeStore owns file I/O. Controls raise named intents, not service calls.
@@ -100,7 +100,7 @@ Current verification includes core/configuration tests and native headless phone
 
 ## Native-session host foundation
 
-This is not yet a connected native sign-in screen. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The app still runs offline. Native transport/session coordination and Windows protected storage pass local tests, but mobile storage and screen wiring remain open. Do not give the app a dashboard key or internal service token to bypass that work.
+This is not yet a connected native sign-in screen. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The app still runs offline. Native transport/session coordination and Windows/Android protected storage have local proof, but iOS storage and screen wiring remain open. Do not give the app a dashboard key or internal service token to bypass that work.
 
 The host registers `LuciaCompanion` as an explicit authentication scheme. It is not part of the existing default API-key/internal-token scheme, `Administrator`, or `ExternalOrInternal` policies. The native credential carries no broad scope or administrator role. Dashboard headers/cookies and internal credentials are not accepted as a companion identity. `GET /api/companion/homes/{homeId}/session` returns only that device's session/grant metadata and uses `Cache-Control: no-store`, including denied responses. Insecure companion requests fail without redirecting a credential to another address. Disabled routes return 404.
 
@@ -116,7 +116,7 @@ Authentication reads current durable state on each request, with no API-key cach
 
 The design reuses ASP.NET Core's [explicit scheme policies](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/authorize-with-a-specific-scheme?view=aspnetcore-10.0) and applies [refresh-rotation guidance](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14). This Lucia-specific device-session foundation is not an OAuth/OIDC authorization server or a claim of RFC conformance. Owner-approved pairing remains the selected local-pilot direction. A supported identity-provider integration would instead require a separate [native browser/PKCE design](https://www.rfc-editor.org/rfc/rfc8252.html).
 
-Current proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, pairing, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. This does not qualify mobile storage, production TLS/reverse proxies, real projections or a third-party security audit. Owner UI, membership management, mobile storage and the connected app remain required work.
+Current host proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, pairing, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. Host tests alone do not qualify platform storage; separate Windows/Android checks are described below. Production TLS/proxies, real projections, owner UI, membership management, iOS storage, connected screens and release security review remain open.
 
 ### Owner-approved pairing API
 
@@ -157,7 +157,7 @@ Pairing/refresh secrets travel in JSON bodies only; access credentials use a per
 
 Responses are limited to 64 KiB. Headers and content each have a thirty-second deadline; caller cancellation remains cancellation. Content needs a separate deadline because [ResponseHeadersRead ends HttpClient's timeout at the headers](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpcompletionoption?view=net-10.0). An ambiguous renewal/redemption must not replay an old credential. The session coordinator serializes renewal and protects replacements before use.
 
-Proof includes scripted hostile responses and the actual transport/coordinator against isolated loopback Kestrel HTTPS with real SQLite pairing/session services. It covers approval/grant discovery/renewal/logout, old-access rejection, pending/throttle/denial, certificate rejection, bounded/stalled bodies, cancellation and redacted errors. These HTTPS tests use ephemeral test encryption, not a production platform key. Separate Windows tests check actual DPAPI and protected-file reopening. Installed Android networking/storage, production deployment and connected UI remain unqualified.
+Proof includes scripted hostile responses and the actual transport/coordinator against isolated loopback Kestrel HTTPS with real SQLite pairing/session services. It covers approval/grant discovery/renewal/logout, old-access rejection, pending/throttle/denial, certificate rejection, bounded/stalled bodies, cancellation and redacted errors. These HTTPS tests use ephemeral test encryption, not a production platform key. Separate platform checks cover actual Windows DPAPI and bounded Android Keystore storage. Installed Android networking, production deployment and connected UI remain unqualified.
 
 ### Protected sessions and recovery
 
@@ -165,7 +165,7 @@ Proof includes scripted hostile responses and the actual transport/coordinator a
 
 `ISessionVaultLease` holds the `.session.lock` file exclusively across cooperating instances, including credential-changing HTTP requests. Other callers wait with cancellation, bounded at 75 seconds. The sidecar is not deleted or replaced. Writes protect bytes first, flush a same-directory temporary file, then replace ciphertext. Corrupt, oversized, unreadable or unsupported-schema files fail closed and cannot be overwritten by ordinary Save. Explicit Forget is local-only recovery. Protection failure and cancelled writes preserve the prior file. This is not protection against a same-user malicious process, arbitrary editors, filesystem rollback or device compromise.
 
-The Windows launcher provides `WindowsDeviceSecretProtector` using [CurrentUser DPAPI](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=net-10.0), with a Lucia-specific purpose. Microsoft package `System.Security.Cryptography.ProtectedData` 10.0.12 is its only new direct dependency. The app does not store its own Windows key. Android Keystore and iOS Keychain adapters are not implemented yet. Unsupported targets must not fall back to plaintext. Plaintext buffers are cleared after serialization/parsing; managed credential strings cannot be guaranteed erased from memory.
+The Windows launcher provides `WindowsDeviceSecretProtector` using [CurrentUser DPAPI](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=net-10.0), with a Lucia-specific purpose. Microsoft package `System.Security.Cryptography.ProtectedData` 10.0.12 is its only new direct dependency. The app does not store its own Windows key. Android has a platform adapter described below; iOS Keychain is not implemented yet. Unsupported targets must not fall back to plaintext. Plaintext buffers are cleared after serialization/parsing; managed credential strings cannot be guaranteed erased from memory.
 
 `DeviceSessionCoordinator` protects newly redeemed credentials in Verifying state before reading the grant. A temporary grant-read outage can recover without repeating redemption. It returns permissions only after a successful server read and stores exact approved home/member identity for later comparison. A foreign endpoint receives no stored credential. Revocation or identity changes clear the local connection; ordinary network failures do not fabricate an offline grant or silently switch to sample data.
 
@@ -173,7 +173,34 @@ Before renewal, the coordinator durably writes Renewing. It then sends the refre
 
 Disconnect clears local ciphertext before a bounded revocation attempt. It returns false when only local removal is confirmed, including an offline host. The owner can revoke that device remotely. It does not claim logout succeeded if local storage could not be cleared. Forget deliberately claims no remote revocation. UI must expose these distinctions when connection screens are wired.
 
-Tests cover separate coordinators issuing one renewal, marker/write ordering, failed protection before sending, failed replacement storage, caller cancellation, interrupted renewal recovery, delayed verification, endpoint/identity mismatch, offline disconnect, revocation and corruption preservation. Windows tests reopen the actual DPAPI-backed file through a new protector instance and launch a hidden synthetic probe process to verify file-lease exclusion. Android/iOS, actual process termination at each write boundary, filesystem power-loss guarantees, backup/restore and full release security review remain open gates.
+Tests cover separate coordinators issuing one renewal, marker/write ordering, failed protection before sending, failed replacement storage, caller cancellation, interrupted renewal recovery, delayed verification, endpoint/identity mismatch, offline disconnect, revocation and corruption preservation. Windows tests reopen the actual DPAPI-backed file through a new protector instance and launch a hidden synthetic probe process to verify file-lease exclusion. Full installed Android/iOS connection qualification, process termination at every write boundary, filesystem power-loss guarantees, backup/restore and release security review remain open gates.
+
+### Android Keystore qualification
+
+`AndroidDeviceSecretProtector` uses an app-scoped non-exportable AES-256 key from Android Keystore and the platform AES/GCM/NoPadding cipher. Android generates each 96-bit IV; the envelope includes format version, IV and ciphertext with a 128-bit authentication tag. A Lucia-specific authenticated purpose binds the payload format. This follows Android's [Keystore GCM example](https://developer.android.com/reference/android/security/keystore/KeyGenParameterSpec). No extra package or key file is required.
+
+Missing keys, invalid versions, truncated or modified ciphertext fail closed. Reading never creates a replacement key. Only encryption can create a missing key, after the vault's ordinary read checks or explicit local Forget. The adapter does not require a biometric prompt for background renewal and adds no app-unlock gate. Hardware backing is device-dependent and not claimed from an emulator. Production wiring must use the app's `NoBackupFilesDir`, separate from local setup metadata; Android backup is already disabled in the application.
+
+Qualification source is excluded from ordinary builds. Opting it in is allowed only in Debug; Release explicitly rejects the property. The runner creates separate `Lucia.Qualification.*` keys and temporary no-backup directories. It never reads the production key, saved home, household data or network endpoints. Default checks remove their own keys/files. Staged process tests retain only their named synthetic run until resume or explicit cleanup.
+
+With the dedicated `LuciaPhoneApi36` emulator on port 5580 only:
+
+```powershell
+dotnet build clients/Lucia.Companion/Lucia.Companion.Android -p:AndroidSdkDirectory="$PWD/.tools/android-sdk" -p:EnableCompanionQualification=true
+$taskAdb = "$PWD/.tools/android-sdk/platform-tools/adb.exe"
+& $taskAdb -s emulator-5580 emu avd name # Verify LuciaPhoneApi36, never use a physical device.
+& $taskAdb -s emulator-5580 install -r --no-streaming clients/Lucia.Companion/Lucia.Companion.Android/bin/Debug/net10.0-android/org.lucia.companion.prototype-Signed.apk
+& $taskAdb -s emulator-5580 shell am instrument -w -r org.lucia.companion.prototype/org.lucia.companion.prototype.SessionVaultQualification
+$taskRunId = [Guid]::NewGuid().ToString('N')
+& $taskAdb -s emulator-5580 shell am instrument -w -r -e stage seed -e runId $taskRunId org.lucia.companion.prototype/org.lucia.companion.prototype.SessionVaultQualification
+& $taskAdb -s emulator-5580 shell am force-stop org.lucia.companion.prototype
+& $taskAdb -s emulator-5580 shell pidof org.lucia.companion.prototype # Must be absent before resume.
+& $taskAdb -s emulator-5580 shell am instrument -w -r -e stage resume -e runId $taskRunId org.lucia.companion.prototype/org.lucia.companion.prototype.SessionVaultQualification
+```
+
+Each instrumented run must report `status=passed` and `INSTRUMENTATION_CODE: -1`. The adb exit code alone is insufficient. Twelve default checks cover randomization, key reuse/non-exportability, tampering, format bounds, vault exclusion, ciphertext-only files, restored renewal state, corruption/key-loss preservation and explicit Forget. The two-stage probe confirms a key and encrypted renewal marker survive force-stop into a fresh process. This is not an interrupted real HTTP rotation, every write/power-loss boundary, hardware/biometric proof or installed connected sign-in. Existing synthetic setup remains unchanged.
+
+If a staged run fails before cleanup, use `-e stage cleanup -e runId $taskRunId` with the same instrumentation component. Rebuild/install the ordinary app without `EnableCompanionQualification`, verify the component is absent, and stop the dedicated emulator after the bounded check. Keep evidence outside the public repository. iOS, real-device storage/lifecycle, backup/restore, installed networking and release security review remain open.
 
 ## StoryOrbit Day
 

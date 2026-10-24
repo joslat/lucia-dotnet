@@ -1,6 +1,6 @@
 # Technical Stack
 
-> Last Updated: 2026-10-19
+> Last Updated: 2026-10-24
 > Version: 1.3.0
 
 ## Core Technologies
@@ -22,7 +22,7 @@
 - **Storage:** databases `luciatraces`, `luciaconfig`, `luciatasks` (separate PostgreSQL databases or SQLite files)
 - **Native companion sessions, experimental:** explicit ASP.NET Core authentication scheme with a shared ADO.NET credential lifecycle over existing SQLite/Npgsql providers. Configuration schema 4 stores hashed credentials/replay metadata; schema 5 adds one-use owner-approved pairing with durable quota/poll guards. Owner routes check current admin-key state and cookie antiforgery proof; scoped ASP.NET rate limits protect pairing/session endpoints. Disabled by default; no additional package, cloud identity service or mobile owner key. Owner UI, member-removal semantics, native secure storage/client and live projections remain separate work.
 - **Native companion transport, experimental:** `Lucia.Companion.Connection` uses built-in HttpClient/System.Text.Json and references pure Core, not server/HA/model/Avalonia packages. Fixed trusted HTTPS origin, no redirects/cookies/retries, validated wire contracts, bounded content/deadlines and redacted errors. The session coordinator serializes credential changes under an exclusive protected-file lease, marks renewal before sending, and protects replacements before use. Real loopback HTTPS tests exercise recovery and revocation. Visible app wiring and mobile storage remain open.
-- **Native credential storage, experimental:** the desktop launcher references Microsoft `System.Security.Cryptography.ProtectedData` 10.0.12 for Windows CurrentUser DPAPI rather than implementing cryptography or persisting an app key. Only this launcher has the new direct dependency. Common vault code stores bounded ciphertext separately from the home profile and fails closed on corruption. Actual Windows DPAPI/file-reopen and separate-process exclusion tests pass. Android Keystore and iOS Keychain adapters are still required; no plaintext fallback on unsupported targets.
+- **Native credential storage, experimental:** the desktop launcher references Microsoft `System.Security.Cryptography.ProtectedData` 10.0.12 for Windows CurrentUser DPAPI. Only this launcher has that direct package. Android uses existing platform Keystore/Java crypto APIs with an app-scoped non-exportable AES-256 key, GCM, random 96-bit IVs and a 128-bit authentication tag. Common vault code stores bounded ciphertext separately from the home profile and fails closed on corruption. Windows DPAPI/file-lock tests and bounded API36 emulator Keystore/cold-process checks pass. Instrumentation is explicit Debug-only, absent from ordinary builds. iOS Keychain and connected UI remain open; no plaintext fallback.
 - **Optional long-term memory:** Neo4j 5.x through AgentMemory 1.9.0 (`AgentMemory.AgentFramework`, `AgentMemory.Neo4j`, `AgentMemory.Extraction.Llm`, which bring in `Neo4j.Driver` 6.3.0). Off unless `AgentMemory:Enabled` is true. It adds graph recall and LLM fact extraction as a Microsoft Agent Framework `AIContextProvider`, so Lucia does not maintain its own graph memory code.
 
 ## Agent Stack
