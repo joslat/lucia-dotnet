@@ -30,7 +30,7 @@ public sealed class ConnectedActivityScreenTests
             Assert.Single(view.GetVisualDescendants().OfType<LuciaStagePath>());
             Assert.Contains("Working", Text(view));
             Assert.DoesNotContain("Example request", Text(view));
-            Assert.Contains("Room not reported", Text(view));
+            Assert.Contains("Target area not reported", Text(view));
             service.Activity = () => throw new CompanionConnectionException(ConnectionFailure.Transport);
             await controller.RefreshAsync(TestContext.Current.CancellationToken); window.UpdateLayout();
             Assert.Empty(view.GetVisualDescendants().OfType<LuciaStagePath>());
@@ -57,7 +57,7 @@ public sealed class ConnectedActivityScreenTests
             window.UpdateLayout();
             Assert.Contains(caption, Text(view));
             Assert.DoesNotContain("Action completed", Text(view));
-            Assert.Contains("Room not reported", Text(view));
+            Assert.Contains("Target area not reported", Text(view));
         }
         finally { window.Close(); }
     }
@@ -80,6 +80,29 @@ public sealed class ConnectedActivityScreenTests
     }
 
     internal static string Text(Control control) => string.Join(" ", control.GetVisualDescendants().OfType<TextBlock>().Where(item => item.IsEffectivelyVisible).Select(item => item.Text));
+
+    [AvaloniaFact]
+    public void CategoryAndCurrentAreaRefreshIndependentlyOfTheRequestRevisionAndClearWhenUnqualified()
+    {
+        var view = new LuciaStagePath(); var now = DateTimeOffset.UtcNow;
+        ActivityRequest Request(ActivityTargetAreas? areas) => new(new string('a', 32), RequestActivityState.Working, now.AddSeconds(-2), now, 3,
+            category: RequestActivityCategory.Lighting, currentTargetAreas: areas);
+        view.SetRequest(Request(new(now, true, [new("porch", "Porch")])));
+        var window = new Window { Width = 390, Height = 900, Content = view }; window.Show();
+        try
+        {
+            window.UpdateLayout();
+            Assert.Contains("Lighting request", Text(view));
+            Assert.Contains("Current target areas: Porch", Text(view));
+            Assert.Contains("Some target areas cannot be shown", Text(view));
+            view.SetRequest(Request(new(now.AddSeconds(5), false, [new("porch", "Garden porch")]))); window.UpdateLayout();
+            Assert.Contains("Current target areas: Garden porch", Text(view));
+            Assert.DoesNotContain("Some target areas cannot be shown", Text(view));
+            view.SetRequest(Request(null)); window.UpdateLayout();
+            Assert.Contains("Target area not reported", Text(view)); Assert.DoesNotContain("Garden porch", Text(view));
+        }
+        finally { window.Close(); }
+    }
 
     [AvaloniaTheory]
     [InlineData(RequestActivityState.Continued)]

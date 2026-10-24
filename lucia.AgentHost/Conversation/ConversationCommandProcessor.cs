@@ -215,6 +215,8 @@ public sealed partial class ConversationCommandProcessor
         // Only this turn's verified voice proof, never sticky continuity or body-supplied identities.
         var tracked = context.IsVoiceRequest ? _companionActivity?.BeginVoice(activityProfileId, conversationId)
             : _companionActivity?.BeginOwner(context.IsDashboardSession ? context.ActivityOwnerKeyId : null, conversationId);
+        cleanRequest = cleanRequest with { Context = cleanRequest.Context with
+            { RequestedTargetsObserver = tracked is null ? null : tracked.ReportRequestedTargets } };
         try
         {
             tracked?.Working();

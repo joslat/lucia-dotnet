@@ -152,6 +152,7 @@ public sealed partial class DirectSkillExecutor : IDirectSkillExecutor
                 .ConfigureAwait(false)
             : ResolveSearchTermsToEntityIds(BuildSearchTerms(route, context), LightDomains);
 
+        if (useCascadingResolver) { context.RequestedTargetsObserver?.Invoke(resolvedIds); }
         return await collector.RecordAsync(
             nameof(LightControlSkill.ControlLightsAsync),
             new { searchTerms = resolvedIds, state, preResolved = useCascadingResolver },
@@ -178,6 +179,7 @@ public sealed partial class DirectSkillExecutor : IDirectSkillExecutor
                 .ConfigureAwait(false)
             : ResolveSearchTermsToEntityIds(BuildSearchTerms(route, context), LightDomains);
 
+        if (useCascadingResolver) { context.RequestedTargetsObserver?.Invoke(resolvedIds); }
         return await collector.RecordAsync(
             nameof(LightControlSkill.ControlLightsAsync),
             new { searchTerms = resolvedIds, state = "on", brightness, preResolved = useCascadingResolver },
@@ -204,6 +206,7 @@ public sealed partial class DirectSkillExecutor : IDirectSkillExecutor
                 .ConfigureAwait(false)
             : ResolveEntityIdFromCache(route, ClimateDomains);
 
+        context.RequestedTargetsObserver?.Invoke(new[] { entityId });
         return await collector.RecordAsync(
             nameof(ClimateControlSkill.SetClimateTemperatureAsync),
             new { entityId, temperature },
@@ -223,6 +226,7 @@ public sealed partial class DirectSkillExecutor : IDirectSkillExecutor
                 .ConfigureAwait(false)
             : ResolveEntityIdFromCache(route, ClimateDomains);
 
+        context.RequestedTargetsObserver?.Invoke(new[] { entityId });
         var stateInfo = await collector.RecordAsync(
             nameof(ClimateControlSkill.GetClimateStateAsync),
             new { entityId },
@@ -264,6 +268,7 @@ public sealed partial class DirectSkillExecutor : IDirectSkillExecutor
                 .ConfigureAwait(false)
             : ResolveEntityIdFromCache(route, SceneDomains, captureKey: "scene");
 
+        context.RequestedTargetsObserver?.Invoke(new[] { entityId });
         return await collector.RecordAsync(
             nameof(SceneControlSkill.ActivateSceneAsync),
             new { entityId },

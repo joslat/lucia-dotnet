@@ -17,13 +17,17 @@ internal sealed class SyntheticConversationRouter : ICommandRouter
             release = new(TaskCreationOptions.RunContinuationsAsynchronously); return true;
         }
     }
-    public async Task<CommandRouteResult> RouteAsync(string transcript, CancellationToken ct)
+    public Task<CommandRouteResult> RouteAsync(string transcript, CancellationToken ct) => Task.FromResult(new CommandRouteResult
+    {
+        IsMatch = true, Confidence = 1,
+        MatchedPattern = new() { Id = "synthetic", SkillId = "LightControlSkill", Action = "toggle", Templates = ["PRIVATE_"] }
+    });
+    // Only the fake executor waits here. No physical skill implementation is registered.
+    public async Task WaitForExecutionAsync(CancellationToken ct)
     {
         Task pending;
         lock (gate) { waiting++; pending = release.Task; }
         try { await pending.WaitAsync(ct); }
         finally { lock (gate) { waiting--; } }
-        return new() { IsMatch = true, Confidence = 1,
-            MatchedPattern = new() { Id = "synthetic", SkillId = "synthetic", Action = "read", Templates = ["PRIVATE_"] } };
     }
 }

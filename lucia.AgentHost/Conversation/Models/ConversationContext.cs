@@ -52,6 +52,10 @@ public sealed record ConversationContext
     [JsonIgnore]
     internal string? ActivityOwnerKeyId { get; init; }
 
+    /// <summary>Request-local server observer for exact IDs about to enter a skill, never a body field or physical-result assertion.</summary>
+    [JsonIgnore]
+    internal Action<IReadOnlyList<string>>? RequestedTargetsObserver { get; init; }
+
     [JsonPropertyName("location")]
     public string? Location { get; init; }
 }

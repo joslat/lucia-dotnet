@@ -21,6 +21,60 @@ namespace lucia.Tests.Auth;
 /// <summary>Real conversation/controller/auth/HTTPS/SQLite, synthetic command executor only. No model or household actions.</summary>
 public sealed class CompanionActivityConversationWireTests
 {
+    [Fact]
+    public async Task RealConversationTargetsReachTheProtectedNativeClientThroughFreshRegistryWireWhileWorking()
+    {
+        await using var source = await SyntheticCompanionHomeSource.StartAsync();
+        var router = A.Fake<ICommandRouter>();
+        A.CallTo(() => router.RouteAsync(A<string>._, A<CancellationToken>._)).Returns(Route());
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource<SkillExecutionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var executor = A.Fake<IDirectSkillExecutor>();
+        A.CallTo(() => executor.ExecuteAsync(A<CommandRouteResult>._, A<ConversationContext>._, A<CancellationToken>._))
+            .Invokes((CommandRouteResult _, ConversationContext context, CancellationToken _) =>
+            { context.RequestedTargetsObserver?.Invoke(["light.porch_main", "light.bedroom_private"]); entered.TrySetResult(); }).Returns(release.Task);
+        await using var host = await CompanionSecurityTestHost.StartAsync(homeSource: source.Client, sourceBaseUrl: source.Origin,
+            configureApp: app => app.MapConversationApi(), configureServices: services =>
+            { SyntheticCompanionConversationServices.Configure(services, router); services.AddSingleton(executor); });
+        host.Client.DefaultRequestHeaders.Add("Cookie", ".lucia.session=synthetic-cookie");
+        var grant = new lucia.Agents.Companion.CompanionGrant("home-a", "member-a",
+            [new("porch", [lucia.Agents.Companion.CompanionField.Temperature])], canReadActivity: true);
+        var issued = await host.Sessions.CreateAsync(grant, "Phone");
+        var directory = Directory.CreateTempSubdirectory("lucia-target-native-wire-");
+        var vault = new ProtectedSessionVault(directory.FullName, CompanionCoordinatorIntegrationTests.EphemeralProtector());
+        using var seedApi = host.CreateNativeClient();
+        await new DeviceSessionCoordinator(seedApi, vault).ConnectAsync(new DeviceCredentials(issued.SessionId, issued.AccessToken,
+            issued.AccessExpiresAt, issued.RefreshToken, issued.RefreshExpiresAt));
+        using var native = new CompanionConnection(vault, _ => host.CreateNativeClient());
+        var identity = (await native.RestoreAsync())!;
+        var pending = host.Client.PostAsJsonAsync("/api/conversation/", new { text = "PRIVATE_REQUEST", context = new { deviceArea = "PRIVATE_FORGED_ORIGIN" } });
+        try
+        {
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            var working = Assert.Single((await native.ReadActivityAsync(identity)).Requests);
+            Assert.Equal(RequestActivityState.Working, working.State);
+            Assert.True(working.CurrentTargetAreas!.IsPartial);
+            Assert.Equal("Porch", Assert.Single(working.CurrentTargetAreas.Places).Name);
+            Assert.DoesNotContain("private", JsonSerializer.Serialize(working), StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("config/entity_registry/list", source.Reads);
+            Assert.DoesNotContain("states", source.Reads);
+            release.SetResult(new() { Success = true, SkillId = "synthetic", Action = "read", ResponseText = "PRIVATE_RESPONSE" });
+            using var response = await pending; Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var completed = Assert.Single((await native.ReadActivityAsync(identity)).Requests);
+            Assert.Equal(RequestActivityState.ResponseReady, completed.State);
+            Assert.Equal(working.RequestId, completed.RequestId);
+            Assert.Equal("Porch", Assert.Single(completed.CurrentTargetAreas!.Places).Name);
+            await host.Sessions.RevokeAsync(issued.SessionId, "home-a");
+            await Assert.ThrowsAsync<CompanionConnectionException>(() => native.ReadActivityAsync(identity));
+            Assert.False(native.HasSavedConnection);
+        }
+        finally
+        {
+            release.TrySetResult(new() { Success = true, SkillId = "synthetic", Action = "read", ResponseText = "PRIVATE_RESPONSE" });
+            using var response = await pending; directory.Delete(recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData("LightControlSkill", "toggle", "Lighting")]
     [InlineData("LightControlSkill", "brightness", "Lighting")]

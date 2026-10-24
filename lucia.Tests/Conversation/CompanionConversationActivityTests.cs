@@ -58,6 +58,30 @@ public sealed class CompanionConversationActivityTests : IDisposable
     }
 
     [Fact]
+    public async Task VerifiedActorTargetsReachPrivateProjectionBeforeTheSkillCompletes()
+    {
+        var completion = new TaskCompletionSource<SkillExecutionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        A.CallTo(() => executor.ExecuteAsync(A<CommandRouteResult>._, A<ConversationContext>._, A<CancellationToken>._))
+            .Invokes((CommandRouteResult _, ConversationContext context, CancellationToken _) => context.RequestedTargetsObserver?.Invoke(["light.porch"]))
+            .Returns(completion.Task);
+        var pending = Processor().ProcessAsync(new() { Text = "PRIVATE_REQUEST", Context = new() { IsDashboardSession = true, ActivityOwnerKeyId = "owner-a" } });
+        try
+        {
+            var projection = journal.ReadForProjection(CompanionActivityJournalTests.Grant());
+            var working = Assert.Single(projection.Snapshot.Requests);
+            Assert.Equal(CompanionActivityState.Working, working.State);
+            Assert.Equal(["light.porch"], projection.TargetEntityIds[working.RequestId]);
+            Assert.Empty(journal.ReadForProjection(CompanionActivityJournalTests.Grant("member-b")).TargetEntityIds);
+            Assert.DoesNotContain("light.porch", JsonSerializer.Serialize(projection.Snapshot));
+        }
+        finally
+        {
+            completion.TrySetResult(new() { Success = true, SkillId = "synthetic", Action = "read", ResponseText = "PRIVATE_RESPONSE" });
+            await pending;
+        }
+    }
+
+    [Fact]
     public async Task FreshAuthorizedVoiceProofOverridesUntrustedBodyIdentityAndNeverCopiesTextOrNames()
     {
         var request = VoiceRequest(new() { ProfileId = "profile-a", Name = "PRIVATE_NAME", Similarity = .95f, IsAuthorized = true });
@@ -123,9 +147,10 @@ public sealed class CompanionConversationActivityTests : IDisposable
     {
         var request = JsonSerializer.Deserialize<ConversationRequest>("""
             {"text":"PRIVATE_REQUEST", "context":{"userId":"owner-a", "speakerId":"profile-a", "deviceArea":"porch",
-             "activityOwnerKeyId":"owner-a", "isDashboardSession":true, "enrolledProfileId":"profile-a"}}
+             "activityOwnerKeyId":"owner-a", "isDashboardSession":true, "enrolledProfileId":"profile-a", "requestedTargetsObserver":"PRIVATE_CALLBACK"}}
             """)!;
         Assert.Null(request.Context.ActivityOwnerKeyId); Assert.False(request.Context.IsDashboardSession);
+        Assert.Null(request.Context.RequestedTargetsObserver);
         await Processor().ProcessAsync(request);
         Assert.Empty(journal.Read(CompanionActivityJournalTests.Grant()).Requests);
     }

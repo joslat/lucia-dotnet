@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
              x:Class="Lucia.Companion.App.Screens.HomeScreen" Background="{DynamicResource CanvasBrush}">
-  <!-- THESIS: A stable, legible home graph with truthful reported observations and attributed request phases.
+  <!-- THESIS: A stable, legible home graph with truthful observations, attributed request topics, phases and qualified current target areas.
        OWN-WORLD: Constellation circles, physical-connection lines, Observatory light/dark and local Outfit/DM Sans.
-       STORY: See places and attention, open readings, pin a place through accessible Bloom actions. Connected Lucia now shows only authorized reported phases, never timer-generated progress.
+       STORY: See places and attention, open readings, pin a place through accessible Bloom actions. Connected Lucia now shows reported topics/phases and current target areas, never origin guesses, physical-result claims or timer-generated progress.
        FIRST VIEWPORT: Home identity, offline notice, Your places first; attention and details alongside on tablet, a separate detail view on phone.
        FORM: Approved Constellation native composition. Seed: approved-constellation-home.
        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->

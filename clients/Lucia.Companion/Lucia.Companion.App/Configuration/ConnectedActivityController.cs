@@ -55,8 +55,7 @@ public sealed class ConnectedActivityController : IDisposable
         {
             var received = await service.ReadActivityAsync(identity, cancellationToken);
             if (disposed || suspended || generation != startedGeneration) { return; }
-            if (received.HomeId != identity.Session.HomeId || received.MemberId != identity.Session.MemberId)
-            { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
+            received.RequireGrant(identity.Session);
             if (Snapshot is { } prior && received.Requests.Any(current => prior.Requests.FirstOrDefault(old => old.RequestId == current.RequestId) is { } old && InvalidContinuation(old, current)))
             { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
             Snapshot = received;
@@ -128,6 +127,8 @@ public sealed class ConnectedActivityController : IDisposable
             or HttpStatusCode.InternalServerError or HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout;
     private static bool InvalidContinuation(ActivityRequest previous, ActivityRequest current)
     {
+        // CurrentTargetAreas is freshly qualified registry metadata, not a lifecycle event.
+        // A moved/renamed target can change that projection without rewriting the request revision.
         if (current.StartedAt != previous.StartedAt || current.PreviousRequestId != previous.PreviousRequestId || current.UpdatedAt < previous.UpdatedAt
             || current.Revision < previous.Revision || current.Revision == previous.Revision && (current.State != previous.State || current.UpdatedAt != previous.UpdatedAt || current.Category != previous.Category)
             || current.Category != previous.Category && (previous.Category != RequestActivityCategory.General || previous.State is not (RequestActivityState.Received or RequestActivityState.Working)))

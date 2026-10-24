@@ -4,12 +4,55 @@ using System.Text.Json.Nodes;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Lucia.Companion.Connection;
+using Lucia.Companion.Core;
 using Xunit;
 
 namespace Lucia.Companion.Tests;
 
 public sealed class CompanionActivityClientTests
 {
+    [Fact]
+    public async Task CurrentTargetAreasCarryOnlyApprovedPlacesWithTheirSeparateRegistryCheckTime()
+    {
+        var body = Payload(); body["requests"]![0]!["currentTargetAreas"] = TargetAreas();
+        using var api = Client(body);
+        var item = Assert.Single((await api.GetActivityAsync(Access, TargetSession(), TestContext.Current.CancellationToken)).Requests);
+        var encoded = JsonSerializer.SerializeToNode(item, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        Assert.Equal("Porch", encoded!["currentTargetAreas"]?["places"]?[0]?["name"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData("ungranted")]
+    [InlineData("duplicate")]
+    [InlineData("empty")]
+    [InlineData("capacity")]
+    [InlineData("future-check")]
+    [InlineData("stale-check")]
+    [InlineData("label")]
+    public async Task MalformedOrUnapprovedTargetAreasAreRejectedRatherThanRendered(string defect)
+    {
+        var body = Payload(); var areas = TargetAreas();
+        switch (defect)
+        {
+            case "ungranted": areas["places"]![0]!["placeId"] = "PRIVATE_ROOM"; break;
+            case "duplicate": areas["places"]!.AsArray().Add(areas["places"]![0]!.DeepClone()); break;
+            case "empty": areas["places"] = new JsonArray(); break;
+            case "capacity": areas["places"] = new JsonArray(Enumerable.Range(0, 7).Select(index => (JsonNode)new JsonObject { ["placeId"] = $"place-{index}", ["name"] = "Porch" }).ToArray()); break;
+            case "future-check": areas["checkedAt"] = "2026-10-24T12:00:01Z"; break;
+            case "stale-check": areas["checkedAt"] = "2026-10-24T11:59:00Z"; break;
+            case "label": areas["places"]![0]!["name"] = "PRIVATE_\u202e"; break;
+        }
+        body["requests"]![0]!["currentTargetAreas"] = areas;
+        using var api = Client(body);
+        var error = await Assert.ThrowsAsync<CompanionConnectionException>(() => api.GetActivityAsync(Access, TargetSession(), TestContext.Current.CancellationToken));
+        Assert.Equal(ConnectionFailure.InvalidResponse, error.Failure); Assert.DoesNotContain("PRIVATE_", error.ToString());
+    }
+
+    private static JsonObject TargetAreas() => JsonNode.Parse("""
+        {"checkedAt":"2026-10-24T12:00:00Z","isPartial":false,"places":[{"placeId":"porch","name":"Porch"}]}
+        """)!.AsObject();
+    private static DeviceSession TargetSession() => new(new string('a', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a",
+        [new("porch", [ObservationRole.Temperature])], canReadActivity: true);
     private const string Access = "lca_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     [Fact]
     public async Task TypedActivityUsesOnlyTheVerifiedHomeMemberAndExplicitCapability()

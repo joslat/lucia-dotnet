@@ -84,7 +84,7 @@ public sealed class SyntheticCompanionHomeSource : IAsyncDisposable
         var json = type switch
         {
             "config/area_registry/list" => """[{"area_id":"porch","name":"Porch"},{"area_id":"bedroom","name":"private-wire-bedroom"}]""",
-            "config/entity_registry/list" => """[{"entity_id":"sensor.porch_temperature","device_id":"child","original_name":"Porch temperature"},{"entity_id":"sensor.bedroom_temperature","area_id":"bedroom"}]""",
+            "config/entity_registry/list" => """[{"entity_id":"sensor.porch_temperature","device_id":"child","original_name":"Porch temperature"},{"entity_id":"sensor.bedroom_temperature","area_id":"bedroom"},{"entity_id":"light.porch_main","device_id":"child"},{"entity_id":"light.bedroom_private","area_id":"bedroom"}]""",
             "config/device_registry/list" => """[{"id":"parent","area_id":"porch","connections":[["mac","private-wire-marker"]]},{"id":"child","parent_device_id":"parent","area_id":null}]""",
             _ => throw new InvalidOperationException("Unexpected synthetic source command")
         };

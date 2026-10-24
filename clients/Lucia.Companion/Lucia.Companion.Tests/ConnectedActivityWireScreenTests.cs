@@ -72,8 +72,12 @@ public sealed class ConnectedActivityWireScreenTests
             await workspace.ActivityController.RefreshAsync(TestContext.Current.CancellationToken); window.UpdateLayout();
             var working = Assert.Single(workspace.ActivityController.Snapshot!.Requests, item => item.State == RequestActivityState.Working);
             Assert.Equal(RequestActivityState.Working, working.State);
+            Assert.Equal(RequestActivityCategory.Lighting, working.Category);
+            Assert.Equal("Porch", Assert.Single(working.CurrentTargetAreas!.Places).Name);
             Assert.NotEmpty(workspace.GetVisualDescendants().OfType<LuciaStagePath>());
             Assert.Contains("Working", ConnectedActivityScreenTests.Text(workspace));
+            Assert.Contains("Lighting request", ConnectedActivityScreenTests.Text(workspace));
+            Assert.Contains("Current target areas: Porch", ConnectedActivityScreenTests.Text(workspace));
             Assert.DoesNotContain("PRIVATE_", ConnectedActivityScreenTests.Text(workspace));
             NativeCapture.Save(window, "activity-wire-working-phone.png");
             using var release = await owner.PostAsync("/synthetic/conversation/release", null, TestContext.Current.CancellationToken);

@@ -31,7 +31,9 @@ public sealed class ConnectedActivityLayoutTests
         var now = DateTimeOffset.UtcNow;
         var requests = new[] { RequestActivityState.Working, RequestActivityState.NeedsInput, RequestActivityState.ResponseReady,
             RequestActivityState.Continued, RequestActivityState.Failed, RequestActivityState.OutcomeUnknown, RequestActivityState.Received }
-            .Select((state, index) => new ActivityRequest((index + 1).ToString("x8").PadRight(32, 'a'), state, now.AddMinutes(-2), now.AddSeconds(-20 - index), index == 0 ? 2 : 3)).ToArray();
+            .Select((state, index) => new ActivityRequest((index + 1).ToString("x8").PadRight(32, 'a'), state, now.AddMinutes(-2), now.AddSeconds(-20 - index), index == 0 ? 2 : 3,
+                category: (RequestActivityCategory)(index % 3 + 1), currentTargetAreas: index is 0 or 2
+                    ? new(now, index == 0, [new("porch", index == 0 ? "Porch, covered garden seating and greenhouse entrance" : "Porch")]) : null)).ToArray();
         var service = ConnectedHomeControllerTests.Service();
         service.Activity = () => Task.FromResult(new ActivitySnapshot("home-a", "member-a", now, now.AddMinutes(-10), true, true, false, requests));
         using var workspace = new ConnectedHomeWorkspace(service, ConnectedActivityWorkspaceTests.Identity(), null);
@@ -47,6 +49,16 @@ public sealed class ConnectedActivityLayoutTests
             var activity = workspace.GetVisualDescendants().OfType<ConnectedLuciaNow>().Single();
             var suffix = $"{width}-{(dark ? "dark" : "light")}-{scale:0.0}";
             NativeCapture.Save(window, $"activity-home-top-{suffix}.png");
+            // Scroll to the first request's start, not the end of its possibly oversized panel.
+            var firstRequest = activity.GetVisualDescendants().OfType<LuciaStagePath>().First();
+            foreach (var scroll in firstRequest.GetVisualAncestors().OfType<ScrollViewer>()
+                .Where(item => item.VerticalScrollBarVisibility != ScrollBarVisibility.Disabled))
+            {
+                if (scroll.Content is Visual content && firstRequest.TranslatePoint(default, content) is { } origin)
+                { scroll.Offset = new Vector(scroll.Offset.X, origin.Y); }
+            }
+            Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+            NativeCapture.Save(window, $"activity-home-target-{suffix}.png");
             var more = activity.GetVisualDescendants().OfType<Expander>().Single();
             more.IsExpanded = true; window.UpdateLayout();
             var button = activity.GetVisualDescendants().OfType<Button>().Single(item => item.Name == "RefreshActivity");

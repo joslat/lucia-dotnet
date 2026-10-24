@@ -36,6 +36,20 @@ public sealed class CompanionActivityJournal
     public CompanionActivityLease? BeginVoice(string? verifiedProfileId, string? conversationId = null) => Begin(voiceMembers, "voice", verifiedProfileId, conversationId);
     public CompanionActivityLease? BeginOwner(string? currentOwnerKeyId, string? conversationId = null) => Begin(ownerMembers, "owner", currentOwnerKeyId, conversationId);
     internal bool HasOwnerMapping(string? ownerKeyId) => enabled && ownerKeyId is not null && ownerMembers.ContainsKey(ownerKeyId);
+    internal DateTimeOffset CaptureTime => Now();
+
+    internal (CompanionActivitySnapshot Snapshot, IReadOnlyDictionary<string, IReadOnlyList<string>> TargetEntityIds) ReadForProjection(CompanionGrant grant)
+    {
+        lock (gate)
+        {
+            var snapshot = Read(grant);
+            var ids = snapshot.Requests.Select(item => item.RequestId).ToHashSet(StringComparer.Ordinal);
+            var targets = requests.GetValueOrDefault(grant.MemberId)?.Where(entry => ids.Contains(entry.Item.RequestId) && entry.RequestedEntityIds is not null)
+                .ToDictionary(entry => entry.Item.RequestId, entry => entry.RequestedEntityIds!, StringComparer.Ordinal)
+                ?? new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+            return (snapshot, targets);
+        }
+    }
 
     public CompanionActivitySnapshot Read(CompanionGrant grant)
     {
@@ -85,7 +99,22 @@ public sealed class CompanionActivityJournal
             }
             var id = Guid.NewGuid().ToString("N");
             records.Add(new(new(id, CompanionActivityState.Received, now, now, 1, previousId), key));
-            return new(id, state => Update(memberId, id, state), category => Describe(memberId, id, category));
+            return new(id, state => Update(memberId, id, state), category => Describe(memberId, id, category), targets => ReportTargets(memberId, id, targets));
+        }
+    }
+
+    private void ReportTargets(string memberId, string id, IReadOnlyList<string> targets)
+    {
+        if (targets is null || targets.Count is < 1 or > 32 || targets.Any(target => !CompanionEntityIdentifier.IsValid(target))) { return; }
+        var copy = Array.AsReadOnly(targets.Distinct(StringComparer.Ordinal).ToArray());
+        lock (gate)
+        {
+            if (!requests.TryGetValue(memberId, out var records)) { return; }
+            var index = records.FindIndex(entry => entry.Item.RequestId == id);
+            if (index < 0 || records[index].RequestedEntityIds is not null
+                || records[index].Item.State is not (CompanionActivityState.Received or CompanionActivityState.Working)) { return; }
+            var entry = records[index];
+            records[index] = entry with { RequestedEntityIds = copy, Item = entry.Item with { UpdatedAt = Now(), Revision = entry.Item.Revision + 1 } };
         }
     }
 

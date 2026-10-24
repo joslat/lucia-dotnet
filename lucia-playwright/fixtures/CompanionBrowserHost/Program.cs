@@ -15,7 +15,8 @@ await using var source = nativeHome || ownerHome ? await SyntheticCompanionHomeS
 var conversation = nativeHome ? new SyntheticConversationRouter() : null;
 await using var host = await CompanionSecurityTestHost.StartAsync(homeSource: source?.Client,
     sourceBaseUrl: source?.Origin ?? "http://synthetic-ha.invalid",
-    configureServices: services => { if (conversation is not null) { SyntheticCompanionConversationServices.Configure(services, conversation); } },
+    configureServices: services => { if (conversation is not null) { SyntheticCompanionConversationServices.Configure(services, conversation,
+        requestedTargets: ["light.porch_main"], waitForExecution: conversation.WaitForExecutionAsync); } },
     configureApp: app =>
 {
     if (conversation is not null)

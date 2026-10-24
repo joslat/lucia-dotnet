@@ -1,4 +1,3 @@
-using System.Globalization;
 using lucia.HomeAssistant.Configuration;
 using lucia.HomeAssistant.Models;
 using lucia.HomeAssistant.Services;
@@ -27,37 +26,29 @@ public sealed class CompanionHomeReader(IHomeAssistantClient source, IOptions<Co
     private async Task<CompanionHomeSnapshot> ReadCoreAsync(CompanionGrant? grant, bool includeReadings, CancellationToken cancellationToken)
     {
         var settings = options.Value;
-        if (!MatchesSource(sourceOptions.CurrentValue.BaseUrl)) { throw new CompanionDataUnavailableException(); }
-        var sourceChanged = 0;
-        using var changes = sourceOptions.OnChange((current, _) =>
-        { if (!MatchesSource(current.BaseUrl)) { Interlocked.Exchange(ref sourceChanged, 1); } });
-        using var timeout = new CancellationTokenSource(settings.HomeReadTimeout, clock);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
-        try
+        return await CompanionSourceRead.RunAsync(settings, sourceOptions, clock, logger, async token =>
         {
             // No 24-hour location cache, phonetic/fuzzy lookup or fallback to old source metadata.
-            var areaTask = source.GetAreaRegistryAsync(linked.Token);
-            var entityTask = source.GetEntityRegistryAsync(linked.Token);
-            var deviceTask = source.GetDeviceRegistryAsync(linked.Token);
-            var stateTask = source.GetStatesAsync(linked.Token);
-            await Task.WhenAll(areaTask, entityTask, deviceTask, stateTask).WaitAsync(linked.Token).ConfigureAwait(false);
+            var areaTask = source.GetAreaRegistryAsync(token);
+            var entityTask = source.GetEntityRegistryAsync(token);
+            var deviceTask = source.GetDeviceRegistryAsync(token);
+            var stateTask = source.GetStatesAsync(token);
+            await Task.WhenAll(areaTask, entityTask, deviceTask, stateTask).WaitAsync(token).ConfigureAwait(false);
             var areas = await areaTask.ConfigureAwait(false);
             var entities = await entityTask.ConfigureAwait(false);
             var devices = await deviceTask.ConfigureAwait(false);
             var states = await stateTask.ConfigureAwait(false);
-            if (areas.Length > 2000 || entities.Length > 20_000 || devices.Length > 20_000 || states.Length > 20_000)
+            if (states.Length > 20_000)
             { throw new CompanionDataUnavailableException(tooLarge: true); }
-            var areaMap = Unique(areas, area => area.AreaId, ValidId);
-            var entityMap = Unique(entities, entity => entity.EntityId, ValidEntityId);
-            var deviceMap = Unique(devices, device => device.Id, ValidId);
-            var stateMap = Unique(states, state => state.EntityId, ValidEntityId);
+            var locations = new CompanionRegistryLocations(areas, entities, devices);
+            var areaMap = locations.Areas;
+            var stateMap = CompanionRegistryLocations.Unique(states, state => state.EntityId, CompanionEntityIdentifier.IsValid);
             var located = new Dictionary<string, List<EntityRegistryEntry>>(StringComparer.Ordinal);
-            foreach (var entity in entityMap.Values.OrderBy(entity => entity.EntityId, StringComparer.Ordinal))
+            foreach (var entity in locations.Entities.Values.OrderBy(entity => entity.EntityId, StringComparer.Ordinal))
             {
-                linked.Token.ThrowIfCancellationRequested();
-                if (entity.DisabledBy is not null || entity.HiddenBy is not null) { continue; }
-                var areaId = ResolveArea(entity, deviceMap);
-                if (areaId is null || !areaMap.ContainsKey(areaId)) { continue; }
+                token.ThrowIfCancellationRequested();
+                var areaId = locations.ResolveArea(entity);
+                if (areaId is null) { continue; }
                 if (!located.TryGetValue(areaId, out var inArea)) { inArea = []; located.Add(areaId, inArea); }
                 inArea.Add(entity);
             }
@@ -66,71 +57,25 @@ public sealed class CompanionHomeReader(IHomeAssistantClient source, IOptions<Co
             var totalSources = 0;
             foreach (var area in areaMap.Values.OrderBy(area => area.AreaId, StringComparer.Ordinal))
             {
-                linked.Token.ThrowIfCancellationRequested();
+                token.ThrowIfCancellationRequested();
                 var allowed = grant?.Places.SingleOrDefault(place => place.PlaceId == area.AreaId);
                 if (grant is not null && (allowed is null || allowed.Fields.Count == 0)) { continue; }
                 var sources = new List<CompanionSource>();
                 var readings = new List<CompanionReading>();
                 foreach (var entity in located.GetValueOrDefault(area.AreaId) ?? [])
                 {
-                    linked.Token.ThrowIfCancellationRequested();
+                    token.ThrowIfCancellationRequested();
                     if (!stateMap.TryGetValue(entity.EntityId, out var state)) { continue; }
                     var field = CompanionReadingMapper.Field(state);
                     if (field is null || allowed is not null && !allowed.Fields.Contains(field.Value)) { continue; }
-                    sources.Add(new(entity.EntityId, Label(entity.Name ?? entity.OriginalName ?? CompanionReadingMapper.Attribute(state, "friendly_name"), entity.EntityId), field.Value));
+                    sources.Add(new(entity.EntityId, CompanionRegistryLocations.Label(entity.Name ?? entity.OriginalName ?? CompanionReadingMapper.Attribute(state, "friendly_name"), entity.EntityId), field.Value));
                     if (includeReadings) { readings.Add(CompanionReadingMapper.Read(state, field.Value, now, settings.MaximumObservationAge)); }
                     if (++totalSources > 2000) { throw new CompanionDataUnavailableException(tooLarge: true); }
                 }
-                projected.Add(new(area.AreaId, Label(area.Name, area.AreaId), sources.AsReadOnly(), readings.AsReadOnly()));
+                projected.Add(new(area.AreaId, CompanionRegistryLocations.Label(area.Name, area.AreaId), sources.AsReadOnly(), readings.AsReadOnly()));
             }
-            if (Volatile.Read(ref sourceChanged) != 0 || !MatchesSource(sourceOptions.CurrentValue.BaseUrl))
-            { throw new CompanionDataUnavailableException(); }
-            return new(settings.HomeId, now, settings.MaximumObservationAge.TotalSeconds, projected.AsReadOnly());
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
-        catch (CompanionDataUnavailableException) { throw; }
-        catch (Exception error)
-        {
-            logger.LogWarning("Companion home source read failed with {FailureType}; no cached household fallback was returned", error.GetType().Name);
-            throw new CompanionDataUnavailableException();
-        }
-    }
-
-    private bool MatchesSource(string value)
-    {
-        try { return options.Value.SourceBaseUrl.Length > 0 && CompanionOptions.ValidateSourceUrl(value) == CompanionOptions.ValidateSourceUrl(options.Value.SourceBaseUrl); }
-        catch (ArgumentException) { return false; }
-    }
-
-    private static string? ResolveArea(EntityRegistryEntry entity, IReadOnlyDictionary<string, DeviceRegistryEntry> devices)
-    {
-        var area = entity.AreaId;
-        var deviceId = entity.DeviceId;
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-        while (deviceId is not null)
-        {
-            if (seen.Count >= 32 || !seen.Add(deviceId) || !devices.TryGetValue(deviceId, out var device) || device.DisabledBy is not null)
-            { return null; }
-            area ??= device.AreaId;
-            deviceId = device.ParentDeviceId;
-        }
-        return area;
-    }
-    private static Dictionary<string, T> Unique<T>(IEnumerable<T> items, Func<T, string> id, Func<string, bool> valid) where T : class =>
-        items.Where(item => item is not null && valid(id(item))).GroupBy(id, StringComparer.Ordinal)
-            .Where(group => group.Count() == 1).ToDictionary(group => group.Key, group => group.Single(), StringComparer.Ordinal);
-    private static bool ValidId(string value) => !string.IsNullOrEmpty(value) && value.Length <= 128
-        && value.All(character => char.IsAsciiLetterOrDigit(character) || character is '_' or '-' or '.' or ':');
-    private static bool ValidEntityId(string value)
-    {
-        if (string.IsNullOrEmpty(value) || value.Length > 256) { return false; }
-        var parts = value.Split('.');
-        return parts.Length == 2 && parts.All(part => part.Length > 0 && part.All(character => char.IsAsciiLetterLower(character) || char.IsAsciiDigit(character) || character == '_'));
-    }
-    private static string Label(string? value, string fallback)
-    {
-        var clean = new string((value ?? string.Empty).Where(character => !char.IsControl(character) && char.GetUnicodeCategory(character) != UnicodeCategory.Format).Take(200).ToArray()).Trim();
-        return clean.Length > 0 ? clean : fallback[..Math.Min(200, fallback.Length)];
+            return new CompanionHomeSnapshot(settings.HomeId, now, settings.MaximumObservationAge.TotalSeconds, projected.AsReadOnly());
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     public static CompanionHomeSnapshot Restrict(CompanionHomeSnapshot snapshot, CompanionGrant current) => snapshot with

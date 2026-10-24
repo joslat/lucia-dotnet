@@ -9,6 +9,7 @@ public sealed class ActivitySnapshot
         ArgumentNullException.ThrowIfNull(requests);
         if (coverageStartedAt <= DateTimeOffset.UnixEpoch || capturedAt < coverageStartedAt || requests.Count > 20
             || requests.Any(request => request is null || request.UpdatedAt > capturedAt
+                || request.CurrentTargetAreas is { } areas && (areas.CheckedAt > capturedAt || capturedAt - areas.CheckedAt > TimeSpan.FromSeconds(30))
                 || request.UpdatedAt < coverageStartedAt && request.State is not (RequestActivityState.Received or RequestActivityState.Working))
             || requests.Select(request => request.RequestId).Distinct(StringComparer.Ordinal).Count() != requests.Count
             || !isConfigured && (requests.Count > 0 || hasGap || hasMore) || hasMore && requests.Count != 20)
@@ -24,9 +25,12 @@ public sealed class ActivitySnapshot
     public bool HasGap { get; }
     public bool HasMore { get; }
     public IReadOnlyList<ActivityRequest> Requests { get; }
-    internal void RequireGrant(DeviceSession session)
+    public void RequireGrant(DeviceSession session)
     {
-        if (!session.CanReadActivity || session.HomeId != HomeId || session.MemberId != MemberId)
+        ArgumentNullException.ThrowIfNull(session);
+        if (!session.CanReadActivity || session.HomeId != HomeId || session.MemberId != MemberId
+            || Requests.Any(item => item.CurrentTargetAreas is { } areas && areas.Places.Any(place =>
+                !session.Places.Any(allowed => allowed.PlaceId == place.PlaceId && allowed.Fields.Count > 0))))
         { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
     }
 }

@@ -177,6 +177,34 @@ public sealed class ConnectedActivityControllerTests
 
     internal static ConnectionSession Identity() => new(new Uri("https://synthetic.invalid"), CompanionActivityClientTests.Session());
 
+    [Fact]
+    public async Task AServiceAdapterCannotAttachAnUnapprovedTargetAreaToAnOtherwiseValidMember()
+    {
+        var snapshot = Snapshot(); var old = snapshot.Requests[0];
+        var request = new ActivityRequest(old.RequestId, old.State, old.StartedAt, old.UpdatedAt, old.Revision,
+            currentTargetAreas: new(snapshot.CapturedAt, false, [new("porch", "PRIVATE_ROOM")]));
+        using var controller = new ConnectedActivityController(Service(() => Task.FromResult(new ActivitySnapshot(snapshot.HomeId, snapshot.MemberId,
+            snapshot.CapturedAt, snapshot.CoverageStartedAt, true, false, false, [request]))), Identity());
+        await controller.RefreshAsync(TestContext.Current.CancellationToken);
+        Assert.Null(controller.Snapshot);
+    }
+
+    [Fact]
+    public async Task FreshAreaMetadataMayChangeWithoutRewritingTheRequestLifecycle()
+    {
+        var original = Snapshot(); var old = original.Requests[0];
+        var identity = new ConnectionSession(new Uri("https://synthetic.invalid"), new DeviceSession(new string('a', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a",
+            [new("porch", [Lucia.Companion.Core.ObservationRole.Temperature])], canReadActivity: true));
+        ActivitySnapshot Project(string name, DateTimeOffset capturedAt) => new(original.HomeId, original.MemberId, capturedAt, original.CoverageStartedAt,
+            true, false, false, [new(old.RequestId, old.State, old.StartedAt, old.UpdatedAt, old.Revision, currentTargetAreas: new(capturedAt, false, [new("porch", name)]))]);
+        var service = Service(() => Task.FromResult(Project("Porch", original.CapturedAt)));
+        using var controller = new ConnectedActivityController(service, identity);
+        await controller.RefreshAsync(TestContext.Current.CancellationToken);
+        service.Activity = () => Task.FromResult(Project("Renamed porch", original.CapturedAt.AddSeconds(5)));
+        await controller.RefreshAsync(TestContext.Current.CancellationToken);
+        Assert.Equal("Renamed porch", Assert.Single(Assert.Single(controller.Snapshot!.Requests).CurrentTargetAreas!.Places).Name);
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]

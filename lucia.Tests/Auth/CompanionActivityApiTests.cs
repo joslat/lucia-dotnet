@@ -9,6 +9,108 @@ namespace lucia.Tests.Auth;
 public sealed class CompanionActivityApiTests
 {
     [Fact]
+    public async Task TargetProjectionShowsOnlyCurrentAuthorizedAreasAndNeverItsPrivateEntitySelectors()
+    {
+        await using var host = await StartAsync();
+        A.CallTo(() => host.HomeAssistant.GetAreaRegistryAsync(A<CancellationToken>._)).Returns([
+            new() { AreaId = "porch", Name = "Porch" }, new() { AreaId = "bedroom", Name = "PRIVATE_BEDROOM" }]);
+        A.CallTo(() => host.HomeAssistant.GetEntityRegistryAsync(A<CancellationToken>._)).Returns([
+            new() { EntityId = "light.porch", AreaId = "porch" }, new() { EntityId = "light.private", AreaId = "bedroom" }]);
+        using var request = host.Activity.BeginOwner("owner-a"); request!.Working();
+        request.ReportRequestedTargets(["light.porch", "light.private", "light.missing"]);
+        var grant = new CompanionGrant("home-a", "member-a", [new("porch", [CompanionField.Temperature])], canReadActivity: true);
+        var issued = await host.Sessions.CreateAsync(grant, "Phone");
+        host.Client.DefaultRequestHeaders.Authorization = new("Bearer", issued.AccessToken);
+        var snapshot = await host.Client.GetFromJsonAsync<JsonElement>("/api/companion/homes/home-a/activity");
+        var areas = Assert.Single(snapshot.GetProperty("requests").EnumerateArray()).GetProperty("currentTargetAreas");
+        Assert.True(areas.GetProperty("isPartial").GetBoolean());
+        Assert.Equal("Porch", Assert.Single(areas.GetProperty("places").EnumerateArray()).GetProperty("name").GetString());
+        Assert.DoesNotContain("PRIVATE_", snapshot.ToString()); Assert.DoesNotContain("light.", snapshot.ToString());
+        A.CallTo(() => host.HomeAssistant.GetStatesAsync(A<CancellationToken>._)).MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task AnUnavailableRegistryDoesNotInventTargetsOrHideTheReportedRequestLifecycle()
+    {
+        await using var host = await StartAsync();
+        A.CallTo(() => host.HomeAssistant.GetAreaRegistryAsync(A<CancellationToken>._)).ThrowsAsync(new InvalidOperationException("PRIVATE_DIAGNOSTIC"));
+        using var request = host.Activity.BeginOwner("owner-a"); request!.Working(); request.ReportRequestedTargets(["light.porch"]);
+        var issued = await host.Sessions.CreateAsync(new("home-a", "member-a", [new("porch", [CompanionField.Temperature])], canReadActivity: true), "Phone");
+        host.Client.DefaultRequestHeaders.Authorization = new("Bearer", issued.AccessToken);
+        var snapshot = await host.Client.GetFromJsonAsync<JsonElement>("/api/companion/homes/home-a/activity");
+        var item = Assert.Single(snapshot.GetProperty("requests").EnumerateArray());
+        Assert.Equal("Working", item.GetProperty("state").GetString());
+        Assert.Equal(JsonValueKind.Null, item.GetProperty("currentTargetAreas").ValueKind);
+        Assert.DoesNotContain("PRIVATE_", snapshot.ToString());
+    }
+
+    [Theory]
+    [InlineData("place", false, HttpStatusCode.OK)]
+    [InlineData("activity", false, HttpStatusCode.Forbidden)]
+    [InlineData("revoked", false, HttpStatusCode.Unauthorized)]
+    [InlineData("place", true, HttpStatusCode.OK)]
+    [InlineData("activity", true, HttpStatusCode.Forbidden)]
+    [InlineData("revoked", true, HttpStatusCode.Unauthorized)]
+    public async Task AuthorityIsRecheckedAfterSuccessfulOrFailedTargetLookup(string change, bool sourceFails, HttpStatusCode expected)
+    {
+        const string access = "lca_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        var grant = new CompanionGrant("home-a", "member-a", [new("porch", [CompanionField.Temperature])], canReadActivity: true);
+        var initial = new CompanionSession(new string('a', 32), "Phone", grant, DateTimeOffset.UtcNow.AddMinutes(5));
+        CompanionSession? current = initial;
+        var sessions = A.Fake<ICompanionSessionService>();
+        A.CallTo(() => sessions.AuthenticateAsync(access, A<CancellationToken>._)).ReturnsLazily(() => current);
+        await using var host = await CompanionSecurityTestHost.StartAsync(configureServices: services =>
+        {
+            services.AddSingleton(sessions);
+            services.Configure<CompanionActivityOptions>(settings => { settings.Enabled = true; settings.OwnerMembers["owner-a"] = "member-a"; });
+        });
+        A.CallTo(() => host.HomeAssistant.GetAreaRegistryAsync(A<CancellationToken>._)).Returns([new() { AreaId = "porch", Name = "PRIVATE_REMOVED_PLACE" }]);
+        A.CallTo(() => host.HomeAssistant.GetEntityRegistryAsync(A<CancellationToken>._)).ReturnsLazily(() =>
+        {
+            current = change == "revoked" ? null : initial with { Grant = new("home-a", "member-a", [], canReadActivity: change != "activity") };
+            if (sourceFails) { throw new InvalidOperationException("PRIVATE_SOURCE_FAILURE"); }
+            return new lucia.HomeAssistant.Models.EntityRegistryEntry[] { new() { EntityId = "light.porch", AreaId = "porch" } };
+        });
+        using var request = host.Activity.BeginOwner("owner-a"); request!.Working(); request.ReportRequestedTargets(["light.porch"]);
+        host.Client.DefaultRequestHeaders.Authorization = new("Bearer", access);
+        using var response = await host.Client.GetAsync("/api/companion/homes/home-a/activity");
+        Assert.Equal(expected, response.StatusCode);
+        Assert.DoesNotContain("PRIVATE_", await response.Content.ReadAsStringAsync());
+        if (expected == HttpStatusCode.OK)
+        {
+            var snapshot = await response.Content.ReadFromJsonAsync<JsonElement>();
+            Assert.Equal(JsonValueKind.Null, Assert.Single(snapshot.GetProperty("requests").EnumerateArray()).GetProperty("currentTargetAreas").ValueKind);
+        }
+        else { Assert.DoesNotContain(request.RequestId, await response.Content.ReadAsStringAsync()); }
+    }
+
+    [Fact]
+    public async Task LargeTargetProjectionsKeepEveryLifecycleWithinTheWireBudgetAndDiscloseAreaTruncation()
+    {
+        await using var host = await StartAsync();
+        var ids = Enumerable.Range(0, 32).Select(index => $"light.target_{index}").ToArray();
+        A.CallTo(() => host.HomeAssistant.GetAreaRegistryAsync(A<CancellationToken>._)).Returns(Enumerable.Range(0, 32)
+            .Select(index => new lucia.HomeAssistant.Models.AreaRegistryEntry { AreaId = $"area-{index}", Name = new string('\u4e00', 200) }).ToArray());
+        A.CallTo(() => host.HomeAssistant.GetEntityRegistryAsync(A<CancellationToken>._)).Returns(ids.Select((id, index) =>
+            new lucia.HomeAssistant.Models.EntityRegistryEntry { EntityId = id, AreaId = $"area-{index}" }).ToArray());
+        for (var index = 0; index < 20; index++) { using var request = host.Activity.BeginOwner("owner-a"); request!.ReportRequestedTargets(ids); request.Working(); }
+        var grant = new CompanionGrant("home-a", "member-a", Enumerable.Range(0, 32)
+            .Select(index => new CompanionPlaceGrant($"area-{index}", [CompanionField.Temperature])).ToArray(), canReadActivity: true);
+        var issued = await host.Sessions.CreateAsync(grant, "Phone");
+        host.Client.DefaultRequestHeaders.Authorization = new("Bearer", issued.AccessToken);
+        using var response = await host.Client.GetAsync("/api/companion/homes/home-a/activity");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var bytes = await response.Content.ReadAsByteArrayAsync(); Assert.True(bytes.Length <= 65_536);
+        var requests = JsonDocument.Parse(bytes).RootElement.GetProperty("requests").EnumerateArray().ToArray();
+        Assert.Equal(20, requests.Length);
+        Assert.All(requests, item =>
+        {
+            var areas = item.GetProperty("currentTargetAreas");
+            Assert.True(areas.GetProperty("isPartial").GetBoolean());
+            Assert.InRange(areas.GetProperty("places").GetArrayLength(), 1, 3);
+        });
+    }
+    [Fact]
     public async Task OnlyTheCurrentMemberSeesItsExplicitlyAttributedLifecycleAndNoPrivateFields()
     {
         await using var host = await StartAsync();

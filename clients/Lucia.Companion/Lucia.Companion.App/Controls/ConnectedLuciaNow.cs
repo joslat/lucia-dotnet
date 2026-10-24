@@ -103,7 +103,7 @@ public sealed class ConnectedLuciaNow : UserControl
         more.IsVisible = controls.Length > 3;
         additionalCount = Math.Max(0, controls.Length - 3); UpdateMoreCaption();
         coverage.Text = !snapshot.IsConfigured ? "No activity source is attributed to this member. Home readings remain separate."
-            : $"Captured {snapshot.CapturedAt.UtcDateTime:HH:mm:ss 'UTC'}. Attributed requests only, not all household work. Responses do not verify physical results."
+            : $"Captured {snapshot.CapturedAt.UtcDateTime:HH:mm:ss 'UTC'}. Attributed requests only, not all household work. Areas show current target registry assignments, not origin or verified physical results."
                 + (snapshot.HasGap ? " Some requests were lost from this host's bounded buffer." : "")
                 + (snapshot.HasMore ? " Only 20 retained requests are included in this snapshot." : "");
     }

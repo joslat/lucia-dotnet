@@ -9,6 +9,36 @@ namespace lucia.Tests.Auth;
 public sealed class CompanionActivityJournalTests
 {
     [Fact]
+    public void RequestedTargetsStayPrivateBoundedImmutableAndCannotBeReassigned()
+    {
+        var clock = Clock(); var journal = Journal(clock);
+        using var request = journal.BeginOwner("owner-a"); request!.Working();
+        var before = Assert.Single(journal.Read(Grant()).Requests);
+        var ids = new[] { "light.porch", "light.porch", "climate.porch" };
+        clock.Advance(TimeSpan.FromSeconds(1)); request.ReportRequestedTargets(ids);
+        ids[0] = "light.PRIVATE";
+        var projection = journal.ReadForProjection(Grant());
+        Assert.Equal(["light.porch", "climate.porch"], projection.TargetEntityIds[request.RequestId]);
+        Assert.Equal(before.Revision + 1, Assert.Single(projection.Snapshot.Requests).Revision);
+        request.ReportRequestedTargets(["light.bedroom"]);
+        Assert.Equal(["light.porch", "climate.porch"], journal.ReadForProjection(Grant()).TargetEntityIds[request.RequestId]);
+        Assert.DoesNotContain("light.", JsonSerializer.Serialize(projection.Snapshot));
+        Assert.Empty(journal.ReadForProjection(Grant("member-b")).TargetEntityIds);
+    }
+
+    [Theory]
+    [InlineData("malformed")]
+    [InlineData("oversized")]
+    [InlineData("completed")]
+    public void UnqualifiedOrLateTargetsCannotCreateProjectionEvidence(string defect)
+    {
+        var journal = Journal(); using var request = journal.BeginOwner("owner-a");
+        if (defect == "completed") { request!.Complete(CompanionActivityState.ResponseReady); }
+        request!.ReportRequestedTargets(defect == "malformed" ? ["PRIVATE_ROOM"]
+            : defect == "oversized" ? Enumerable.Range(0, 33).Select(index => $"light.target_{index}").ToArray() : ["light.porch"]);
+        Assert.Empty(journal.ReadForProjection(Grant()).TargetEntityIds);
+    }
+    [Fact]
     public void CategoryIsOneRevisionedSourceFactAndCannotBeRetaggedAfterItIsReportedOrCompleted()
     {
         var clock = Clock(); var journal = Journal(clock);

@@ -123,12 +123,14 @@ public sealed class DirectSkillExecutorTests
         };
 
         // Act
-        var result = await _executor.ExecuteAsync(route, CreateContext());
+        var reportedTargets = new List<string>();
+        var result = await _executor.ExecuteAsync(route, CreateContext() with { RequestedTargetsObserver = ids => reportedTargets.AddRange(ids) });
 
         // Assert
         Assert.True(result.Success);
         Assert.Equal("LightControlSkill", result.SkillId);
         Assert.Equal("toggle", result.Action);
+        Assert.Empty(reportedTargets); // This legacy light path searches again inside the skill.
         A.CallTo(() => haClient.CallServiceAsync(
                 "light", "turn_on", A<string?>._, A<ServiceCallRequest?>._, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
@@ -227,9 +229,11 @@ public sealed class DirectSkillExecutorTests
             }
         };
 
-        var result = await executor.ExecuteAsync(route, CreateContext());
+        var reportedTargets = new List<string>();
+        var result = await executor.ExecuteAsync(route, CreateContext() with { RequestedTargetsObserver = ids => reportedTargets.AddRange(ids) });
 
         Assert.True(result.Success, result.Error);
+        Assert.Equal(["light.zacks_light"], reportedTargets);
         A.CallTo(() => filteredLocationService.SearchHierarchyForAgentAsync(
                 "Zach's light",
                 A<HybridMatchOptions?>.That.Matches(matchOptions => HasExpectedThreshold(matchOptions)),
