@@ -5,7 +5,7 @@ namespace lucia.Data.Companion;
 /// <summary>Portable SQLite/PostgreSQL configuration schema. Times are UTC Unix milliseconds.</summary>
 public static class CompanionSchema
 {
-    public static string QualifyPostgres(string sql) => Regex.Replace(sql, @"\b(companion_sessions|companion_refresh_history|companion_pairings|companion_pairing_gates)\b", "public.$1", RegexOptions.CultureInvariant);
+    public static string QualifyPostgres(string sql) => Regex.Replace(sql, @"\b(companion_sessions|companion_refresh_history|companion_pairings|companion_pairing_gates|companion_layouts)\b", "public.$1", RegexOptions.CultureInvariant);
     public const string Sql = """
         CREATE TABLE IF NOT EXISTS companion_sessions (
             id TEXT PRIMARY KEY,

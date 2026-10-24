@@ -13,7 +13,7 @@ public sealed partial class PostgresMigrationRunner : IHostedService
 {
     internal const long AdvisoryLockKey = 0x4C554349414D4947;
 
-    private const int ConfigSchemaVersion = 5;
+    private const int ConfigSchemaVersion = 6;
     private const int TracesSchemaVersion = 2;
     private const int TasksSchemaVersion = 2;
     private const string TraceSearchIndex = "idx_command_traces_clean_text_trgm";
@@ -90,7 +90,7 @@ public sealed partial class PostgresMigrationRunner : IHostedService
                 config,
                 "config",
                 ConfigSchemaVersion,
-                [ApplyConfigV1Async, ApplyConfigV2Async, ApplyConfigV3Async, ApplyConfigV4Async, ApplyConfigV5Async],
+                [ApplyConfigV1Async, ApplyConfigV2Async, ApplyConfigV3Async, ApplyConfigV4Async, ApplyConfigV5Async, ApplyConfigV6Async],
                 cancellationToken).ConfigureAwait(false);
             await MigrateDatabaseAsync(
                 traces,
@@ -705,6 +705,14 @@ public sealed partial class PostgresMigrationRunner : IHostedService
         await using var command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = Companion.CompanionSchema.QualifyPostgres(Companion.CompanionPairingSchema.Sql);
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task ApplyConfigV6Async(NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = Companion.CompanionSchema.QualifyPostgres(Companion.CompanionLayoutSchema.Sql);
         await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 

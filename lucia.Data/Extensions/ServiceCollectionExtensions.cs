@@ -136,6 +136,9 @@ public static class ServiceCollectionExtensions
 
         // luciaconfig repositories
         builder.Services.AddSingleton<IConfigStoreWriter, SqliteConfigStoreWriter>();
+        builder.Services.AddSingleton<ICompanionLayoutStore>(sp => new RelationalCompanionLayoutStore(
+            _ => ValueTask.FromResult<DbConnection>(sp.GetRequiredKeyedService<SqliteConnectionFactory>(SqliteDbNames.Config).CreateConnection()),
+            sp.GetService<TimeProvider>() ?? TimeProvider.System));
         builder.Services.AddSingleton<ICompanionSessionService>(sp => new RelationalCompanionSessionService(
             _ => ValueTask.FromResult<DbConnection>(sp.GetRequiredKeyedService<SqliteConnectionFactory>(SqliteDbNames.Config).CreateConnection()),
             sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));
@@ -209,6 +212,9 @@ public static class ServiceCollectionExtensions
 
         // luciaconfig repositories
         builder.Services.AddSingleton<IConfigStoreWriter, PostgresConfigStoreWriter>();
+        builder.Services.AddSingleton<ICompanionLayoutStore>(sp => new RelationalCompanionLayoutStore(
+            async cancellationToken => await sp.GetRequiredKeyedService<PostgresConnectionFactory>(PostgresDbNames.Config).CreateConnectionAsync(cancellationToken).ConfigureAwait(false),
+            sp.GetService<TimeProvider>() ?? TimeProvider.System));
         builder.Services.AddSingleton<ICompanionSessionService>(sp => new RelationalCompanionSessionService(
             async cancellationToken => await sp.GetRequiredKeyedService<PostgresConnectionFactory>(PostgresDbNames.Config).CreateConnectionAsync(cancellationToken).ConfigureAwait(false),
             sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));

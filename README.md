@@ -18,6 +18,8 @@ The host has opt-in native sessions and owner-approved pairing endpoints, disabl
 
 An opt-in [attributed activity boundary](clients/Lucia.Companion/README.md#attributed-activity-boundary) follows verified conversation requests into a member-filtered read-only API, protected transport and native Lucia now view. Actor-scoped follow-up correlation retires older reply requests without claiming the question was answered. Written outcomes, reported times, allowlisted topics, qualified current target areas and independent access recovery accompany the native phase paths. Fresh source registries and current place grants qualify exact server-observed target IDs without exposing them. Unknown and partial coverage stay explicit. This is not request-origin, occupancy, physical-result or durable history evidence; it exposes no request text or global diagnostics.
 
+The next [shared-configuration delivery](clients/Lucia.Companion/README.md#shared-layout-storage-foundation) has checked SQLite/PostgreSQL metadata storage and schema6 migration/import tests. Its owner workflow and authorized native consumption are not implemented yet. Existing local setup remains personal, and shared metadata never grants access.
+
 ## ☀️ About the Name
 
 Lucia is named after **Lucia**, the ancient Nordic sun goddess associated with light, wisdom, and bringing illumination during the darkest time of year. In Norse mythology, Lucia represents the return of light and the power to guide through darkness—a fitting name for an AI assistant that brings intelligent automation and insight to your home.

@@ -17,6 +17,7 @@ public static class SqliteDbNames
         "companion_refresh_history",
         "companion_pairing_gates",
         "companion_pairings",
+        "companion_layouts",
         "model_providers",
         "agent_definitions",
         "mcp_tool_servers",
