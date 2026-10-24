@@ -36,6 +36,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     public IApiKeyService Keys { get; }
     public IHomeAssistantClient HomeAssistant { get; }
     public CompanionActivityJournal Activity => app.Services.GetRequiredService<CompanionActivityJournal>();
+    public ICompanionLayoutStore Layouts => app.Services.GetRequiredService<ICompanionLayoutStore>();
     public string CertificateFingerprint => certificate.GetCertHashString(HashAlgorithmName.SHA256);
     public HomeAssistantOptions SourceSettings => app.Services.GetRequiredService<IOptionsMonitor<HomeAssistantOptions>>().CurrentValue;
 
@@ -71,7 +72,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
             OperatingSystem.IsWindows() ? X509KeyStorageFlags.UserKeySet : X509KeyStorageFlags.EphemeralKeySet);
         var database = new SqliteTestHelper();
         using (var connection = database.ConnectionFactory.CreateConnection())
-        using (var command = connection.CreateCommand()) { command.CommandText = CompanionSchema.Sql + CompanionPairingSchema.Sql; command.ExecuteNonQuery(); }
+        using (var command = connection.CreateCommand()) { command.CommandText = CompanionSchema.Sql + CompanionPairingSchema.Sql + CompanionLayoutSchema.Sql; command.ExecuteNonQuery(); }
         var configuration = new Dictionary<string, string?>
         {
             ["Companion:Enabled"] = "true", ["Companion:HomeId"] = "home-a", ["InternalAuth:Token"] = "synthetic-internal",
@@ -105,6 +106,8 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         var pairings = new RelationalCompanionPairingService(_ => ValueTask.FromResult<DbConnection>(database.ConnectionFactory.CreateConnection()),
             new() { Enabled = true, HomeId = "home-a" }, clock);
         builder.Services.AddSingleton<ICompanionPairingService>(pairings);
+        builder.Services.AddSingleton<ICompanionLayoutStore>(new RelationalCompanionLayoutStore(
+            _ => ValueTask.FromResult<DbConnection>(database.ConnectionFactory.CreateConnection()), clock));
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         builder.Services.AddLuciaAuthentication(builder.Configuration);
         builder.Services.AddCompanionHomeReads();
@@ -125,6 +128,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         app.MapCompanionPairingApi();
         app.MapCompanionHomeApi();
         app.MapCompanionActivityApi();
+        app.MapCompanionLayoutApi();
         configureApp?.Invoke(app);
         await app.StartAsync();
         var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();

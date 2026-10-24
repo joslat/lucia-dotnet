@@ -1,7 +1,6 @@
 using System.Data.Common;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using lucia.Agents.Companion;
 using static lucia.Data.Companion.CompanionSql;
 
@@ -10,12 +9,6 @@ namespace lucia.Data.Companion;
 public sealed class RelationalCompanionLayoutStore(Func<CancellationToken, ValueTask<DbConnection>> openConnection, TimeProvider clock) : ICompanionLayoutStore
 {
     private const int MaximumBytes = 524_288;
-    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNameCaseInsensitive = false, UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-        RespectRequiredConstructorParameters = true, MaxDepth = 32,
-        Converters = { new JsonStringEnumConverter<CompanionField>(allowIntegerValues: false) }
-    };
 
     public async Task<CompanionLayoutSnapshot?> ReadAsync(string homeId, CancellationToken cancellationToken = default)
     {
@@ -30,7 +23,7 @@ public sealed class RelationalCompanionLayoutStore(Func<CancellationToken, Value
         ArgumentNullException.ThrowIfNull(layout); CompanionIdentifier.Validate(ownerId);
         if (expectedRevision is not null && !ValidRevision(expectedRevision)) { throw new ArgumentException("A checked write requires a valid revision.", nameof(expectedRevision)); }
         cancellationToken.ThrowIfCancellationRequested();
-        var json = JsonSerializer.Serialize(new { schemaVersion = 1, layout }, Json);
+        var json = JsonSerializer.Serialize(new { schemaVersion = 1, layout }, CompanionLayoutJson.Options);
         if (Encoding.UTF8.GetByteCount(json) > MaximumBytes) { throw new ArgumentException("The shared layout exceeds its storage capacity.", nameof(layout)); }
         var revision = Guid.NewGuid().ToString("N"); var updatedAt = clock.GetUtcNow();
         await using var connection = await openConnection(cancellationToken).ConfigureAwait(false);
@@ -69,11 +62,11 @@ public sealed class RelationalCompanionLayoutStore(Func<CancellationToken, Value
             if (!ValidRevision(revision) || json.Length > MaximumBytes || Encoding.UTF8.GetByteCount(json) > MaximumBytes) { throw new InvalidDataException(); }
             using var document = JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 32 });
             var root = document.RootElement;
-            RequireUniqueProperties(root);
+            CompanionLayoutJson.RequireUniqueProperties(root);
             if (root.ValueKind != JsonValueKind.Object || root.EnumerateObject().Count() != 2
                 || !root.TryGetProperty("schemaVersion", out var version) || !version.TryGetInt32(out var number) || number != 1
                 || !root.TryGetProperty("layout", out var payload)) { throw new InvalidDataException(); }
-            var layout = payload.Deserialize<CompanionLayout>(Json) ?? throw new InvalidDataException();
+            var layout = CompanionLayoutJson.Read(payload);
             if (layout.HomeId != homeId) { throw new InvalidDataException(); }
             var at = DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64(2));
             if (at <= DateTimeOffset.UnixEpoch) { throw new InvalidDataException(); }
@@ -86,18 +79,4 @@ public sealed class RelationalCompanionLayoutStore(Func<CancellationToken, Value
 
     private static bool ValidRevision(string value) => value.Length == 32 && value.All(character => char.IsAsciiDigit(character) || character is >= 'a' and <= 'f');
 
-    private static void RequireUniqueProperties(JsonElement element)
-    {
-        if (element.ValueKind == JsonValueKind.Object)
-        {
-            var names = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var property in element.EnumerateObject())
-            {
-                if (!names.Add(property.Name)) { throw new InvalidDataException(); }
-                RequireUniqueProperties(property.Value);
-            }
-        }
-        else if (element.ValueKind == JsonValueKind.Array)
-        { foreach (var item in element.EnumerateArray()) { RequireUniqueProperties(item); } }
-    }
 }

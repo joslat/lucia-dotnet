@@ -23,6 +23,16 @@ public sealed class CompanionHomeReader(IHomeAssistantClient source, IOptions<Co
     public Task<CompanionHomeSnapshot> ReadOwnerCatalogAsync(CancellationToken cancellationToken = default) =>
         ReadCoreAsync(null, includeReadings: false, cancellationToken);
 
+    /// <summary>Current member-qualified metadata, never observed values.</summary>
+    public Task<CompanionHomeSnapshot> ReadCatalogAsync(CompanionGrant grant, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(grant);
+        if (grant.HomeId != options.Value.HomeId) { throw new ArgumentException("The catalog belongs to another home."); }
+        return !grant.Places.Any(place => place.Fields.Count > 0)
+            ? Task.FromResult(new CompanionHomeSnapshot(grant.HomeId, clock.GetUtcNow(), options.Value.MaximumObservationAge.TotalSeconds, []))
+            : ReadCoreAsync(grant, includeReadings: false, cancellationToken);
+    }
+
     private async Task<CompanionHomeSnapshot> ReadCoreAsync(CompanionGrant? grant, bool includeReadings, CancellationToken cancellationToken)
     {
         var settings = options.Value;

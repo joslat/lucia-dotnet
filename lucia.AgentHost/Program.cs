@@ -411,6 +411,7 @@ app.MapCompanionSessionApi();
 app.MapCompanionPairingApi();
 app.MapCompanionHomeApi();
 app.MapCompanionActivityApi();
+app.MapCompanionLayoutApi();
 app.MapSetupApi();
 app.MapApiKeyManagementApi(isInstalledAppliance);
 app.MapAgentRegistryApiV1();

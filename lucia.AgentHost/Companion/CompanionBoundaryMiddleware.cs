@@ -19,7 +19,9 @@ public sealed class CompanionBoundaryMiddleware(RequestDelegate next)
                 await context.Response.WriteAsJsonAsync(new { error = "https_required" }, context.RequestAborted).ConfigureAwait(false);
                 return;
             }
-            const long maximumBodyBytes = 16_384;
+            var maximumBodyBytes = HttpMethods.IsPut(context.Request.Method)
+                && context.Request.Path.Equals(new PathString("/api/companion/owner/layout"), StringComparison.OrdinalIgnoreCase)
+                ? CompanionLayoutWriteRequest.MaximumBodyBytes : 16_384;
             if (context.Request.ContentLength > maximumBodyBytes) { context.Response.StatusCode = StatusCodes.Status413PayloadTooLarge; return; }
             if (context.Features.Get<IHttpMaxRequestBodySizeFeature>() is { IsReadOnly: false } bodyLimit)
             {
