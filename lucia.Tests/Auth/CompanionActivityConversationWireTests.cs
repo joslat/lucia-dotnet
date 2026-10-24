@@ -21,6 +21,34 @@ namespace lucia.Tests.Auth;
 /// <summary>Real conversation/controller/auth/HTTPS/SQLite, synthetic command executor only. No model or household actions.</summary>
 public sealed class CompanionActivityConversationWireTests
 {
+    [Theory]
+    [InlineData("LightControlSkill", "toggle", "Lighting")]
+    [InlineData("LightControlSkill", "brightness", "Lighting")]
+    [InlineData("ClimateControlSkill", "set_temperature", "Climate")]
+    [InlineData("ClimateControlSkill", "adjust", "Climate")]
+    [InlineData("SceneControlSkill", "activate", "Scene")]
+    [InlineData("PRIVATE_PLUGIN", "PRIVATE_ACTION", "General")]
+    [InlineData("LightControlSkill", "PRIVATE_ACTION", "General")]
+    public async Task ActualMatchedCommandPublishesOnlyAnAllowlistedRequestCategory(string skill, string action, string category)
+    {
+        var route = Route() with { MatchedPattern = new() { Id = "PRIVATE_PATTERN", SkillId = skill, Action = action, Templates = ["PRIVATE_PROMPT"] } };
+        var router = A.Fake<ICommandRouter>();
+        A.CallTo(() => router.RouteAsync(A<string>._, A<CancellationToken>._)).Returns(route);
+        await using var host = await StartAsync(router);
+        host.Client.DefaultRequestHeaders.Add("Cookie", ".lucia.session=synthetic-cookie");
+        using var response = await host.Client.PostAsJsonAsync("/api/conversation/", new
+            { text = "PRIVATE_REQUEST", context = new { category = "Scene", deviceArea = "PRIVATE_ROOM" } });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var issued = await host.Sessions.CreateAsync(CompanionActivityJournalTests.Grant(), "Phone");
+        using var device = Device(host, issued.AccessToken);
+        var snapshot = await device.GetFromJsonAsync<JsonElement>("/api/companion/homes/home-a/activity");
+        Assert.Equal(category, Assert.Single(snapshot.GetProperty("requests").EnumerateArray()).GetProperty("category").GetString());
+        Assert.DoesNotContain("PRIVATE_", snapshot.ToString());
+        using var native = host.CreateNativeClient();
+        var verified = await native.GetSessionAsync(issued.AccessToken);
+        Assert.Equal(category, Assert.Single((await native.GetActivityAsync(issued.AccessToken, verified)).Requests).Category.ToString());
+    }
+
     [Fact]
     public async Task CurrentOwnerConversationProducesOnlyItsMembersRealLifecycleThroughTheProtectedFeed()
     {

@@ -129,7 +129,8 @@ public sealed class ConnectedActivityController : IDisposable
     private static bool InvalidContinuation(ActivityRequest previous, ActivityRequest current)
     {
         if (current.StartedAt != previous.StartedAt || current.PreviousRequestId != previous.PreviousRequestId || current.UpdatedAt < previous.UpdatedAt
-            || current.Revision < previous.Revision || current.Revision == previous.Revision && (current.State != previous.State || current.UpdatedAt != previous.UpdatedAt))
+            || current.Revision < previous.Revision || current.Revision == previous.Revision && (current.State != previous.State || current.UpdatedAt != previous.UpdatedAt || current.Category != previous.Category)
+            || current.Category != previous.Category && (previous.Category != RequestActivityCategory.General || previous.State is not (RequestActivityState.Received or RequestActivityState.Working)))
         { return true; }
         return previous.State switch
         {

@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Lucia.Companion.Connection;
 using Xunit;
 
@@ -41,6 +43,8 @@ public sealed class CompanionActivityClientTests
     [InlineData("false-more")]
     [InlineData("invalid-previous")]
     [InlineData("self-previous")]
+    [InlineData("unknown-category")]
+    [InlineData("integer-category")]
     public async Task MalformedActivityIsRejectedWithoutPrivateDiagnosticBodies(string defect)
     {
         var body = Payload(); var item = body["requests"]![0]!;
@@ -62,11 +66,28 @@ public sealed class CompanionActivityClientTests
             case "false-more": body["hasMore"] = true; break;
             case "invalid-previous": item["previousRequestId"] = "PRIVATE_MARKER"; break;
             case "self-previous": item["previousRequestId"] = item["requestId"]!.GetValue<string>(); break;
+            case "unknown-category": item["category"] = "PRIVATE_MARKER"; break;
+            case "integer-category": item["category"] = 1; break;
         }
         using var api = Client(body);
         var error = await Assert.ThrowsAsync<CompanionConnectionException>(() => api.GetActivityAsync(Access, Session(), TestContext.Current.CancellationToken));
         Assert.Equal(ConnectionFailure.InvalidResponse, error.Failure);
         Assert.DoesNotContain("PRIVATE_MARKER", error.ToString());
+    }
+
+    [Theory]
+    [InlineData(null, "General")]
+    [InlineData("Lighting", "Lighting")]
+    [InlineData("Climate", "Climate")]
+    [InlineData("Scene", "Scene")]
+    public async Task RequestCategoriesAreTypedAndOlderHostsRemainGeneral(string? supplied, string expected)
+    {
+        var body = Payload();
+        if (supplied is not null) { body["requests"]![0]!["category"] = supplied; }
+        using var api = Client(body);
+        var request = Assert.Single((await api.GetActivityAsync(Access, Session(), TestContext.Current.CancellationToken)).Requests);
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web) { Converters = { new JsonStringEnumConverter() } };
+        Assert.Equal(expected, JsonSerializer.SerializeToNode(request, options)!["category"]?.GetValue<string>());
     }
 
     [Fact]

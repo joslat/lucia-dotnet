@@ -28,8 +28,9 @@ public static class SyntheticCompanionConversationServices
             .Returns(new SkillExecutionResult { Success = true, SkillId = "synthetic", Action = "read", ResponseText = "PRIVATE_WIRE_RESPONSE" });
         services.AddSingleton(executor);
         var templates = A.Fake<IResponseTemplateRepository>();
-        A.CallTo(() => templates.GetBySkillAndActionAsync("synthetic", "read", A<CancellationToken>._))
-            .Returns(new ResponseTemplate { SkillId = "synthetic", Action = "read", Templates = ["PRIVATE_WIRE_RESPONSE"] });
+        A.CallTo(() => templates.GetBySkillAndActionAsync(A<string>._, A<string>._, A<CancellationToken>._))
+            .ReturnsLazily((string skill, string action, CancellationToken _) =>
+                new ResponseTemplate { SkillId = skill, Action = action, Templates = ["PRIVATE_WIRE_RESPONSE"] });
         services.AddSingleton(new ResponseTemplateRenderer(templates, NullLogger<ResponseTemplateRenderer>.Instance));
         services.AddSingleton<ContextReconstructor>(); services.AddSingleton<AgentHostTelemetrySource>(); services.AddSingleton<ConversationTelemetry>();
         services.AddSingleton<ICommandTraceRepository, InMemoryCommandTraceRepository>(); services.AddSingleton<CommandTraceChannel>();

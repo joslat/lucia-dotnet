@@ -177,6 +177,42 @@ public sealed class ConnectedActivityControllerTests
 
     internal static ConnectionSession Identity() => new(new Uri("https://synthetic.invalid"), CompanionActivityClientTests.Session());
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task CategoriesCannotRewriteAnEstablishedRequestOrChangeWithoutRevision(bool previouslyFinal, bool sameRevision)
+    {
+        var original = Snapshot(); var old = original.Requests[0];
+        var state = previouslyFinal ? RequestActivityState.ResponseReady : old.State;
+        var before = new ActivityRequest(old.RequestId, state, old.StartedAt, old.UpdatedAt, old.Revision,
+            category: previouslyFinal ? RequestActivityCategory.General : RequestActivityCategory.Lighting);
+        var current = new ActivityRequest(old.RequestId, state, old.StartedAt, old.UpdatedAt.AddMilliseconds(sameRevision ? 0 : 1), old.Revision + (sameRevision ? 0 : 1),
+            category: RequestActivityCategory.Climate);
+        ActivitySnapshot With(ActivityRequest item) => new(original.HomeId, original.MemberId, original.CapturedAt, original.CoverageStartedAt, true, false, false, [item]);
+        var service = Service(() => Task.FromResult(With(before)));
+        using var controller = new ConnectedActivityController(service, Identity());
+        await controller.RefreshAsync(TestContext.Current.CancellationToken);
+        service.Activity = () => Task.FromResult(With(current));
+        await controller.RefreshAsync(TestContext.Current.CancellationToken);
+        Assert.Null(controller.Snapshot);
+    }
+
+    [Fact]
+    public async Task AWorkingRequestCanAcquireItsFirstMatchedCategoryAcrossASkippedPoll()
+    {
+        var snapshot = Snapshot(); var old = snapshot.Requests[0];
+        var service = Service(() => Task.FromResult(snapshot));
+        using var controller = new ConnectedActivityController(service, Identity());
+        await controller.RefreshAsync(TestContext.Current.CancellationToken);
+        var final = new ActivityRequest(old.RequestId, RequestActivityState.ResponseReady, old.StartedAt, old.UpdatedAt.AddMilliseconds(1), old.Revision + 2,
+            category: RequestActivityCategory.Lighting);
+        service.Activity = () => Task.FromResult(new ActivitySnapshot(snapshot.HomeId, snapshot.MemberId, snapshot.CapturedAt, snapshot.CoverageStartedAt,
+            true, false, false, [final]));
+        await controller.RefreshAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(RequestActivityCategory.Lighting, Assert.Single(controller.Snapshot!.Requests).Category);
+    }
+
     [Fact]
     public async Task RepeatedTransientFailuresBackOffToFiveMinutesAndSuccessResetsThePollingCadence()
     {

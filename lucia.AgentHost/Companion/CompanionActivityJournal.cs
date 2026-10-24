@@ -85,7 +85,20 @@ public sealed class CompanionActivityJournal
             }
             var id = Guid.NewGuid().ToString("N");
             records.Add(new(new(id, CompanionActivityState.Received, now, now, 1, previousId), key));
-            return new(id, state => Update(memberId, id, state));
+            return new(id, state => Update(memberId, id, state), category => Describe(memberId, id, category));
+        }
+    }
+
+    private void Describe(string memberId, string id, CompanionActivityCategory category)
+    {
+        if (category == CompanionActivityCategory.General) { return; }
+        lock (gate)
+        {
+            if (!requests.TryGetValue(memberId, out var records)) { return; }
+            var index = records.FindIndex(entry => entry.Item.RequestId == id);
+            if (index < 0 || records[index].Item is not { Category: CompanionActivityCategory.General,
+                State: CompanionActivityState.Received or CompanionActivityState.Working } item) { return; }
+            records[index] = records[index] with { Item = item with { Category = category, UpdatedAt = Now(), Revision = item.Revision + 1 } };
         }
     }
 

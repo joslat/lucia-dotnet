@@ -9,6 +9,24 @@ namespace lucia.Tests.Auth;
 public sealed class CompanionActivityJournalTests
 {
     [Fact]
+    public void CategoryIsOneRevisionedSourceFactAndCannotBeRetaggedAfterItIsReportedOrCompleted()
+    {
+        var clock = Clock(); var journal = Journal(clock);
+        using var request = journal.BeginOwner("owner-a"); request!.Working();
+        var before = Assert.Single(journal.Read(Grant()).Requests);
+        clock.Advance(TimeSpan.FromSeconds(1));
+        request.DescribeMatchedCommand("LightControlSkill", "toggle");
+        var reported = Assert.Single(journal.Read(Grant()).Requests);
+        Assert.Equal(CompanionActivityCategory.Lighting, reported.Category);
+        Assert.Equal(before.Revision + 1, reported.Revision); Assert.True(reported.UpdatedAt > before.UpdatedAt);
+        request.DescribeMatchedCommand("ClimateControlSkill", "adjust");
+        Assert.Equal(reported, Assert.Single(journal.Read(Grant()).Requests));
+        request.Complete(CompanionActivityState.Failed);
+        var completed = Assert.Single(journal.Read(Grant()).Requests);
+        request.DescribeMatchedCommand("SceneControlSkill", "activate");
+        Assert.Equal(completed, Assert.Single(journal.Read(Grant()).Requests));
+    }
+    [Fact]
     public void ExplicitAttributionProducesOneStableRequestWithoutSourceIdentityOrPrivateContent()
     {
         var clock = Clock();

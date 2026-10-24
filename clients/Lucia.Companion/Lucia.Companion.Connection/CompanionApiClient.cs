@@ -14,7 +14,7 @@ public sealed class CompanionApiClient : IDisposable
     {
         RespectRequiredConstructorParameters = true,
         Converters = { new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false), new JsonStringEnumConverter<ObservationQuality>(allowIntegerValues: false),
-            new JsonStringEnumConverter<RequestActivityState>(allowIntegerValues: false) }
+            new JsonStringEnumConverter<RequestActivityState>(allowIntegerValues: false), new JsonStringEnumConverter<RequestActivityCategory>(allowIntegerValues: false) }
     };
     private readonly HttpClient client;
     private readonly TimeSpan bodyTimeout;

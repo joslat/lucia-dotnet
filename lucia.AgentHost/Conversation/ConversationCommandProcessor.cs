@@ -219,6 +219,8 @@ public sealed partial class ConversationCommandProcessor
         {
             tracked?.Working();
             var routeResult = await _commandRouter.RouteAsync(cleanText, ct).ConfigureAwait(false);
+            if (routeResult.IsMatch && routeResult.MatchedPattern is { } matched)
+            { tracked?.DescribeMatchedCommand(matched.SkillId, matched.Action); }
             var result = routeResult.IsMatch && routeResult.MatchedPattern is not null
                 ? await HandleCommandMatchAsync(request.Text, cleanRequest, routeResult, conversationId, activity, sw, ct).ConfigureAwait(false)
                 : await HandleLlmFallbackAsync(request.Text, cleanRequest, routeResult, conversationId, activity, sw, ct).ConfigureAwait(false);

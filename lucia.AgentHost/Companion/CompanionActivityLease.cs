@@ -4,10 +4,23 @@ namespace lucia.AgentHost.Companion;
 public sealed class CompanionActivityLease : IDisposable
 {
     private readonly Action<CompanionActivityState> update;
+    private readonly Action<CompanionActivityCategory> describe;
     private int finished;
     public string RequestId { get; }
-    internal CompanionActivityLease(string requestId, Action<CompanionActivityState> update)
-    { RequestId = requestId; this.update = update; }
+    internal CompanionActivityLease(string requestId, Action<CompanionActivityState> update, Action<CompanionActivityCategory> describe)
+    { RequestId = requestId; this.update = update; this.describe = describe; }
+    public void DescribeMatchedCommand(string skillId, string action)
+    {
+        if (Volatile.Read(ref finished) != 0) { return; }
+        var category = (skillId, action) switch
+        {
+            ("LightControlSkill", "toggle" or "brightness") => CompanionActivityCategory.Lighting,
+            ("ClimateControlSkill", "set_temperature" or "adjust") => CompanionActivityCategory.Climate,
+            ("SceneControlSkill", "activate") => CompanionActivityCategory.Scene,
+            _ => CompanionActivityCategory.General
+        };
+        describe(category);
+    }
     public void Working() { if (Volatile.Read(ref finished) == 0) { update(CompanionActivityState.Working); } }
     public void Complete(CompanionActivityState state)
     {
