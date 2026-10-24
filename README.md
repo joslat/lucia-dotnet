@@ -334,6 +334,8 @@ To switch providers on any deployment, set the environment variables:
 
    Enter the API key generated during setup to access the full dashboard.
 
+   SQLite API-key timestamps are read as UTC instants. Legacy timestamps without a zone also mean UTC, so key expiry and administrator-key revocation do not depend on the server's local timezone.
+
 5. **Install the Home Assistant Integration**
 
    **Option A: HACS (Recommended)**

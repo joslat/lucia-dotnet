@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -218,7 +219,7 @@ public sealed class SqliteApiKeyService : IApiKeyService
         var entry = ReadApiKeyEntry(reader);
 
         // Check expiration
-        if (entry.ExpiresAt.HasValue && entry.ExpiresAt.Value < DateTime.UtcNow)
+        if (entry.ExpiresAt.HasValue && entry.ExpiresAt.Value <= DateTime.UtcNow)
             return null;
 
         return entry;
@@ -244,11 +245,11 @@ public sealed class SqliteApiKeyService : IApiKeyService
                 Id = reader.GetString(0),
                 KeyPrefix = reader.GetString(2),
                 Name = reader.GetString(3),
-                CreatedAt = DateTime.Parse(reader.GetString(4)),
-                LastUsedAt = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5)),
-                ExpiresAt = reader.IsDBNull(6) ? null : DateTime.Parse(reader.GetString(6)),
+                CreatedAt = ParseUtc(reader.GetString(4)),
+                LastUsedAt = reader.IsDBNull(5) ? null : ParseUtc(reader.GetString(5)),
+                ExpiresAt = reader.IsDBNull(6) ? null : ParseUtc(reader.GetString(6)),
                 IsRevoked = reader.GetInt64(7) != 0,
-                RevokedAt = reader.IsDBNull(8) ? null : DateTime.Parse(reader.GetString(8)),
+                RevokedAt = reader.IsDBNull(8) ? null : ParseUtc(reader.GetString(8)),
                 Scopes = JsonSerializer.Deserialize<string[]>(reader.GetString(9)) ?? ["*"],
             });
         }
@@ -281,17 +282,17 @@ public sealed class SqliteApiKeyService : IApiKeyService
             Id = reader.GetString(0),
             KeyPrefix = reader.GetString(2),
             Name = reader.GetString(3),
-            CreatedAt = DateTime.Parse(reader.GetString(4)),
+            CreatedAt = ParseUtc(reader.GetString(4)),
             LastUsedAt = reader.IsDBNull(5)
                 ? null
-                : DateTime.Parse(reader.GetString(5)),
+                : ParseUtc(reader.GetString(5)),
             ExpiresAt = reader.IsDBNull(6)
                 ? null
-                : DateTime.Parse(reader.GetString(6)),
+                : ParseUtc(reader.GetString(6)),
             IsRevoked = reader.GetInt64(7) != 0,
             RevokedAt = reader.IsDBNull(8)
                 ? null
-                : DateTime.Parse(reader.GetString(8)),
+                : ParseUtc(reader.GetString(8)),
             Scopes =
                 JsonSerializer.Deserialize<string[]>(reader.GetString(9))
                 ?? ["*"],
@@ -323,7 +324,7 @@ public sealed class SqliteApiKeyService : IApiKeyService
         var isRevoked = reader.GetInt64(2) != 0;
         DateTime? expiresAt = reader.IsDBNull(3)
             ? null
-            : DateTime.Parse(reader.GetString(3));
+            : ParseUtc(reader.GetString(3));
         var scopes =
             JsonSerializer.Deserialize<string[]>(reader.GetString(4)) ?? ["*"];
         await reader.DisposeAsync().ConfigureAwait(false);
@@ -652,6 +653,10 @@ public sealed class SqliteApiKeyService : IApiKeyService
         return Convert.ToHexStringLower(bytes);
     }
 
+    // Stored ISO instants and legacy SQLite UTC timestamps must not inherit the server's local zone.
+    private static DateTime ParseUtc(string value) => DateTime.Parse(value, CultureInfo.InvariantCulture,
+        DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+
     private static ApiKeyEntry ReadApiKeyEntry(SqliteDataReader reader)
     {
         return new ApiKeyEntry
@@ -660,11 +665,11 @@ public sealed class SqliteApiKeyService : IApiKeyService
             KeyHash = reader.GetString(1),
             KeyPrefix = reader.GetString(2),
             Name = reader.GetString(3),
-            CreatedAt = DateTime.Parse(reader.GetString(4)),
-            LastUsedAt = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5)),
-            ExpiresAt = reader.IsDBNull(6) ? null : DateTime.Parse(reader.GetString(6)),
+            CreatedAt = ParseUtc(reader.GetString(4)),
+            LastUsedAt = reader.IsDBNull(5) ? null : ParseUtc(reader.GetString(5)),
+            ExpiresAt = reader.IsDBNull(6) ? null : ParseUtc(reader.GetString(6)),
             IsRevoked = reader.GetInt64(7) != 0,
-            RevokedAt = reader.IsDBNull(8) ? null : DateTime.Parse(reader.GetString(8)),
+            RevokedAt = reader.IsDBNull(8) ? null : ParseUtc(reader.GetString(8)),
             Scopes = JsonSerializer.Deserialize<string[]>(reader.GetString(9)) ?? ["*"],
         };
     }

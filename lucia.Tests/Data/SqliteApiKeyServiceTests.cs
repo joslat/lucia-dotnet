@@ -154,6 +154,48 @@ public sealed class SqliteApiKeyServiceTests : IDisposable
         Assert.Null(entry);
     }
 
+    [Theory]
+    [InlineData("2025-01-02T03:04:05.0000000Z")]
+    [InlineData("2025-01-02T05:04:05+02:00")]
+    [InlineData("2025-01-01T22:04:05-05:00")]
+    [InlineData("2025-01-02 03:04:05")]
+    public async Task KeyTimestampsAreUtcAcrossAllReadPaths(string storedTimestamp)
+    {
+        var created = await _service.CreateKeyAsync("utc-metadata");
+        using (var connection = _helper.ConnectionFactory.CreateConnection())
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = """
+                UPDATE api_keys SET created_at = @timestamp, last_used_at = @timestamp,
+                    revoked_at = @timestamp, expires_at = @expiry WHERE id = @id;
+                """;
+            command.Parameters.AddWithValue("@timestamp", storedTimestamp);
+            command.Parameters.AddWithValue("@expiry", "2035-01-02T03:04:05.0000000Z");
+            command.Parameters.AddWithValue("@id", created.Id);
+            await command.ExecuteNonQueryAsync();
+        }
+        var expected = new DateTime(2025, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        var entry = await _service.ValidateKeyAsync(created.Key);
+        var summary = await _service.GetKeyAsync(created.Id);
+        var listed = Assert.Single(await _service.ListKeysAsync());
+        Assert.NotNull(entry);
+        Assert.NotNull(summary);
+        foreach (var value in new[] { entry.CreatedAt, entry.LastUsedAt, entry.RevokedAt,
+                     summary.CreatedAt, summary.LastUsedAt, summary.RevokedAt,
+                     listed.CreatedAt, listed.LastUsedAt, listed.RevokedAt })
+        {
+            Assert.NotNull(value);
+            Assert.Equal(DateTimeKind.Utc, value.Value.Kind);
+            Assert.Equal(expected, value.Value);
+        }
+        foreach (var expiry in new[] { entry.ExpiresAt, summary.ExpiresAt, listed.ExpiresAt })
+        {
+            Assert.NotNull(expiry);
+            Assert.Equal(DateTimeKind.Utc, expiry.Value.Kind);
+            Assert.Equal(new DateTime(2035, 1, 2, 3, 4, 5, DateTimeKind.Utc), expiry.Value);
+        }
+    }
+
     [Fact]
     public async Task ValidateKeyAsync_ReturnsNull_ForInvalidKey()
     {
