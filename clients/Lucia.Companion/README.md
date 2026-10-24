@@ -36,7 +36,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-The 207 client tests cover semantics, transport, protected storage, session recovery and native interactions. Home transport adds 29 checks for typed reports, grant validation, response budgets, renewal-before-read and protected lease/revocation behavior. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover binding validation, competing local writers, conflict recovery, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. Connection checks include explicit demo separation, approval identity, grant disclosure and focus continuity. Windows-only DPAPI tests explicitly skip on other operating systems. None of these tests qualifies physical-device accessibility, safe areas or performance.
+The 218 client tests cover semantics, transport, protected storage, session recovery and native interactions. Home transport adds 29 checks and import/scope rules add 11. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover binding validation, competing local writers, conflict recovery, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. Connection checks include explicit demo separation, approval identity, grant disclosure and focus continuity. Windows-only DPAPI tests explicitly skip on other operating systems. None of these tests qualifies physical-device accessibility, safe areas or performance.
 
 ### Android
 
@@ -100,7 +100,11 @@ Customize at the bottom of Home, or Options then Customize Home, changes the ord
 
 The binding picker reports rejected duplicate assignments beside its own controls, focuses the error and names the existing place plus the removal step. Missing discovery never deletes existing metadata. Removing a place removes its draft connections and bindings; Cancel leaves the saved setup untouched. A bound place without readings says so rather than claiming no bindings exist.
 
-Current verification includes core/configuration tests and native headless phone/tablet checks, not a production data boundary or full platform qualification. Production Story history, authorized discovery/import and live adapters remain future work. BUILD-PLAN.md tracks the active full-application goal; this checkpoint does not complete it.
+Import merge rules now have a tested non-visual implementation. `HomeImportPlan` stages only explicitly selected catalog places and their typed bindings. Existing names/icons, order, connections, readings and missing bindings stay unchanged. An already-assigned source is flagged, never stolen. Re-import adds nothing twice. Accepting a preview after another draft edit requires a fresh review. Capacity/name/selection failures leave the original untouched. This code does not save metadata, request permissions or infer room connections. Names for new rooms must be explicitly supplied within the existing 80-character limit.
+
+`ConnectedProfileScope` computes a separate opaque filename from the canonical HTTPS endpoint, exact home ID and member ID. It remains stable across re-pairing with a new session/device label, but differs across hosts/homes/people. The offline demo path stays separate. This filename and merge policy are not wired into visible import or storage yet. Connected views must also filter old imported metadata when a new grant is narrower; a scoped filename alone does not authorize showing it.
+
+Configuration verification includes core rules and native headless phone/tablet checks, not full platform qualification. The protected transport/source boundary is described below. Visible connected import/Home and production Story history remain unfinished. BUILD-PLAN.md tracks the active full-application goal; these checkpoints do not complete it.
 
 ## Native-session host foundation
 
