@@ -1,5 +1,7 @@
 using lucia.Tests.Auth;
 using Microsoft.Extensions.FileProviders;
+using lucia.AgentHost.Apis;
+using lucia.Agents.Auth;
 
 // Synthetic fixture only. Production assets plus production companion auth/API/SQLite services.
 // No real AgentHost startup, configuration, owner key, HA, models or household data.
@@ -10,9 +12,19 @@ if (args.Length == 1 && !nativeHome && !ownerHome) { dashboard = Path.GetFullPat
 if (!nativeHome && !File.Exists(Path.Combine(dashboard, "index.html"))) { throw new InvalidOperationException("Build lucia-dashboard before starting the synthetic browser fixture."); }
 using var provider = nativeHome ? null : new PhysicalFileProvider(dashboard);
 await using var source = nativeHome || ownerHome ? await SyntheticCompanionHomeSource.StartAsync() : null;
+var conversation = nativeHome ? new SyntheticConversationRouter() : null;
 await using var host = await CompanionSecurityTestHost.StartAsync(homeSource: source?.Client,
-    sourceBaseUrl: source?.Origin ?? "http://synthetic-ha.invalid", configureApp: app =>
+    sourceBaseUrl: source?.Origin ?? "http://synthetic-ha.invalid",
+    configureServices: services => { if (conversation is not null) { SyntheticCompanionConversationServices.Configure(services, conversation); } },
+    configureApp: app =>
 {
+    if (conversation is not null)
+    {
+        app.MapConversationApi();
+        app.MapGet("/synthetic/conversation/status", () => new { waiting = conversation.Waiting }).RequireAuthorization(AuthOptions.AdministratorPolicy);
+        app.MapPost("/synthetic/conversation/reset", () => conversation.Reset() ? Results.NoContent() : Results.Conflict()).RequireAuthorization(AuthOptions.AdministratorPolicy);
+        app.MapPost("/synthetic/conversation/release", () => { conversation.Release(); return Results.NoContent(); }).RequireAuthorization(AuthOptions.AdministratorPolicy);
+    }
     if (provider is null) { return; }
     app.UseStaticFiles(new StaticFileOptions { FileProvider = provider });
     app.MapGet("/api/auth/status", (HttpContext context) => new { authenticated = context.User.Identity?.IsAuthenticated == true, setupComplete = true, hasKeys = true }).AllowAnonymous();

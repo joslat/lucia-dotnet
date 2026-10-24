@@ -148,7 +148,7 @@ Places use household outline icons, written names and explicit state labels. The
 
 The app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Owners review codes, choose exact grants and manage issued sessions in Companion devices on the trusted HTTPS dashboard. Open Home reads authorized source reports into the existing Constellation Home, with qualified readings, local setup, source bindings, save-conflict recovery and Customize section ordering. Bring your places in lets the user select authorized places, preview exact metadata additions and conflicts, add to the setup draft, then use the existing Save setup action. Import preserves existing names, icons, order, connections and source ownership. A saved binding grants no access. While active, connected Home checks report revisions and keeps their original age. Temporary read failures show automatic-retry guidance; server waits disable retry without hiding Connection.
 
-Explore the demo explicitly opens the cached synthetic shell with its offline badge and synthetic reading time. That mode retains HomeConstellation, PlaceDetail, contextual Bloom actions, offline StoryOrbit Day and the control workbench. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Connected mode shares the Home composition but hides sample Story and Control lab and replaces the sample task stages with a written activity-not-connected notice. The scoped connected Home and import extension has a ship disposition. BUILD-PLAN.md still owns the unfinished Story, Week and Engine adapters and the remaining motion, performance, platform and release gates.
+Explore the demo explicitly opens the cached synthetic shell with its offline badge and synthetic reading time. That mode retains HomeConstellation, PlaceDetail, contextual Bloom actions, offline StoryOrbit Day and the control workbench. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Connected mode shares the Home composition, hides sample Story and Control lab, and shows separately authorized, attributed request activity in Lucia now. Written outcomes and reported UTC times qualify the compact phase paths. The scoped connected Home and import extension has a ship disposition. Activity's UI review closed its phase, recovery-visibility and label-layout findings; this documenter handoff records the remaining documentation fix. H03 still lacks qualified place attribution and complete request semantics. BUILD-PLAN.md owns those tasks, the unfinished Story, Week and Engine adapters and the remaining motion, performance, platform and release gates.
 
 Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
@@ -171,6 +171,9 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Connection keeps the canonical HTTPS host and submitted device name beside the approval code.
 - Verified access discloses exact grants without substituting sample household data.
 - Recovery distinguishes retry, local forgetting and a request to revoke the device session.
+- Connected activity shows attributed request outcomes with reported UTC times and separate activity access.
+- Activity phase labels reflow vertically when their natural widths no longer fit; exceptional outcomes carry no invented reached phase.
+- Activity recovery reveals its written status after an affected action disappears, while healthy polling leaves focus and status quiet.
 
 ## Colors
 
@@ -247,6 +250,8 @@ Home and setup use 16-unit outer margins and composition gaps. Home changes to i
 The default section order is Your places, Needs a look, Lucia now. Expanded Home puts the first preferred section at the top of the wide main column and always keeps Your places in that column. If Your places is first, the last preferred section sits below it and the middle section occupies the side column. If another section is first, Your places sits below that section and the remaining section occupies the side column. Selected-place detail follows the side section. Customize remains a footer Expander in the Home scroll region, outside this section grid.
 
 When Home is narrower than 600 units and its home-name font exceeds 32 units, its mode badge moves below the name. The name then spans both header columns.
+
+When the mapped home-name font exceeds 32 units, Home's identity and source context scroll with the Home or compact detail content through the outer ContextScroll. The inner Home and detail scrollers disable vertical scrolling in this layout. At smaller type sizes, the context stays above those inner scroll regions. This keeps large-text context from consuming the available content viewport.
 
 Connected Home uses this same layout with a Connected badge and a report-capture notice. The identity stacking rule applies to either mode's badge. ConnectedHomeWorkspace replaces the shell with a vertically scrolling Home reports state while checking access or recovering from a failed read. That state has 20-unit horizontal and 32-unit vertical margins, 20-unit spacing, a 720-unit maximum width and the existing 44-unit household Home outline. Retry Home reports and Connection wrap below the written status. Longer recovery text can put the actions below the first viewport at large text sizes; the same vertical scroll region keeps them reachable.
 
@@ -336,7 +341,7 @@ The Android activity reuses one cached view only within the running process. An 
 
 ### ConnectedHomeWorkspace and report lifetime
 
-ConnectedHomeWorkspace requires a verified session and credential-bound data service. It opens the shared Home shell only after the authorized read succeeds. The existing graph, attention list, PlaceDetail and Bloom use the same semantic resources, household outline icons and Outfit/DM Sans roles as the demo. Connected Home prints its report capture time and the source-report qualification. Its Lucia now panel says task activity is not connected; it never displays the sample request stages. Story and Control lab remain available only through the explicit demo.
+ConnectedHomeWorkspace requires a verified session and credential-bound data service. It opens the shared Home shell only after the authorized read succeeds. The existing graph, attention list, PlaceDetail and Bloom use the same semantic resources, household outline icons and Outfit/DM Sans roles as the demo. Connected Home prints its report capture time and the source-report qualification. Its Lucia now panel uses ConnectedLuciaNow for separately authorized attributed requests and written access/recovery states. It never displays the sample request stages. Story and Control lab remain available only through the explicit demo.
 
 ConnectedHomeController conditionally reads a full Home snapshot every 20 seconds while the view is active. Each subscriber reads independently. The server's weak ETag covers the session, home, member, exact Home grants and sanitized report content, excluding capture time. A changed or unknown revision returns a complete replacement. There is no delta replay, push stream or atomic Home Assistant snapshot promise.
 
@@ -404,7 +409,21 @@ Needs a look contains native full-width buttons for Problem, Waiting and Unavail
 
 ### LuciaNow
 
-The demo's compact fixture has three equal columns. Received · done is a sage outlined 16-unit circle. Reading · current is a filled blue circle. Result · pending is a thin neutral outline. Written stage names accompany every marker. Its example request and explicit synthetic/no-running-request notice are part of the control. No request execution, animated progress or completed physical outcome is implied. Connected Home hides this fixture and shows the written task-activity-not-connected notice.
+The demo's compact fixture has three equal columns. Received · done is a sage outlined 16-unit circle. Reading · current is a filled blue circle. Result · pending is a thin neutral outline. Written stage names accompany every marker. Its example request and explicit synthetic/no-running-request notice are part of the control. No request execution, animated progress or completed physical outcome is implied. Connected Home hides this fixture and uses ConnectedLuciaNow.
+
+### ConnectedLuciaNow, LuciaStagePath and LuciaStageTrack
+
+Connected activity extends the existing Lucia now panel with the same Outfit heading, DM Sans body and label roles, semantic brushes and native theme buttons. Three recent requests are visible first. A named Show/Hide more recent requests Expander holds the remainder and stays expanded across successful refreshes. Capture time, partial coverage and bounded-buffer notices remain written below the requests. No retained requests means only that this member has no retained attributed requests, not that Lucia or the household is idle.
+
+Each row shows a shortened opaque request reference, Room not reported, a written state and the reported update time in UTC. Received and Working use blue; Reply requested uses amber, Response ready uses sage, Reported failure uses the problem role, and Outcome unknown uses muted text. Later turn received is the written Continued state and uses blue. Reply requested sends the user to their existing Lucia conversation. A later verified turn does not establish that an answer arrived. A previous-request reference supplies correlation without transcript, diagnostic text, model or tool claims. Response ready never proves a physical result. Qualified place attribution and complete request semantics remain H03 work; local place names or source bindings cannot supply that missing evidence.
+
+Received, Working, Reply requested and Response ready have the source-supported Received, Processing and Response path. Drawn circles and connectors accompany complete written labels, with sage checks for reported completed phases. Reported failure, Outcome unknown and Later turn received hide the phase group because those outcomes do not establish a reached phase. The path is static, never a timer-driven progress animation. Labels retain their mapped type size. When three times the widest natural label width plus 16 units exceeds the available width, the path becomes three vertical rows with a 24-unit marker column and labels beside it. Otherwise it uses three horizontal columns above the labels.
+
+Activity permission is independent of Home access. An initially unapproved session sends no activity reads. Activity-only denial clears request rows and stops automatic retry while retaining Home. Refresh activity becomes Check activity access for explicit rechecking after denial, and Review connection exposes recovery. Whole-session authority loss hides protected Home and returns to Connection. Every activity read uses protected identity and current authorization. Successful configured activity checks run at five-second intervals while the workspace is active. Transient failures retry with 20, 40, 80, 160 and 300-second backoff; server waits constrain manual retry and resume too. Failure or suspension hides retained requests. Resume checks current access before displaying them again. Requests remain in memory only.
+
+ActivityStatus is focusable and has a polite live setting. With retained requests, healthy checks leave its existing text in place instead of announcing Checking activity every five seconds. Rows reuse unchanged revisions. Explicit refresh repairs focus when its button disables. If the focused request area or expansion toggle disappears when rows clear, the status receives focus and scrolls into view after layout through each active scrolling ancestor. The deferred move rechecks the current focus, so it does not take focus after the user has moved elsewhere. Normal healthy polls do not move focus.
+
+The independent finish review's fix1 verdict closed material findings 1 through 3 after 32 replacement layout captures and two source-wire captures. These cover phone/tablet, light/dark, normal/doubled text, exceptional outcomes, readable phases and denial recovery. After the documenter updated this file and its sidecar, the final verdict resolved all four findings and returned ship for this scoped activity UI extension. The captures use synthetic fixtures and bounded synthetic wire data. They establish no successful installed TLS session, actual household or physical result, TalkBack, iOS, performance, release readiness or completion of H03 or the wider app. The existing approved composition, fonts and palette required no rebuild or new assets.
 
 ### HomeEditorScreen
 
@@ -518,6 +537,9 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do retain original report age and capture time after an unchanged-revision response.
 - Do respect server-requested waits across retry and resume, and keep Connection available.
 - Do retain the current setup editor and unsaved input through temporary report recovery.
+- Do show activity's written outcome, reported UTC time, partial coverage and missing room attribution.
+- Do reflow complete activity phase labels without reducing their mapped type size.
+- Do keep activity permission separate from Home access and reveal recovery status when the affected control disappears.
 
 ### Don't:
 
@@ -541,3 +563,6 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't show sample Story, task stages or Control lab inside connected mode.
 - Don't treat saved bindings, a previous report or an old grant as permission to display an offline household.
 - Don't treat revisioned polling as event replay, a push stream or an atomic Home Assistant snapshot.
+- Don't draw a reached activity phase for failure, unknown outcome or a later turn without source evidence.
+- Don't infer room attribution, transcript content, model/tool steps or physical success from an activity record.
+- Don't announce healthy activity polls or move focus away from the user's current control.

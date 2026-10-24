@@ -1,13 +1,14 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
              x:Class="Lucia.Companion.App.Screens.HomeScreen" Background="{DynamicResource CanvasBrush}">
-  <!-- THESIS: A stable, legible home graph with truthful sample observations.
+  <!-- THESIS: A stable, legible home graph with truthful reported observations and attributed request phases.
        OWN-WORLD: Constellation circles, physical-connection lines, Observatory light/dark and local Outfit/DM Sans.
-       STORY: See places and attention, open readings, pin a place through accessible Bloom actions.
+       STORY: See places and attention, open readings, pin a place through accessible Bloom actions. Connected Lucia now shows only authorized reported phases, never timer-generated progress.
        FIRST VIEWPORT: Home identity, offline notice, Your places first; attention and details alongside on tablet, a separate detail view on phone.
        FORM: Approved Constellation native composition. Seed: approved-constellation-home.
        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
-  <Grid RowDefinitions="Auto,*" Margin="16">
-    <StackPanel Spacing="4" Margin="4,0,4,12">
+  <ScrollViewer Name="ContextScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+  <Grid Name="HomeRoot" RowDefinitions="Auto,*" Margin="16">
+    <StackPanel Name="HomeContext" Spacing="4" Margin="4,0,4,12">
       <Grid Name="HomeIdentity" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
         <TextBlock Name="HomeName" Classes="section" VerticalAlignment="Center" TextWrapping="Wrap" />
         <Border Name="DemoBadge" Grid.Column="1" Background="{DynamicResource ControlBrush}" CornerRadius="12" Padding="12,8" VerticalAlignment="Center">
@@ -18,7 +19,7 @@
       <TextBlock Name="AttentionSummary" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
     </StackPanel>
     <ScrollViewer Name="HomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel Spacing="12">
+      <StackPanel Name="HomeScrollContent" Spacing="12">
       <Grid Name="HomeGrid" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
         <StackPanel Name="MainPanel" Spacing="16">
         <Border Name="PlacesCard" Classes="panel" Padding="12">
@@ -31,10 +32,7 @@
         <Border Name="LuciaCard" Classes="panel" Padding="12">
           <StackPanel Spacing="8">
             <c:LuciaNow Name="DemoLuciaNow" />
-            <StackPanel Name="ConnectedLuciaNotice" IsVisible="False" Spacing="8">
-              <TextBlock Text="Lucia now" Classes="section" />
-              <TextBlock Text="Task activity is not connected to this view yet. No request status or completed physical outcome is inferred from sensor reports." Classes="muted" />
-            </StackPanel>
+            <c:ConnectedLuciaNow Name="ConnectedLuciaNotice" IsVisible="False" />
           </StackPanel>
         </Border>
         </StackPanel>
@@ -55,7 +53,7 @@
       </StackPanel>
     </ScrollViewer>
     <ScrollViewer Name="DetailScroll" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel Spacing="16">
+      <StackPanel Name="DetailScrollContent" Spacing="16">
         <Button Name="BackToHome" Classes="theme" Content="Back to your home" HorizontalAlignment="Left" />
         <Border Classes="panel">
           <StackPanel Spacing="18">
@@ -69,4 +67,5 @@
       <c:BloomActions Name="PlaceActions" />
     </Popup>
   </Grid>
+  </ScrollViewer>
 </UserControl>

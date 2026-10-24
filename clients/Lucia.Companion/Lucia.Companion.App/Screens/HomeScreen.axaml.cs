@@ -72,7 +72,8 @@ public sealed partial class HomeScreen : UserControl
         this.FindControl<TextBlock>("HomeModeLabel")!.Text = State.IsDemo ? "Offline demo" : "Connected";
         this.FindControl<TextBlock>("SourceNotice")!.Text = State.SourceNotice;
         this.FindControl<LuciaNow>("DemoLuciaNow")!.IsVisible = State.IsDemo;
-        this.FindControl<StackPanel>("ConnectedLuciaNotice")!.IsVisible = !State.IsDemo;
+        this.FindControl<ConnectedLuciaNow>("ConnectedLuciaNotice")!.IsVisible = !State.IsDemo;
+        ArrangeContextForTextSize();
         var stackIdentity = Bounds.Width < 600 && this.FindControl<TextBlock>("HomeName")!.FontSize > 32;
         Grid.SetColumnSpan(this.FindControl<TextBlock>("HomeName")!, stackIdentity ? 2 : 1);
         var badge = this.FindControl<Border>("DemoBadge")!;
@@ -142,6 +143,16 @@ public sealed partial class HomeScreen : UserControl
 
         actionsWereOpen = State.IsActionsOpen;
         detailWasOpen = State.IsDetailOpen;
+    }
+
+    private void ArrangeContextForTextSize()
+    {
+        var scrolling = this.FindControl<TextBlock>("HomeName")!.FontSize > 32;
+        this.FindControl<ScrollViewer>("ContextScroll")!.VerticalScrollBarVisibility = scrolling ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
+        foreach (var name in new[] { "HomeScroll", "DetailScroll" })
+        {
+            this.FindControl<ScrollViewer>(name)!.VerticalScrollBarVisibility = scrolling ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
+        }
     }
 
     private void ArrangeSections(StackPanel main, StackPanel side)

@@ -17,10 +17,13 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
     private bool attached;
     private bool reportedAuthorityLoss;
     private bool focusedReadState;
+    private bool activityHomeReady;
+    private Task activityResume = Task.CompletedTask;
     public ConnectionSession Identity { get; }
     public HomeViewModel State { get; }
     public CompanionShell Shell { get; }
     public ConnectedHomeController Controller { get; }
+    public ConnectedActivityController ActivityController { get; }
     public event Action? ConnectionRequested;
 
     public ConnectedHomeWorkspace() => throw new InvalidOperationException("A verified connection and protected data service are required.");
@@ -31,6 +34,8 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         State = new(new(identity.Session.HomeId, "Your home", [], []), isDemo: false);
         Shell = new(State, store);
         Controller = new(service, identity, State, Shell.ProfileSession, clock);
+        ActivityController = new(service, identity, clock);
+        Shell.BindActivity(ActivityController);
         AvaloniaXamlLoader.Load(this);
         this.FindControl<ContentControl>("ConnectedShellHost")!.Content = Shell;
         Shell.ConnectionRequested += () => ConnectionRequested?.Invoke();
@@ -38,7 +43,12 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         this.FindControl<Button>("RetryHomeReports")!.Click += async (_, _) => await RefreshAsync();
         this.FindControl<Button>("ManageHomeConnection")!.Click += (_, _) => ConnectionRequested?.Invoke();
         Controller.Changed += Update;
-        refresh.Tick += async (_, _) => await Controller.TickAsync();
+        ActivityController.Changed += ActivityChanged;
+        refresh.Tick += async (_, _) =>
+        {
+            await Controller.TickAsync();
+            if (Controller.HasData) { await activityResume; await ActivityController.TickAsync(); }
+        };
         AttachedToVisualTree += (_, _) =>
         {
             attached = true; topLevel = TopLevel.GetTopLevel(this);
@@ -47,26 +57,38 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         };
         DetachedFromVisualTree += (_, _) =>
         {
-            attached = false; refresh.Stop(); Controller.Suspend();
+            attached = false; Suspend();
             if (topLevel is not null) { topLevel.BackRequested -= OnBack; }
             topLevel = null;
         };
         Update();
     }
 
-    public Task RefreshAsync(CancellationToken cancellationToken = default) => Controller.RefreshAsync(cancellationToken: cancellationToken);
+    public async Task RefreshAsync(CancellationToken cancellationToken = default)
+    {
+        await Controller.RefreshAsync(cancellationToken: cancellationToken);
+        await activityResume;
+    }
     public async Task ResumeAsync()
     {
         if (attached) { refresh.Start(); }
         await Controller.ResumeAsync();
+        await activityResume;
     }
-    public void Suspend() { refresh.Stop(); Controller.Suspend(); }
+    public void Suspend() { refresh.Stop(); activityHomeReady = false; ActivityController.Suspend(); Controller.Suspend(); }
     private void OnBack(object? sender, RoutedEventArgs args)
     {
         if (!args.Handled && !Controller.HasData) { args.Handled = true; ConnectionRequested?.Invoke(); }
     }
     private void Update()
     {
+        var ready = attached && Controller.HasData;
+        if (ready != activityHomeReady)
+        {
+            activityHomeReady = ready;
+            if (ready) { activityResume = ActivityController.ResumeAsync(); }
+            else { ActivityController.Suspend(); }
+        }
         this.FindControl<ContentControl>("ConnectedShellHost")!.IsVisible = Controller.HasData;
         this.FindControl<ScrollViewer>("HomeReadState")!.IsVisible = !Controller.HasData;
         this.FindControl<TextBlock>("HomeReadStatus")!.Text = Controller.StatusText;
@@ -78,5 +100,15 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         if (Controller.AuthorityLost && !Controller.IsBusy && !reportedAuthorityLoss)
         { reportedAuthorityLoss = true; refresh.Stop(); ConnectionRequested?.Invoke(); }
     }
-    public void Dispose() { refresh.Stop(); Controller.Changed -= Update; Controller.Dispose(); }
+    private void ActivityChanged()
+    {
+        if (!ActivityController.AuthorityLost || ActivityController.IsBusy || reportedAuthorityLoss) { return; }
+        reportedAuthorityLoss = true; refresh.Stop(); Controller.Suspend();
+        ConnectionRequested?.Invoke();
+    }
+    public void Dispose()
+    {
+        refresh.Stop(); Controller.Changed -= Update; ActivityController.Changed -= ActivityChanged;
+        ActivityController.Dispose(); Controller.Dispose();
+    }
 }

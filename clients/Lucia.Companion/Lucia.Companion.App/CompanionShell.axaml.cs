@@ -5,6 +5,8 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Lucia.Companion.App.Screens;
+using Lucia.Companion.App.Configuration;
+using Lucia.Companion.App.Controls;
 using Lucia.Companion.App.Persistence;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.Connection;
@@ -27,6 +29,7 @@ public sealed partial class CompanionShell : UserControl
     public event Action? ConnectionRequested;
     public event Action? RefreshRequested;
     public void RequestConnection() => ConnectionRequested?.Invoke();
+    public void BindActivity(ConnectedActivityController controller) => home.FindControl<ConnectedLuciaNow>("ConnectedLuciaNotice")!.SetController(controller, RequestConnection);
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create(), SampleObservationSources.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
