@@ -16,6 +16,13 @@ public sealed class CompanionApiClient : IDisposable
         Converters = { new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false), new JsonStringEnumConverter<ObservationQuality>(allowIntegerValues: false),
             new JsonStringEnumConverter<RequestActivityState>(allowIntegerValues: false), new JsonStringEnumConverter<RequestActivityCategory>(allowIntegerValues: false) }
     };
+    private static readonly JsonSerializerOptions LayoutJsonOptions = new(JsonOptions)
+    {
+        PropertyNameCaseInsensitive = false,
+        UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+        AllowDuplicateProperties = false,
+        Converters = { new JsonStringEnumConverter<PlaceIcon>(allowIntegerValues: false) }
+    };
     private readonly HttpClient client;
     private readonly TimeSpan bodyTimeout;
     public Uri Endpoint { get; }
@@ -143,6 +150,27 @@ public sealed class CompanionApiClient : IDisposable
         return snapshot;
     }
 
+    public async Task<SharedHomeLayout?> GetSharedLayoutAsync(string accessToken, DeviceSession session, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        using var request = Authorized(HttpMethod.Get, $"homes/{session.HomeId}/layout", accessToken);
+        using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Only the member's bounded missing-view contract means no configured layout.
+            // A disabled route, owner-context response or unavailable source is not an empty home.
+            var missing = await ReadAsync<JsonElement>(response, cancellationToken, options: LayoutJsonOptions).ConfigureAwait(false);
+            if (missing.ValueKind != JsonValueKind.Object || missing.EnumerateObject().Count() != 1
+                || !missing.TryGetProperty("error", out var error) || error.ValueKind != JsonValueKind.String || error.GetString() != "layout_not_configured")
+            { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
+            return null;
+        }
+        Require(response, HttpStatusCode.OK);
+        var layout = await ReadAsync<SharedHomeLayout>(response, cancellationToken, 524_288, LayoutJsonOptions).ConfigureAwait(false);
+        layout.RequireGrant(session);
+        return layout;
+    }
+
     public async Task RevokeAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         WireValue.Secret(refreshToken, "lcr_");
@@ -171,7 +199,8 @@ public sealed class CompanionApiClient : IDisposable
         { throw new CompanionConnectionException(ConnectionFailure.Transport); }
     }
 
-    private async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken, long maximumBytes = 65_536)
+    private async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken, long maximumBytes = 65_536,
+        JsonSerializerOptions? options = null)
     {
         // HttpClient's ResponseHeadersRead timeout ends at the headers. Content needs its own deadline.
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -180,7 +209,7 @@ public sealed class CompanionApiClient : IDisposable
         {
             if (!string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json", StringComparison.OrdinalIgnoreCase)) { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
             await response.Content.LoadIntoBufferAsync(maximumBytes, deadline.Token).ConfigureAwait(false);
-            return await response.Content.ReadFromJsonAsync<T>(JsonOptions, deadline.Token).ConfigureAwait(false)
+            return await response.Content.ReadFromJsonAsync<T>(options ?? JsonOptions, deadline.Token).ConfigureAwait(false)
                 ?? throw new CompanionConnectionException(ConnectionFailure.InvalidResponse);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }

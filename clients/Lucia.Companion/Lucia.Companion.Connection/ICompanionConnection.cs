@@ -15,4 +15,5 @@ public interface ICompanionConnection
     Task<HomeUpdate> ReadHomeUpdateAsync(ConnectionSession expected, string? revision, CancellationToken cancellationToken = default);
     Task<ActivitySnapshot> ReadActivityAsync(ConnectionSession expected, CancellationToken cancellationToken = default);
     Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default);
+    Task<SharedHomeLayout?> ReadSharedLayoutAsync(ConnectionSession expected, CancellationToken cancellationToken = default);
 }

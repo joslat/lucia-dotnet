@@ -30,6 +30,7 @@ internal sealed class TestCompanionConnection : ICompanionConnection
         HomeUpdate is { } read ? await read(revision) : new(HomeUpdateClientTests.Revision, await Home());
     public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => throw new SessionStateException(SessionStateFailure.ConnectionRequired);
     public Task<ActivitySnapshot> ReadActivityAsync(ConnectionSession expected, CancellationToken cancellationToken = default) => Activity();
+    public Task<SharedHomeLayout?> ReadSharedLayoutAsync(ConnectionSession expected, CancellationToken cancellationToken = default) => Task.FromResult<SharedHomeLayout?>(null);
     internal static ConnectionSession Session() => new(new Uri("https://synthetic.invalid"), new DeviceSession(new string('a', 32), "Phone",
         DateTimeOffset.UtcNow.AddDays(30), "home-a", "member-a", [new("porch", [Core.ObservationRole.Contact])], canReadHistory: true));
 }
