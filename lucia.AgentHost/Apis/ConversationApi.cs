@@ -1,8 +1,11 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Security.Claims;
 
 using lucia.AgentHost.Conversation;
 using lucia.AgentHost.Conversation.Models;
+using lucia.AgentHost.Companion;
+using lucia.Agents.Abstractions;
 using lucia.Agents.Orchestration;
 using lucia.Wyoming.CommandRouting;
 
@@ -40,6 +43,8 @@ public static class ConversationApi
         [FromBody] ConversationRequest request,
         [FromServices] ConversationCommandProcessor processor,
         [FromServices] IServiceProvider serviceProvider,
+        [FromServices] IApiKeyService keys,
+        [FromServices] TimeProvider clock,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Text))
@@ -50,14 +55,20 @@ public static class ConversationApi
             return;
         }
 
+        var dashboardSession = httpContext.User.FindFirst("auth_method")?.Value == "session";
+        var candidateOwner = dashboardSession ? httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
+        var ownerId = serviceProvider.GetService<CompanionActivityJournal>()?.HasOwnerMapping(candidateOwner) == true
+            && await CompanionOwnerFilter.HasCurrentOwnerAsync(httpContext, keys, clock).ConfigureAwait(false) ? candidateOwner : null;
         request = request with
         {
             Context = request.Context with
             {
-                IsDashboardSession = httpContext.User.FindFirst("auth_method")?.Value == "session",
+                IsDashboardSession = dashboardSession,
+                ActivityOwnerKeyId = ownerId,
             },
         };
         var result = await processor.ProcessAsync(request, ct).ConfigureAwait(false);
+        using var tracked = result.Activity;
 
         switch (result.Kind)
         {
@@ -69,7 +80,7 @@ public static class ConversationApi
 
             case ProcessingKind.LlmFallback:
                 await StreamLlmResponseAsync(
-                    httpContext, result, serviceProvider, ct).ConfigureAwait(false);
+                    httpContext, result, serviceProvider, tracked, ct).ConfigureAwait(false);
                 break;
         }
     }
@@ -105,6 +116,7 @@ public static class ConversationApi
         HttpContext httpContext,
         ProcessingResult result,
         IServiceProvider serviceProvider,
+        CompanionActivityLease? tracked,
         CancellationToken ct)
     {
         httpContext.Response.StatusCode = StatusCodes.Status200OK;
@@ -123,6 +135,7 @@ public static class ConversationApi
         var engine = serviceProvider.GetService<LuciaEngine>();
         if (engine is null || string.IsNullOrEmpty(result.LlmPrompt))
         {
+            tracked?.Complete(CompanionActivityState.Failed);
             await WriteSseEventAsync(httpContext, "error", new
             {
                 error = "LLM engine not available",
@@ -140,6 +153,7 @@ public static class ConversationApi
                     originalUserText: result.OriginalUserText,
                     cancellationToken: ct)
                 .ConfigureAwait(false);
+            tracked?.Complete(llmResult.NeedsInput ? CompanionActivityState.NeedsInput : CompanionActivityState.ResponseReady);
 
             // Send the complete response as a done event
             await WriteSseEventAsync(httpContext, "done", new
@@ -156,6 +170,7 @@ public static class ConversationApi
         }
         catch (Exception ex)
         {
+            tracked?.Complete(CompanionActivityState.Failed);
             await WriteSseEventAsync(httpContext, "error", new
             {
                 error = ex.Message,

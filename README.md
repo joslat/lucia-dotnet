@@ -16,6 +16,8 @@ An experimental [native mobile/tablet companion](clients/Lucia.Companion/README.
 
 The host has opt-in native sessions and owner-approved pairing endpoints, disabled by default. It separates companion credentials from dashboard keys and internal service tokens, with exact home/place/observation grants and durable expiry, rotation and revocation in SQLite or PostgreSQL. Native HTTPS/session coordination, Windows DPAPI, Android Keystore and connection UI have local proof. Companion devices lets owners choose catalog-backed read grants and revoke devices. Home snapshot/discovery filter exact places and fields, bind the HA source explicitly and retain report timestamps and quality. Every conditional snapshot rechecks authority and reads the source before confirming a revision. Production activity/Story/Engine, actual-source acceptance, installed successful native TLS and platform/release gates remain open. See the [boundary and remaining gates](clients/Lucia.Companion/README.md#native-session-host-foundation).
 
+An opt-in [attributed activity boundary](clients/Lucia.Companion/README.md#attributed-activity-boundary) now follows verified conversation requests into a member-filtered read-only API and protected native transport. It exposes no request text or global diagnostics. Its connected native view and qualified place/conversation correlation are still unfinished.
+
 ## ☀️ About the Name
 
 Lucia is named after **Lucia**, the ancient Nordic sun goddess associated with light, wisdom, and bringing illumination during the darkest time of year. In Norse mythology, Lucia represents the return of light and the power to guide through darkness—a fitting name for an AI assistant that brings intelligent automation and insight to your home.

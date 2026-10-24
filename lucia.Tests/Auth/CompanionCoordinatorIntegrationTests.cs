@@ -127,7 +127,7 @@ public sealed class CompanionCoordinatorIntegrationTests
         finally { directory.Delete(recursive: true); }
     }
 
-    private static IDeviceSecretProtector EphemeralProtector()
+    internal static IDeviceSecretProtector EphemeralProtector()
     {
         // Integration-only in-memory key. Platform DPAPI/Keystore require their own target checks.
         var ephemeral = new EphemeralDataProtectionProvider().CreateProtector("Lucia.SyntheticDeviceVault");

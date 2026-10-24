@@ -48,6 +48,10 @@ public sealed record ConversationContext
     [JsonIgnore]
     public bool IsDashboardSession { get; init; }
 
+    /// <summary>Current dashboard owner key ID, set only by the authenticated API. Never accepted from JSON.</summary>
+    [JsonIgnore]
+    internal string? ActivityOwnerKeyId { get; init; }
+
     [JsonPropertyName("location")]
     public string? Location { get; init; }
 }

@@ -35,6 +35,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     public ICompanionPairingService Pairings { get; }
     public IApiKeyService Keys { get; }
     public IHomeAssistantClient HomeAssistant { get; }
+    public CompanionActivityJournal Activity => app.Services.GetRequiredService<CompanionActivityJournal>();
     public string CertificateFingerprint => certificate.GetCertHashString(HashAlgorithmName.SHA256);
     public HomeAssistantOptions SourceSettings => app.Services.GetRequiredService<IOptionsMonitor<HomeAssistantOptions>>().CurrentValue;
 
@@ -56,7 +57,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     }
 
     public static async Task<CompanionSecurityTestHost> StartAsync(TimeProvider? clock = null, Action<WebApplication>? configureApp = null,
-        IHomeAssistantClient? homeSource = null, string sourceBaseUrl = "http://synthetic-ha.invalid")
+        IHomeAssistantClient? homeSource = null, string sourceBaseUrl = "http://synthetic-ha.invalid", Action<IServiceCollection>? configureServices = null)
     {
         clock ??= TimeProvider.System;
         using var rsa = RSA.Create(2048);
@@ -91,7 +92,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         });
         var cookies = A.Fake<ISessionService>();
         A.CallTo(() => cookies.ValidateSession("synthetic-cookie")).Returns([
-            new Claim(ClaimTypes.NameIdentifier, "owner-a"), new Claim(ClaimTypes.Role, AuthOptions.AdministratorRole)]);
+            new Claim(ClaimTypes.NameIdentifier, "owner-a"), new Claim(ClaimTypes.Role, AuthOptions.AdministratorRole), new Claim("auth_method", "session")]);
         builder.Services.AddSingleton(keys);
         builder.Services.AddSingleton(cookies);
         var homeAssistant = homeSource ?? A.Fake<IHomeAssistantClient>();
@@ -107,6 +108,8 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         builder.Services.AddLuciaAuthentication(builder.Configuration);
         builder.Services.AddCompanionHomeReads();
+        builder.Services.AddCompanionActivity();
+        configureServices?.Invoke(builder.Services);
         var app = builder.Build();
         app.UseMiddleware<CompanionBoundaryMiddleware>();
         app.UseRateLimiter();
@@ -121,6 +124,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         app.MapCompanionSessionApi();
         app.MapCompanionPairingApi();
         app.MapCompanionHomeApi();
+        app.MapCompanionActivityApi();
         configureApp?.Invoke(app);
         await app.StartAsync();
         var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();

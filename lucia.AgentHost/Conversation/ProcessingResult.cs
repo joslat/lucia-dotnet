@@ -1,5 +1,7 @@
 using lucia.AgentHost.Conversation.Models;
 using lucia.Agents.Orchestration.Models;
+using lucia.AgentHost.Companion;
+using System.Text.Json.Serialization;
 
 namespace lucia.AgentHost.Conversation;
 
@@ -9,6 +11,8 @@ namespace lucia.AgentHost.Conversation;
 /// </summary>
 public sealed record ProcessingResult
 {
+    [JsonIgnore]
+    internal CompanionActivityLease? Activity { get; init; }
     public required ProcessingKind Kind { get; init; }
 
     /// <summary>

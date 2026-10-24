@@ -279,6 +279,7 @@ builder.Services.AddSingleton<IAsyncInitializable>(sp => sp.GetRequiredService<H
 
 builder.Services.AddLuciaAuthentication(builder.Configuration);
 builder.Services.AddCompanionHomeReads();
+builder.Services.AddCompanionActivity();
 
 builder.Services.AddHttpClient("AgentProxy");
 builder.Services.AddHttpClient("OllamaModels", client =>
@@ -409,6 +410,7 @@ app.MapAuthApi();
 app.MapCompanionSessionApi();
 app.MapCompanionPairingApi();
 app.MapCompanionHomeApi();
+app.MapCompanionActivityApi();
 app.MapSetupApi();
 app.MapApiKeyManagementApi(isInstalledAppliance);
 app.MapAgentRegistryApiV1();

@@ -13,7 +13,8 @@ public sealed class CompanionApiClient : IDisposable
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         RespectRequiredConstructorParameters = true,
-        Converters = { new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false), new JsonStringEnumConverter<ObservationQuality>(allowIntegerValues: false) }
+        Converters = { new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false), new JsonStringEnumConverter<ObservationQuality>(allowIntegerValues: false),
+            new JsonStringEnumConverter<RequestActivityState>(allowIntegerValues: false) }
     };
     private readonly HttpClient client;
     private readonly TimeSpan bodyTimeout;
@@ -128,6 +129,18 @@ public sealed class CompanionApiClient : IDisposable
         var catalog = await ReadAsync<HomeCatalog>(response, cancellationToken, 524_288).ConfigureAwait(false);
         catalog.RequireGrant(session);
         return catalog;
+    }
+
+    public async Task<ActivitySnapshot> GetActivityAsync(string accessToken, DeviceSession session, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        if (!session.CanReadActivity) { throw new ArgumentException("Activity requires its explicit grant.", nameof(session)); }
+        using var request = Authorized(HttpMethod.Get, $"homes/{session.HomeId}/activity", accessToken);
+        using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+        Require(response, HttpStatusCode.OK);
+        var snapshot = await ReadAsync<ActivitySnapshot>(response, cancellationToken).ConfigureAwait(false);
+        snapshot.RequireGrant(session);
+        return snapshot;
     }
 
     public async Task RevokeAsync(string refreshToken, CancellationToken cancellationToken = default)

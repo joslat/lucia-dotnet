@@ -5,6 +5,7 @@ using lucia.AgentHost.Conversation.Execution;
 using lucia.AgentHost.Conversation.Models;
 using lucia.AgentHost.Conversation.Templates;
 using lucia.AgentHost.Conversation.Tracing;
+using lucia.AgentHost.Companion;
 using lucia.Agents.CommandTracing;
 using lucia.Agents.Orchestration;
 using lucia.Agents.Orchestration.Models;
@@ -42,6 +43,7 @@ public sealed partial class ConversationCommandProcessor
     private readonly SpeakerVerificationFilter? _speakerFilter;
     private readonly StickySpeakerStore? _stickySpeakers;
     private readonly IOptionsMonitor<VoiceProfileOptions>? _voiceProfileOptions;
+    private readonly CompanionActivityJournal? _companionActivity;
 
     public ConversationCommandProcessor(
         ICommandRouter commandRouter,
@@ -62,7 +64,8 @@ public sealed partial class ConversationCommandProcessor
         VoiceOnboardingWorkflow? onboarding = null,
         SpeakerVerificationFilter? speakerFilter = null,
         StickySpeakerStore? stickySpeakers = null,
-        IOptionsMonitor<VoiceProfileOptions>? voiceProfileOptions = null)
+        IOptionsMonitor<VoiceProfileOptions>? voiceProfileOptions = null,
+        CompanionActivityJournal? companionActivity = null)
     {
         _commandRouter = commandRouter;
         _skillExecutor = skillExecutor;
@@ -83,6 +86,7 @@ public sealed partial class ConversationCommandProcessor
         _speakerFilter = speakerFilter;
         _stickySpeakers = stickySpeakers;
         _voiceProfileOptions = voiceProfileOptions;
+        _companionActivity = companionActivity;
     }
 
     /// <summary>
@@ -108,6 +112,7 @@ public sealed partial class ConversationCommandProcessor
         // Strip optional speaker identification tag from voice platform
         var (voiceToken, _) = VoiceTurnStore.Parse(request.Text);
         var voiceTurn = voiceToken is null ? null : _voiceTurns?.Consume(voiceToken);
+        string? activityProfileId = null;
         var (speakerId, cleanText) = SpeakerTagParser.Parse(voiceTurn?.Text ?? request.Text);
         var context = request.Context with
         {
@@ -143,6 +148,7 @@ public sealed partial class ConversationCommandProcessor
                 if (profile is { IsProvisional: false, IsAuthorized: true })
                 {
                     context = context with { EnrolledProfileId = profile.Id, SpeakerId = profile.Name };
+                    activityProfileId = profile.Id;
                     if (IsStickySpeakerEnabled)
                         _stickySpeakers?.Remember(conversationId, profile.Id);
                 }
@@ -206,18 +212,26 @@ public sealed partial class ConversationCommandProcessor
             });
         }
 
-        // Step 1: Try command pattern matching (on clean text, without speaker tag)
-        var routeResult = await _commandRouter.RouteAsync(cleanText, ct).ConfigureAwait(false);
-
-        if (routeResult.IsMatch && routeResult.MatchedPattern is not null)
+        // Only this turn's verified voice proof, never sticky continuity or body-supplied identities.
+        var tracked = context.IsVoiceRequest ? _companionActivity?.BeginVoice(activityProfileId)
+            : _companionActivity?.BeginOwner(context.IsDashboardSession ? context.ActivityOwnerKeyId : null);
+        try
         {
-            return await HandleCommandMatchAsync(request.Text, cleanRequest, routeResult, conversationId, activity, sw, ct)
-                .ConfigureAwait(false);
+            tracked?.Working();
+            var routeResult = await _commandRouter.RouteAsync(cleanText, ct).ConfigureAwait(false);
+            var result = routeResult.IsMatch && routeResult.MatchedPattern is not null
+                ? await HandleCommandMatchAsync(request.Text, cleanRequest, routeResult, conversationId, activity, sw, ct).ConfigureAwait(false)
+                : await HandleLlmFallbackAsync(request.Text, cleanRequest, routeResult, conversationId, activity, sw, ct).ConfigureAwait(false);
+            if (result.Kind != ProcessingKind.LlmFallback)
+            {
+                tracked?.Complete(result.Response?.Type == "error" ? CompanionActivityState.Failed
+                    : result.Response?.NeedsInput == true ? CompanionActivityState.NeedsInput : CompanionActivityState.ResponseReady);
+            }
+            // The API owns the remaining lifetime when processing must continue through its streaming fallback.
+            return result with { Activity = tracked };
         }
-
-        // Step 2: No match — fall back to LLM (with clean text + speaker in context)
-        return await HandleLlmFallbackAsync(request.Text, cleanRequest, routeResult, conversationId, activity, sw, ct)
-            .ConfigureAwait(false);
+        catch (OperationCanceledException) { tracked?.Dispose(); throw; }
+        catch { tracked?.Complete(CompanionActivityState.Failed); throw; }
     }
 
     private async Task<SpeakerProfile?> ResolveStickySpeakerAsync(string conversationId, CancellationToken ct)

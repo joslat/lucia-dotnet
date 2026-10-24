@@ -36,7 +36,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-The latest full Windows qualification passes 282 client tests, including the opt-in real-wire UI case. Ordinary runs skip that one case unless the isolated fixture is configured. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover bindings/import, source provenance, competing local writers, conflict recovery, section order, Back, drafts and text roles through 200% in phone/tablet light/dark layouts. Connection checks include demo separation, approval identity, grants, conditional revisions, conservative report aging and bounded recovery. Windows-only DPAPI tests explicitly skip on other operating systems. None qualifies physical-device accessibility, safe areas or performance.
+The latest full Windows qualification passes 301 client tests, including the opt-in real-wire UI case. Ordinary runs skip that one case unless the isolated fixture is configured. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover bindings/import, source provenance, competing local writers, conflict recovery, section order, Back, drafts and text roles through 200% in phone/tablet light/dark layouts. Connection checks include demo separation, approval identity, grants, conditional revisions, conservative report aging, bounded recovery and activity-contract validation. Windows-only DPAPI tests explicitly skip on other operating systems. None qualifies physical-device accessibility, safe areas or performance.
 
 ### Android
 
@@ -190,6 +190,36 @@ Only allowlisted reports cross the boundary. Temperature, humidity, moisture and
 `Companion:MaximumObservationAge` defaults to `00:30:00`, bounded from one second to one day. `Companion:HomeReadTimeout` defaults to `00:00:10`, bounded from one to thirty seconds, including providers that ignore cancellation. Source errors return 503 without cached/sample substitution or upstream diagnostic text. Limits are 2,000 raw areas, 20,000 raw entities/devices/states each, 2,000 projected sources and 512 KiB serialized output. Oversize returns 422 `home_projection_too_large`, never partial results. Existing credential/owner rate limits cover these reads. These pilot limits do not bound an adversarial upstream HTTP body or distributed load.
 
 The expanded Companion/auth/migration/SQLite-key regression passes 222 cases, including actual HTTP states and three registry WebSocket commands against a synthetic loopback HA-protocol fixture. It covers conditional reads through protected renewal, temporary source failure, full resynchronization and revocation. An earlier expansion exposed two pre-existing SQLite API-key expiry failures on a non-UTC host. UTC-normalized reads fix them, with four additional timestamp-format cases. The owner picker retains its 30 browser checks and actual isolated production-bundle catalog/approval/restricted-read/revoke proof. These establish isolated adapter behavior, not an installed HA version or household. Activity/history/Engine and platform gates remain open.
+
+### Attributed activity boundary
+
+H03 is still in progress. The host source, read-only API and protected native transport exist; connected Home does not yet display this feed. Native composition, recovery and qualified place/conversation correlation remain unfinished. The current wire format deliberately has no guessed room or free-text summary. Do not replace that missing attribution with a request-body room label or a sample task.
+
+`GET /api/companion/homes/{homeId}/activity` requires a current native session with explicit `CanReadActivity`. Home, history, Engine, owner and internal credentials do not substitute for that grant. The handler filters by exact home/member and checks authority again before returning its bounded JSON snapshot. It exposes only a generated request ID, reported lifecycle state, start/update times and per-request revision, plus coverage/configuration/limit indicators. It does not expose global task counts, other members' requests, prompts, responses, tool parameters, source identities, conversation IDs or diagnostics.
+
+Collection is off by default. An operator may opt in through existing server configuration, using IDs they have verified, then restart the host:
+
+```json
+{
+  "Companion": {
+    "Activity": {
+      "Enabled": true,
+      "VoiceMembers": { "enrolled-profile-id": "member-a" },
+      "OwnerMembers": { "dashboard-owner-key-id": "member-a" }
+    }
+  }
+}
+```
+
+This extends the existing enabled Companion home configuration, not its native authentication protocol. Mapping keys are identifiers, never API-key values. `VoiceMembers` accepts only a fresh server-held voice turn whose authorized, nonprovisional enrolled profile was rechecked this turn. Sticky-speaker continuity, display-name tags and body-supplied user/profile IDs cannot publish activity. `OwnerMembers` applies only to the authenticated dashboard-session owner after an uncached current-key check. A broad API-key request is not a person and does not gain attribution from its body. Shared owner logins cannot distinguish their human users; do not map one as a personal source unless that sharing is intended. At most 200 explicit mappings are accepted and copied at startup. Disabled or unmapped collection adds no extra owner-key database read to existing conversations.
+
+The source follows the real conversation processor through Received, Working, NeedsInput, ResponseReady, Failed or OutcomeUnknown. It does not advance stages on a timer. ResponseReady means Lucia produced a response, not that its interpretation or a physical result succeeded. NeedsInput records that response's request for input; it does not yet prove a conversation is still waiting after a later turn. An interrupted or unobserved outcome never becomes success. Onboarding replies and rejected or unverified voices stay out of the feed. Legacy/unattributed A2A, background and global task records are not silently reassigned to a household member.
+
+The volatile journal retains at most 50 records per mapped member and returns at most 20. Working requests sort ahead of completed responses; capacity evicts a completed record before an ongoing one when possible. A capacity gap is disclosed for that member only. Completed records leave the read window after 30 minutes and are pruned on a later attributed request or read, not by a promised background eraser. Ongoing records may predate that window and retain their original reported status time. Timestamps use a UTC anchor plus monotonic elapsed time, so clock corrections cannot extend retention. A process restart loses this buffer. Empty or unconfigured activity is not proof that no household request is running, and this is not the Story history store.
+
+`ReadActivityAsync(expectedConnection)` uses the same protected lease and renewal/identity checks as Home reads. It additionally verifies current activity authority before sending and validates the response's home/member, enum states, IDs, timestamp consistency, duplicates, coverage and 64 KiB budget. A narrowed grant asks the view to recover without discarding a valid replacement Home connection. Activity records never enter the credential vault or local setup file. Existing native UI remains unchanged until H03's composition and failure/lifecycle checks are finished.
+
+The current combined auth/Companion/conversation/migration regression passes 425 cases, and the full native suite passes 301, both with zero failures/skips. The actual isolated HTTPS/SQLite wire test runs the real conversation processor through a synthetic executor, observes Working then ResponseReady through the protected native connection, verifies an unchanged credential file, denies other members and native conversation calls, and clears revoked credentials. It does not run models or physical skills. Android compiles with zero warnings/errors; no installed activity UI or target-platform qualification is claimed.
 
 ### Native transport library
 

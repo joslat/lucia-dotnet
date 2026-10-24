@@ -71,6 +71,13 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
         ArgumentNullException.ThrowIfNull(expected);
         return ReadAuthorizedAsync((access, session, ct) => api.GetHomeUpdateAsync(access, session, revision, ct), cancellationToken, expected);
     }
+    public Task<ActivitySnapshot> ReadActivityAsync(ConnectionSession expected, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(expected);
+        if (!expected.Session.CanReadActivity) { throw new ArgumentException("Activity requires its explicit grant.", nameof(expected)); }
+        return ReadAuthorizedAsync((access, current, ct) => current.CanReadActivity ? api.GetActivityAsync(access, current, ct)
+            : throw new SessionStateException(SessionStateFailure.IdentityChanged), cancellationToken, expected);
+    }
 
     private async Task<T> ReadAuthorizedAsync<T>(Func<string, DeviceSession, CancellationToken, Task<T>> read, CancellationToken cancellationToken, ConnectionSession? expected = null)
     {
