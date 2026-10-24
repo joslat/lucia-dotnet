@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.Screens.HomeSaveConflictScreen" Background="{DynamicResource CanvasBrush}">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="16" Spacing="24" MaxWidth="760" HorizontalAlignment="Stretch">
+      <StackPanel Spacing="8">
+        <TextBlock Name="ReviewTitle" Text="Choose which setup to keep" Classes="title" TextWrapping="Wrap" Focusable="True" />
+        <TextBlock Text="The saved setup changed outside this session. Automatic saving has stopped. Compare the versions below before choosing. There is no automatic merge." Classes="muted" />
+        <TextBlock Name="ReviewStatus" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
+        <Button Name="BackWithoutChoosing" Classes="theme" HorizontalAlignment="Left" AutomationProperties.Name="Back without choosing, keep both versions">
+          <TextBlock Text="Back without choosing" TextWrapping="Wrap" />
+        </Button>
+      </StackPanel>
+      <StackPanel Spacing="12">
+        <TextBlock Text="Your session changes" Classes="section" TextWrapping="Wrap" />
+        <TextBlock Name="SessionSummary" TextWrapping="Wrap" />
+        <Expander HorizontalContentAlignment="Stretch" AutomationProperties.Name="Review your session places and bindings">
+          <Expander.Header><TextBlock Text="Places and bindings" TextWrapping="Wrap" /></Expander.Header>
+          <TextBlock Name="SessionDetails" TextWrapping="Wrap" Margin="0,12,0,0" />
+        </Expander>
+        <TextBlock Text="Choosing this replaces the saved setup with everything in this session. Readings and task history are not saved." Classes="muted" />
+        <Button Name="KeepSessionChanges" Classes="theme" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                AutomationProperties.Name="Replace saved setup with my session changes">
+          <TextBlock Text="Replace saved setup with my changes" TextWrapping="Wrap" />
+        </Button>
+      </StackPanel>
+      <Border Height="1" Background="{DynamicResource GraphLineBrush}" />
+      <StackPanel Spacing="12">
+        <TextBlock Text="Saved on this device" Classes="section" TextWrapping="Wrap" />
+        <TextBlock Name="SavedSummary" TextWrapping="Wrap" />
+        <Expander Name="SavedDetailsExpander" HorizontalContentAlignment="Stretch" AutomationProperties.Name="Review saved places and bindings">
+          <Expander.Header><TextBlock Text="Places and bindings" TextWrapping="Wrap" /></Expander.Header>
+          <TextBlock Name="SavedDetails" TextWrapping="Wrap" Margin="0,12,0,0" />
+        </Expander>
+        <TextBlock Text="Choosing this discards all session changes and loads the saved setup. Back keeps both versions unchanged." Classes="muted" />
+        <Button Name="UseSavedSetup" Classes="theme" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                AutomationProperties.Name="Discard my session changes and use the saved setup">
+          <TextBlock Text="Discard my changes and use saved setup" TextWrapping="Wrap" />
+        </Button>
+        <Button Name="ReadSavedAgain" Classes="theme" HorizontalAlignment="Left">
+          <TextBlock Text="Read saved setup again" TextWrapping="Wrap" />
+        </Button>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

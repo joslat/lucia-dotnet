@@ -9,9 +9,12 @@
       <Button Name="StoryButton" Content="Story" Classes="theme" />
     </WrapPanel>
     </DockPanel>
-    <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">
+    <StackPanel Name="StorageFooter" DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">
       <TextBlock Name="StorageStatus" Classes="muted" FontSize="{DynamicResource TextSize13}" />
       <Button Name="RetrySaveButton" Content="Retry save" Classes="theme" IsVisible="False" HorizontalAlignment="Left" />
+      <Button Name="ReviewSaveConflict" Classes="theme" IsVisible="False" HorizontalAlignment="Left" AutomationProperties.Name="Review save conflict, both versions are preserved">
+        <TextBlock Text="Review save conflict" TextWrapping="Wrap" />
+      </Button>
     </StackPanel>
     <ContentControl Name="ScreenHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
   </DockPanel>

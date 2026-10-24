@@ -16,7 +16,7 @@ public sealed class LocalHomeStoreTests
         {
             var store = new LocalHomeStore(file);
             var home = SampleHome.Create();
-            await store.SaveAsync(HomeProfile.From(home, ["garden"]), TestContext.Current.CancellationToken);
+            await store.SaveAsync(HomeProfile.From(home, ["garden"]), null, TestContext.Current.CancellationToken);
             var json = await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken);
             Assert.DoesNotContain("21.4", json);
             Assert.DoesNotContain("observations", json, StringComparison.OrdinalIgnoreCase);
@@ -27,11 +27,13 @@ public sealed class LocalHomeStoreTests
             var restored = profile.ApplyTo(home);
             Assert.Equal(home.Places.Select(place => place.Id), restored.Places.Select(place => place.Id));
             Assert.NotEmpty(restored.Places[0].Observations);
-            Assert.Single(Directory.GetFiles(folder));
+            Assert.Equal(2, Directory.GetFiles(folder).Length);
+            Assert.True(File.Exists(file + ".lock"));
         }
         finally
         {
             if (File.Exists(file)) { File.Delete(file); }
+            if (File.Exists(file + ".lock")) { File.Delete(file + ".lock"); }
             if (Directory.Exists(folder)) { Directory.Delete(folder); }
         }
     }

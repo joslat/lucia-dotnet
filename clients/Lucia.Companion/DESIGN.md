@@ -146,7 +146,7 @@ components:
 
 Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.
 
-This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup and source-binding metadata editor, Customize section ordering, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, authorized live source adapters and real source import remain unbuilt. This record describes the current UI; BUILD-PLAN.md owns the remaining work toward the full application.
+This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup and source-binding metadata editor, local save-conflict recovery, Customize section ordering, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, authorized live source adapters and real source import remain unbuilt. This record describes the current UI; BUILD-PLAN.md owns the remaining work toward the full application.
 
 Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
@@ -163,6 +163,7 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Platform text settings resize individual type roles, with layout adaptations for larger text.
 - Customize changes the order of the three Home sections without hiding any section or rearranging places.
 - Source-binding metadata remains separate from physical neighbors, source access and qualified readings.
+- Save-conflict recovery shows both metadata alternatives and requires an explicit checked choice.
 
 ## Colors
 
@@ -240,6 +241,10 @@ The Home constellation keeps the supplied place order. Its panel starts with a 1
 
 **The Stable Home Rule.** Preserve explicit room order through selection, pinning and state display. Place reordering belongs to setup's Move earlier and Move later controls. Customize changes section order independently of room order.
 
+### Save-conflict review
+
+HomeSaveConflictScreen uses one vertical ScrollViewer with horizontal scrolling disabled. A 16-unit margin and a 760-unit maximum content width keep the review readable on phone and tablet. The title, introduction, status and Back button precede two stacked alternatives, Your session changes and Saved on this device. Major groups have 24-unit spacing; each alternative uses 12-unit spacing, and a 1-unit GraphLineBrush divider separates them. Titles, summaries, Expander headers and button captions wrap using the existing native text roles. There is no side-by-side diff or new card theme.
+
 ### Story Day
 
 Story is one vertical ScrollViewer with a 16-unit horizontal and 20-unit vertical margin, section spacing, and no horizontal page scroll. At its own Bounds.Width of 900 units it places a 400-unit dial in a 420-unit left column and chapters in the flexible right column, with a 24-unit column gap. Below that threshold the dial sits above chapters and measures the available width minus 32 units, clamped between 240 and 340 units.
@@ -288,9 +293,9 @@ Story adds concentric time rings, rounded place-filter pills and circular outlin
 
 System, Light and Dark are native buttons that change the application's RequestedThemeVariant. Their minimum height is 48 units. They explicitly use body typography and the control/text brush pair. Each has an accessible name that says which theme it selects. Their hover, focus, pressed and disabled presentation otherwise belongs to the installed Fluent template; no custom primary, destructive or ghost button family exists.
 
-CompanionShell exposes Options, Setup and Story. Its Options context menu contains an Appearance submenu for System, Light and Dark and separate Customize Home and Control lab entries. Story opens Story Day and becomes Home while that screen is visible. Customize Home returns to Home, closes detail and actions, expands the Customize footer, and brings it into view with focus. Setup disables Setup, Story, Customize Home and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save. There is no tab bar.
+CompanionShell exposes Options, Setup and Story. Its Options context menu contains an Appearance submenu for System, Light and Dark and separate Customize Home and Control lab entries. Story opens Story Day and becomes Home while that screen is visible. Customize Home returns to Home, closes detail and actions, expands the Customize footer, and brings it into view with focus. Setup disables Setup, Story, Customize Home and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save for storage failures or Review save conflict for a stale saved revision. Review save conflict is disabled while editing or reading storage. Opening the conflict review hides the duplicate storage footer, disables Setup, Story, Customize Home and Control lab, and focuses the review title after reading. Appearance remains available. There is no tab bar.
 
-Native Back and Escape first close Home's open Bloom, then compact place detail, then an expanded Customize footer. Collapsing Customize focuses its Expander. Back from Story or Control lab returns Home. At the Home root with no open context the request stays unhandled so the OS can leave the app. Setup handles Back through its draft-discard question. The shell subscribes to its current TopLevel's BackRequested event while attached and unsubscribes when detached.
+Native Back and Escape first close Home's open Bloom, then compact place detail, then an expanded Customize footer. Collapsing Customize focuses its Expander. Back from Story, Control lab or save-conflict review returns Home. Leaving conflict review makes no storage or session choice and does not resume automatic saving. At the Home root with no open context the request stays unhandled so the OS can leave the app. Setup handles Back through its draft-discard question. The shell subscribes to its current TopLevel's BackRequested event while attached and unsubscribes when detached.
 
 Android temporarily sets `android:enableOnBackInvokedCallback="false"` in its manifest. In the API 36 emulator, default predictive Back bypassed the app callbacks even though the headless route checks passed. The checked APK with this compatibility opt-out returned from native Garden detail to Home instead of the launcher. Predictive Back and its gesture animation still need separate qualification before this temporary opt-out can be removed.
 
@@ -347,6 +352,22 @@ Setup uses labelled native TextBoxes for home and place names, a place ListBox o
 Add place, Move earlier, Move later, source-binding changes and Remove place edit a draft. Removal reveals Confirm removal and Keep place inline, and removing a place also removes its draft connections and bindings. Validation and unreadable-profile replacement warnings use ProblemBrush and written text. Save setup or Replace saved setup and Cancel sit below the scrolling header and form. Local storage contains setup metadata, binding IDs and roles, pins and Home section order only. It does not establish visual tokens or persist the source catalog, sensor readings or task history.
 
 Back or Escape first closes an open removal question. With pending draft changes it asks "Discard the unsaved setup changes?" with Keep editing and Discard changes. The pending-change check includes invalid, uncommitted field text, icon changes, neighbor changes and applied binding changes. While this question is visible, editing is disabled and normal Save/Cancel commands hide. Focus starts on Keep editing. Back again closes the question and retains the draft. With no changes, Back returns Home directly. The explicit Cancel command still leaves setup immediately without saving.
+
+### Local save conflicts and HomeSaveConflictScreen
+
+Automatic saving compares the saved file's byte revision with the session's baseline. A stale revision stops saving, preserves the current session and saved file, and exposes Review save conflict instead of silently retrying an overwrite. Ordinary I/O failures retain the separate Retry save path. LocalHomeStore uses revision checks and a lock for cooperating writers; the UI does not promise an automatic merge.
+
+The review shows home name, place/connection/binding counts, section order and pinned names for the session and any readable saved profile. Each alternative has an accessible Places and bindings Expander. Expanded text shows place names and IDs, icons, named physical neighbors and source-role IDs. These are metadata summaries, not observed values or task history. ReviewStatus uses ProblemBrush and written text. Choices retain the existing theme-button style with wrapping captions and explicit accessible names.
+
+Replace saved setup with my changes writes the complete current session metadata over the reviewed saved revision. Discard my changes and use saved setup discards the session changes and loads the reviewed profile only when it belongs to the same home. Read saved setup again refreshes the review without selecting either version. Back without choosing, native Back and Escape return Home with both versions unchanged. Unsaved session changes remain in memory only.
+
+Both choices recheck the reviewed revision. If the saved bytes change again, the choice is not applied: the screen reads the latest snapshot and tells the user to review it before choosing again. A stale review never authorizes a blind replacement or an automatic discard.
+
+A removed saved file has written guidance that keeping session changes creates it again; loading is disabled. A corrupt or unsupported profile whose bytes can be safely snapshotted remains untouched unless the user explicitly replaces that reviewed revision; loading is disabled. A readable different-home profile remains reviewable, with the explicit explanation "This file belongs to another home and cannot be loaded into this session." Its discard/load choice is disabled, while checked replacement with the current session remains available. Back still preserves both versions.
+
+If a review read fails because access is unavailable or the file is oversized, no safe snapshot is available. Both choice buttons stay disabled, the session remains untouched, and Read saved setup again remains the recovery action when storage becomes available. A storage failure while applying a choice leaves that choice unapplied and keeps the session changes. At startup, explicit setup replacement is enabled only after the existing file's revision was safely captured; an unread file without that baseline cannot be blindly replaced through setup.
+
+This C04 increment is documented from its native source and phone/tablet, light/dark, normal/large-text captures. These captures do not establish an installed-APK or physical-device result for C04; earlier installed-APK evidence belongs to its stated increments. No automatic merge, durable unsaved-draft recovery, live authorization or completion of the wider application is claimed.
 
 ### SourceBindingPicker
 
@@ -426,6 +447,7 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do preserve pending setup changes on Back until the user chooses Discard changes.
 - Do keep every Home section present when reordering and expose named movement controls with disabled boundaries.
 - Do retain missing source bindings with a written warning and require explicit removal.
+- Do show both local metadata alternatives and recheck the reviewed revision before a save-conflict choice.
 
 ### Don't:
 
@@ -443,3 +465,5 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't claim TalkBack, device, iOS or performance qualification from text-resource mapping or headless checks.
 - Don't confuse Home section order with the stable order of places in the graph.
 - Don't infer source ownership from physical adjacency or promote a saved binding into a current reading.
+- Don't merge save-conflict metadata automatically or replace an unread file without a safely captured revision.
+- Don't present memory-only session changes as durable unsaved-draft recovery.

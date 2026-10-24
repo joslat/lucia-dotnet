@@ -60,7 +60,7 @@ public sealed class ObservationBindingTests
             var editor = new HomeEditorViewModel(home);
             editor.BindSource("garden", new ObservationSource("sensor.soil", "Garden soil", [ObservationRole.Moisture]), ObservationRole.Moisture);
             var store = new LocalHomeStore(file);
-            await store.SaveAsync(HomeProfile.From(editor.Build(), []), TestContext.Current.CancellationToken);
+            await store.SaveAsync(HomeProfile.From(editor.Build(), []), null, TestContext.Current.CancellationToken);
             var profile = Assert.IsType<HomeProfile>(await store.LoadAsync(TestContext.Current.CancellationToken));
             Assert.Equal(editor.Bindings, profile.ApplyTo(home).Bindings);
             var json = await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken);
@@ -70,6 +70,6 @@ public sealed class ObservationBindingTests
             Assert.Throws<ArgumentException>(() => (profile with { Bindings = [new("not-here", "sensor.soil", ObservationRole.Moisture)] }).Validate());
             Assert.Empty((profile with { Bindings = null }).ApplyTo(home).Bindings);
         }
-        finally { if (File.Exists(file)) { File.Delete(file); } }
+        finally { if (File.Exists(file)) { File.Delete(file); } if (File.Exists(file + ".lock")) { File.Delete(file + ".lock"); } }
     }
 }

@@ -34,7 +34,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-Tests use headless Avalonia with the real Skia renderer, not HTML. The 110 cases cover shared semantics, binding validation/persistence/recovery, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
+Tests use headless Avalonia with the real Skia renderer, not HTML. The 128 cases cover shared semantics, binding validation/persistence/recovery, competing local writers, explicit conflict recovery, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
 
 ### Android
 
@@ -56,6 +56,8 @@ Debug packages embed their assemblies and can be installed directly without IDE 
 API 36 x86_64 emulator checks confirm direct APK installation, startup, place detail, Bloom actions, saved pins, Story scrolling and chapter/cursor selection. They also cover system Back, rotation, same-process activity recreation with an unsaved setup draft, a focused field above the keyboard, native font preference 2.0 and corrupt-setup preservation. These are bounded offline checks, not physical-device or full mobile qualification.
 
 A later installed-build check also opens Customize through Options, moves a section and verifies its saved order. Native source/role choosers select a labelled sample temperature source, add its binding, save and restore it after a cold process restart. Only metadata is stored. This does not qualify live discovery or real household access.
+
+The installed conflict-recovery check deliberately changes the synthetic saved file while a session has another draft. Saving refuses the stale overwrite. Review shows both versions; system Back preserves the session; explicit reload uses the saved setup; explicit replacement saves the session version and survives a cold restart with bindings and section order retained. The original synthetic setup was restored afterward and the emulator shut down. These checks do not qualify arbitrary external-editor races, hardware accessibility or production household data.
 
 ### Native navigation and text
 
@@ -84,7 +86,11 @@ See [font provenance and licenses](Lucia.Companion.App/Assets/Fonts/README.md) a
 
 The prototype saves `Lucia/Companion/offline-home.json` under the platform's local application-data folder. It contains setup metadata, source ID/role bindings and preferences, never readings, source catalogs, credentials or task history. Optional schema-1 bindings default to empty for older files. New places retain unavailable state until qualified readings arrive, even when bindings are configured. Metadata does not grant access to a household or device.
 
-Writes use a same-directory temporary file and serialized replacement. Invalid schema, invalid topology or unreadable JSON leaves the original file untouched and disables automatic saving. Build your home then offers an explicit Replace saved setup action. An I/O failure leaves the session usable and offers Retry save.
+Writes use a same-directory temporary file, a cooperating-process file lock and a SHA-256 revision of the exact saved bytes. Null revision permits creation only. A session queues rapid edits and carries forward each successful revision. A stale writer cannot replace a newer file, including during corrupt-file repair. The small `.lock` sidecar remains on disk so waiting writers cannot accidentally lock different files. No readings or secrets go into that file. External editors must not modify the setup while the app is running; the lock coordinates companion writers, not arbitrary editors.
+
+Invalid schema, invalid topology or unreadable JSON leaves the original file untouched and disables automatic saving. When the original bytes can be read safely, Build your home offers explicit Replace saved setup. An oversized or inaccessible file cannot be replaced blindly; repair storage and reopen the app. An ordinary write failure leaves the session usable and offers Retry save.
+
+A changed saved revision stops automatic saving and offers Review save conflict. The scrollable review shows the session and saved home name, counts, pins and section order. Expand Places and bindings to compare place order, names, icons, physical neighbors and source-role metadata. Replace saved setup with my changes performs a checked replacement. Discard my changes and use saved setup explicitly discards the session version. Back without choosing preserves both. A second change while reviewing refuses the stale choice and displays the latest saved version. Unreadable, removed and different-home files cannot be loaded as this session's setup. There is no automatic merge or recovery of unsaved session changes after process death.
 
 Customize at the bottom of Home, or Options then Customize Home, changes the order of Your places, Needs a look and Lucia now. Named earlier/later buttons work without dragging. Restore default order resets the preference. All sections remain present and room positions stay unchanged. Phone follows the chosen order; tablet prioritizes the first section while keeping the room graph in the wide column. Back collapses Customize before leaving Home. The additive optional schema-1 preference defaults for older saved files.
 

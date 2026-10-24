@@ -28,7 +28,7 @@ public sealed class HomeProfileSessionTests
             Assert.False(session.HasUnreadableProfile);
             Assert.NotEqual("broken setup", await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken));
         }
-        finally { if (File.Exists(file)) { File.Delete(file); } }
+        finally { if (File.Exists(file)) { File.Delete(file); } if (File.Exists(file + ".lock")) { File.Delete(file + ".lock"); } }
     }
 
     [Fact]
@@ -49,6 +49,6 @@ public sealed class HomeProfileSessionTests
             await new HomeProfileSession(restored, new LocalHomeStore(file)).InitializeAsync(TestContext.Current.CancellationToken);
             Assert.True(restored.IsPinned("garden"));
         }
-        finally { if (File.Exists(file)) { File.Delete(file); } }
+        finally { if (File.Exists(file)) { File.Delete(file); } if (File.Exists(file + ".lock")) { File.Delete(file + ".lock"); } }
     }
 }

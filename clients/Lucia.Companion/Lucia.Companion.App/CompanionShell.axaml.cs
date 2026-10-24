@@ -20,6 +20,7 @@ public sealed partial class CompanionShell : UserControl
     private readonly MenuItem controlLab = new() { Header = "Control lab" };
     private readonly MenuItem customizeHome = new() { Header = "Customize Home" };
     private TopLevel? attachedTopLevel;
+    public HomeProfileSession ProfileSession => profileSession;
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create(), SampleObservationSources.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
@@ -40,6 +41,7 @@ public sealed partial class CompanionShell : UserControl
         appearance.Click += (_, _) => appearance.ContextMenu.Open(appearance);
         this.FindControl<Button>("BuildHomeButton")!.Click += (_, _) => OpenEditor();
         this.FindControl<Button>("RetrySaveButton")!.Click += (_, _) => profileSession.RetrySave();
+        this.FindControl<Button>("ReviewSaveConflict")!.Click += async (_, _) => await OpenSaveConflictAsync();
         controlLab.Click += (_, _) =>
         {
             this.FindControl<ContentControl>("ScreenHost")!.Content = workbench ??= new ControlWorkbench();
@@ -83,6 +85,7 @@ public sealed partial class CompanionShell : UserControl
 
     private void OpenEditor()
     {
+        if (profileSession.HasUnreadableProfile && !profileSession.CanReplaceUnreadableProfile) { return; }
         var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog);
         if (profileSession.HasUnreadableProfile) { editor.WarnAboutReplacement(); }
         editor.CancelRequested += ShowHome;
@@ -96,6 +99,26 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<Button>("StoryButton")!.IsEnabled = false;
         controlLab.IsEnabled = false;
         customizeHome.IsEnabled = false;
+        RefreshStorageState();
+    }
+
+    private async Task OpenSaveConflictAsync()
+    {
+        var review = new HomeSaveConflictScreen();
+        review.FindControl<Button>("BackWithoutChoosing")!.Click += (_, _) => ShowHome();
+        review.FindControl<Button>("ReadSavedAgain")!.Click += async (_, _) => await profileSession.ReviewConflictAsync();
+        review.FindControl<Button>("KeepSessionChanges")!.Click += async (_, _) =>
+        {
+            if (await profileSession.ResolveConflictAsync(keepSessionChanges: true)) { ShowHome(); }
+        };
+        review.FindControl<Button>("UseSavedSetup")!.Click += async (_, _) =>
+        {
+            if (await profileSession.ResolveConflictAsync(keepSessionChanges: false)) { ShowHome(); }
+        };
+        this.FindControl<ContentControl>("ScreenHost")!.Content = review;
+        RefreshStorageState();
+        await profileSession.ReviewConflictAsync();
+        review.FindControl<TextBlock>("ReviewTitle")!.Focus();
     }
 
     private void ShowHome()
@@ -106,6 +129,7 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<Button>("StoryButton")!.Content = "Story";
         controlLab.IsEnabled = true;
         customizeHome.IsEnabled = true;
+        RefreshStorageState();
     }
 
     private void SwitchStory()
@@ -123,13 +147,21 @@ public sealed partial class CompanionShell : UserControl
 
     private void RefreshStorageState()
     {
+        var content = this.FindControl<ContentControl>("ScreenHost")!.Content;
+        var reviewing = content is HomeSaveConflictScreen;
+        if (content is HomeSaveConflictScreen review)
+        {
+            review.Refresh(Core.HomeProfile.From(home.State.Home, home.State.PinnedPlaceIds, home.State.SectionOrder), profileSession);
+        }
+        this.FindControl<StackPanel>("StorageFooter")!.IsVisible = !reviewing;
         this.FindControl<TextBlock>("StorageStatus")!.Text = profileSession.StatusText;
         this.FindControl<Button>("RetrySaveButton")!.IsVisible = profileSession.CanRetry;
+        this.FindControl<Button>("ReviewSaveConflict")!.IsVisible = profileSession.HasConflict;
+        this.FindControl<Button>("ReviewSaveConflict")!.IsEnabled = content is not HomeEditorScreen && !profileSession.IsLoading;
         this.FindControl<ContentControl>("ScreenHost")!.IsEnabled = !profileSession.IsLoading;
-        this.FindControl<Button>("BuildHomeButton")!.IsEnabled = !profileSession.IsLoading &&
-            this.FindControl<ContentControl>("ScreenHost")!.Content is not HomeEditorScreen;
-        this.FindControl<Button>("StoryButton")!.IsEnabled = !profileSession.IsLoading &&
-            this.FindControl<ContentControl>("ScreenHost")!.Content is not HomeEditorScreen;
+        this.FindControl<Button>("BuildHomeButton")!.IsEnabled = !profileSession.IsLoading && !reviewing &&
+            (!profileSession.HasUnreadableProfile || profileSession.CanReplaceUnreadableProfile) && content is not HomeEditorScreen;
+        this.FindControl<Button>("StoryButton")!.IsEnabled = !profileSession.IsLoading && !reviewing && content is not HomeEditorScreen;
         controlLab.IsEnabled = this.FindControl<Button>("StoryButton")!.IsEnabled;
         customizeHome.IsEnabled = controlLab.IsEnabled;
     }

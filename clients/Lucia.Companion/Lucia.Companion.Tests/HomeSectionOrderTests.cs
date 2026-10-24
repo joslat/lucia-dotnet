@@ -38,7 +38,7 @@ public sealed class HomeSectionOrderTests
         try
         {
             var store = new LocalHomeStore(file);
-            await store.SaveAsync(HomeProfile.From(SampleHome.Create(), []), TestContext.Current.CancellationToken);
+            await store.SaveAsync(HomeProfile.From(SampleHome.Create(), []), null, TestContext.Current.CancellationToken);
             var legacy = System.Text.Json.Nodes.JsonNode.Parse(await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken))!.AsObject();
             legacy.Remove("SectionOrder");
             await File.WriteAllTextAsync(file, legacy.ToJsonString(), TestContext.Current.CancellationToken);
@@ -55,6 +55,6 @@ public sealed class HomeSectionOrderTests
             var profile = Assert.IsType<HomeProfile>(await store.LoadAsync(TestContext.Current.CancellationToken));
             Assert.Throws<ArgumentException>(() => (profile with { SectionOrder = [HomeSection.Places] }).Validate());
         }
-        finally { if (File.Exists(file)) { File.Delete(file); } }
+        finally { if (File.Exists(file)) { File.Delete(file); } if (File.Exists(file + ".lock")) { File.Delete(file + ".lock"); } }
     }
 }
