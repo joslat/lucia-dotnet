@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace lucia.Tests.Auth;
 
@@ -28,11 +29,13 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     private readonly X509Certificate2 certificate;
     public HttpClient Client { get; }
     public ICompanionSessionService Sessions { get; }
+    public ICompanionPairingService Pairings { get; }
+    public IApiKeyService Keys { get; }
 
     private CompanionSecurityTestHost(SqliteTestHelper database, WebApplication app, X509Certificate2 certificate,
-        HttpClient client, ICompanionSessionService sessions)
+        HttpClient client, ICompanionSessionService sessions, ICompanionPairingService pairings, IApiKeyService keys)
     {
-        this.database = database; this.app = app; this.certificate = certificate; Client = client; Sessions = sessions;
+        this.database = database; this.app = app; this.certificate = certificate; Client = client; Sessions = sessions; Pairings = pairings; Keys = keys;
     }
 
     public static async Task<CompanionSecurityTestHost> StartAsync()
@@ -48,7 +51,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
             OperatingSystem.IsWindows() ? X509KeyStorageFlags.UserKeySet : X509KeyStorageFlags.EphemeralKeySet);
         var database = new SqliteTestHelper();
         using (var connection = database.ConnectionFactory.CreateConnection())
-        using (var command = connection.CreateCommand()) { command.CommandText = CompanionSchema.Sql; command.ExecuteNonQuery(); }
+        using (var command = connection.CreateCommand()) { command.CommandText = CompanionSchema.Sql + CompanionPairingSchema.Sql; command.ExecuteNonQuery(); }
         var configuration = new Dictionary<string, string?>
         {
             ["Companion:Enabled"] = "true", ["Companion:HomeId"] = "home-a", ["InternalAuth:Token"] = "synthetic-internal"
@@ -74,9 +77,14 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         var sessions = new RelationalCompanionSessionService(_ => ValueTask.FromResult<DbConnection>(database.ConnectionFactory.CreateConnection()),
             new() { Enabled = true, HomeId = "home-a" }, TimeProvider.System);
         builder.Services.AddSingleton<ICompanionSessionService>(sessions);
+        var pairings = new RelationalCompanionPairingService(_ => ValueTask.FromResult<DbConnection>(database.ConnectionFactory.CreateConnection()),
+            new() { Enabled = true, HomeId = "home-a" }, TimeProvider.System);
+        builder.Services.AddSingleton<ICompanionPairingService>(pairings);
+        builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         builder.Services.AddLuciaAuthentication(builder.Configuration);
         var app = builder.Build();
         app.UseMiddleware<CompanionBoundaryMiddleware>();
+        app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapGet("/general", () => "general").RequireAuthorization();
@@ -86,6 +94,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         app.MapGet("/history/{homeId}", () => "history").RequireAuthorization(CompanionAuthentication.HistoryPolicy);
         app.MapGet("/activity/{homeId}", () => "activity").RequireAuthorization(CompanionAuthentication.ActivityPolicy);
         app.MapCompanionSessionApi();
+        app.MapCompanionPairingApi();
         await app.StartAsync();
         var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
         var fingerprint = certificate.GetCertHashString(HashAlgorithmName.SHA256);
@@ -94,7 +103,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
             UseCookies = false, AllowAutoRedirect = false,
             ServerCertificateCustomValidationCallback = (_, presented, _, _) => presented?.GetCertHashString(HashAlgorithmName.SHA256) == fingerprint
         };
-        return new(database, app, certificate, new HttpClient(handler) { BaseAddress = new Uri(address) }, sessions);
+        return new(database, app, certificate, new HttpClient(handler) { BaseAddress = new Uri(address) }, sessions, pairings, keys);
     }
 
     public async ValueTask DisposeAsync()

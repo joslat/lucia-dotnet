@@ -13,7 +13,7 @@ namespace lucia.Data.Sqlite;
 /// </summary>
 public sealed class SqliteMigrationRunner : IHostedService
 {
-    private const int ConfigSchemaVersion = 4;
+    private const int ConfigSchemaVersion = 5;
     private const int TracesSchemaVersion = 2;
     private const int TasksSchemaVersion = 2;
 
@@ -46,7 +46,8 @@ public sealed class SqliteMigrationRunner : IHostedService
             ApplyConfigV1,
             ApplyConfigV2,
             ApplyConfigV3,
-            ApplyConfigV4);
+            ApplyConfigV4,
+            ApplyConfigV5);
         MigrateDatabase(_tracesFactory, "traces", TracesSchemaVersion, ApplyTracesV1, ApplyTracesV2);
         MigrateDatabase(_tasksFactory, "tasks", TasksSchemaVersion, ApplyTasksV1, ApplyTasksV2);
         if (_legacyPath is not null)
@@ -68,6 +69,7 @@ public sealed class SqliteMigrationRunner : IHostedService
                 ApplyConfigV1(connection);
                 ApplyConfigV2(connection);
                 ApplyConfigV4(connection);
+                ApplyConfigV5(connection);
                 break;
             case SqliteDbNames.Traces:
                 ApplyTracesV1(connection);
@@ -87,6 +89,13 @@ public sealed class SqliteMigrationRunner : IHostedService
     {
         using var command = connection.CreateCommand();
         command.CommandText = Companion.CompanionSchema.Sql;
+        command.ExecuteNonQuery();
+    }
+
+    private static void ApplyConfigV5(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = Companion.CompanionPairingSchema.Sql;
         command.ExecuteNonQuery();
     }
 

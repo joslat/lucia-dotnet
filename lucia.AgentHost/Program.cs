@@ -381,6 +381,7 @@ app.MapScalarApiReference();
 
 app.UseForwardedHeaders();
 app.UseMiddleware<CompanionBoundaryMiddleware>();
+app.UseRateLimiter();
 app.UseAntiforgery();
 app.UseCors("Dashboard");
 app.UseStaticFiles();
@@ -405,6 +406,7 @@ else
 }
 app.MapAuthApi();
 app.MapCompanionSessionApi();
+app.MapCompanionPairingApi();
 app.MapSetupApi();
 app.MapApiKeyManagementApi(isInstalledAppliance);
 app.MapAgentRegistryApiV1();

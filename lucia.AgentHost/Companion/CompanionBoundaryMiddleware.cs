@@ -1,5 +1,6 @@
 using lucia.Agents.Companion;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace lucia.AgentHost.Companion;
 
@@ -17,6 +18,12 @@ public sealed class CompanionBoundaryMiddleware(RequestDelegate next)
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await context.Response.WriteAsJsonAsync(new { error = "https_required" }, context.RequestAborted).ConfigureAwait(false);
                 return;
+            }
+            const long maximumBodyBytes = 16_384;
+            if (context.Request.ContentLength > maximumBodyBytes) { context.Response.StatusCode = StatusCodes.Status413PayloadTooLarge; return; }
+            if (context.Features.Get<IHttpMaxRequestBodySizeFeature>() is { IsReadOnly: false } bodyLimit)
+            {
+                bodyLimit.MaxRequestBodySize = Math.Min(bodyLimit.MaxRequestBodySize ?? maximumBodyBytes, maximumBodyBytes);
             }
         }
         await next(context).ConfigureAwait(false);

@@ -1,17 +1,12 @@
 using System.Data.Common;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using lucia.Agents.Companion;
+using static lucia.Data.Companion.CompanionSql;
 
 namespace lucia.Data.Companion;
 
 /// <summary>Durable device credentials. Shared SQL keeps both supported providers on the same rotation/revocation rules.</summary>
 public sealed class RelationalCompanionSessionService : ICompanionSessionService
 {
-    private static readonly JsonSerializerOptions Json = new()
-    {
-        Converters = { new JsonStringEnumConverter<CompanionField>(allowIntegerValues: false) }
-    };
     private readonly Func<CancellationToken, ValueTask<DbConnection>> openConnection;
     private readonly CompanionOptions options;
     private readonly TimeProvider clock;
@@ -30,21 +25,8 @@ public sealed class RelationalCompanionSessionService : ICompanionSessionService
         if (!options.Enabled) { throw new InvalidOperationException("Companion access is disabled."); }
         ArgumentNullException.ThrowIfNull(grant);
         if (grant.HomeId != options.HomeId) { throw new ArgumentException("The grant belongs to another home.", nameof(grant)); }
-        ArgumentException.ThrowIfNullOrWhiteSpace(deviceName);
-        if (deviceName.Length > 80 || deviceName.Any(char.IsControl)) { throw new ArgumentException("A device name supports at most 80 printable characters.", nameof(deviceName)); }
-        var now = clock.GetUtcNow();
-        var id = Guid.NewGuid().ToString("N");
-        var issued = NewTokens(id, now, now + options.SessionLifetime);
         await using var connection = await openConnection(cancellationToken).ConfigureAwait(false);
-        await using var command = Command(connection, null, """
-            INSERT INTO companion_sessions(id, home_id, device_name, grant_json, access_hash, access_expires_at, refresh_hash, refresh_expires_at, expires_at)
-            VALUES (@id, @home, @name, @grant, @access, @accessExpiry, @refresh, @refreshExpiry, @expiry);
-            """, ("id", id), ("home", grant.HomeId), ("name", deviceName), ("grant", JsonSerializer.Serialize(grant, Json)),
-            ("access", CompanionTokens.Hash(issued.AccessToken)), ("accessExpiry", issued.AccessExpiresAt.ToUnixTimeMilliseconds()),
-            ("refresh", CompanionTokens.Hash(issued.RefreshToken)), ("refreshExpiry", issued.RefreshExpiresAt.ToUnixTimeMilliseconds()),
-            ("expiry", (now + options.SessionLifetime).ToUnixTimeMilliseconds()));
-        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-        return issued;
+        return await CompanionSessionIssuer.IssueAsync(connection, null, options, clock.GetUtcNow(), grant, deviceName, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<CompanionSession?> AuthenticateAsync(string accessToken, CancellationToken cancellationToken = default)
@@ -57,7 +39,7 @@ public sealed class RelationalCompanionSessionService : ICompanionSessionService
             """, ("home", options.HomeId), ("hash", CompanionTokens.Hash(accessToken)), ("now", clock.GetUtcNow().ToUnixTimeMilliseconds()));
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
         if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false)) { return null; }
-        var grant = JsonSerializer.Deserialize<CompanionGrant>(reader.GetString(2), Json) ?? throw new InvalidDataException("The saved companion grant is missing.");
+        var grant = CompanionGrantJson.Deserialize(reader.GetString(2));
         if (grant.HomeId != options.HomeId) { return null; }
         return new(reader.GetString(0), reader.GetString(1), grant, DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64(3)));
     }
@@ -119,10 +101,6 @@ public sealed class RelationalCompanionSessionService : ICompanionSessionService
         return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false) == 1;
     }
 
-    private CompanionSessionTokens NewTokens(string id, DateTimeOffset now, DateTimeOffset expiresAt) => new(id,
-        CompanionTokens.Create(CompanionTokens.AccessPrefix), now + options.AccessLifetime < expiresAt ? now + options.AccessLifetime : expiresAt,
-        CompanionTokens.Create(CompanionTokens.RefreshPrefix), now + options.RefreshLifetime < expiresAt ? now + options.RefreshLifetime : expiresAt);
-
     public async Task<int> PruneExpiredAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = await openConnection(cancellationToken).ConfigureAwait(false);
@@ -139,15 +117,21 @@ public sealed class RelationalCompanionSessionService : ICompanionSessionService
         return removed + await sessions.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private static DbCommand Command(DbConnection connection, DbTransaction? transaction, string sql, params (string Name, object Value)[] values)
+    public async Task<IReadOnlyList<CompanionSession>> ListActiveAsync(string homeId, CancellationToken cancellationToken = default)
     {
-        var command = connection.CreateCommand();
-        command.Transaction = transaction;
-        command.CommandText = connection is Npgsql.NpgsqlConnection ? CompanionSchema.QualifyPostgres(sql) : sql;
-        foreach (var (name, value) in values)
+        if (homeId != options.HomeId) { return []; }
+        await using var connection = await openConnection(cancellationToken).ConfigureAwait(false);
+        await using var command = Command(connection, null, """
+            SELECT id, device_name, grant_json, expires_at FROM companion_sessions
+            WHERE home_id = @home AND revoked_at IS NULL AND expires_at > @now ORDER BY device_name, id;
+            """, ("home", homeId), ("now", clock.GetUtcNow().ToUnixTimeMilliseconds()));
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        var devices = new List<CompanionSession>();
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
-            var parameter = command.CreateParameter(); parameter.ParameterName = name; parameter.Value = value; command.Parameters.Add(parameter);
+            devices.Add(new(reader.GetString(0), reader.GetString(1), CompanionGrantJson.Deserialize(reader.GetString(2)), DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64(3))));
         }
-        return command;
+        return devices.AsReadOnly();
     }
+
 }

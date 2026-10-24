@@ -2,7 +2,7 @@ using lucia.Agents.Companion;
 
 namespace lucia.AgentHost.Companion;
 
-public sealed class CompanionSessionMaintenance(ICompanionSessionService sessions,
+public sealed class CompanionSessionMaintenance(ICompanionSessionService sessions, ICompanionPairingService pairings,
     TimeProvider clock, ILogger<CompanionSessionMaintenance> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -10,7 +10,11 @@ public sealed class CompanionSessionMaintenance(ICompanionSessionService session
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(15), clock);
         do
         {
-            try { await sessions.PruneExpiredAsync(stoppingToken).ConfigureAwait(false); }
+            try
+            {
+                await sessions.PruneExpiredAsync(stoppingToken).ConfigureAwait(false);
+                await pairings.PruneExpiredAsync(stoppingToken).ConfigureAwait(false);
+            }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { return; }
             catch (Exception)
             {

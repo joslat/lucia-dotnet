@@ -139,6 +139,9 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<ICompanionSessionService>(sp => new RelationalCompanionSessionService(
             _ => ValueTask.FromResult<DbConnection>(sp.GetRequiredKeyedService<SqliteConnectionFactory>(SqliteDbNames.Config).CreateConnection()),
             sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));
+        builder.Services.AddSingleton<ICompanionPairingService>(sp => new RelationalCompanionPairingService(
+            _ => ValueTask.FromResult<DbConnection>(sp.GetRequiredKeyedService<SqliteConnectionFactory>(SqliteDbNames.Config).CreateConnection()),
+            sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));
         builder.Services.AddSingleton<IModelProviderRepository, SqliteModelProviderRepository>();
         builder.Services.AddSingleton<IAgentDefinitionRepository, SqliteAgentDefinitionRepository>();
         builder.Services.AddSingleton<IPresenceSensorRepository, SqlitePresenceSensorRepository>();
@@ -207,6 +210,9 @@ public static class ServiceCollectionExtensions
         // luciaconfig repositories
         builder.Services.AddSingleton<IConfigStoreWriter, PostgresConfigStoreWriter>();
         builder.Services.AddSingleton<ICompanionSessionService>(sp => new RelationalCompanionSessionService(
+            async cancellationToken => await sp.GetRequiredKeyedService<PostgresConnectionFactory>(PostgresDbNames.Config).CreateConnectionAsync(cancellationToken).ConfigureAwait(false),
+            sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));
+        builder.Services.AddSingleton<ICompanionPairingService>(sp => new RelationalCompanionPairingService(
             async cancellationToken => await sp.GetRequiredKeyedService<PostgresConnectionFactory>(PostgresDbNames.Config).CreateConnectionAsync(cancellationToken).ConfigureAwait(false),
             sp.GetRequiredService<IOptions<CompanionOptions>>().Value, sp.GetService<TimeProvider>() ?? TimeProvider.System));
         builder.Services.AddSingleton<IModelProviderRepository, PostgresModelProviderRepository>();

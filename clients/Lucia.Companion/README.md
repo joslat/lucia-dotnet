@@ -71,7 +71,7 @@ The prototype temporarily opts out of predictive Back in its manifest. On the te
 
 ## Status and engineering boundaries
 
-Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host now has an opt-in native-session foundation. Owner pairing, native client authentication/storage, real history sources and live integration remain unimplemented.
+Implemented: observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. The owner approval UI, native client authentication/storage, real history sources and live integration remain unimplemented.
 
 - Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. The separate host-side security module does not add server dependencies to the native client.
 - HomeViewModel owns shared selection and pins without UI dependencies. HomeEditorViewModel owns draft edits. HomeProfileSession coordinates persistence/recovery; LocalHomeStore owns file I/O. Controls raise named intents, not service calls.
@@ -100,15 +100,15 @@ Current verification includes core/configuration tests and native headless phone
 
 ## Native-session host foundation
 
-This is server-side groundwork, not a working sign-in flow. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The native app still runs offline and has no credentials or network client. Do not give it a dashboard key or internal service token to bypass the unfinished pairing work.
+This is server-side groundwork, not a connected native sign-in flow. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The native app still runs offline and has no credentials or network client. Do not give it a dashboard key or internal service token to bypass the unfinished native client.
 
 The host registers `LuciaCompanion` as an explicit authentication scheme. It is not part of the existing default API-key/internal-token scheme, `Administrator`, or `ExternalOrInternal` policies. The native credential carries no broad scope or administrator role. Dashboard headers/cookies and internal credentials are not accepted as a companion identity. `GET /api/companion/homes/{homeId}/session` returns only that device's session/grant metadata and uses `Cache-Control: no-store`, including denied responses. Insecure companion requests fail without redirecting a credential to another address. Disabled routes return 404.
 
 An owner-assigned `CompanionGrant` identifies one home and member, explicit place IDs and observation fields. Activity, history and Engine access default to false. There are no wildcard grants. IDs compare exactly; names and physical connections grant no access. `CompanionHome` checks the identity and route home only. Future projections must filter each place, field, event, history interval and aggregate against the current grant. A home-level policy alone does not authorize returning all household data. Engine permission will authorize sanitized administrator aggregates, not general appliance administration or raw personal transcripts.
 
-The shared relational session service uses the existing SQLite/PostgreSQL configuration database. Configuration schema 4 adds session and spent-refresh tables without converting existing keys. PostgreSQL queries explicitly name the public schema. Both access and refresh credentials contain 256 random bits and have separate prefixes; the server stores their SHA-256 hashes, never the credentials. The credential response redacts its `ToString()` output and must never be logged or put in a URL.
+The shared relational session service uses the existing SQLite/PostgreSQL configuration database. Configuration schema 4 adds session and spent-refresh tables without converting existing keys; schema 5 adds pending pairing and per-home quota tables. PostgreSQL queries explicitly name the public schema. Both access and refresh credentials contain 256 random bits and have separate prefixes; the server stores their SHA-256 hashes, never the credentials. Credential requests/responses redact their `ToString()` output and must never be logged or put in a URL.
 
-Defaults are five-minute access, seven-day idle refresh and a thirty-day absolute device session. Configuration validates positive, ascending lifetimes, with maximums of fifteen minutes, thirty days and ninety days respectively. Renewal atomically replaces both credentials and invalidates the previous access credential. It never extends the absolute session expiry. A spent refresh credential revokes the entire device session, including the newly rotated access credential. Clients must serialize renewal; ambiguous delivery failure requires re-pairing rather than blindly replaying the old refresh credential. Logout/revocation will invalidate the durable session, not just erase local preferences.
+Defaults are five-minute access, seven-day idle refresh and a thirty-day absolute device session. Configuration validates positive, ascending lifetimes, with maximums of fifteen minutes, thirty days and ninety days respectively. Renewal atomically replaces both credentials and invalidates the previous access credential. It never extends the absolute session expiry. A spent refresh credential revokes the entire device session, including the newly rotated access credential. Clients must serialize renewal; ambiguous delivery failure requires re-pairing rather than blindly replaying the old refresh credential. Logout/revocation invalidates the durable session, not just local preferences.
 
 These options are read at host startup. Restart after changing them; use durable device revocation for immediate access removal rather than relying on a configuration reload.
 
@@ -116,7 +116,33 @@ Authentication reads current durable state on each request, with no API-key cach
 
 The design reuses ASP.NET Core's [explicit scheme policies](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/authorize-with-a-specific-scheme?view=aspnetcore-10.0) and applies [refresh-rotation guidance](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14). This Lucia-specific device-session foundation is not an OAuth/OIDC authorization server or a claim of RFC conformance. Owner-approved pairing remains the selected local-pilot direction. A supported identity-provider integration would instead require a separate [native browser/PKCE design](https://www.rfc-editor.org/rfc/rfc8252.html).
 
-Current proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. This does not qualify native storage, pairing, production TLS/reverse proxies, real projections or a third-party security audit. Owner approval, one-time pending-device possession, abuse/CSRF protections, membership management, platform storage and the connected app remain required work.
+Current proof uses isolated SQLite databases, temporary PostgreSQL 17 containers and loopback Kestrel HTTPS with a per-test certificate trusted only by that test client. It covers permissions, scheme isolation, cross-home denial, mixed broad/native credentials, expiry, concurrent renewal/replay, pairing, revocation, retention and schema migration. No real AgentHost startup, household, HA endpoint, model or cloud service participates. Existing authentication tests remain part of the regression checks. This does not qualify native storage, production TLS/reverse proxies, real projections or a third-party security audit. Owner UI, membership management, platform storage and the connected app remain required work.
+
+### Owner-approved pairing API
+
+Pairing uses two separate codes. The native device retains a 256-bit `deviceCode`; the owner reviews a ten-character `userCode`. The short code cannot redeem credentials. Display the same code on the device and owner review, and approve only after the owner checks the intended device and exact grant. Device names are untrusted labels, not proof of identity. This Lucia-specific protocol is not an OAuth device authorization implementation.
+
+| Endpoint under `/api/companion` | Caller and result |
+|---|---|
+| `POST /pairings` | Anonymous HTTPS JSON `{deviceName}`. Returns codes, expiry and five-second poll interval |
+| `POST /pairings/redeem` | Device JSON `{deviceCode}`. Pending 202, slow polling 429, denied 403, expired/consumed 410, invalid 401; success returns credentials once |
+| `POST /session/renew` | Device JSON `{refreshToken}`. Rotates both credentials or returns 401 |
+| `GET /homes/{homeId}/session` | Native Bearer. Returns own current session/grant only |
+| `POST /homes/{homeId}/session/logout` | Native Bearer. Durably revokes that session |
+| `GET /owner/antiforgery` | Current owner key/cookie. Returns identity-bound request token and Secure/HttpOnly/SameSite=Strict cookie |
+| `POST /owner/pairings/review` | Current owner JSON `{userCode}`. Returns pending intent metadata, never the device secret |
+| `POST /owner/pairings/{id}/approve` | Current owner JSON `{codeConfirmed:true,grant:{homeId,memberId,places,canReadActivity,canReadHistory,canReadEngine}}`. Exact grant, no wildcards; fields are string enum names |
+| `POST /owner/pairings/{id}/cancel` | Current owner. Denies pending or approved but unconsumed intent |
+| `GET /owner/sessions` | Current owner. Non-revoked, absolute-unexpired device metadata/grants, never credentials or hashes |
+| `DELETE /owner/sessions/{id}` | Current owner. Durably revokes a device |
+
+Owner routes use the existing Administrator API-key scheme, not native or internal tokens. Every request checks current key state without relying on cached validation. Cookie mutations require ASP.NET antiforgery proof; an explicit API-key header is non-ambient. Owner routes reject any Authorization header, so a native Bearer plus an ambient owner cookie cannot approve devices. The browser approval/device management UI is still to be built.
+
+`Companion:PairingLifetime` defaults to ten minutes, allowed one to fifteen minutes. `Companion:MaximumPendingPairings` defaults to 32, allowed 1 to 128. A database transaction locks the home quota across instances. Poll timing is durable too. Approval binds one immutable grant; redemption and credential insertion commit together. A storage failure rolls back both, allowing retry. Successful delivery lost after commit cannot recover plaintext credentials; re-pair and revoke the orphaned device if needed.
+
+All companion requests have a 16 KiB body limit. Per-process, per-remote-IP limits allow five starts, 120 credential/session requests and 60 owner requests per minute, with no queue and Retry-After on rejection. These are local-pilot abuse limits, not distributed DDoS protection. Qualify trusted proxy forwarding before deployment; never trust arbitrary forwarded headers. Expired pairing rows are removed in bounded batches during creation and maintenance. Approval metadata is not a permanent audit log.
+
+The owner assigns an opaque member ID with the grant. There is no separate member account/roster yet. Removing an owner key after a valid approval does not retroactively revoke that device grant. Cancel an unconsumed intent or explicitly revoke its issued session. Full member-removal semantics, owner UI, native vault/TLS/client integration and real projection filtering remain open.
 
 ## StoryOrbit Day
 

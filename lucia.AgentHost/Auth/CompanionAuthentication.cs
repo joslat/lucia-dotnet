@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using lucia.AgentHost.Companion;
+using lucia.Agents.Auth;
 
 namespace lucia.AgentHost.Auth;
 
@@ -14,6 +15,7 @@ public static class CompanionAuthentication
     public const string EnginePolicy = "CompanionEngine";
     public const string HistoryPolicy = "CompanionHistory";
     public const string ActivityPolicy = "CompanionActivity";
+    public const string OwnerPolicy = "CompanionOwnerManagement";
 
     public static IServiceCollection AddCompanionAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
@@ -23,6 +25,8 @@ public static class CompanionAuthentication
             .ValidateOnStart();
         services.TryAddSingleton<TimeProvider>(TimeProvider.System);
         services.AddHostedService<CompanionSessionMaintenance>();
+        services.AddAntiforgery();
+        services.AddCompanionRateLimits();
         // Never add this handler to MultiScheme, Administrator or ExternalOrInternal.
         services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, CompanionAuthenticationHandler>(Scheme, _ => { });
         services.AddAuthorization(options =>
@@ -31,6 +35,8 @@ public static class CompanionAuthentication
             options.AddPolicy(EnginePolicy, policy => Configure(policy, session => session.Grant.CanReadEngine));
             options.AddPolicy(HistoryPolicy, policy => Configure(policy, session => session.Grant.CanReadHistory));
             options.AddPolicy(ActivityPolicy, policy => Configure(policy, session => session.Grant.CanReadActivity));
+            options.AddPolicy(OwnerPolicy, policy => policy.AddAuthenticationSchemes(AuthOptions.AuthenticationScheme)
+                .RequireRole(AuthOptions.AdministratorRole).RequireAssertion(context => context.Resource is HttpContext http && http.Request.Headers.Authorization.Count == 0));
         });
         return services;
     }

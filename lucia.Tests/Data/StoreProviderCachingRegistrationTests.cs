@@ -33,6 +33,7 @@ public sealed class StoreProviderCachingRegistrationTests
         Assert.IsType<CachedApiKeyService>(provider.GetRequiredService<IApiKeyService>());
         Assert.IsType<CachedSpeakerProfileStore>(provider.GetRequiredService<ISpeakerProfileStore>());
         Assert.IsType<RelationalCompanionSessionService>(provider.GetRequiredService<ICompanionSessionService>());
+        Assert.IsType<RelationalCompanionPairingService>(provider.GetRequiredService<ICompanionPairingService>());
     }
 
     [Theory]
@@ -45,6 +46,7 @@ public sealed class StoreProviderCachingRegistrationTests
         Assert.IsType<CachedApiKeyService>(provider.GetRequiredService<IApiKeyService>());
         Assert.IsType<CachedSpeakerProfileStore>(provider.GetRequiredService<ISpeakerProfileStore>());
         Assert.IsType<RelationalCompanionSessionService>(provider.GetRequiredService<ICompanionSessionService>());
+        Assert.IsType<RelationalCompanionPairingService>(provider.GetRequiredService<ICompanionPairingService>());
     }
 
     [Fact]
