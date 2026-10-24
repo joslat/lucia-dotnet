@@ -116,6 +116,7 @@ public sealed class CompanionConnection : ICompanionConnection, IDisposable
     }
 
     public Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default) => ReadAsync((coordinator, ct) => coordinator.ReadHomeAsync(ct), cancellationToken);
+    public Task<HomeSnapshot> ReadHomeAsync(ConnectionSession expected, CancellationToken cancellationToken = default) => ReadAsync((coordinator, ct) => coordinator.ReadHomeAsync(expected, ct), cancellationToken);
     public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => ReadAsync((coordinator, ct) => coordinator.DiscoverAsync(ct), cancellationToken);
 
     private async Task<T> ReadAsync<T>(Func<DeviceSessionCoordinator, CancellationToken, Task<T>> read, CancellationToken cancellationToken)

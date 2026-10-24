@@ -47,7 +47,8 @@
             <Expander Name="ApprovedAccess" Header="Approved access" HorizontalAlignment="Stretch">
               <TextBlock Name="GrantDetails" TextWrapping="Wrap" Margin="0,12,0,0" />
             </Expander>
-            <TextBlock Text="Live Home, Story and Engine data are not wired into this build yet. No sample readings will be substituted for your home." Classes="muted" />
+            <Button Name="OpenConnectedHome" Classes="theme" HorizontalAlignment="Left" BorderBrush="{DynamicResource AccentBrush}"><TextBlock Text="Open your home" TextWrapping="Wrap" /></Button>
+            <TextBlock Text="Home opens with authorized source reports and local setup. Story and Engine are not connected yet. No sample readings will be substituted for your home." Classes="muted" />
           </StackPanel>
           <WrapPanel Name="RecoveryActions" IsVisible="False">
             <Button Name="RetryConnection" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Retry saved connection" TextWrapping="Wrap" /></Button>

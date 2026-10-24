@@ -35,6 +35,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     public ICompanionPairingService Pairings { get; }
     public IApiKeyService Keys { get; }
     public IHomeAssistantClient HomeAssistant { get; }
+    public string CertificateFingerprint => certificate.GetCertHashString(HashAlgorithmName.SHA256);
     public HomeAssistantOptions SourceSettings => app.Services.GetRequiredService<IOptionsMonitor<HomeAssistantOptions>>().CurrentValue;
 
     public Lucia.Companion.Connection.CompanionApiClient CreateNativeClient()

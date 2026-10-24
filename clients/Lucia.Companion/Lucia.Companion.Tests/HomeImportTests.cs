@@ -116,13 +116,29 @@ public sealed class HomeImportTests
         Assert.NotEqual(name, ConnectedProfileScope.FileName(connection with { Endpoint = new Uri("https://other.invalid") }));
         var otherMember = new DeviceSession(new string('b', 32), "Tablet", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-b", []);
         Assert.NotEqual(name, ConnectedProfileScope.FileName(connection with { Session = otherMember }));
-        var sameMember = new DeviceSession(new string('c', 32), "Replacement phone", DateTimeOffset.UtcNow.AddDays(2), "home-a", "member-a", []);
+        var sameMember = new DeviceSession(new string('c', 32), "Replacement phone", DateTimeOffset.UtcNow.AddDays(2), "home-a", "member-a", connection.Session.Places);
         Assert.Equal(name, ConnectedProfileScope.FileName(connection with { Session = sameMember }));
+        var narrowed = new DeviceSession(new string('d', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a", []);
+        Assert.NotEqual(name, ConnectedProfileScope.FileName(connection with { Session = narrowed }));
         var otherHome = new DeviceSession(new string('c', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-b", "member-a", []);
         Assert.NotEqual(name, ConnectedProfileScope.FileName(connection with { Session = otherHome }));
         Assert.NotEqual("offline-home.json", name);
         Assert.DoesNotContain("member-a", name);
         Assert.Throws<ArgumentException>(() => ConnectedProfileScope.FileName(connection with { Endpoint = new Uri("http://synthetic.invalid") }));
+    }
+
+    [Fact]
+    public void ProfileScopeDependsOnHomeAccessNotGrantOrderingOrUnrelatedCapabilities()
+    {
+        var first = new DeviceSession(new string('a', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a",
+            [new("porch", [ObservationRole.Temperature, ObservationRole.Humidity]), new("garden", [ObservationRole.Moisture])]);
+        var reordered = new DeviceSession(new string('b', 32), "Tablet", DateTimeOffset.UtcNow.AddDays(2), "home-a", "member-a",
+            [new("garden", [ObservationRole.Moisture]), new("porch", [ObservationRole.Humidity, ObservationRole.Temperature])], canReadHistory: true);
+        var origin = new Uri("https://synthetic.invalid");
+        Assert.Equal(ConnectedProfileScope.FileName(new(origin, first)), ConnectedProfileScope.FileName(new(origin, reordered)));
+        var narrowerFields = new DeviceSession(new string('c', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a",
+            [new("porch", [ObservationRole.Temperature]), new("garden", [ObservationRole.Moisture])]);
+        Assert.NotEqual(ConnectedProfileScope.FileName(new(origin, first)), ConnectedProfileScope.FileName(new(origin, narrowerFields)));
     }
 
     private static HomeCatalog Catalog() => new("home-a", DateTimeOffset.UtcNow, [

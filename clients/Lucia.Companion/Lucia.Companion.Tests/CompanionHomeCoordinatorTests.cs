@@ -121,6 +121,33 @@ public sealed class CompanionHomeCoordinatorTests
         finally { directory.Delete(recursive: true); }
     }
 
+    [Fact]
+    public async Task AViewBoundToAnotherSessionOrGrantCannotReadUnderAReplacementConnection()
+    {
+        var directory = Directory.CreateTempSubdirectory("lucia-home-view-identity-");
+        using var protector = new TestSecretProtector();
+        var vault = new ProtectedSessionVault(directory.FullName, protector);
+        var dataCalls = 0;
+        try
+        {
+            await SeedAsync(vault, Credentials('a'));
+            using var api = Api((request, _) =>
+            {
+                if (!request.RequestUri!.AbsolutePath.EndsWith("/session", StringComparison.Ordinal)) { dataCalls++; }
+                return Task.FromResult(Ok(CompanionHomeClientTests.Grant()));
+            });
+            var expected = new ConnectionSession(new Uri("https://localhost"), new DeviceSession(new string('b', 32), "Old phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a", [new("porch", [Core.ObservationRole.Temperature])]));
+            var coordinator = new DeviceSessionCoordinator(api, vault);
+            Assert.Equal(SessionStateFailure.IdentityChanged, (await Assert.ThrowsAsync<SessionStateException>(() => coordinator.ReadHomeAsync(expected, TestContext.Current.CancellationToken))).Failure);
+            var changedGrant = new DeviceSession(new string('a', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a", []);
+            await Assert.ThrowsAsync<SessionStateException>(() => coordinator.ReadHomeAsync(expected with { Session = changedGrant }, TestContext.Current.CancellationToken));
+            Assert.Equal(0, dataCalls);
+            await using var lease = await vault.OpenAsync(TestContext.Current.CancellationToken);
+            Assert.NotNull(await lease.ReadAsync(TestContext.Current.CancellationToken));
+        }
+        finally { directory.Delete(recursive: true); }
+    }
+
     private static CompanionApiClient Api(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> send) => new(new Uri("https://localhost"), new ScriptedCompanionHandler(send));
     private static HttpResponseMessage Ok(object body) => new(HttpStatusCode.OK) { Content = JsonContent.Create(body, options: new(System.Text.Json.JsonSerializerDefaults.Web)
     { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter<Core.ObservationRole>(allowIntegerValues: false) } }) };

@@ -3,18 +3,21 @@ namespace Lucia.Companion.Core;
 /// <summary>Explicit metadata connecting a source role to one place, independent of adjacency.</summary>
 public sealed record ObservationBinding
 {
-    public ObservationBinding(string placeId, string sourceId, ObservationRole role)
+    public ObservationBinding(string placeId, string sourceId, ObservationRole role, string? sourcePlaceId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(placeId);
         ObservationSource.ValidateId(sourceId);
+        ObservationSource.ValidateSourcePlaceId(sourcePlaceId);
         if (!Enum.IsDefined(role)) { throw new ArgumentOutOfRangeException(nameof(role)); }
         PlaceId = placeId;
         SourceId = sourceId;
         Role = role;
+        SourcePlaceId = sourcePlaceId;
     }
     public string PlaceId { get; }
     public string SourceId { get; }
     public ObservationRole Role { get; }
+    public string? SourcePlaceId { get; }
 
     public static string MissingReadingsReason(bool hasBindings) => hasBindings
         ? "Observation bindings configured. No readings available."

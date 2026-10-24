@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.Screens.HomeImportScreen" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: Deliberate room additions without replacing the user's existing home.
+       OWN-WORLD: Constellation outline icons, Observatory semantic roles, Outfit headings and DM Sans controls.
+       STORY: Select authorized places, review exact metadata additions/conflicts, add to the draft and Save later.
+       FIRST VIEWPORT: Clear title and selection above a separate review on phone, beside it on tablet; named actions stay below.
+       FORM: Local Operate extension of the approved native setup, no new visual identity.
+       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+  <Grid RowDefinitions="*,Auto" RowSpacing="16" Margin="16">
+    <ScrollViewer Name="ImportScroll" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="20" MaxWidth="1040" HorizontalAlignment="Stretch">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Bring your places in" Classes="title" TextWrapping="Wrap" />
+          <TextBlock Text="Choose places from the authorized home catalog. Existing names, order and connections stay yours. Nothing is saved yet." Classes="muted" />
+          <TextBlock Name="ImportEmptyNotice" IsVisible="False" Text="No places are available in this catalog. Ask the owner to check this device's exact access and the HA source configuration." Classes="muted" />
+        </StackPanel>
+        <Grid Name="ImportLayout" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="24" RowSpacing="24">
+          <StackPanel Name="ImportSelection" Spacing="8">
+            <TextBlock Text="Choose places" Classes="section" TextWrapping="Wrap" />
+            <TextBlock Text="Expand a selected place to review its sources. Connections between rooms are configured separately." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            <StackPanel Name="ImportChoices" Spacing="8" />
+          </StackPanel>
+          <StackPanel Name="ImportReview" Grid.Column="1" Spacing="12">
+            <TextBlock Name="ImportReviewTitle" Text="Review additions" Classes="section" TextWrapping="Wrap" Focusable="True" />
+            <TextBlock Name="ImportReviewSummary" Text="Select places, then preview what will be added. A preview grants no access and contains no readings." Classes="muted" />
+            <StackPanel Name="ImportReviewChanges" Spacing="12" />
+          </StackPanel>
+        </Grid>
+      </StackPanel>
+    </ScrollViewer>
+    <StackPanel Grid.Row="1" Spacing="8">
+      <TextBlock Name="ImportStatus" Text="Choose at least one place to preview." Classes="muted" Focusable="True" AutomationProperties.LiveSetting="Polite" />
+      <WrapPanel>
+        <Button Name="PreviewImport" Classes="theme" Margin="0,0,8,8" IsEnabled="False"><TextBlock Text="Preview additions" TextWrapping="Wrap" /></Button>
+        <Button Name="EditImportSelection" Classes="theme" Margin="0,0,8,8" IsVisible="False"><TextBlock Text="Change selection" TextWrapping="Wrap" /></Button>
+        <Button Name="AddImportToDraft" Classes="theme" Margin="0,0,8,8" IsEnabled="False" BorderBrush="{DynamicResource AccentBrush}"><TextBlock Text="Add to draft" TextWrapping="Wrap" /></Button>
+        <Button Name="CancelImport" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Back without adding" TextWrapping="Wrap" /></Button>
+      </WrapPanel>
+    </StackPanel>
+  </Grid>
+</UserControl>

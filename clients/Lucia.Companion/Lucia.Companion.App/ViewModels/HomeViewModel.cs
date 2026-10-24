@@ -4,14 +4,16 @@ using Lucia.Companion.Core;
 namespace Lucia.Companion.App.ViewModels;
 
 /// <summary>Shared screen state. No Avalonia, transport, storage or device actions.</summary>
-public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSource>? sources = null) : INotifyPropertyChanged
+public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSource>? sources = null, bool isDemo = true) : INotifyPropertyChanged
 {
     private readonly HashSet<string> pinnedIds = new(StringComparer.Ordinal);
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action? PreferencesChanged;
     public HomeTopology Home { get; private set; } = home ?? throw new ArgumentNullException(nameof(home));
-    public IReadOnlyList<ObservationSource> SourceCatalog { get; } = Array.AsReadOnly((sources ?? []).ToArray());
+    public IReadOnlyList<ObservationSource> SourceCatalog { get; private set; } = Array.AsReadOnly((sources ?? []).ToArray());
+    public bool IsDemo { get; } = isDemo;
+    public string SourceNotice { get; private set; } = isDemo ? "Synthetic readings · 24 Oct 2026 · 12:00 UTC" : "No verified Home reports available.";
     public Place? SelectedPlace { get; private set; }
     public bool IsActionsOpen { get; private set; }
     public bool IsDetailOpen { get; private set; }
@@ -22,6 +24,15 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
         .OrderBy(place => place.State switch { PlaceState.Problem => 0, PlaceState.Waiting => 1, _ => 2 }).ToArray();
 
     public bool IsPinned(string placeId) => pinnedIds.Contains(placeId);
+
+    public void SetSources(IEnumerable<ObservationSource> sources)
+    {
+        ArgumentNullException.ThrowIfNull(sources);
+        SourceCatalog = Array.AsReadOnly(sources.ToArray());
+        Notify();
+    }
+
+    public void SetSourceNotice(string notice) { SourceNotice = notice; Notify(); }
 
     public void SetSectionOrder(IEnumerable<HomeSection> order, bool notifyPreferences = true)
     {

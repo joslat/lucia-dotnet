@@ -7,6 +7,7 @@
       <Button Name="AppearanceButton" Content="Options" Classes="theme" Margin="0,0,8,0" />
       <Button Name="BuildHomeButton" Content="Setup" AutomationProperties.Name="Build your home" Classes="theme" Margin="0,0,8,0" />
       <Button Name="StoryButton" Content="Story" Classes="theme" />
+      <Button Name="RefreshHomeReports" Classes="theme" IsVisible="False"><TextBlock Text="Refresh reports" TextWrapping="Wrap" /></Button>
     </WrapPanel>
     </DockPanel>
     <StackPanel Name="StorageFooter" DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">

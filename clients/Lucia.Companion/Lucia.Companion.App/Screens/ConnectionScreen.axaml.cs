@@ -20,6 +20,7 @@ public sealed partial class ConnectionScreen : UserControl
     public ConnectionViewModel State { get; }
     public Task PendingOperation { get; private set; } = Task.CompletedTask;
     public event Action? DemoRequested;
+    public event Action? HomeRequested;
     public ConnectionScreen() : this(new ConnectionViewModel(null)) { }
     public ConnectionScreen(ConnectionViewModel state)
     {
@@ -29,6 +30,7 @@ public sealed partial class ConnectionScreen : UserControl
         this.FindControl<TextBox>("DeviceName")!.TextChanged += (_, _) => State.DeviceName = this.FindControl<TextBox>("DeviceName")!.Text ?? string.Empty;
         this.FindControl<Button>("StartConnection")!.Click += async (_, _) => await RunAsync(State.StartAsync());
         this.FindControl<Button>("ExploreDemo")!.Click += (_, _) => { State.StopWaiting(); DemoRequested?.Invoke(); };
+        this.FindControl<Button>("OpenConnectedHome")!.Click += (_, _) => { if (State.IsConnected && !State.IsBusy) { HomeRequested?.Invoke(); } };
         this.FindControl<Button>("StopWaiting")!.Click += (_, _) => State.StopWaiting();
         this.FindControl<Button>("ResumeWaiting")!.Click += (_, _) => State.ResumeWaiting();
         this.FindControl<Button>("ChangeHost")!.Click += (_, _) => State.ChangeHost();
@@ -107,6 +109,7 @@ public sealed partial class ConnectionScreen : UserControl
         this.FindControl<Button>("ResumeWaiting")!.IsEnabled = !State.IsBusy;
         this.FindControl<Button>("ChangeHost")!.IsEnabled = !State.IsBusy;
         this.FindControl<StackPanel>("VerifiedConnection")!.IsVisible = State.IsConnected;
+        this.FindControl<Button>("OpenConnectedHome")!.IsEnabled = State.IsConnected && !State.IsBusy;
         var verified = State.Connection;
         this.FindControl<TextBlock>("SessionSummary")!.Text = verified is null ? string.Empty
             : $"{verified.Session.DeviceName}\n{verified.Endpoint.Host}\n{verified.Session.Places.Count} {(verified.Session.Places.Count == 1 ? "place" : "places")} approved for read access";

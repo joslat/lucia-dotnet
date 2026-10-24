@@ -1,6 +1,6 @@
 ---
 name: Lucia Companion
-description: Connection-first native companion with owner-approved read access and an explicit Constellation demo in an Observatory palette.
+description: Native connected Home with reviewed place import, owner-approved read access and an explicit Constellation demo in an Observatory palette.
 colors:
   light-canvas: "#f1f2ef"
   light-panel: "#ffffff"
@@ -146,7 +146,9 @@ components:
 
 Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.
 
-The app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Explore the demo explicitly opens the cached synthetic Home shell. That shell contains HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup and source-binding metadata, local save-conflict recovery, Customize section ordering, offline StoryOrbit Day and the control workbench. Home carries its offline demo badge, synthetic reading time and written attention summary. Story links a one-day dial, authored chapters and readable place timelines through one selection state. The connection preview uses the real device-session API. Owners now review codes, choose exact grants and manage issued sessions in Companion devices on the trusted HTTPS dashboard. That scoped owner UI has a ship disposition; authorized live Home, Story and Engine adapters and real source import remain unbuilt. BUILD-PLAN.md owns the full native Home, Story, Week and Engine goals and the remaining motion, performance, platform and release gates. Owner approval is one checkpoint in that work.
+The app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Owners review codes, choose exact grants and manage issued sessions in Companion devices on the trusted HTTPS dashboard. Open Home reads authorized source reports into the existing Constellation Home, with qualified readings, local setup, source bindings, save-conflict recovery and Customize section ordering. Bring your places in lets the user select authorized places, preview exact metadata additions and conflicts, add to the setup draft, then use the existing Save setup action. Import preserves existing names, icons, order, connections and source ownership. A saved binding grants no access.
+
+Explore the demo explicitly opens the cached synthetic shell with its offline badge and synthetic reading time. That mode retains HomeConstellation, PlaceDetail, contextual Bloom actions, offline StoryOrbit Day and the control workbench. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Connected mode shares the Home composition but hides sample Story and Control lab and replaces the sample task stages with a written activity-not-connected notice. The scoped connected Home and import extension has a ship disposition. BUILD-PLAN.md still owns the unfinished Story, Week and Engine adapters and the remaining motion, performance, platform and release gates.
 
 Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
@@ -163,6 +165,8 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Platform text settings resize individual type roles, with layout adaptations for larger text.
 - Customize changes the order of the three Home sections without hiding any section or rearranging places.
 - Source-binding metadata remains separate from physical neighbors, source access and qualified readings.
+- Import separates place selection from exact addition/conflict review before applying metadata to the setup draft.
+- Connected Home labels report quality and reported time, clears reports when access cannot be checked and keeps recovery explicit.
 - Save-conflict recovery shows both metadata alternatives and requires an explicit checked choice.
 - Connection keeps the canonical HTTPS host and submitted device name beside the approval code.
 - Verified access discloses exact grants without substituting sample household data.
@@ -242,13 +246,21 @@ Home and setup use 16-unit outer margins and composition gaps. Home changes to i
 
 The default section order is Your places, Needs a look, Lucia now. Expanded Home puts the first preferred section at the top of the wide main column and always keeps Your places in that column. If Your places is first, the last preferred section sits below it and the middle section occupies the side column. If another section is first, Your places sits below that section and the remaining section occupies the side column. Selected-place detail follows the side section. Customize remains a footer Expander in the Home scroll region, outside this section grid.
 
-When Home is narrower than 600 units and its home-name font exceeds 32 units, the offline badge moves below the name. The name then spans both header columns.
+When Home is narrower than 600 units and its home-name font exceeds 32 units, its mode badge moves below the name. The name then spans both header columns.
+
+Connected Home uses this same layout with a Connected badge and a report-capture notice. The identity stacking rule applies to either mode's badge. ConnectedHomeWorkspace replaces the shell with a vertically scrolling Home reports state while checking access or recovering from a failed read. That state has 20-unit horizontal and 32-unit vertical margins, 20-unit spacing, a 720-unit maximum width and the existing 44-unit household Home outline. Retry Home reports and Connection wrap below the written status.
 
 Setup changes at its own Bounds.Width of 800 units. Expanded setup uses two equal columns, a place list on the left and the selected place's form on the right. Compact setup replaces the list with a place chooser and stacks the form below it. The header and forms share one scrolling region; Save and Cancel or the discard question sit outside it. These are control-width thresholds, not physical device categories or browser viewport breakpoints.
 
 The Home constellation keeps the supplied place order. Its panel starts with a 108-unit slot, multiplies that slot by the largest orb FontSize divided by its normal size of 16, and divides available width by the resulting slot width to derive column count. Larger text increases slot width and can reduce the column count. The cap remains three columns below 800 units of panel width and four above it. Child width can grow to 152 times that text ratio. The panel measures each row from the tallest child, with a minimum row height of 148 units. Up to six places use fixed varied offsets. Larger homes continue in stable rows with alternating vertical offsets. No physics, animation, automatic sorting by state or inferred room position affects placement.
 
 **The Stable Home Rule.** Preserve explicit room order through selection, pinning and state display. Place reordering belongs to setup's Move earlier and Move later controls. Customize changes section order independently of room order.
+
+### Place import
+
+HomeImportScreen uses a 16-unit margin, a vertical ScrollViewer with horizontal scrolling disabled and a 1040-unit maximum content width. Its title and explanation precede place selection and review. At a control width of at least 900 units, while the mapped ImportStatus body text is at most 20 units, selection and review occupy equal columns with a 24-unit gap. Narrower widths or larger body text show them as separate steps. In that compact layout, Preview additions hides selection and opens review; Change selection returns to the selected place and requires a fresh preview. Back from compact review also returns to selection before leaving import.
+
+Status and wrapping action buttons sit below the scrolling content. Place rows use a straight GraphLineBrush divider, 12-unit vertical padding and the existing 24-unit household outline icon with a 1.7-unit stroke. Their selection CheckBoxes, icon chooser, source Expander, shared TextBoxes and theme buttons retain a 48-unit minimum height. Selected-place fields indent 12 units; source details stay inside Sources to bind. There is no new card, palette, type family or motion treatment.
 
 ### Save-conflict review
 
@@ -304,7 +316,7 @@ CompanionRoot starts with ConnectionScreen. A failed restore or unavailable prot
 
 The host form labels Lucia host and Device name. A host without a scheme gains HTTPS; validation rejects paths, queries and embedded credentials. Request approval code disables while busy. The code state keeps the canonical submitted host and trimmed device name visible, includes expiry, and explains exact matching and owner approval. Stop waiting pauses future checks, not an approval already completing. Resume waiting retains the current code until expiry. Use another host abandons the local prompt and explains that its code expires automatically. Polling follows the server's retry interval and slowdown responses; a one-second UI timer does not mean one-second network requests.
 
-Connection verified uses sage and written text. Its summary names the verified device and host and counts approved places. Approved access expands the home and member IDs, every approved place and field, and explicit Allowed or Not allowed activity, history and Engine grants. A verified session does not open a live household view. The same panel states that live Home, Story and Engine data are not wired and sample readings will not stand in for that home. The connection footer directs owners to Companion devices on their trusted HTTPS dashboard to match the code and choose exact read access. The dashboard route preserves Observatory's own system; this increment changes no native styles.
+Connection verified uses sage and written text. Its summary names the verified device and host and counts approved places. Approved access expands the home and member IDs, every approved place and field, and explicit Allowed or Not allowed activity, history and Engine grants. Open Home opens ConnectedHomeWorkspace and checks access before showing source reports. The connection footer directs owners to Companion devices on their trusted HTTPS dashboard to match the code and choose exact read access. The dashboard route preserves Observatory's own system; this extension uses the existing native styles.
 
 Startup restores protected credentials and asks the host to verify access. The UI holds connection metadata, never credential text. Retry saved connection retains protected state after a recoverable network failure. Storage failure has written guidance and no plaintext fallback. Forget local connection asks a separate inline question and states that local removal does not revoke host access. Disconnect this device asks to remove local credentials and request host revocation. If the host cannot confirm revocation, the resulting status says removal was local only and directs the owner to connected devices. Keep connection receives focus when either question opens. Closing with Keep connection, Back or Escape restores the invoking action when available.
 
@@ -314,13 +326,33 @@ StatusNotice is focusable and declares a polite live setting. Form, approval, pa
 
 System, Light and Dark are native buttons that change the application's RequestedThemeVariant. Their minimum height is 48 units. They explicitly use body typography and the control/text brush pair. Each has an accessible name that says which theme it selects. Their hover, focus, pressed and disabled presentation otherwise belongs to the installed Fluent template; no custom primary, destructive or ghost button family exists.
 
-CompanionShell exposes Options, Setup and Story. Its Options context menu contains an Appearance submenu for System, Light and Dark and separate Customize Home, Connection and Control lab entries. Story opens Story Day and becomes Home while that screen is visible. Customize Home returns to Home, closes detail and actions, expands the Customize footer, and brings it into view with focus. Setup disables Setup, Story, Customize Home and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save for storage failures or Review save conflict for a stale saved revision. Review save conflict is disabled while editing or reading storage. Opening the conflict review hides the duplicate storage footer, disables Setup, Story, Customize Home and Control lab, and focuses the review title after reading. Appearance remains available. There is no tab bar.
+CompanionShell exposes Options and Setup in both modes. Its Options context menu contains an Appearance submenu for System, Light and Dark and separate Customize Home and Connection entries. The explicit demo also exposes Story and Control lab. Story opens Story Day and becomes Home while that screen is visible. Connected mode hides those synthetic destinations and exposes Refresh Home reports. Customize Home returns to Home, closes detail and actions, expands the Customize footer, and brings it into view with focus. Setup disables navigation to other shell tasks until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save for storage failures or Review save conflict for a stale saved revision. Review save conflict is disabled while editing or reading storage. Opening the conflict review hides the duplicate storage footer, disables the other shell tasks, and focuses the review title after reading. Appearance remains available. There is no tab bar.
 
 Native Back and Escape first close Home's open Bloom, then compact place detail, then an expanded Customize footer. Collapsing Customize focuses its Expander. Back from Story, Control lab or save-conflict review returns Home. Leaving conflict review makes no storage or session choice and does not resume automatic saving. At the Home root with no open context the request stays unhandled so the OS can leave the app. Setup handles Back through its draft-discard question. The shell subscribes to its current TopLevel's BackRequested event while attached and unsubscribes when detached.
 
 Android temporarily sets `android:enableOnBackInvokedCallback="false"` in its manifest. In the API 36 emulator, default predictive Back bypassed the app callbacks even though the headless route checks passed. The checked APK with this compatibility opt-out returned from native Garden detail to Home instead of the launcher. Predictive Back and its gesture animation still need separate qualification before this temporary opt-out can be removed.
 
 The Android activity reuses one cached view only within the running process. An API 36 emulator density change and reset triggered recorded activity destruction and recreation in the same process, retaining an edited setup draft. This is not unsaved-draft storage. Process death restores saved setup metadata, binding IDs and roles, pins and section-order preferences only.
+
+### ConnectedHomeWorkspace and report lifetime
+
+ConnectedHomeWorkspace requires a verified session and credential-bound data service. It opens the shared Home shell only after the authorized read succeeds. The existing graph, attention list, PlaceDetail and Bloom use the same semantic resources, household outline icons and Outfit/DM Sans roles as the demo. Connected Home prints its report capture time and the source-report qualification. Its Lucia now panel says task activity is not connected; it never displays the sample request stages. Story and Control lab remain available only through the explicit demo.
+
+ConnectedHomeController refreshes reports every 20 seconds while the view is active and reprojects their age on five-second ticks. Current reports can become Stale while displayed. Read duration contributes to the age bound. The implementation polls; it has no revision stream. Current means recently reported by the source, not independently checked physical state. Connected observations use Reported time. Quiet means recent configured reports, and neither Quiet nor missing attention proves safety, presence or occupancy.
+
+A failed read clears reports, source choices and selection before showing the written recovery state. Suspend also clears them; resume checks access again. Retry Home reports explicitly repeats the check. Connection returns to connection recovery, and revoked or changed authority takes that path. The workspace never substitutes the sample home or treats saved metadata as an offline access grant.
+
+ConnectedProfileScope separates saved metadata by canonical host, home, member and exact Home place/field grants. Equal-access pairing can reuse that setup. A different scope gets a separate profile. Files contain local metadata, not the authorized catalog or source reports. Connected bindings retain SourcePlaceId alongside local place, source and role. Projection accepts only that exact authorized source place. A missing or moved source remains Unavailable and needs explicit binding review; import does not silently rebind an existing assignment.
+
+### HomeImportScreen and HomeImportPlaceRow
+
+Bring your places in opens from connected setup when an authorized catalog is available. Each native place CheckBox exposes its name and source count. Selecting a new place opens editable Name on this device and Icon fields; an existing place instead states that its name, icon, order and connections stay. Sources to bind expands the exact source names and roles. The catalog grants no additional access, supplies no readings in preview and infers no physical room connections.
+
+Preview additions shows counts of new places, new bindings and assignments kept elsewhere, then names each selected place and its source-role additions or conflict. A conflict names the existing owning place and says No reassignment. New places append in catalog order; existing metadata and missing bindings remain. Import never steals a source-role assignment or overwrites a place. Any selection, name or icon change invalidates the preview and disables Add to draft until reviewed again.
+
+Add to draft applies the reviewed plan to the unchanged setup draft and returns to setup. It performs no disk write. Save setup remains the explicit persistence step, with the existing discard protection and revision-conflict recovery. Back without adding leaves the draft untouched. Compact review first returns to selection on Back. Preview focuses the review title; returning to selection focuses its selected place; leaving import restores focus to the setup import action. Invalid selections focus the written ProblemBrush status, and an empty catalog has explicit access/source guidance.
+
+The completed extension passed 249 native tests with zero failures or skips, including the opt-in actual UI, Windows DPAPI, HTTPS, SQLite and HA-wire synthetic-fixture checks. Its reviewed import/recovery evidence includes 12 layout/matrix cases and 24 second-round captures. Captures and review evidence are retained outside the public repository. Independent finish review returned ship with no material fixes. Successful connected Home has narrower visual coverage than that import/recovery matrix. This evidence does not establish an actual household connection, installed Android TLS, iOS, hardware, TalkBack, safe-area or performance qualification. Story, Week and Engine goals remain unfinished.
 
 ### PlaceOrb
 
@@ -338,9 +370,9 @@ Each orb has a native context menu for View readings, Place actions and Toggle p
 
 ### ObservationRow
 
-A read-only row pairs a label with a semibold value, then shows timing or a last-known explanation below. Current requires a current quality, a value and an observed time. Stale, Unavailable or Unknown occupy the current-value position when that condition is unmet.
+A read-only row pairs a label with a semibold value, then shows timing or a last-known explanation below. Current requires a current quality, a value and a timestamp. Stale, Unavailable or Unknown occupy the current-value position when that condition is unmet. Connected source rows label their time Reported; demo observations retain their own time basis. A Reported timestamp never establishes physical verification.
 
-A retained old value appears as "Last known" with its observation time. It never occupies the current-value position. Without an old value, the timing line carries the observed time or "Observation time unknown". The row's accessible name combines its qualified content. A bottom divider separates readings.
+A retained old value appears as "Last known" with its timestamp. It never occupies the current-value position. Without an old value, the timing line carries the timestamp or a written unknown time. Connected rows say "Report time unknown" when no time is supplied; demo rows with an Observed time basis say "Observation time unknown". The row's accessible name combines its qualified content. A bottom divider separates readings.
 
 ### PlaceDetail and detail panels
 
@@ -360,11 +392,11 @@ The Popup uses light dismissal and the overlay layer. Opening focuses Readings. 
 
 ### AttentionList
 
-Needs a look contains native full-width buttons for Problem, Waiting and Unavailable places, in that priority order. Each button has a semibold 14-unit place/state label and a 13-unit reason limited to two visible lines with ellipsis. The accessible name retains the full reason. Activating a row opens that place's readings. Empty attention has a written "Nothing needs a look in this sample" state.
+Needs a look contains native full-width buttons for Problem, Waiting and Unavailable places, in that priority order. Each button has a semibold 14-unit place/state label and a 13-unit reason limited to two visible lines with ellipsis. The accessible name retains the full reason. Activating a row opens that place's readings. Demo empty attention says "Nothing needs a look in this sample". Connected empty attention limits its claim to configured reports and states that no safety or presence conclusion follows.
 
 ### LuciaNow
 
-The compact fixture has three equal columns. Received · done is a sage outlined 16-unit circle. Reading · current is a filled blue circle. Result · pending is a thin neutral outline. Written stage names accompany every marker. Its example request and explicit synthetic/no-running-request notice are part of the control. No request execution, animated progress or completed physical outcome is implied.
+The demo's compact fixture has three equal columns. Received · done is a sage outlined 16-unit circle. Reading · current is a filled blue circle. Result · pending is a thin neutral outline. Written stage names accompany every marker. Its example request and explicit synthetic/no-running-request notice are part of the control. No request execution, animated progress or completed physical outcome is implied. Connected Home hides this fixture and shows the written task-activity-not-connected notice.
 
 ### HomeEditorScreen
 
@@ -400,7 +432,7 @@ Existing rows show the role and source name, or the stored source ID when absent
 
 ObservationSource describes available names and supported roles; ObservationBinding associates a place ID, source ID and role. The same source-role pair can belong to at most one place in the home. A conflicting assignment leaves metadata unchanged and shows BindingError inside the picker. This wrapping, focusable ProblemBrush TextBlock names the current owner and tells the user to remove that binding before reassignment. The picker focuses the error and brings it into view; Source does not take focus while the error is visible. Choosing another source or role clears the error. Physical-neighbor connections do not determine source ownership. A binding changes metadata only, grants no access and creates no current reading.
 
-The demo shell supplies SampleObservationSources with visibly Sample-named synthetic choices. The catalog is an in-memory input, not a persisted discovery record. The optional Bindings field extends the existing version-1 profile with IDs and roles only; a missing field restores no bindings. Binding edits remain in the setup draft until Save and participate in Back protection. This metadata editor supplies no live discovery or real source import. Its sample catalog is separate from ConnectionScreen's owner-approved device session and exact access grants.
+The demo shell supplies SampleObservationSources with visibly Sample-named synthetic choices. Connected setup supplies only the current authorized source catalog and opens HomeImportScreen for reviewed place additions. Catalogs stay in memory. The optional Bindings field extends the existing version-1 profile with IDs, roles and optional SourcePlaceId provenance; a missing field restores no bindings. Binding edits remain in the setup draft until Save and participate in Back protection. Sample choices stay separate from the owner-approved session and its exact grants. A connected binding's exact source-place provenance controls report matching, independently of local physical neighbors.
 
 The picker's phone/tablet and normal/large-text captures are native desktop/headless evidence. A final debug APK installed on a dedicated API 36 emulator also showed the sample source catalog, offered only Temperature for Sample temperature sensor, added its binding, and retained the living-room binding after Save and a force-stop/cold restart. Scoped JSON inspection found metadata only, without observations or catalog values. This bounded emulator result does not qualify physical devices, TalkBack, iOS or performance, or complete the wider application.
 
@@ -454,7 +486,7 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do show each place's name and written state alongside its icon.
 - Do retain the explicit DM Sans body-size override on theme buttons.
 - Do keep observation quality, last-known values and observation time visible.
-- Do identify Home, Story and workbench data as synthetic before their observations or history.
+- Do identify demo Home, Story and workbench data as synthetic before their observations or history.
 - Do use the authored household paths for the implemented place icons.
 - Do preserve explicit place order and keep pinning independent of graph position.
 - Do keep Home's circular selection ring distinct from its rectangular keyboard-focus frame.
@@ -471,13 +503,17 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do show both local metadata alternatives and recheck the reviewed revision before a save-conflict choice.
 - Do keep canonical host, submitted device name, code expiry and exact approved grants readable in connection states.
 - Do distinguish local forgetting from confirmed host revocation and keep removal choices explicit.
+- Do preview exact selected-place additions and source conflicts before Add to draft, then require Save setup for persistence.
+- Do preserve existing place metadata and source ownership during import, and require explicit review for moved sources.
+- Do show connected report quality, Reported time and capture time with the existing Home controls.
+- Do clear reports on read failure or suspend and recheck access before resuming connected Home.
 
 ### Don't:
 
 - Don't use color as the only indication of place state or selection.
 - Don't promote an old reading to the current-value position.
 - Don't infer locked from closed, occupancy from Quiet, or a physical result from a completed request.
-- Don't present verified device access or the shipped owner approval dashboard as live Home, Story or Engine data, real source import or completion of the wider native app.
+- Don't present connected Home and reviewed metadata import as completion of Story, Week, Engine or the wider native app.
 - Don't replace a failed household connection with an automatic synthetic Home.
 - Don't claim real-device accessibility, safe-area or performance qualification from desktop renders.
 - Don't treat illustrative sidecar HTML/CSS or generated color ramps as native implementation tokens.
@@ -491,3 +527,6 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't infer source ownership from physical adjacency or promote a saved binding into a current reading.
 - Don't merge save-conflict metadata automatically or replace an unread file without a safely captured revision.
 - Don't present memory-only session changes as durable unsaved-draft recovery.
+- Don't show sample Story, task stages or Control lab inside connected mode.
+- Don't treat saved bindings, a previous report or an old grant as permission to display an offline household.
+- Don't claim revision streaming or broader successful-Home visual coverage from the import/recovery matrix.

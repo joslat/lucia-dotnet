@@ -11,10 +11,10 @@
       <Grid Name="HomeIdentity" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
         <TextBlock Name="HomeName" Classes="section" VerticalAlignment="Center" TextWrapping="Wrap" />
         <Border Name="DemoBadge" Grid.Column="1" Background="{DynamicResource ControlBrush}" CornerRadius="12" Padding="12,8" VerticalAlignment="Center">
-          <TextBlock Text="Offline demo" FontSize="{DynamicResource TextSize13}" Foreground="{DynamicResource AccentBrush}" />
+          <TextBlock Name="HomeModeLabel" Text="Offline demo" FontSize="{DynamicResource TextSize13}" Foreground="{DynamicResource AccentBrush}" />
         </Border>
       </Grid>
-      <TextBlock Text="Synthetic readings · 24 Oct 2026 · 12:00 UTC" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+      <TextBlock Name="SourceNotice" Text="Synthetic readings · 24 Oct 2026 · 12:00 UTC" Classes="muted" FontSize="{DynamicResource TextSize13}" />
       <TextBlock Name="AttentionSummary" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
     </StackPanel>
     <ScrollViewer Name="HomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
@@ -29,7 +29,13 @@
           </StackPanel>
         </Border>
         <Border Name="LuciaCard" Classes="panel" Padding="12">
-          <c:LuciaNow />
+          <StackPanel Spacing="8">
+            <c:LuciaNow Name="DemoLuciaNow" />
+            <StackPanel Name="ConnectedLuciaNotice" IsVisible="False" Spacing="8">
+              <TextBlock Text="Lucia now" Classes="section" />
+              <TextBlock Text="Task activity is not connected to this view yet. No request status or completed physical outcome is inferred from sensor reports." Classes="muted" />
+            </StackPanel>
+          </StackPanel>
         </Border>
         </StackPanel>
         <StackPanel Name="SidePanel" Grid.Column="1" Spacing="16">

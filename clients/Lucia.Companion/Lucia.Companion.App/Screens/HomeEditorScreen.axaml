@@ -19,6 +19,8 @@
             <ListBox Name="PlacesList" MaxHeight="280" AutomationProperties.Name="Choose a place to edit" />
             <ComboBox Name="PlaceChooser" HorizontalAlignment="Stretch" AutomationProperties.Name="Choose a place to edit" MinHeight="48" />
             <Button Name="AddPlace" Content="Add place" Classes="theme" HorizontalAlignment="Left" />
+            <Button Name="ImportPlaces" Classes="theme" HorizontalAlignment="Left" IsVisible="False"><TextBlock Text="Import authorized places" TextWrapping="Wrap" /></Button>
+            <TextBlock Name="ImportDraftStatus" IsVisible="False" Text="Places added to this draft. Review their setup, then Save setup to keep them." Classes="muted" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
         </Border>
         <Border Name="PlaceFormCard" Classes="panel" Grid.Column="1">
@@ -50,7 +52,7 @@
       </Grid>
     </StackPanel>
     </ScrollViewer>
-    <StackPanel Grid.Row="1" Spacing="8">
+    <StackPanel Name="EditorCommands" Grid.Row="1" Spacing="8">
       <Border Name="DiscardConfirmation" IsVisible="False" Classes="panel" Padding="12">
         <StackPanel Spacing="8">
           <TextBlock Text="Discard the unsaved setup changes?" TextWrapping="Wrap" />
@@ -65,5 +67,6 @@
         <Button Name="CancelEdit" Content="Cancel" Classes="theme" />
       </WrapPanel>
     </StackPanel>
+    <ContentControl Name="ImportHost" Grid.RowSpan="2" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
   </Grid>
 </UserControl>

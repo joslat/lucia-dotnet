@@ -10,10 +10,10 @@ public sealed class AttentionList : UserControl
 {
     public event Action<string>? PlaceInvoked;
 
-    public void SetPlaces(IReadOnlyList<Place> places)
+    public void SetPlaces(IReadOnlyList<Place> places, bool isDemo = true)
     {
         var stack = new StackPanel { Spacing = 8 };
-        stack.Children.Add(new TextBlock { Text = places.Count == 0 ? "Nothing needs a look in this sample" : "Needs a look", Classes = { "section" }, TextWrapping = Avalonia.Media.TextWrapping.Wrap });
+        stack.Children.Add(new TextBlock { Text = places.Count == 0 ? isDemo ? "Nothing needs a look in this sample" : "No configured reports flagged" : "Needs a look", Classes = { "section" }, TextWrapping = Avalonia.Media.TextWrapping.Wrap });
         foreach (var place in places)
         {
             var label = new TextBlock { Text = $"{place.Name} · {place.State}", [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize14"), FontWeight = Avalonia.Media.FontWeight.SemiBold, TextWrapping = Avalonia.Media.TextWrapping.Wrap };

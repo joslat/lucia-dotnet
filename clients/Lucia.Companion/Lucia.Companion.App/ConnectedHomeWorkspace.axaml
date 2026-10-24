@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.ConnectedHomeWorkspace" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: A verified Home, never an automatically substituted synthetic household.
+       OWN-WORLD: The approved Constellation Home compositions and shared Observatory/native control language.
+       STORY: Read qualified reports, configure local places deliberately, refresh/recover without stale authority.
+       FIRST VIEWPORT: Existing Home graph after access/source checks; a readable recovery state instead when reports cannot be verified.
+       FORM: Local Operate extension, phone stack and tablet Home composition unchanged.
+       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+  <Grid>
+    <ContentControl Name="ConnectedShellHost" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+    <ScrollViewer Name="HomeReadState" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="20,32" Spacing="20" MaxWidth="720" HorizontalAlignment="Center">
+        <Path Data="{x:Static c:PlaceIcons.Home}" Width="44" Height="44" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7" HorizontalAlignment="Left" />
+        <TextBlock Text="Home reports" Classes="title" TextWrapping="Wrap" />
+        <TextBlock Name="HomeReadStatus" Text="Checking access and reading Home reports." TextWrapping="Wrap" Focusable="True" AutomationProperties.LiveSetting="Polite" />
+        <TextBlock Text="The home appears only after its access and source reports have been verified. A connection error never opens the demo." Classes="muted" />
+        <WrapPanel>
+          <Button Name="RetryHomeReports" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Retry Home reports" TextWrapping="Wrap" /></Button>
+          <Button Name="ManageHomeConnection" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Connection" TextWrapping="Wrap" /></Button>
+        </WrapPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

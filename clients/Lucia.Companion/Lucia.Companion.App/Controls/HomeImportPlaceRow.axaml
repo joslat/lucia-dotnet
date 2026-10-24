@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.Controls.HomeImportPlaceRow">
+  <Border BorderBrush="{DynamicResource GraphLineBrush}" BorderThickness="0,0,0,1" Padding="0,12">
+    <StackPanel Spacing="12">
+      <CheckBox Name="SelectImportPlace" MinHeight="48" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+        <Grid ColumnDefinitions="32,*" ColumnSpacing="12">
+          <Path Name="ImportPlaceIcon" Width="24" Height="24" Stretch="Uniform" Stroke="{DynamicResource TextBrush}" StrokeThickness="1.7" VerticalAlignment="Top" Margin="0,4,0,0" />
+          <StackPanel Grid.Column="1" Spacing="4">
+            <TextBlock Name="ImportSourcePlaceName" TextWrapping="Wrap" FontWeight="SemiBold" />
+            <TextBlock Name="ImportSourceCount" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+          </StackPanel>
+        </Grid>
+      </CheckBox>
+      <StackPanel Name="SelectedPlaceFields" IsVisible="False" Spacing="12" Margin="12,0,0,0">
+        <TextBlock Name="ExistingPlaceNotice" IsVisible="False" Classes="muted" />
+        <StackPanel Name="NewPlaceFields" Spacing="8">
+          <TextBlock Text="Name on this device" />
+          <TextBox Name="ImportPlaceName" MaxLength="80" />
+          <TextBlock Name="ShortNameNotice" IsVisible="False" Text="Suggested name shortened to fit. Review it before adding." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+          <TextBlock Text="Icon" />
+          <ComboBox Name="ImportPlaceIconChoice" MinHeight="48" HorizontalAlignment="Stretch" />
+        </StackPanel>
+        <Expander Name="ImportSources" Header="Sources to bind" MinHeight="48" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+          <StackPanel Name="ImportSourceNames" Spacing="8" Margin="0,8,0,0" />
+        </Expander>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

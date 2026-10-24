@@ -11,5 +11,6 @@ public interface ICompanionConnection
     Task<bool> DisconnectAsync(CancellationToken cancellationToken = default);
     Task ForgetAsync(CancellationToken cancellationToken = default);
     Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default);
+    Task<HomeSnapshot> ReadHomeAsync(ConnectionSession expected, CancellationToken cancellationToken = default);
     Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default);
 }

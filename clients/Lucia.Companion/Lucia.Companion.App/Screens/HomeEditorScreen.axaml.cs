@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.App.Controls;
 using Lucia.Companion.Core;
+using Lucia.Companion.Connection;
 
 namespace Lucia.Companion.App.Screens;
 
@@ -18,11 +19,13 @@ public sealed partial class HomeEditorScreen : UserControl
 
     public HomeEditorScreen() : this(SampleHome.Create()) { }
 
-    public HomeEditorScreen(HomeTopology home, IReadOnlyList<ObservationSource>? sources = null)
+    public HomeEditorScreen(HomeTopology home, IReadOnlyList<ObservationSource>? sources = null, HomeCatalog? importCatalog = null)
     {
         draft = new(home);
         this.sources = Array.AsReadOnly((sources ?? []).ToArray());
         AvaloniaXamlLoader.Load(this);
+        this.FindControl<Button>("ImportPlaces")!.IsVisible = importCatalog is not null;
+        this.FindControl<Button>("ImportPlaces")!.Click += (_, _) => { if (importCatalog is not null) { OpenImport(importCatalog); } };
         var bindings = this.FindControl<SourceBindingPicker>("BindingPicker")!;
         bindings.BindingRequested += (source, role) =>
         {
@@ -72,6 +75,7 @@ public sealed partial class HomeEditorScreen : UserControl
 
     public void RequestBack()
     {
+        if (this.FindControl<ContentControl>("ImportHost")! is { IsVisible: true, Content: HomeImportScreen import }) { import.RequestBack(); return; }
         var removal = this.FindControl<StackPanel>("RemovalConfirmation")!;
         if (removal.IsVisible)
         {
@@ -82,6 +86,37 @@ public sealed partial class HomeEditorScreen : UserControl
         if (this.FindControl<Border>("DiscardConfirmation")!.IsVisible) { ShowDiscardQuestion(false); return; }
         if (HasPendingChanges()) { ShowDiscardQuestion(true); }
         else { CancelRequested?.Invoke(); }
+    }
+
+    private void OpenImport(HomeCatalog catalog)
+    {
+        if (!TryApplyCurrent() || !RunEdit(() => draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty))) { return; }
+        var import = new HomeImportScreen(draft.Build(), catalog);
+        import.CancelRequested += CloseImport;
+        import.ApplyRequested += plan =>
+        {
+            try
+            {
+                draft.ApplyImport(plan);
+                RebuildList(plan.AddedPlaceIds.FirstOrDefault() ?? selectedId ?? draft.Places.FirstOrDefault()?.Id);
+                this.FindControl<TextBlock>("ImportDraftStatus")!.IsVisible = true;
+                CloseImport();
+            }
+            catch (InvalidOperationException) { CloseImport(); ShowError("The draft changed. Open import and review the additions again."); }
+        };
+        this.FindControl<ScrollViewer>("EditorScroll")!.IsVisible = false;
+        this.FindControl<StackPanel>("EditorCommands")!.IsVisible = false;
+        var host = this.FindControl<ContentControl>("ImportHost")!;
+        host.Content = import; host.IsVisible = true;
+    }
+
+    private void CloseImport()
+    {
+        var host = this.FindControl<ContentControl>("ImportHost")!;
+        host.IsVisible = false; host.Content = null;
+        this.FindControl<ScrollViewer>("EditorScroll")!.IsVisible = true;
+        this.FindControl<StackPanel>("EditorCommands")!.IsVisible = true;
+        this.FindControl<Button>("ImportPlaces")!.Focus();
     }
 
     private bool HasPendingChanges()

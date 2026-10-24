@@ -45,7 +45,7 @@ public sealed class HomeImportPlan
             }
             foreach (var source in imported.Sources)
             {
-                var proposed = new ObservationBinding(choice.PlaceId, source.SourceId, source.Field);
+                var proposed = new ObservationBinding(choice.PlaceId, source.SourceId, source.Field, imported.PlaceId);
                 if (assigned.TryGetValue((source.SourceId, source.Field), out var existing))
                 {
                     if (existing.PlaceId != choice.PlaceId) { conflicts.Add(new(source.SourceId, source.Field, existing.PlaceId, choice.PlaceId)); }

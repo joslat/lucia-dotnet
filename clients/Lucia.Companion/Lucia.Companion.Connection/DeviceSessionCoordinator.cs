@@ -60,14 +60,21 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
     }
 
     public Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default) => ReadAuthorizedAsync(api.GetHomeAsync, cancellationToken);
+    public Task<HomeSnapshot> ReadHomeAsync(ConnectionSession expected, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(expected);
+        return ReadAuthorizedAsync(api.GetHomeAsync, cancellationToken, expected);
+    }
     public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => ReadAuthorizedAsync(api.GetDiscoveryAsync, cancellationToken);
 
-    private async Task<T> ReadAuthorizedAsync<T>(Func<string, DeviceSession, CancellationToken, Task<T>> read, CancellationToken cancellationToken)
+    private async Task<T> ReadAuthorizedAsync<T>(Func<string, DeviceSession, CancellationToken, Task<T>> read, CancellationToken cancellationToken, ConnectionSession? expected = null)
     {
         // Keep renewal, verification and data read under the same cross-instance lease. No token is returned to the app.
         await using var lease = await vault.OpenAsync(cancellationToken).ConfigureAwait(false);
         var metadata = await RestoreCoreAsync(lease, cancellationToken).ConfigureAwait(false)
             ?? throw new SessionStateException(SessionStateFailure.ConnectionRequired);
+        if (expected is not null && (expected.Endpoint != api.Endpoint || !MatchesHomeAccess(expected.Session, metadata)))
+        { throw new SessionStateException(SessionStateFailure.IdentityChanged); }
         var stored = await lease.ReadAsync(cancellationToken).ConfigureAwait(false)
             ?? throw new SessionStateException(SessionStateFailure.ConnectionRequired);
         try { return await read(stored.Credentials.AccessToken, metadata, cancellationToken).ConfigureAwait(false); }
@@ -77,6 +84,11 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
             throw;
         }
     }
+
+    private static bool MatchesHomeAccess(DeviceSession expected, DeviceSession current) => expected.SessionId == current.SessionId
+        && expected.HomeId == current.HomeId && expected.MemberId == current.MemberId && expected.Places.Count == current.Places.Count
+        && current.Places.All(place => expected.Places.SingleOrDefault(item => item.PlaceId == place.PlaceId) is { } previous
+            && previous.Fields.ToHashSet().SetEquals(place.Fields));
 
     /// <returns>True only when the host confirmed revocation, or there was no stored connection. False means local removal only.</returns>
     public async Task<bool> DisconnectAsync(CancellationToken cancellationToken = default)

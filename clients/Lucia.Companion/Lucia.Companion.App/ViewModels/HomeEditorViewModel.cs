@@ -1,4 +1,5 @@
 using Lucia.Companion.Core;
+using Lucia.Companion.App.Configuration;
 
 namespace Lucia.Companion.App.ViewModels;
 
@@ -44,7 +45,7 @@ public sealed class HomeEditorViewModel
         RequirePlace(placeId);
         ArgumentNullException.ThrowIfNull(source);
         if (!source.SupportedRoles.Contains(role)) { throw new ArgumentException("Choose a role supported by this source.", nameof(role)); }
-        var binding = new ObservationBinding(placeId, source.Id, role);
+        var binding = new ObservationBinding(placeId, source.Id, role, source.SourcePlaceId);
         if (Bindings.Contains(binding)) { return; }
         var assigned = Bindings.FirstOrDefault(existing => existing.SourceId == source.Id && existing.Role == role);
         if (assigned is not null)
@@ -87,6 +88,7 @@ public sealed class HomeEditorViewModel
     }
 
     public HomeTopology Build() => draft;
+    public void ApplyImport(HomeImportPlan plan) => draft = plan.ApplyTo(draft);
     private void Replace(IEnumerable<Place> places, IEnumerable<PlaceConnection> connections, IEnumerable<ObservationBinding>? bindings = null)
     {
         var snapshot = places.ToArray();

@@ -7,6 +7,7 @@ using Avalonia.Styling;
 using Lucia.Companion.App.Screens;
 using Lucia.Companion.App.Persistence;
 using Lucia.Companion.App.ViewModels;
+using Lucia.Companion.Connection;
 
 namespace Lucia.Companion.App;
 
@@ -20,8 +21,11 @@ public sealed partial class CompanionShell : UserControl
     private readonly MenuItem controlLab = new() { Header = "Control lab" };
     private readonly MenuItem customizeHome = new() { Header = "Customize Home" };
     private TopLevel? attachedTopLevel;
+    private HomeCatalog? importCatalog;
+    private bool refreshing;
     public HomeProfileSession ProfileSession => profileSession;
     public event Action? ConnectionRequested;
+    public event Action? RefreshRequested;
     public void RequestConnection() => ConnectionRequested?.Invoke();
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create(), SampleObservationSources.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
@@ -35,13 +39,15 @@ public sealed partial class CompanionShell : UserControl
         var appearance = this.FindControl<Button>("AppearanceButton")!;
         var connectionItem = new MenuItem { Header = "Connection" };
         connectionItem.Click += (_, _) => RequestConnection();
-        appearance.ContextMenu = new ContextMenu
-        {
-            ItemsSource = new[] { new MenuItem { Header = "Appearance", ItemsSource = new[]
+        var menu = new List<MenuItem> { new MenuItem { Header = "Appearance", ItemsSource = new[]
             {
                 ThemeItem("System", ThemeVariant.Default), ThemeItem("Light", ThemeVariant.Light), ThemeItem("Dark", ThemeVariant.Dark)
-            }}, customizeHome, connectionItem, controlLab }
-        };
+            }}, customizeHome, connectionItem };
+        if (state.IsDemo) { menu.Add(controlLab); }
+        appearance.ContextMenu = new ContextMenu { ItemsSource = menu };
+        this.FindControl<Button>("StoryButton")!.IsVisible = state.IsDemo;
+        this.FindControl<Button>("RefreshHomeReports")!.IsVisible = !state.IsDemo;
+        this.FindControl<Button>("RefreshHomeReports")!.Click += (_, _) => RefreshRequested?.Invoke();
         appearance.Click += (_, _) => appearance.ContextMenu.Open(appearance);
         this.FindControl<Button>("BuildHomeButton")!.Click += (_, _) => OpenEditor();
         this.FindControl<Button>("RetrySaveButton")!.Click += (_, _) => profileSession.RetrySave();
@@ -75,6 +81,7 @@ public sealed partial class CompanionShell : UserControl
 
     private void OnBackRequested(object? sender, RoutedEventArgs args)
     {
+        if (!IsEffectivelyVisible) { return; }
         if (!args.Handled) { args.Handled = NavigateBack(); }
     }
 
@@ -90,7 +97,7 @@ public sealed partial class CompanionShell : UserControl
     private void OpenEditor()
     {
         if (profileSession.HasUnreadableProfile && !profileSession.CanReplaceUnreadableProfile) { return; }
-        var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog);
+        var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog, importCatalog);
         if (profileSession.HasUnreadableProfile) { editor.WarnAboutReplacement(); }
         editor.CancelRequested += ShowHome;
         editor.SaveRequested += updated =>
@@ -138,6 +145,7 @@ public sealed partial class CompanionShell : UserControl
 
     private void SwitchStory()
     {
+        if (!home.State.IsDemo) { return; }
         var host = this.FindControl<ContentControl>("ScreenHost")!;
         if (host.Content is StoryScreen) { ShowHome(); return; }
         if (!ReferenceEquals(storyHome, home.State.Home))
@@ -168,7 +176,11 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<Button>("StoryButton")!.IsEnabled = !profileSession.IsLoading && !reviewing && content is not HomeEditorScreen;
         controlLab.IsEnabled = this.FindControl<Button>("StoryButton")!.IsEnabled;
         customizeHome.IsEnabled = controlLab.IsEnabled;
+        this.FindControl<Button>("RefreshHomeReports")!.IsEnabled = !refreshing && !profileSession.IsLoading && content is not HomeEditorScreen && !reviewing;
     }
+
+    public void SetImportCatalog(HomeCatalog? catalog) => importCatalog = catalog;
+    public void SetRefreshing(bool value) { refreshing = value; RefreshStorageState(); }
 
     private static MenuItem ThemeItem(string label, ThemeVariant theme)
     {

@@ -69,6 +69,10 @@ public sealed partial class HomeScreen : UserControl
 
     private void Refresh()
     {
+        this.FindControl<TextBlock>("HomeModeLabel")!.Text = State.IsDemo ? "Offline demo" : "Connected";
+        this.FindControl<TextBlock>("SourceNotice")!.Text = State.SourceNotice;
+        this.FindControl<LuciaNow>("DemoLuciaNow")!.IsVisible = State.IsDemo;
+        this.FindControl<StackPanel>("ConnectedLuciaNotice")!.IsVisible = !State.IsDemo;
         var stackIdentity = Bounds.Width < 600 && this.FindControl<TextBlock>("HomeName")!.FontSize > 32;
         Grid.SetColumnSpan(this.FindControl<TextBlock>("HomeName")!, stackIdentity ? 2 : 1);
         var badge = this.FindControl<Border>("DemoBadge")!;
@@ -81,10 +85,10 @@ public sealed partial class HomeScreen : UserControl
         {
             this.FindControl<TextBlock>("HomeName")!.Text = State.Home.Name;
             this.FindControl<TextBlock>("AttentionSummary")!.Text = State.AttentionPlaces.Count == 0
-                ? "No places need a look in this sample."
+                ? State.IsDemo ? "No places need a look in this sample." : "Configured reports only. No safety or presence conclusion."
                 : $"{State.AttentionPlaces.Count} places need a look · {State.AttentionPlaces[0].Name} first";
             constellation.SetHome(State.Home);
-            this.FindControl<AttentionList>("Attention")!.SetPlaces(State.AttentionPlaces);
+            this.FindControl<AttentionList>("Attention")!.SetPlaces(State.AttentionPlaces, State.IsDemo);
             renderedHome = State.Home;
         }
 

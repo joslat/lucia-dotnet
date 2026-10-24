@@ -1,6 +1,6 @@
 # Lucia Companion (experimental)
 
-Native Avalonia client for the Constellation mobile/tablet design. It opens a real HTTPS device-connection preview, with protected storage on Windows and Android. The dashboard has an owner approval/device-management pilot. Home, local setup and Story Day remain an explicitly selected synthetic demo; live household views are not built yet, so this is not a completed MVP. No model calls or physical actions. The demo control workbench remains available through Options, then Control lab.
+Native Avalonia client for the Constellation mobile/tablet design. Connection uses HTTPS with protected storage on Windows and Android; owners approve exact read grants in the dashboard. Connected Home now reads authorized source reports, imports selected places through a reviewed draft, and saves local configuration. Home/setup and Story Day also remain available as an explicitly selected synthetic demo. Production Story/Week, activity, Engine room and release qualification are unfinished. No model calls or physical actions. The demo control workbench remains available through Options, then Control lab.
 
 ## Smallest shared architecture
 
@@ -27,7 +27,7 @@ dotnet build clients/Lucia.Companion/Lucia.Companion.slnx
 
 Choose Explore the demo explicitly to open sample observations. Click/tap an orb or use Tab and Enter/Space to select them. Phone opens a detail view with Back; tablet keeps details beside the graph. Place actions opens named Bloom shortcuts for readings, pinning and dismissal. Context menus offer the same actions. Options, then Appearance offers System, Light and Dark. All demo readings and task stages are synthetic. Options, then Connection returns to connection management without discarding the demo session.
 
-Build your home stages place names/icons, physical connections, ordering, observation bindings and removal until Save. Choose a source and a supported report role; a source-role pair belongs to one place in the home. Existing bindings remain visible if a source disappears from discovery, with explicit removal. New places stay unavailable until qualified readings arrive. The default app offers labelled sample sources; real authorized discovery/import is not connected yet.
+Build your home stages place names/icons, physical connections, ordering, observation bindings and removal until Save. Choose a source and a supported report role; a source-role pair belongs to one place in the home. Existing bindings remain visible if a source disappears from discovery, with explicit removal. New places stay unavailable until qualified readings arrive. The demo offers labelled sample sources. Open your home on a verified connection to read authorized reports; Build your home then Import authorized places opens the real catalog. Select, Preview additions, Add to draft, then Save setup. On compact/large-text layouts Change selection or Back returns from review without losing choices. Normal tablet layouts show selection and review beside each other.
 
 Optional native screenshots:
 
@@ -36,7 +36,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-The 218 client tests cover semantics, transport, protected storage, session recovery and native interactions. Home transport adds 29 checks and import/scope rules add 11. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover binding validation, competing local writers, conflict recovery, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. Connection checks include explicit demo separation, approval identity, grant disclosure and focus continuity. Windows-only DPAPI tests explicitly skip on other operating systems. None of these tests qualifies physical-device accessibility, safe areas or performance.
+The latest full Windows qualification passes 249 client tests, including the opt-in real-wire UI case. Ordinary runs skip that one case unless the isolated fixture is configured. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover bindings/import, source provenance, competing local writers, conflict recovery, section order, Back, drafts and text roles through 200% in phone/tablet light/dark layouts. Connection checks include demo separation, approval identity, grants and recovery. Windows-only DPAPI tests explicitly skip on other operating systems. None qualifies physical-device accessibility, safe areas or performance.
 
 ### Android
 
@@ -63,6 +63,8 @@ The installed conflict-recovery check deliberately changes the synthetic saved f
 
 The connection-preview APK also passes a bounded API 36 installed check. Cold startup opens connection first. A closed emulator-loopback HTTPS port produces a written error, saves no session and never opens the demo automatically. Explicit demo entry, Options then Connection, and system Back return work. The native keyboard can consume the first Back to hide itself. With the soft keyboard enabled, the focused host field remains above it. Native 200% text changes the form layout. The existing synthetic setup hash stays unchanged; the crash buffer is empty. These checks do not establish successful installed TLS pairing, real-source integration, TalkBack or hardware qualification.
 
+The connected Home/import debug package was rebuilt after the compact-review fix with zero warnings/errors and installed on the dedicated API36 emulator. Its bounded smoke repeats cold connection-first startup and a closed emulator-local HTTPS failure. No session is saved, the original synthetic setup hash is unchanged and the crash buffer stays empty. The emulator was stopped. This is package/startup/failure evidence, not successful installed connected Home or TLS qualification.
+
 ### Native navigation and text
 
 Back closes Bloom before phone detail, then returns Story or the control lab to Home. At Home root it lets Android leave the app. Setup Back first closes a removal question, then asks before discarding changed fields, including invalid unsaved text. Keep editing preserves those fields; Discard changes never saves them. Explicit Cancel remains an intentional discard. The keyboard can consume the first Back to hide itself.
@@ -75,7 +77,7 @@ The prototype temporarily opts out of predictive Back in its manifest. On the te
 
 ## Status and engineering boundaries
 
-Implemented: connection-first native preview, protected restoration/recovery, owner dashboard approval/device management, host-side authorized Home snapshot/discovery, observation semantics, validated topology, shared selection, HomeConstellation, attention, read-only detail, named BloomActions, local setup, metadata/pin persistence and a thin fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. The host has opt-in native sessions and owner-approved pairing endpoints. Native discovery/import and live views, iOS storage and real history remain open.
+Implemented: connection-first native access/recovery, owner approval/device management, authorized Home snapshot/discovery and visible connected Home/import, observation semantics, topology, shared selection, HomeConstellation, attention, read-only detail, Bloom, local setup/preferences and a fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. Activity/history/Engine adapters, owner catalog selection, revisioned updates, iOS storage and installed connected-platform qualification remain open.
 
 - Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. The separate host-side security module does not add server dependencies to the native client.
 - HomeViewModel owns shared selection and pins without UI dependencies. HomeEditorViewModel owns draft edits. HomeProfileSession coordinates persistence/recovery; LocalHomeStore owns file I/O. Controls raise named intents, not service calls.
@@ -100,11 +102,13 @@ Customize at the bottom of Home, or Options then Customize Home, changes the ord
 
 The binding picker reports rejected duplicate assignments beside its own controls, focuses the error and names the existing place plus the removal step. Missing discovery never deletes existing metadata. Removing a place removes its draft connections and bindings; Cancel leaves the saved setup untouched. A bound place without readings says so rather than claiming no bindings exist.
 
-Import merge rules now have a tested non-visual implementation. `HomeImportPlan` stages only explicitly selected catalog places and their typed bindings. Existing names/icons, order, connections, readings and missing bindings stay unchanged. An already-assigned source is flagged, never stolen. Re-import adds nothing twice. Accepting a preview after another draft edit requires a fresh review. Capacity/name/selection failures leave the original untouched. This code does not save metadata, request permissions or infer room connections. Names for new rooms must be explicitly supplied within the existing 80-character limit.
+`HomeImportPlan` stages only explicitly selected authorized catalog places and typed bindings. Existing names/icons, order, connections and missing bindings stay unchanged. An already-assigned source is flagged, never stolen. Re-import adds nothing twice. Input changes invalidate the preview. Capacity/name/selection failures leave the original untouched. Import does not save metadata, request permissions or infer room connections. Review proposed names/icons before Add to draft; Save setup remains separate. Names fit the existing 80-character limit.
 
-`ConnectedProfileScope` computes a separate opaque filename from the canonical HTTPS endpoint, exact home ID and member ID. It remains stable across re-pairing with a new session/device label, but differs across hosts/homes/people. The offline demo path stays separate. This filename and merge policy are not wired into visible import or storage yet. Connected views must also filter old imported metadata when a new grant is narrower; a scoped filename alone does not authorize showing it.
+`ConnectedProfileScope` computes a separate opaque filename from canonical HTTPS endpoint, exact home/member IDs and sorted exact Home place/field grants. Re-pairing with the same Home access reuses metadata; a narrower or different grant selects another file without deleting the previous one. Session/device labels and unrelated activity/history/Engine flags do not change this key. The offline demo path stays separate. A filename never grants access: every read revalidates the exact view identity/grant under the protected lease before data reaches Home.
 
-Configuration verification includes core rules and native headless phone/tablet checks, not full platform qualification. The protected transport/source boundary is described below. Visible connected import/Home and production Story history remain unfinished. BUILD-PLAN.md tracks the active full-application goal; these checkpoints do not complete it.
+Bindings persist optional exact `SourcePlaceId` provenance, not readings. A moved, missing or legacy unqualified source stays unavailable until explicitly reviewed; no report is borrowed from its new location. Connected reports say Reported, not Observed. Current reports age against server capture/report time plus monotonic elapsed time. Source failures, suspension and revocation clear reports; foreground revalidates access without replacing a surviving editor draft. Foreground reads run every 20 seconds, with five-second aging ticks. Source failure stops automatic polling until deliberate retry or foreground. This is not a revision stream or historical coverage.
+
+Connected Home hides synthetic Story, Control lab and Lucia now task stages. It states that task information is not connected. Configuration and report verification include native headless phone/tablet checks, not full platform qualification. BUILD-PLAN.md tracks the full application; this checkpoint does not complete it.
 
 ## Native-session host foundation
 
@@ -177,17 +181,29 @@ Only allowlisted reports cross the boundary. Temperature, humidity, moisture and
 
 `Companion:MaximumObservationAge` defaults to `00:30:00`, bounded from one second to one day. `Companion:HomeReadTimeout` defaults to `00:00:10`, bounded from one to thirty seconds, including providers that ignore cancellation. Source errors return 503 without cached/sample substitution or upstream diagnostic text. Limits are 2,000 raw areas, 20,000 raw entities/devices/states each, 2,000 projected sources and 512 KiB serialized output. Oversize returns 422 `home_projection_too_large`, never partial results. Existing credential/owner rate limits cover these reads. These pilot limits do not bound an adversarial upstream HTTP body or distributed load.
 
-The 218-test scoped server/auth/migration/source regression passes. It includes 40 Home cases plus protected native connection integration with real HTTP states and three registry WebSocket commands against a synthetic loopback HA-protocol fixture. This proves adapter behavior, not an installed HA version or household. Explicit native import, visible connected Home, owner catalog selection and revisioned updates remain open, as do historical/Engine adapters and platform gates.
+The current focused Companion/auth/migration regression passes 188 cases, including actual HTTP states and three registry WebSocket commands against a synthetic loopback HA-protocol fixture. An expanded 211-case run adds SQLite key tests and exposes two existing expiry failures in unchanged code on a non-UTC host, with 209 passing. These failures remain an explicit security follow-up, not a green suite. This proves isolated adapter behavior, not an installed HA version or household. Owner catalog selection, revisioned updates, activity/history/Engine and platform gates remain open.
 
 ### Native transport library
 
 `Lucia.Companion.Connection` references Core only, not Avalonia, AgentHost, HA or model packages. It owns HTTP and validated immutable wire types; Core remains independent of network I/O. The visible app calls its UI-safe `ICompanionConnection` boundary. It exposes display codes and verified session metadata, never credential sets or the pending device secret. There is no new NuGet package.
 
-`ICompanionConnection.ReadHomeAsync` and `DiscoverAsync` return typed read-only reports/catalogs without credentials. They serialize with connection changes and hold the protected cross-instance lease through renewal, current grant verification and data read. Received replacements must be protected before use. Authority loss during data read clears the vault; source/transport failures preserve it for deliberate retry, never substitute sample data. Reports/catalogs are not persisted in the session vault or home profile. The visible native app has not wired these operations into Home/import yet.
+`ICompanionConnection.ReadHomeAsync` and `DiscoverAsync` return typed read-only reports/catalogs without credentials. They serialize with connection changes and hold the protected cross-instance lease through renewal, current grant verification and data read. The view-bound read also compares the expected endpoint/session/home/member and exact Home grants before requesting data. Received replacement credentials must be protected before use. Authority loss clears the vault; source/transport failures preserve it for deliberate retry, never substitute sample data. Reports/catalogs remain in memory. Connected Home/import uses these protected operations.
 
 Home responses have a separate 512 KiB limit. Credential/session responses retain their 64 KiB limit; headers/content retain independent deadlines. Constructors reject missing/duplicate/orphan sources, unsupported fields/quality, invalid numeric units and contradictory report times/quality. Every returned place/field must fit the freshly verified grant before the result reaches the caller. Discovery has separate metadata-only types, no readings property. API-level validation is defense in depth, not a substitute for the host's own filtering.
 
 An isolated end-to-end test pairs through the UI-safe connection service, protects credentials, reads discovery and source reports, advances expiry, renews, rejects the old access token, remotely revokes and clears local storage. It crosses actual HTTPS/Kestrel/SQLite and the actual HA REST/WebSocket adapter with synthetic source responses. It is not proof of an installed Android/iOS networking stack or a real household.
+
+The opt-in `ConnectedHomeWireScreenTests` joins that transport to the actual native root, owner-approved pairing, explicit import, Save, reopen, refresh and remote revocation. On Windows it uses DPAPI in a temporary test directory. Run the synthetic fixture in a separate terminal, copy its printed loopback URL and public certificate digest into the test process, then run the case:
+
+```powershell
+dotnet run --project lucia-playwright/fixtures/CompanionBrowserHost -- --native-home
+# Separate terminal, values printed by that fixture only:
+$env:LUCIA_COMPANION_WIRE_URL = '<LUCIA_BROWSER_FIXTURE_URL>'
+$env:LUCIA_COMPANION_WIRE_CERT = '<LUCIA_FIXTURE_CERT_SHA256>'
+dotnet test clients/Lucia.Companion/Lucia.Companion.Tests --filter FullyQualifiedName~ConnectedHomeWireScreenTests
+```
+
+Enter `stop` in the fixture terminal afterward. Native mode has a nine-minute safety limit. The fixture binds loopback only, creates synthetic SQLite/HA protocol data, and never loads real AgentHost secrets or household configuration. Only the test client pins its temporary certificate; production retains platform HTTPS trust. Its synthetic owner driver is separate from the native service, which never receives an owner key. Without the fixture variables the case explicitly skips, rather than claiming wire qualification.
 
 `CompanionApiClient` accepts one HTTPS origin with no embedded credentials, query, fragment or path prefix. Reverse-proxy path-prefix hosting is not supported yet. Production uses the platform certificate trust policy, disables redirects, cookies and default credentials, and never sends an owner key. Test-only constructors are internal to the two test assemblies; the integration host pins only its own temporary certificate. The public constructor refuses that untrusted certificate.
 

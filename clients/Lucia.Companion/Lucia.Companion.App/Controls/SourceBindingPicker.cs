@@ -81,9 +81,11 @@ public sealed class SourceBindingPicker : UserControl
             var known = sources.FirstOrDefault(item => item.Id == binding.SourceId);
             var row = new StackPanel { Spacing = 6 };
             row.Children.Add(new TextBlock { Text = $"{binding.Role} · {known?.Name ?? binding.SourceId}", TextWrapping = TextWrapping.Wrap });
-            if (known is null || !known.SupportedRoles.Contains(binding.Role))
+            if (known is null || !known.SupportedRoles.Contains(binding.Role) || known.SourcePlaceId is not null && known.SourcePlaceId != binding.SourcePlaceId)
             {
-                row.Children.Add(new TextBlock { Text = "Source or role is not in current discovery. Binding kept; no current reading is inferred.", Classes = { "muted" },
+                row.Children.Add(new TextBlock { Text = known?.SourcePlaceId is not null && known.SourcePlaceId != binding.SourcePlaceId
+                    ? "Source location changed or was not qualified. Remove and rebind it after review. Binding kept; no current reading is inferred."
+                    : "Source or role is not in current discovery. Binding kept; no current reading is inferred.", Classes = { "muted" },
                     [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13") });
             }
             var remove = new Button { Content = "Remove binding", Classes = { "theme" }, HorizontalAlignment = HorizontalAlignment.Left };
