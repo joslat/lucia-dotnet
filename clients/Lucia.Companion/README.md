@@ -34,7 +34,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-Tests use headless Avalonia with the real Skia renderer, not HTML. The 85 cases cover shared semantics, native interactions, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
+Tests use headless Avalonia with the real Skia renderer, not HTML. The 95 cases cover shared semantics, native interactions, persisted section ordering, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
 
 ### Android
 
@@ -84,7 +84,9 @@ The prototype saves `Lucia/Companion/offline-home.json` under the platform's loc
 
 Writes use a same-directory temporary file and serialized replacement. Invalid schema, invalid topology or unreadable JSON leaves the original file untouched and disables automatic saving. Build your home then offers an explicit Replace saved setup action. An I/O failure leaves the session usable and offers Retry save.
 
-Current verification includes core/configuration tests and native headless phone/tablet checks, not a production data boundary or full platform qualification. Production Story history, source import, observation-binding editing and section-order preferences remain future work.
+Customize at the bottom of Home, or Options then Customize Home, changes the order of Your places, Needs a look and Lucia now. Named earlier/later buttons work without dragging. Restore default order resets the preference. All sections remain present and room positions stay unchanged. Phone follows the chosen order; tablet prioritizes the first section while keeping the room graph in the wide column. Back collapses Customize before leaving Home. The additive optional schema-1 preference defaults for older saved files.
+
+Current verification includes core/configuration tests and native headless phone/tablet checks, not a production data boundary or full platform qualification. Production Story history, source import and observation-binding editing remain future work. BUILD-PLAN.md tracks the active full-application goal; this checkpoint does not complete it.
 
 ## StoryOrbit Day
 

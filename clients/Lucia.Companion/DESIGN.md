@@ -146,7 +146,7 @@ components:
 
 Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.
 
-This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, live household and sensor bindings, import and section-order preferences remain unbuilt.
+This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup, Customize section ordering, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, live household and sensor bindings, and import remain unbuilt. This record describes the current UI; BUILD-PLAN.md owns the remaining work toward the full application.
 
 Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
@@ -161,6 +161,7 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Story keeps reported intervals, last-known values and missing reports visibly distinct.
 - Home and Bloom remain static; Story optionally transitions only its selected time hand.
 - Platform text settings resize individual type roles, with layout adaptations for larger text.
+- Customize changes the order of the three Home sections without hiding any section or rearranging places.
 
 ## Colors
 
@@ -226,7 +227,9 @@ Line height and tracking use native defaults. No custom scale ratio, uppercase l
 
 ### Home and setup
 
-Home and setup use 16-unit outer margins and composition gaps. Home changes to its expanded layout when its own Bounds.Width reaches 900 units. The graph and Lucia now sit in the main column; attention and selected-place details share a 340-unit side column. Below that threshold, attention moves between the graph and Lucia now. Selecting a place opens a separate vertically scrolling detail view with "Back to your home". Back and Escape return to the graph and restore focus to the selected place. Opening phone detail focuses Back.
+Home and setup use 16-unit outer margins and composition gaps. Home changes to its expanded layout when its own Bounds.Width reaches 900 units. At the default section order, the graph and Lucia now sit in the main column; attention and selected-place details share a 340-unit side column. Below that threshold, all three sections follow the saved order in one column. Selecting a place opens a separate vertically scrolling detail view with "Back to your home". Back and Escape return to the graph and restore focus to the selected place. Opening phone detail focuses Back.
+
+The default section order is Your places, Needs a look, Lucia now. Expanded Home puts the first preferred section at the top of the wide main column and always keeps Your places in that column. If Your places is first, the last preferred section sits below it and the middle section occupies the side column. If another section is first, Your places sits below that section and the remaining section occupies the side column. Selected-place detail follows the side section. Customize remains a footer Expander in the Home scroll region, outside this section grid.
 
 When Home is narrower than 600 units and its home-name font exceeds 32 units, the offline badge moves below the name. The name then spans both header columns.
 
@@ -234,7 +237,7 @@ Setup changes at its own Bounds.Width of 800 units. Expanded setup uses two equa
 
 The Home constellation keeps the supplied place order. Its panel starts with a 108-unit slot, multiplies that slot by the largest orb FontSize divided by its normal size of 16, and divides available width by the resulting slot width to derive column count. Larger text increases slot width and can reduce the column count. The cap remains three columns below 800 units of panel width and four above it. Child width can grow to 152 times that text ratio. The panel measures each row from the tallest child, with a minimum row height of 148 units. Up to six places use fixed varied offsets. Larger homes continue in stable rows with alternating vertical offsets. No physics, animation, automatic sorting by state or inferred room position affects placement.
 
-**The Stable Home Rule.** Preserve explicit room order through selection, pinning and state display. Reordering belongs to the user's Move earlier and Move later setup controls.
+**The Stable Home Rule.** Preserve explicit room order through selection, pinning and state display. Place reordering belongs to setup's Move earlier and Move later controls. Customize changes section order independently of room order.
 
 ### Story Day
 
@@ -284,13 +287,13 @@ Story adds concentric time rings, rounded place-filter pills and circular outlin
 
 System, Light and Dark are native buttons that change the application's RequestedThemeVariant. Their minimum height is 48 units. They explicitly use body typography and the control/text brush pair. Each has an accessible name that says which theme it selects. Their hover, focus, pressed and disabled presentation otherwise belongs to the installed Fluent template; no custom primary, destructive or ghost button family exists.
 
-CompanionShell exposes Options, Setup and Story. Options opens a native context menu with an Appearance submenu containing System, Light and Dark, plus Control lab for the workbench. Story opens Story Day and becomes Home while that screen is visible. Setup disables Setup, Story and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save. There is no tab bar.
+CompanionShell exposes Options, Setup and Story. Its Options context menu contains an Appearance submenu for System, Light and Dark and separate Customize Home and Control lab entries. Story opens Story Day and becomes Home while that screen is visible. Customize Home returns to Home, closes detail and actions, expands the Customize footer, and brings it into view with focus. Setup disables Setup, Story, Customize Home and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save. There is no tab bar.
 
-Native Back and Escape first close Home's open Bloom, then compact place detail. Back from Story or Control lab returns Home. At the Home root the request stays unhandled so the OS can leave the app. Setup handles Back through its draft-discard question. The shell subscribes to its current TopLevel's BackRequested event while attached and unsubscribes when detached.
+Native Back and Escape first close Home's open Bloom, then compact place detail, then an expanded Customize footer. Collapsing Customize focuses its Expander. Back from Story or Control lab returns Home. At the Home root with no open context the request stays unhandled so the OS can leave the app. Setup handles Back through its draft-discard question. The shell subscribes to its current TopLevel's BackRequested event while attached and unsubscribes when detached.
 
 Android temporarily sets `android:enableOnBackInvokedCallback="false"` in its manifest. In the API 36 emulator, default predictive Back bypassed the app callbacks even though the headless route checks passed. The checked APK with this compatibility opt-out returned from native Garden detail to Home instead of the launcher. Predictive Back and its gesture animation still need separate qualification before this temporary opt-out can be removed.
 
-The Android activity reuses one cached view only within the running process. An API 36 emulator density change and reset triggered recorded activity destruction and recreation in the same process, retaining an edited setup draft. This is not unsaved-draft storage. Process death restores saved metadata and pins only.
+The Android activity reuses one cached view only within the running process. An API 36 emulator density change and reset triggered recorded activity destruction and recreation in the same process, retaining an edited setup draft. This is not unsaved-draft storage. Process death restores saved setup metadata, pins and section-order preferences only.
 
 ### PlaceOrb
 
@@ -338,9 +341,21 @@ The compact fixture has three equal columns. Received · done is a sage outlined
 
 Setup uses labelled native TextBoxes for home and place names, a place ListBox or ComboBox according to width, an icon ComboBox and named neighbor CheckBoxes. TextBoxes and chooser/neighbor targets have a 48-unit minimum height where set by source. Inputs use DM Sans body typography, with Fluent field, selection and focus presentation.
 
-Add place, Move earlier, Move later and Remove place edit a draft. Removal reveals Confirm removal and Keep place inline. Validation and unreadable-profile replacement warnings use ProblemBrush and written text. Save setup or Replace saved setup and Cancel sit below the scrolling header and form. Local storage contains setup metadata and pins only. It does not establish visual tokens or persist sensor readings.
+Add place, Move earlier, Move later and Remove place edit a draft. Removal reveals Confirm removal and Keep place inline. Validation and unreadable-profile replacement warnings use ProblemBrush and written text. Save setup or Replace saved setup and Cancel sit below the scrolling header and form. Local storage contains setup metadata, pins and Home section order only. It does not establish visual tokens or persist sensor readings.
 
 Back or Escape first closes an open removal question. With pending draft changes it asks "Discard the unsaved setup changes?" with Keep editing and Discard changes. The pending-change check includes invalid, uncommitted field text, icon changes and neighbor changes. While this question is visible, editing is disabled and normal Save/Cancel commands hide. Focus starts on Keep editing. Back again closes the question and retains the draft. With no changes, Back returns Home directly. The explicit Cancel command still leaves setup immediately without saving.
+
+### Customize and HomeSectionOrder
+
+Customize is a native footer Expander with three labelled rows: Your places, Needs a look and Lucia now. HomeSectionOrder uses the existing body text, muted supporting text and theme buttons. Rows have a flexible wrapping label followed by two auto-sized movement columns, with 8-unit column and row gaps. A 12-unit stack gap separates the instruction, row list and restore button.
+
+The earlier and later buttons have a 48-unit minimum width and height. Their authored 20-unit outline paths use the shared 1.7-unit stroke: `M4,14 L12,6 20,14` for earlier and `M4,8 L12,16 20,8` for later. Native accessible names and tooltips say "Move [section label] earlier" or "Move [section label] later". No dragging or glyph icon is required. The first earlier and last later button disable at their boundaries.
+
+Moving swaps adjacent sections, retains focus on an available movement button for that section, and brings it into view. Restore default order resets Your places, Needs a look, Lucia now and focuses the Your places later button. Its caption is a wrapping native TextBlock, and the button has the explicit accessible name "Restore default order". Restore disables when the order already matches the default. All three sections must appear exactly once; this control never hides attention or invents a new section.
+
+HomeViewModel owns the order and preference notification; controls only request changes. HomeProfileSession saves it with local setup and pins. SectionOrder is an optional additive field in the existing version-1 profile, and a missing field restores the default. Loading restores the preference without initiating an automatic save. The visible storage status remains the authority for whether saving succeeded.
+
+This increment has native desktop/headless evidence. It does not establish an installed Android or real-device result for Customize; earlier emulator checks belong to their stated increments.
 
 ### PlaceIcons
 
@@ -392,13 +407,14 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do use dynamic TextSize resources for platform-adjusted type and let constrained layouts adapt.
 - Do keep all Bloom actions reachable in its large-text list.
 - Do preserve pending setup changes on Back until the user chooses Discard changes.
+- Do keep every Home section present when reordering and expose named movement controls with disabled boundaries.
 
 ### Don't:
 
 - Don't use color as the only indication of place state or selection.
 - Don't promote an old reading to the current-value position.
 - Don't infer locked from closed, occupancy from Quiet, or a physical result from a completed request.
-- Don't present authentication, live bindings, import or section-order preferences as built.
+- Don't present authentication, live bindings or import as built.
 - Don't claim real-device accessibility, safe-area or performance qualification from desktop renders.
 - Don't treat illustrative sidecar HTML/CSS or generated color ramps as native implementation tokens.
 - Don't treat configured graph connections or static layout offsets as a measured floor plan.
@@ -407,3 +423,4 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't claim live history, persisted history or a historical binding policy from the authored Story fixture.
 - Don't treat the in-process activity-view cache as persisted unsaved drafts.
 - Don't claim TalkBack, device, iOS or performance qualification from text-resource mapping or headless checks.
+- Don't confuse Home section order with the stable order of places in the graph.

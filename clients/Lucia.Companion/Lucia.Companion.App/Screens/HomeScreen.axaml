@@ -18,6 +18,7 @@
       <TextBlock Name="AttentionSummary" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
     </StackPanel>
     <ScrollViewer Name="HomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="12">
       <Grid Name="HomeGrid" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
         <StackPanel Name="MainPanel" Spacing="16">
         <Border Name="PlacesCard" Classes="panel" Padding="12">
@@ -42,6 +43,10 @@
         </Border>
         </StackPanel>
       </Grid>
+      <Expander Name="CustomizeHome" Header="Customize" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+        <c:HomeSectionOrder Name="SectionOrderEditor" Margin="0,8,0,4" />
+      </Expander>
+      </StackPanel>
     </ScrollViewer>
     <ScrollViewer Name="DetailScroll" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Spacing="16">

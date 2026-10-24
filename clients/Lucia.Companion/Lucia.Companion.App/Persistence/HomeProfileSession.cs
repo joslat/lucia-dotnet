@@ -54,6 +54,7 @@ public sealed class HomeProfileSession
                 var restored = profile.ApplyTo(state.Home);
                 state.ReplaceHome(restored, notifyPreferences: false);
                 state.RestorePins(profile.PinnedPlaceIds);
+                state.SetSectionOrder(profile.SectionOrder ?? HomeSections.DefaultOrder, notifyPreferences: false);
             }
 
             SetStatus("Local setup. Changes save on this device.");
@@ -75,7 +76,7 @@ public sealed class HomeProfileSession
     private async Task SaveAsync()
     {
         var revision = ++saveRevision;
-        var snapshot = HomeProfile.From(state.Home, state.PinnedPlaceIds);
+        var snapshot = HomeProfile.From(state.Home, state.PinnedPlaceIds, state.SectionOrder);
         SetStatus("Saving local setup...");
         try
         {

@@ -18,6 +18,7 @@ public sealed partial class CompanionShell : UserControl
     private StoryScreen? story;
     private Core.HomeTopology? storyHome;
     private readonly MenuItem controlLab = new() { Header = "Control lab" };
+    private readonly MenuItem customizeHome = new() { Header = "Customize Home" };
     private TopLevel? attachedTopLevel;
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
@@ -34,7 +35,7 @@ public sealed partial class CompanionShell : UserControl
             ItemsSource = new[] { new MenuItem { Header = "Appearance", ItemsSource = new[]
             {
                 ThemeItem("System", ThemeVariant.Default), ThemeItem("Light", ThemeVariant.Light), ThemeItem("Dark", ThemeVariant.Dark)
-            }}, controlLab }
+            }}, customizeHome, controlLab }
         };
         appearance.Click += (_, _) => appearance.ContextMenu.Open(appearance);
         this.FindControl<Button>("BuildHomeButton")!.Click += (_, _) => OpenEditor();
@@ -44,6 +45,7 @@ public sealed partial class CompanionShell : UserControl
             this.FindControl<ContentControl>("ScreenHost")!.Content = workbench ??= new ControlWorkbench();
             this.FindControl<Button>("StoryButton")!.Content = "Story";
         };
+        customizeHome.Click += (_, _) => { ShowHome(); home.OpenCustomization(); };
         this.FindControl<Button>("StoryButton")!.Click += (_, _) => SwitchStory();
         profileSession.Changed += RefreshStorageState;
         AttachedToVisualTree += async (_, _) =>
@@ -93,6 +95,7 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<Button>("BuildHomeButton")!.IsEnabled = false;
         this.FindControl<Button>("StoryButton")!.IsEnabled = false;
         controlLab.IsEnabled = false;
+        customizeHome.IsEnabled = false;
     }
 
     private void ShowHome()
@@ -102,6 +105,7 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<Button>("StoryButton")!.IsEnabled = true;
         this.FindControl<Button>("StoryButton")!.Content = "Story";
         controlLab.IsEnabled = true;
+        customizeHome.IsEnabled = true;
     }
 
     private void SwitchStory()
@@ -127,6 +131,7 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<Button>("StoryButton")!.IsEnabled = !profileSession.IsLoading &&
             this.FindControl<ContentControl>("ScreenHost")!.Content is not HomeEditorScreen;
         controlLab.IsEnabled = this.FindControl<Button>("StoryButton")!.IsEnabled;
+        customizeHome.IsEnabled = controlLab.IsEnabled;
     }
 
     private static MenuItem ThemeItem(string label, ThemeVariant theme)

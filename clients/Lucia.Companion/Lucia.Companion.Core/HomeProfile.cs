@@ -4,8 +4,11 @@ namespace Lucia.Companion.Core;
 public sealed record HomeProfile(int SchemaVersion, string HomeId, string HomeName,
     IReadOnlyList<PlaceSetting> Places, IReadOnlyList<PlaceConnection> Connections, IReadOnlyList<string> PinnedPlaceIds)
 {
-    public static HomeProfile From(HomeTopology home, IReadOnlyList<string> pinnedIds) => new(1, home.Id, home.Name,
-        home.Places.Select(place => new PlaceSetting(place.Id, place.Name, place.Icon)).ToArray(), home.Connections.ToArray(), pinnedIds.ToArray());
+    public IReadOnlyList<HomeSection>? SectionOrder { get; init; }
+
+    public static HomeProfile From(HomeTopology home, IReadOnlyList<string> pinnedIds, IReadOnlyList<HomeSection>? sectionOrder = null) => new(1, home.Id, home.Name,
+        home.Places.Select(place => new PlaceSetting(place.Id, place.Name, place.Icon)).ToArray(), home.Connections.ToArray(), pinnedIds.ToArray())
+        { SectionOrder = sectionOrder is null ? null : HomeSections.ValidateOrder(sectionOrder) };
 
     public void Validate()
     {
@@ -13,6 +16,7 @@ public sealed record HomeProfile(int SchemaVersion, string HomeId, string HomeNa
         ArgumentNullException.ThrowIfNull(Places);
         ArgumentNullException.ThrowIfNull(Connections);
         ArgumentNullException.ThrowIfNull(PinnedPlaceIds);
+        if (SectionOrder is not null) { HomeSections.ValidateOrder(SectionOrder); }
         if (Places.Count > 200) { throw new ArgumentException("This prototype supports at most 200 places."); }
         var home = BuildTopology([]);
         if (HomeName.Length > 80 || Places.Any(place => place.Name.Length > 80 || place.Id.Length > 128))

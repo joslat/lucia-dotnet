@@ -34,6 +34,7 @@ public sealed partial class HomeScreen : UserControl
         constellation.PinRequested += id => { State.SelectPlace(id); State.TogglePin(); };
         this.FindControl<AttentionList>("Attention")!.PlaceInvoked += State.SelectPlace;
         this.FindControl<Button>("BackToHome")!.Click += (_, _) => ReturnHome();
+        this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.OrderChanged += order => State.SetSectionOrder(order);
         foreach (var name in new[] { "DesktopDetail", "PhoneDetail" })
         {
             this.FindControl<PlaceDetail>(name)!.ActionsRequested += State.OpenActions;
@@ -105,9 +106,8 @@ public sealed partial class HomeScreen : UserControl
         grid.ColumnSpacing = IsExpanded ? 16 : 0;
         var side = this.FindControl<StackPanel>("SidePanel")!;
         var main = this.FindControl<StackPanel>("MainPanel")!;
-        var attention = this.FindControl<Border>("AttentionCard")!;
-        if (IsExpanded && !ReferenceEquals(attention.Parent, side)) { main.Children.Remove(attention); side.Children.Insert(0, attention); }
-        else if (!IsExpanded && !ReferenceEquals(attention.Parent, main)) { side.Children.Remove(attention); main.Children.Insert(1, attention); }
+        ArrangeSections(main, side);
+        this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.SetOrder(State.SectionOrder);
         side.IsVisible = IsExpanded;
         this.FindControl<Border>("DesktopDetailCard")!.IsVisible = IsExpanded && State.SelectedPlace is not null;
         this.FindControl<ScrollViewer>("HomeScroll")!.IsVisible = IsExpanded || !State.IsDetailOpen;
@@ -140,16 +140,45 @@ public sealed partial class HomeScreen : UserControl
         detailWasOpen = State.IsDetailOpen;
     }
 
+    private void ArrangeSections(StackPanel main, StackPanel side)
+    {
+        var sections = State.SectionOrder.Select(section => this.FindControl<Border>(section switch
+        {
+            HomeSection.Places => "PlacesCard", HomeSection.Attention => "AttentionCard", _ => "LuciaCard"
+        })!).ToArray();
+        var detail = this.FindControl<Border>("DesktopDetailCard")!;
+        // Keep the home graph wide even when another section is promoted above it.
+        var places = this.FindControl<Border>("PlacesCard")!;
+        var secondaryMain = ReferenceEquals(sections[0], places) ? sections[2] : places;
+        Control[] mainOrder = IsExpanded ? [sections[0], secondaryMain] : sections;
+        Control[] sideOrder = IsExpanded ? [sections.Single(section => !mainOrder.Contains(section)), detail] : [detail];
+        if (main.Children.SequenceEqual(mainOrder) && side.Children.SequenceEqual(sideOrder)) { return; }
+        main.Children.Clear();
+        side.Children.Clear();
+        main.Children.AddRange(mainOrder);
+        side.Children.AddRange(sideOrder);
+    }
+
     private void OnKeyDown(object? sender, KeyEventArgs args)
     {
         if (args.Key != Key.Escape) { return; }
         args.Handled = TryNavigateBack();
     }
 
+    public void OpenCustomization()
+    {
+        State.CloseDetail();
+        var customize = this.FindControl<Expander>("CustomizeHome")!;
+        customize.IsExpanded = true;
+        Dispatcher.UIThread.Post(() => { customize.BringIntoView(); customize.Focus(); }, DispatcherPriority.Loaded);
+    }
+
     public bool TryNavigateBack()
     {
         if (State.IsActionsOpen) { CloseActions(); return true; }
         if (!IsExpanded && State.IsDetailOpen) { ReturnHome(); return true; }
+        var customize = this.FindControl<Expander>("CustomizeHome")!;
+        if (customize.IsExpanded) { customize.IsExpanded = false; customize.Focus(); return true; }
         return false;
     }
 

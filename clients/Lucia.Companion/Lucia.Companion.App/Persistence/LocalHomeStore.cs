@@ -12,7 +12,7 @@ public sealed class LocalHomeStore(string path)
     {
         WriteIndented = true,
         MaxDepth = 32,
-        Converters = { new JsonStringEnumConverter<PlaceIcon>(allowIntegerValues: false) }
+        Converters = { new JsonStringEnumConverter<PlaceIcon>(allowIntegerValues: false), new JsonStringEnumConverter<HomeSection>(allowIntegerValues: false) }
     };
     private readonly string filePath = Path.GetFullPath(path);
     private readonly SemaphoreSlim writeGate = new(1, 1);

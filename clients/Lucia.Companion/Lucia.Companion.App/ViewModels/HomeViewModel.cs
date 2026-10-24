@@ -15,11 +15,21 @@ public sealed class HomeViewModel(HomeTopology home) : INotifyPropertyChanged
     public bool IsActionsOpen { get; private set; }
     public bool IsDetailOpen { get; private set; }
     public IReadOnlyList<string> PinnedPlaceIds => Home.Places.Where(place => pinnedIds.Contains(place.Id)).Select(place => place.Id).ToArray();
+    public IReadOnlyList<HomeSection> SectionOrder { get; private set; } = HomeSections.DefaultOrder;
     public IReadOnlyList<Place> AttentionPlaces => Home.Places
         .Where(place => place.State is PlaceState.Problem or PlaceState.Waiting or PlaceState.Unavailable)
         .OrderBy(place => place.State switch { PlaceState.Problem => 0, PlaceState.Waiting => 1, _ => 2 }).ToArray();
 
     public bool IsPinned(string placeId) => pinnedIds.Contains(placeId);
+
+    public void SetSectionOrder(IEnumerable<HomeSection> order, bool notifyPreferences = true)
+    {
+        var validated = HomeSections.ValidateOrder(order);
+        if (validated.SequenceEqual(SectionOrder)) { return; }
+        SectionOrder = validated;
+        Notify();
+        if (notifyPreferences) { PreferencesChanged?.Invoke(); }
+    }
 
     public void SelectPlace(string id)
     {
