@@ -113,11 +113,14 @@ Lucia Observatory is an Operate-mode system for long technical sessions. It keep
 
 Theme choice extends the existing shell instead of becoming a separate destination. System, Light, and Dark use one semantic role vocabulary, so setup, login, navigation, charts, dialogs, and operational pages keep the same hierarchy when the resolved mode changes.
 
+Companion devices at `/companion-devices` extends this Operate system with owner approval and session management. The route keeps code matching, device identity and exact read access in one inline task, followed by issued sessions. It uses the existing Observatory identity and tokens. The direction contract in the first body comment of `lucia-dashboard/index.html` records `not-applicable-narrow-extension`; this increment introduces no new visual world.
+
 **Key Characteristics:**
 - Compact operational controls and route-first composition
 - Warm neutral surfaces with amber reserved for focus, selection, and progress
 - One semantic token vocabulary across light and dark modes
 - Borders, translucency, and low glows instead of heavy elevation
+- Inline device review and explicit access choices before owner approval
 
 ## Colors
 
@@ -181,6 +184,8 @@ Public setup and login screens center a single column over the observatory canva
 
 The theme selector sits at the upper-right shell edge on loading, setup, and login views with a fixed `170px` width. After authentication it moves into the sidebar footer under the Appearance label.
 
+Companion devices centers a single column capped at `64rem`, with `32px` between major groups. Its heading and security guidance precede the labelled code form. Review expands inside the approval panel; connected sessions follow below. The panel uses `20px` padding, increasing to `24px` at `640px`. Forms and action rows wrap, long identities break within their available width, and the approval code can wrap between its two five-character groups. Actions and checkbox labels in this route have a `3rem` minimum height. These are local task adaptations, not replacements for the shared shell or compact control scale.
+
 ### Named Rules
 
 **The Route-First Rule.** Theme controls stay at the shell edge. They do not displace the current workflow or become a page-level feature.
@@ -242,6 +247,24 @@ System is the fallback for missing or invalid stored values. It follows `prefers
 
 The mesh is a fixed-height `420px` charcoal field with a stone border and `12px` corners. Nodes share the same shape and semantic state colors: amber for processing, blue for tool calls, sage for response generation, rose for errors, and neutral basalt for idle. Active edges thicken from one to two pixels and animate; active non-error nodes pulse without becoming draggable or selectable.
 
+### Companion device review and grants
+
+The owner route reuses Outfit headings, DM Sans forms, labelled Field controls and decorative Lucide outlines. Charcoal panels and stone dividers organize the task. Amber marks the code, keyboard focus and approval action; rose text identifies decline and revoke actions. No new palette, depth treatment or entrance motion is introduced.
+
+Review shows the intended device's untrusted name, the normalized code, home ID, current host and expiry. The owner must match the code with the intended person. Changing the code clears the review and confirmation; expiry also clears them and asks for a new code. A successful review focuses the device heading. Status and error messages have written feedback and a programmatic focus target.
+
+The grant editor requires an explicit member ID and exact, case-sensitive place IDs. Each added place needs at least one of Temperature, Humidity, Moisture, Light, Contact, Motion or Leak; duplicate place IDs are invalid. No places means no place observations. Activity summaries, historical observations and Engine runtime summaries are independent choices, each off by default. Engine permission covers approved summaries, never administration or raw conversations. Approval also requires the intended-person confirmation. Manual member and place IDs are a pilot constraint until W3 authorized catalog discovery supplies the picker.
+
+Each mutation obtains fresh CSRF proof from the real owner API. Same-origin requests use the owner session, bypass response caching and reject redirects. An ambiguous failure never triggers an automatic replay. Approval clears the editor before sending and reports that the device must finish its check; approval alone is not an issued session. The owner key stays in the dashboard.
+
+Decline and revoke expand an inline question naming the device. Focus starts on Keep request or Keep device access. Keep and Escape close the question and return focus to the invoking control. Revocation requires a host response. Its copy explains that the host rejects the session on its next request, including renewal, and cannot remotely erase offline screens or local setup metadata.
+
+Connected devices lists issued, unexpired sessions with a last-checked time, not online presence. Each row exposes its exact member, home, place fields, separate Activity, History and Engine grants, session ID and expiry. An issued grant changes through revocation and pairing again. Loading, empty and unavailable lists have distinct written states.
+
+**The Exact Grant Rule.** Show the reviewed device and code before authorization, keep each read permission explicit and off until selected, and report only the session or revocation state the host confirmed.
+
+The scoped finish review returned `ship` with no material fixes. Its supplied evidence contains 32 round2 captures, 17 passing browser checks split into nine functional and eight capture checks, and six passing production HTTPS, shell and theme regression checks. One browser integration exercised the production bundle with the real API, SQLite, session issuance, CSRF and revocation. It used a synthetic owner-cookie validator and a browser-only fixture certificate bypass. This evidence does not establish real login, household acceptance, Android TLS, hardware or accessibility qualification. Doubled root font size is synthetic text and rem stress, not a browser-zoom result. Native Home, Story, Week and Engine work, motion, platform and release goals remain governed by the companion BUILD-PLAN; owner approval is one checkpoint.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -251,6 +274,9 @@ The mesh is a fixed-height `420px` charcoal field with a stone border and `12px`
 - **Do** place the selector at the upper-right edge on public screens and in the sidebar footer after authentication.
 - **Do** expose selection with `aria-pressed`, label icon-only controls, hide decorative icons from assistive technology, and retain visible keyboard focus.
 - **Do** reserve amber for focus, selection, primary action, progress, and active system state.
+- **Do** keep intended-person code matching, exact grants and separate default-deny Activity, History and Engine choices visible in companion approval.
+- **Do** retain conservative Keep focus and Escape return paths for inline decline and revocation.
+- **Do** distinguish reviewed approval, issued sessions, last-checked metadata and host-confirmed revocation.
 
 ### Don't:
 
@@ -258,3 +284,6 @@ The mesh is a fixed-height `420px` charcoal field with a stone border and `12px`
 - **Don't** promote appearance controls into the primary route content.
 - **Don't** use heavy shadows or broad glows on ordinary operational cards.
 - **Don't** replace semantic success, error, information, and progress states with amber alone.
+- **Don't** infer access from a device name, place name, physical connection or unselected observation field.
+- **Don't** automatically replay an owner mutation after an ambiguous failure or reuse a review after the code changes.
+- **Don't** present issued sessions as online devices or owner approval as completed native live-data, platform or release work.

@@ -161,3 +161,24 @@ npm run build
 ```
 
 Output is written to `dist/`. The production build is a static SPA that expects the AgentHost API to be available at the same origin (or behind a reverse proxy).
+
+## Companion devices, experimental
+
+Open Companion devices to review an intended phone/tablet's approval code. Use the trusted HTTPS dashboard with a current administrator session. The host must enable `Companion:Enabled` and configure a stable `Companion:HomeId`. Disabled, forbidden and failed reads show an error, never an empty successful list.
+
+Match the code and device with the intended person. Device names are untrusted labels. Choose an owner-assigned member ID and exact case-sensitive place IDs/observation fields. The pilot uses manual IDs until authorized discovery supplies a picker. No places or additional activity/history/Engine permissions are selected by default. These permissions do not enable physical controls or appliance administration, and live native adapters are still unfinished.
+
+Approval waits for device redemption before an issued session can appear. Refresh devices shows current server sessions with exact grants and expiry, not online status. Decline and revoke require separate inline confirmation. Keep restores focus; Escape closes the question. Editing a code discards its previous review. Expired requests cannot be approved. Ambiguous approval failure removes the editor and requires a new review; the browser does not replay it automatically. Every mutation obtains fresh antiforgery proof using the existing same-origin session. No owner/native secrets belong in the code field or URL.
+
+The isolated tests in `lucia-playwright/e2e/00-companion-devices.spec.ts` intercept all APIs with labelled synthetic data. `00-companion-https.spec.ts` is opt-in and uses the production bundle with actual isolated HTTPS/SQLite companion services. Its synthetic owner-cookie validator and test-only certificate bypass do not qualify real login, deployment TLS or installed native networking. To run that integration without a household host:
+
+```powershell
+npm run build --prefix lucia-dashboard
+dotnet run --project lucia-playwright/fixtures/CompanionBrowserHost
+# In a second terminal, use the loopback HTTPS URL printed by the fixture.
+$env:SKIP_DOCKER = '1'
+$env:COMPANION_HTTPS_URL = 'https://127.0.0.1:<printed-port>'
+npm exec --prefix lucia-playwright -- playwright test --config=lucia-playwright/playwright.config.ts lucia-playwright/e2e/00-companion-https.spec.ts
+```
+
+The fixture uses a temporary database and certificate, serves only built dashboard assets and listens on loopback. Stop it with Ctrl+C after the check. It never loads the real AgentHost, household configuration, HA, model or cloud services. Private captures belong outside the public repository.

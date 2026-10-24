@@ -62,7 +62,7 @@
               <Button Name="ConfirmRemoval" Classes="theme" Margin="0,0,8,8" Foreground="{DynamicResource ProblemBrush}"><TextBlock Name="RemovalAction" Text="Disconnect" TextWrapping="Wrap" /></Button>
             </WrapPanel>
           </StackPanel>
-          <TextBlock Text="This connection preview uses the real device-session API. Owner approvals currently use the management API; the dashboard approval screen is still being added." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+          <TextBlock Text="Owners approve requests in Companion devices on their trusted HTTPS dashboard. They match the device code and choose exact read access. Never put an owner key on this device." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         </StackPanel>
       </Border>
       <StackPanel Name="DemoChoice" Grid.Row="2" Spacing="8">

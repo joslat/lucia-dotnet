@@ -48,7 +48,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         this.database = database; this.app = app; this.certificate = certificate; Client = client; Sessions = sessions; Pairings = pairings; Keys = keys;
     }
 
-    public static async Task<CompanionSecurityTestHost> StartAsync(TimeProvider? clock = null)
+    public static async Task<CompanionSecurityTestHost> StartAsync(TimeProvider? clock = null, Action<WebApplication>? configureApp = null)
     {
         clock ??= TimeProvider.System;
         using var rsa = RSA.Create(2048);
@@ -107,6 +107,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         app.MapGet("/activity/{homeId}", () => "activity").RequireAuthorization(CompanionAuthentication.ActivityPolicy);
         app.MapCompanionSessionApi();
         app.MapCompanionPairingApi();
+        configureApp?.Invoke(app);
         await app.StartAsync();
         var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
         var fingerprint = certificate.GetCertHashString(HashAlgorithmName.SHA256);

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-20T00:00:00.000Z",
+  "generatedAt": "2026-10-24T00:00:00.000Z",
   "title": "Design System: Lucia Observatory",
   "extensions": {
     "typographyMeta": {
@@ -135,16 +135,24 @@
       "description": "Shows a processing agent inside the live mesh graph.",
       "html": "<div class=\"ds-agent-node\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"10\" rx=\"2\"/><circle cx=\"9\" cy=\"16\" r=\"1\"/><circle cx=\"15\" cy=\"16\" r=\"1\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4M12 3V1\"/></svg><span><strong>Orchestrator</strong><small>Processing Prompt...</small></span></div>",
       "css": ".ds-agent-node { display: inline-flex; min-width: 120px; align-items: center; gap: 8px; border: 1px solid var(--color-amber-dim); border-radius: 12px; background: color-mix(in srgb, var(--color-amber) 14%, transparent); color: var(--color-amber); padding: 8px 12px; box-shadow: 0 0 12px color-mix(in srgb, var(--color-amber-dim) 25%, transparent); font-family: 'DM Sans', system-ui, sans-serif; transition: all 300ms; } .ds-agent-node:hover { border-color: var(--color-amber); } .ds-agent-node:focus-visible { outline: auto; outline-offset: 2px; } .ds-agent-node span { display: flex; min-width: 0; flex-direction: column; } .ds-agent-node strong { color: var(--color-amber); font-size: 14px; font-weight: 500; line-height: 20px; } .ds-agent-node small { color: var(--color-amber); font-size: 10px; line-height: 14px; }"
+    },
+    {
+      "name": "Companion removal confirmation",
+      "kind": "custom",
+      "description": "Static representation of the owner route's inline removal question. The implemented route focuses Keep, closes with Keep or Escape, restores the invoking control and waits for host confirmation. This specimen performs no mutation and supplies no runtime focus behavior.",
+      "html": "<section class=\"ds-companion-confirm\"><p>Revoke access for Kitchen tablet?</p><p class=\"ds-companion-confirm-help\">The host will reject this session on its next request, including renewal. Offline screens cannot be remotely erased.</p><div class=\"ds-companion-confirm-actions\"><button class=\"ds-companion-keep\" type=\"button\">Keep device access</button><button class=\"ds-companion-revoke\" type=\"button\">Confirm revocation</button></div></section>",
+      "css": ".ds-companion-confirm { margin-top:16px; border-top:1px solid var(--color-stone); padding-top:16px; color:var(--color-light); font:400 14px/20px 'DM Sans',system-ui,sans-serif; } .ds-companion-confirm p { margin:0 0 12px; } .ds-companion-confirm-help { max-width:65ch; color:var(--color-fog); } .ds-companion-confirm-actions { display:flex; flex-wrap:wrap; gap:12px; } .ds-companion-keep,.ds-companion-revoke { min-height:3rem; border:1px solid var(--color-stone); border-radius:12px; background:var(--color-basalt); padding:8px 16px; color:var(--color-fog); font:400 14px/20px 'DM Sans',system-ui,sans-serif; cursor:pointer; } .ds-companion-revoke { color:var(--color-rose); } .ds-companion-keep:hover,.ds-companion-revoke:hover { border-color:var(--color-amber); color:var(--color-light); } .ds-companion-keep:focus-visible,.ds-companion-revoke:focus-visible { outline:2px solid var(--color-amber); outline-offset:2px; } .ds-companion-keep:disabled,.ds-companion-revoke:disabled { opacity:0.5; }"
     }
   ],
   "narrative": {
     "northStar": "The Daylight Observatory",
-    "overview": "Lucia Observatory is an Operate-mode system for long technical sessions. It keeps the authenticated dashboard dense and predictable while warm mineral neutrals, amber focus, and small changes in depth preserve the product's identity in both bright and dim rooms.\n\nTheme choice extends the existing shell instead of becoming a separate destination. System, Light, and Dark use one semantic role vocabulary, so setup, login, navigation, charts, dialogs, and operational pages keep the same hierarchy when the resolved mode changes.",
+    "overview": "Lucia Observatory is an Operate-mode system for long technical sessions. It keeps the authenticated dashboard dense and predictable while warm mineral neutrals, amber focus, and small changes in depth preserve the product's identity in both bright and dim rooms.\n\nTheme choice extends the existing shell instead of becoming a separate destination. System, Light, and Dark use one semantic role vocabulary, so setup, login, navigation, charts, dialogs, and operational pages keep the same hierarchy when the resolved mode changes.\n\nCompanion devices at `/companion-devices` extends this Operate system with owner approval and session management. The route keeps code matching, device identity and exact read access in one inline task, followed by issued sessions. It uses the existing Observatory identity and tokens. The direction contract in the first body comment of `lucia-dashboard/index.html` records `not-applicable-narrow-extension`; this increment introduces no new visual world.",
     "keyCharacteristics": [
       "Compact operational controls and route-first composition",
       "Warm neutral surfaces with amber reserved for focus, selection, and progress",
       "One semantic token vocabulary across light and dark modes",
-      "Borders, translucency, and low glows instead of heavy elevation"
+      "Borders, translucency, and low glows instead of heavy elevation",
+      "Inline device review and explicit access choices before owner approval"
     ],
     "rules": [
       {
@@ -171,6 +179,11 @@
         "name": "The Restrained Depth Rule",
         "body": "Borders and tonal layering do the structural work. Glow identifies a live or branded focal point; it does not decorate ordinary containers.",
         "section": "elevation"
+      },
+      {
+        "name": "The Exact Grant Rule",
+        "body": "Show the reviewed device and code before authorization, keep each read permission explicit and off until selected, and report only the session or revocation state the host confirmed.",
+        "section": "components"
       }
     ],
     "dos": [
@@ -178,13 +191,19 @@
       "Do keep the System, Light, and Dark options together and preserve their storage, pre-render resolution, and operating-system behavior.",
       "Do place the selector at the upper-right edge on public screens and in the sidebar footer after authentication.",
       "Do expose selection with `aria-pressed`, label icon-only controls, hide decorative icons from assistive technology, and retain visible keyboard focus.",
-      "Do reserve amber for focus, selection, primary action, progress, and active system state."
+      "Do reserve amber for focus, selection, primary action, progress, and active system state.",
+      "Do keep intended-person code matching, exact grants and separate default-deny Activity, History and Engine choices visible in companion approval.",
+      "Do retain conservative Keep focus and Escape return paths for inline decline and revocation.",
+      "Do distinguish reviewed approval, issued sessions, last-checked metadata and host-confirmed revocation."
     ],
     "donts": [
       "Don't add mode-specific classes or raw light/dark palette values to page components; remap semantic tokens at the root.",
       "Don't promote appearance controls into the primary route content.",
       "Don't use heavy shadows or broad glows on ordinary operational cards.",
-      "Don't replace semantic success, error, information, and progress states with amber alone."
+      "Don't replace semantic success, error, information, and progress states with amber alone.",
+      "Don't infer access from a device name, place name, physical connection or unselected observation field.",
+      "Don't automatically replay an owner mutation after an ambiguous failure or reuse a review after the code changes.",
+      "Don't present issued sessions as online devices or owner approval as completed native live-data, platform or release work."
     ]
   }
 }
