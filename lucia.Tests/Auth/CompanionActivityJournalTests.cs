@@ -108,6 +108,20 @@ public sealed class CompanionActivityJournalTests
         Assert.Equal(CompanionActivityState.OutcomeUnknown, Assert.Single(journal.Read(Grant()).Requests).State);
     }
 
+    [Theory]
+    [InlineData(CompanionActivityState.Received)]
+    [InlineData(CompanionActivityState.Working)]
+    [InlineData(CompanionActivityState.Continued)]
+    [InlineData((CompanionActivityState)999)]
+    public void ACompletionCannotInventFollowUpEvidenceOrConsumeTheLeaseOnInvalidState(CompanionActivityState state)
+    {
+        var journal = Journal(); using var request = journal.BeginOwner("owner-a", "conversation");
+        Assert.Throws<ArgumentException>(() => request!.Complete(state));
+        Assert.Equal(CompanionActivityState.Received, Assert.Single(journal.Read(Grant()).Requests).State);
+        request!.Complete(CompanionActivityState.ResponseReady);
+        Assert.Equal(CompanionActivityState.ResponseReady, Assert.Single(journal.Read(Grant()).Requests).State);
+    }
+
     [Fact]
     public void RetentionAndAProcessRestartCannotPretendToProvideCompleteHistory()
     {
@@ -169,6 +183,100 @@ public sealed class CompanionActivityJournalTests
         Assert.Equal(before.Revision, after.Revision);
         working.Complete(CompanionActivityState.ResponseReady);
         Assert.Equal(CompanionActivityState.ResponseReady, Assert.Single(journal.Read(Grant()).Requests).State);
+    }
+
+    [Fact]
+    public void AVerifiedLaterTurnEndsTheOldReplyRequestWithoutClaimingThatItWasAnswered()
+    {
+        var clock = Clock(); var journal = Journal(clock);
+        using var first = journal.BeginOwner("owner-a", "PRIVATE_CONVERSATION");
+        first!.Complete(CompanionActivityState.NeedsInput);
+        var waiting = Assert.Single(journal.Read(Grant()).Requests);
+        clock.Advance(TimeSpan.FromSeconds(2));
+        using var next = journal.BeginOwner("owner-a", "PRIVATE_CONVERSATION");
+        var after = journal.Read(Grant()).Requests.Single(item => item.RequestId == first.RequestId);
+        Assert.Equal("Continued", after.State.ToString());
+        Assert.Equal(waiting.Revision + 1, after.Revision);
+        Assert.Equal(clock.GetUtcNow(), after.UpdatedAt);
+        Assert.Equal(CompanionActivityState.Received, journal.Read(Grant()).Requests.Single(item => item.RequestId == next!.RequestId).State);
+        Assert.DoesNotContain("PRIVATE_CONVERSATION", JsonSerializer.Serialize(journal.Read(Grant())));
+        next!.Complete(CompanionActivityState.Failed);
+        Assert.Equal("Continued", journal.Read(Grant()).Requests.Single(item => item.RequestId == first.RequestId).State.ToString());
+    }
+
+    [Theory]
+    [InlineData("other-conversation", "owner-a", false)]
+    [InlineData("conversation", "owner-other", false)]
+    [InlineData("conversation", "profile-a", true)]
+    [InlineData("conversation", "profile-b", true)]
+    [InlineData("conversation", "unmapped", true)]
+    public void AConversationSelectorCannotCrossVerifiedActorsSourceKindsOrConversations(string conversation, string actor, bool voice)
+    {
+        var settings = Settings(); settings.OwnerMembers["owner-other"] = "member-a";
+        var journal = Journal(settings: settings);
+        using var first = journal.BeginOwner("owner-a", "conversation"); first!.Complete(CompanionActivityState.NeedsInput);
+        using var next = voice ? journal.BeginVoice(actor, conversation) : journal.BeginOwner(actor, conversation);
+        Assert.Equal(CompanionActivityState.NeedsInput, journal.Read(Grant()).Requests.Single(item => item.RequestId == first.RequestId).State);
+    }
+
+    [Fact]
+    public void OnlyOpaqueRequestIdsLinkRetainedTurnsWithoutPublishingTheSourceConversation()
+    {
+        var journal = Journal();
+        using var first = journal.BeginOwner("owner-a", "PRIVATE_CONVERSATION"); first!.Complete(CompanionActivityState.ResponseReady);
+        using var next = journal.BeginOwner("owner-a", "PRIVATE_CONVERSATION");
+        var item = journal.Read(Grant()).Requests.Single(item => item.RequestId == next!.RequestId);
+        var json = JsonSerializer.SerializeToElement(item);
+        Assert.True(json.TryGetProperty("PreviousRequestId", out var previous));
+        Assert.Equal(first.RequestId, previous.GetString());
+        Assert.DoesNotContain("PRIVATE_CONVERSATION", json.ToString());
+    }
+
+    [Fact]
+    public void AnOlderConcurrentTurnCannotReopenWaitingAfterALaterTurnWasAlreadySeenAndEvicted()
+    {
+        var clock = Clock(); var journal = Journal(clock);
+        using var first = journal.BeginVoice("profile-a", "conversation"); first!.Working();
+        using (var second = journal.BeginVoice("profile-a", "conversation")) { second!.Complete(CompanionActivityState.ResponseReady); }
+        for (var i = 0; i < 60; i++)
+        { clock.Advance(TimeSpan.FromSeconds(1)); using var unrelated = journal.BeginVoice("profile-a", "unrelated-" + i); unrelated!.Complete(CompanionActivityState.ResponseReady); }
+        first.Complete(CompanionActivityState.NeedsInput);
+        Assert.Equal("Continued", journal.Read(Grant()).Requests.Single(item => item.RequestId == first.RequestId).State.ToString());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("\n")]
+    public void MissingConversationEvidenceNeverCorrelatesIndependentRequests(string? conversation)
+    {
+        var journal = Journal();
+        using var first = journal.BeginOwner("owner-a", conversation); first!.Complete(CompanionActivityState.NeedsInput);
+        using var next = journal.BeginOwner("owner-a", conversation);
+        Assert.Equal(CompanionActivityState.NeedsInput, journal.Read(Grant()).Requests.Single(item => item.RequestId == first.RequestId).State);
+    }
+
+    [Fact]
+    public void AnOversizedConversationSelectorIsIgnoredWithoutLosingTheAuthorizedActivity()
+    {
+        var journal = Journal(); var oversized = new string('x', 257);
+        using var first = journal.BeginOwner("owner-a", oversized); first!.Complete(CompanionActivityState.NeedsInput);
+        using var next = journal.BeginOwner("owner-a", oversized);
+        Assert.NotNull(next);
+        Assert.Equal(CompanionActivityState.NeedsInput, journal.Read(Grant()).Requests.Single(item => item.RequestId == first.RequestId).State);
+    }
+
+    [Fact]
+    public void ARecentReplyRequestIsPrioritizedOverCompletedChatterUntilALaterTurnArrives()
+    {
+        var clock = Clock(); var journal = Journal(clock);
+        using var waiting = journal.BeginOwner("owner-a", "waiting"); waiting!.Complete(CompanionActivityState.NeedsInput);
+        for (var i = 0; i < 60; i++)
+        { clock.Advance(TimeSpan.FromSeconds(1)); using var other = journal.BeginOwner("owner-a", "other"); other!.Complete(CompanionActivityState.ResponseReady); }
+        Assert.Equal(waiting.RequestId, journal.Read(Grant()).Requests[0].RequestId);
+        clock.Advance(TimeSpan.FromMinutes(31));
+        Assert.DoesNotContain(journal.Read(Grant()).Requests, item => item.RequestId == waiting.RequestId);
     }
 
     internal static CompanionGrant Grant(string member = "member-a") => new("home-a", member, [], canReadActivity: true);

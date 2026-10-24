@@ -11,8 +11,8 @@ public sealed class CompanionActivityLease : IDisposable
     public void Working() { if (Volatile.Read(ref finished) == 0) { update(CompanionActivityState.Working); } }
     public void Complete(CompanionActivityState state)
     {
-        if (!Enum.IsDefined(state) || state is CompanionActivityState.Received or CompanionActivityState.Working)
-        { throw new ArgumentException("A request completion requires a known final state.", nameof(state)); }
+        if (!Enum.IsDefined(state) || state is CompanionActivityState.Received or CompanionActivityState.Working or CompanionActivityState.Continued)
+        { throw new ArgumentException("A request completion requires its own reported final state, not inferred follow-up evidence.", nameof(state)); }
         if (Interlocked.Exchange(ref finished, 1) == 0) { update(state); }
     }
     public void Dispose() => Complete(CompanionActivityState.OutcomeUnknown);

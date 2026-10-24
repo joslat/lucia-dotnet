@@ -42,7 +42,7 @@ public sealed class CompanionActivityConversationWireTests
         var protectedBefore = await File.ReadAllBytesAsync(Path.Combine(directory.FullName, "session.bin"));
         var pending = host.Client.PostAsJsonAsync("/api/conversation/", new
         {
-            text = "PRIVATE_WIRE_REQUEST", context = new { userId = "member-b", activityOwnerKeyId = "owner-b", enrolledProfileId = "profile-b", deviceArea = "PRIVATE_ROOM" }
+            text = "PRIVATE_WIRE_REQUEST", context = new { conversationId = "PRIVATE_CONVERSATION", userId = "member-b", activityOwnerKeyId = "owner-b", enrolledProfileId = "profile-b", deviceArea = "PRIVATE_ROOM" }
         });
         try
         {
@@ -66,6 +66,12 @@ public sealed class CompanionActivityConversationWireTests
             Assert.Equal("ResponseReady", ready.GetProperty("state").GetString());
             Assert.DoesNotContain("PRIVATE_", after.ToString());
             Assert.Equal(RequestActivityState.ResponseReady, Assert.Single((await native.ReadActivityAsync(identity)).Requests).State);
+            using var next = await host.Client.PostAsJsonAsync("/api/conversation/", new
+                { text = "PRIVATE_REPLY", context = new { conversationId = "PRIVATE_CONVERSATION" } });
+            Assert.Equal(HttpStatusCode.OK, next.StatusCode);
+            var correlated = (await native.ReadActivityAsync(identity)).Requests.Single(item => item.RequestId != id);
+            Assert.Equal(id, correlated.PreviousRequestId);
+            Assert.Equal(RequestActivityState.ResponseReady, correlated.State);
             Assert.Equal(protectedBefore, await File.ReadAllBytesAsync(Path.Combine(directory.FullName, "session.bin")));
 
             var other = await host.Sessions.CreateAsync(CompanionActivityJournalTests.Grant("member-b"), "Tablet");

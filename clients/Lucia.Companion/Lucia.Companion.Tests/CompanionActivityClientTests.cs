@@ -39,6 +39,8 @@ public sealed class CompanionActivityClientTests
     [InlineData("capacity")]
     [InlineData("disabled-with-data")]
     [InlineData("false-more")]
+    [InlineData("invalid-previous")]
+    [InlineData("self-previous")]
     public async Task MalformedActivityIsRejectedWithoutPrivateDiagnosticBodies(string defect)
     {
         var body = Payload(); var item = body["requests"]![0]!;
@@ -58,6 +60,8 @@ public sealed class CompanionActivityClientTests
             case "capacity": for (var i = 0; i < 20; i++) { var next = item.DeepClone(); next["requestId"] = i.ToString("x32"); body["requests"]!.AsArray().Add(next); } break;
             case "disabled-with-data": body["isConfigured"] = false; break;
             case "false-more": body["hasMore"] = true; break;
+            case "invalid-previous": item["previousRequestId"] = "PRIVATE_MARKER"; break;
+            case "self-previous": item["previousRequestId"] = item["requestId"]!.GetValue<string>(); break;
         }
         using var api = Client(body);
         var error = await Assert.ThrowsAsync<CompanionConnectionException>(() => api.GetActivityAsync(Access, Session(), TestContext.Current.CancellationToken));
@@ -90,6 +94,18 @@ public sealed class CompanionActivityClientTests
         var snapshot = await api.GetActivityAsync(Access, Session(), TestContext.Current.CancellationToken);
         Assert.Equal(RequestActivityState.Working, Assert.Single(snapshot.Requests).State);
         Assert.True(snapshot.Requests[0].UpdatedAt < snapshot.CoverageStartedAt);
+    }
+
+    [Fact]
+    public async Task AContinuedResponseCarriesOnlyABoundedOpaquePreviousRequestLink()
+    {
+        var body = Payload(); var item = body["requests"]![0]!;
+        item["state"] = "Continued"; item["previousRequestId"] = new string('b', 32);
+        using var api = Client(body);
+        var request = Assert.Single((await api.GetActivityAsync(Access, Session(), TestContext.Current.CancellationToken)).Requests);
+        Assert.Equal("Continued", request.State.ToString());
+        Assert.Equal(new string('b', 32), request.PreviousRequestId);
+        // A previous turn may be outside the bounded current snapshot. Do not invent or require its history.
     }
 
     internal static DeviceSession Session() => new(new string('a', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1), "home-a", "member-a", [], canReadActivity: true);

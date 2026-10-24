@@ -76,6 +76,36 @@ public sealed class CompanionConversationActivityTests : IDisposable
         Assert.Empty(journal.Read(CompanionActivityJournalTests.Grant()).Requests);
     }
 
+    [Fact]
+    public async Task TheVerifiedOwnerSourceCorrelatesALaterTurnBeforeCommandRoutingCompletes()
+    {
+        using var first = journal.BeginOwner("owner-a", "conversation"); first!.Complete(CompanionActivityState.NeedsInput);
+        var routing = new TaskCompletionSource<CommandRouteResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        A.CallTo(() => router.RouteAsync(A<string>._, A<CancellationToken>._)).Returns(routing.Task);
+        var pending = Processor().ProcessAsync(new() { Text = "PRIVATE_REPLY", Context = new()
+            { IsDashboardSession = true, ActivityOwnerKeyId = "owner-a", ConversationId = "conversation" } });
+        try
+        {
+            var snapshot = journal.Read(CompanionActivityJournalTests.Grant());
+            Assert.Equal(CompanionActivityState.Continued, snapshot.Requests.Single(item => item.RequestId == first.RequestId).State);
+            Assert.Equal(first.RequestId, snapshot.Requests.Single(item => item.State == CompanionActivityState.Working).PreviousRequestId);
+        }
+        finally { routing.TrySetResult(Route()); await pending; }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task OnlyThisTurnsVerifiedVoiceCanContinueItsPriorReplyRequest(bool freshProof)
+    {
+        using var first = journal.BeginVoice("profile-a", "conversation"); first!.Complete(CompanionActivityState.NeedsInput);
+        sticky.Remember("conversation", "profile-a");
+        await Processor(stickyEnabled: true).ProcessAsync(VoiceRequest(freshProof
+            ? new() { ProfileId = "profile-a", Name = "PRIVATE_NAME", Similarity = .95f, IsAuthorized = true } : null));
+        var before = journal.Read(CompanionActivityJournalTests.Grant()).Requests.Single(item => item.RequestId == first.RequestId);
+        Assert.Equal(freshProof ? CompanionActivityState.Continued : CompanionActivityState.NeedsInput, before.State);
+    }
+
     [Theory]
     [InlineData(false, false, .95f)]
     [InlineData(true, true, .95f)]
