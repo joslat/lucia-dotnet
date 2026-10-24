@@ -65,6 +65,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\clients\Lucia.Companion\Lucia.Companion.Connection\Lucia.Companion.Connection.csproj" />
     <ProjectReference Include="..\lucia.AgentHost\lucia.AgentHost.csproj" />
     <ProjectReference Include="..\lucia.MusicAgent\lucia.MusicAgent.csproj" />
     <ProjectReference Include="..\lucia.ServiceDefaults\lucia.ServiceDefaults.csproj" />

@@ -10,6 +10,7 @@ namespace lucia.AgentHost.Auth;
 public static class CompanionAuthentication
 {
     public const string Scheme = "LuciaCompanion";
+    public const string OwnSessionPolicy = "CompanionOwnSession";
     // HomePolicy checks identity/home only. Projections must still filter every place and field through the current grant.
     public const string HomePolicy = "CompanionHome";
     public const string EnginePolicy = "CompanionEngine";
@@ -31,6 +32,8 @@ public static class CompanionAuthentication
         services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, CompanionAuthenticationHandler>(Scheme, _ => { });
         services.AddAuthorization(options =>
         {
+            options.AddPolicy(OwnSessionPolicy, policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser()
+                .RequireAssertion(context => context.Resource is HttpContext http && Session(http) is not null));
             options.AddPolicy(HomePolicy, policy => Configure(policy, _ => true));
             options.AddPolicy(EnginePolicy, policy => Configure(policy, session => session.Grant.CanReadEngine));
             options.AddPolicy(HistoryPolicy, policy => Configure(policy, session => session.Grant.CanReadHistory));

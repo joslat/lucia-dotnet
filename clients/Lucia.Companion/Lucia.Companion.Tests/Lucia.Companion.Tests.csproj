@@ -10,6 +10,7 @@
     <PackageReference Include="Avalonia.Headless.XUnit" />
     <PackageReference Include="Avalonia.Skia" />
     <ProjectReference Include="../Lucia.Companion.Core/Lucia.Companion.Core.csproj" />
+    <ProjectReference Include="../Lucia.Companion.Connection/Lucia.Companion.Connection.csproj" />
     <ProjectReference Include="../Lucia.Companion.App/Lucia.Companion.App.csproj" />
   </ItemGroup>
 </Project>

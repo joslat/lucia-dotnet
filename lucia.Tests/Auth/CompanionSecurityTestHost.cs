@@ -32,6 +32,16 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     public ICompanionPairingService Pairings { get; }
     public IApiKeyService Keys { get; }
 
+    public Lucia.Companion.Connection.CompanionApiClient CreateNativeClient()
+    {
+        var fingerprint = certificate.GetCertHashString(HashAlgorithmName.SHA256);
+        return new(Client.BaseAddress!, new HttpClientHandler
+        {
+            UseCookies = false, AllowAutoRedirect = false,
+            ServerCertificateCustomValidationCallback = (_, presented, _, _) => presented?.GetCertHashString(HashAlgorithmName.SHA256) == fingerprint
+        });
+    }
+
     private CompanionSecurityTestHost(SqliteTestHelper database, WebApplication app, X509Certificate2 certificate,
         HttpClient client, ICompanionSessionService sessions, ICompanionPairingService pairings, IApiKeyService keys)
     {

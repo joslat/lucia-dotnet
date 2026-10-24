@@ -100,7 +100,7 @@ Current verification includes core/configuration tests and native headless phone
 
 ## Native-session host foundation
 
-This is server-side groundwork, not a connected native sign-in flow. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The native app still runs offline and has no credentials or network client. Do not give it a dashboard key or internal service token to bypass the unfinished native client.
+This is not yet a connected native sign-in screen. Companion access is disabled by default. `Companion:Enabled` requires a stable `Companion:HomeId` and trusted HTTPS. The app still runs offline. A separate native transport library now passes HTTPS integration tests, but platform storage/session coordination and screen wiring remain open. Do not give the app a dashboard key or internal service token to bypass that work.
 
 The host registers `LuciaCompanion` as an explicit authentication scheme. It is not part of the existing default API-key/internal-token scheme, `Administrator`, or `ExternalOrInternal` policies. The native credential carries no broad scope or administrator role. Dashboard headers/cookies and internal credentials are not accepted as a companion identity. `GET /api/companion/homes/{homeId}/session` returns only that device's session/grant metadata and uses `Cache-Control: no-store`, including denied responses. Insecure companion requests fail without redirecting a credential to another address. Disabled routes return 404.
 
@@ -127,6 +127,8 @@ Pairing uses two separate codes. The native device retains a 256-bit `deviceCode
 | `POST /pairings` | Anonymous HTTPS JSON `{deviceName}`. Returns codes, expiry and five-second poll interval |
 | `POST /pairings/redeem` | Device JSON `{deviceCode}`. Pending 202, slow polling 429, denied 403, expired/consumed 410, invalid 401; success returns credentials once |
 | `POST /session/renew` | Device JSON `{refreshToken}`. Rotates both credentials or returns 401 |
+| `GET /session` | Native Bearer. Learns its approved home/member/grant without a client-supplied home hint |
+| `POST /session/logout` | Native Bearer. Durably revokes that session without a home hint |
 | `GET /homes/{homeId}/session` | Native Bearer. Returns own current session/grant only |
 | `POST /homes/{homeId}/session/logout` | Native Bearer. Durably revokes that session |
 | `GET /owner/antiforgery` | Current owner key/cookie. Returns identity-bound request token and Secure/HttpOnly/SameSite=Strict cookie |
@@ -143,6 +145,18 @@ Owner routes use the existing Administrator API-key scheme, not native or intern
 All companion requests have a 16 KiB body limit. Per-process, per-remote-IP limits allow five starts, 120 credential/session requests and 60 owner requests per minute, with no queue and Retry-After on rejection. These are local-pilot abuse limits, not distributed DDoS protection. Qualify trusted proxy forwarding before deployment; never trust arbitrary forwarded headers. Expired pairing rows are removed in bounded batches during creation and maintenance. Approval metadata is not a permanent audit log.
 
 The owner assigns an opaque member ID with the grant. There is no separate member account/roster yet. Removing an owner key after a valid approval does not retroactively revoke that device grant. Cancel an unconsumed intent or explicitly revoke its issued session. Full member-removal semantics, owner UI, native vault/TLS/client integration and real projection filtering remain open.
+
+### Native transport library
+
+`Lucia.Companion.Connection` references Core only, not Avalonia, AgentHost, HA or model packages. It owns HTTP and validated immutable wire types; Core remains independent of network I/O. The visible app does not call it yet. There is no new NuGet package.
+
+`CompanionApiClient` accepts one HTTPS origin with no embedded credentials, query, fragment or path prefix. Reverse-proxy path-prefix hosting is not supported yet. Production uses the platform certificate trust policy, disables redirects, cookies and default credentials, and never sends an owner key. Test-only constructors are internal to the two test assemblies; the integration host pins only its own temporary certificate. The public constructor refuses that untrusted certificate.
+
+Pairing/refresh secrets travel in JSON bodies only; access credentials use a per-request Bearer header. Methods do not retry credential-changing requests. Pairing reports pending, throttle, denial, expiry and consumed intent separately. Session metadata reveals only the current device grant, not a household catalog. Wire parsing rejects missing required constructor inputs, malformed credentials, invalid fields and duplicate places. Exceptions and credential `ToString()` output omit response bodies and raw transport diagnostics.
+
+Responses are limited to 64 KiB. Headers and content each have a thirty-second deadline; caller cancellation remains cancellation. Content needs a separate deadline because [ResponseHeadersRead ends HttpClient's timeout at the headers](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpcompletionoption?view=net-10.0). An ambiguous renewal/redemption must not replay an old credential. The forthcoming session coordinator must serialize renewals, save replacements securely before use, and clear protected state after revocation/logout.
+
+Proof includes scripted hostile responses and the actual transport against isolated loopback Kestrel HTTPS with real SQLite pairing/session services. It covers successful approval/grant discovery/renewal/logout, old-access rejection, pending/throttle/denial, certificate rejection, bounded/stalled bodies, cancellation and redacted errors. It does not qualify a platform vault, installed Android networking, production deployment or connected UI.
 
 ## StoryOrbit Day
 

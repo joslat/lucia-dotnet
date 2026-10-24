@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Lucia.Companion.Core/Lucia.Companion.Core.csproj" />
+    <InternalsVisibleTo Include="Lucia.Companion.Tests" />
+    <InternalsVisibleTo Include="lucia.Tests" />
+  </ItemGroup>
+</Project>
