@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <ProjectReference Include="../Lucia.Companion.Core/Lucia.Companion.Core.csproj" />
+    <AvaloniaResource Include="Assets/**" Exclude="Assets/Fonts/Outfit.ttf;Assets/Fonts/DMSans.ttf" />
+  </ItemGroup>
+</Project>

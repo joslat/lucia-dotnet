@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ApplicationId>org.lucia.companion.prototype</ApplicationId>
+    <ApplicationTitle>Lucia prototype</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
+    <SupportedOSPlatformVersion>31</SupportedOSPlatformVersion>
+    <!-- A directly installable prototype must not require IDE fast-deployment side files. -->
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Android" />
+    <ProjectReference Include="../Lucia.Companion.App/Lucia.Companion.App.csproj" />
+  </ItemGroup>
+</Project>

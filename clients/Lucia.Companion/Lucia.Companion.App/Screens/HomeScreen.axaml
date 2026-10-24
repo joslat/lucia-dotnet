@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Screens.HomeScreen" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: A stable, legible home graph with truthful sample observations.
+       OWN-WORLD: Constellation circles, physical-connection lines, Observatory light/dark and local Outfit/DM Sans.
+       STORY: See places and attention, open readings, pin a place through accessible Bloom actions.
+       FIRST VIEWPORT: Home identity, offline notice, Your places first; attention and details alongside on tablet, a separate detail view on phone.
+       FORM: Approved Constellation native composition. Seed: approved-constellation-home.
+       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+  <Grid RowDefinitions="Auto,*" Margin="16">
+    <StackPanel Spacing="4" Margin="4,0,4,12">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <TextBlock Name="HomeName" Classes="section" VerticalAlignment="Center" />
+        <Border Grid.Column="1" Background="{DynamicResource ControlBrush}" CornerRadius="12" Padding="12,8" VerticalAlignment="Center">
+          <TextBlock Text="Offline demo" FontSize="13" Foreground="{DynamicResource AccentBrush}" />
+        </Border>
+      </Grid>
+      <TextBlock Text="Synthetic readings · 24 Oct 2026 · 12:00 UTC" Classes="muted" FontSize="13" />
+      <TextBlock Name="AttentionSummary" FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
+    </StackPanel>
+    <ScrollViewer Name="HomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <Grid Name="HomeGrid" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+        <StackPanel Name="MainPanel" Spacing="16">
+        <Border Name="PlacesCard" Classes="panel" Padding="12">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Your places" Classes="section" />
+            <TextBlock Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="13" />
+            <c:HomeConstellation Name="Constellation" />
+          </StackPanel>
+        </Border>
+        <Border Name="LuciaCard" Classes="panel" Padding="12">
+          <c:LuciaNow />
+        </Border>
+        </StackPanel>
+        <StackPanel Name="SidePanel" Grid.Column="1" Spacing="16">
+        <Border Name="AttentionCard" Classes="panel" Padding="16">
+          <c:AttentionList Name="Attention" />
+        </Border>
+        <Border Name="DesktopDetailCard" Classes="panel" Padding="16">
+          <StackPanel Spacing="18">
+            <c:PlaceDetail Name="DesktopDetail" />
+          </StackPanel>
+        </Border>
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+    <ScrollViewer Name="DetailScroll" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="16">
+        <Button Name="BackToHome" Classes="theme" Content="Back to your home" HorizontalAlignment="Left" />
+        <Border Classes="panel">
+          <StackPanel Spacing="18">
+            <c:PlaceDetail Name="PhoneDetail" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+    <Border Name="BloomShade" Grid.RowSpan="2" Background="#80000000" IsVisible="False" IsHitTestVisible="False" />
+    <Popup Name="ActionPopup" Grid.Row="1" Placement="Center" IsLightDismissEnabled="True" ShouldUseOverlayLayer="True">
+      <c:BloomActions Name="PlaceActions" />
+    </Popup>
+  </Grid>
+</UserControl>

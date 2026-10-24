@@ -1,0 +1,37 @@
+# Approved build sequence
+
+Approved 24 October 2026. Build native Constellation controls, not an HTML wrapper. Keep SRP/KISS/DRY practical: add a layer only when the current slice needs it. Dependency direction and small responsibilities provide CLEAN/SOLID boundaries without a framework of empty interfaces.
+
+| Order | Deliverable | Gate/status |
+|---|---|---|
+| Foundation | Pure Core, themes, PlaceOrb, ObservationRow, outline icons | Initial implementation, sample-data workbench |
+| Compositions | HomeConstellation, physical connections, attention and read-only details | Implemented; empty/single/40-place layout tests |
+| Interactions | Shared selection, named BloomActions, context menu, pins and Back | Implemented; device qualification remains open |
+| Screens | Home and local setup; then StoryOrbit Day | Home/setup implemented; StoryOrbit is next |
+| Local metadata | Add/name/icon/connect/reorder/remove places, save/cancel, pin persistence | Implemented; no source import, binding editor or section-order preference yet |
+| Live boundary | Native session, secure storage, authorization, projections | Must precede live household data |
+| Qualification | Devices, accessibility, lifecycle, performance, distribution | Not completed |
+
+## HomeConstellation, initial implementation complete
+
+Reuse the atoms. Introduce topology here, not before: containment, optional physical connections, sensor bindings and display coordinates are separate. Reject self/duplicate/cross-home edges; cycles and disconnected places are valid. Lines are decorative; places remain semantic native buttons. Urgency must not continuously rearrange stable positions.
+
+One selection state drives constellation and detail. Narrow layouts open detail separately; expanded layouts can place it alongside. Named tap/context/keyboard actions precede long-press acceleration. No hover-only actions. Test empty/single/large homes, long labels, large text and keyboard order.
+
+## Home and local setup, initial implementation complete
+
+Home puts Your places first, then attention and a clearly synthetic Lucia now example. Build your home stages edits until Save. New places have no bindings/readings and remain unavailable. Pin preferences persist without reordering places automatically.
+
+LocalHomeStore writes versioned metadata and pins, never observations or task history. Writes are serialized and replace a same-directory temporary file. A corrupt setup is preserved and blocks automatic writes until the user explicitly chooses Replace saved setup. Failed writes leave session state and offer Retry. Source import, binding editing and section ordering remain future work. The following original acceptance scope is retained so those gaps remain visible.
+
+Compose Your places first, read-only Lucia now and Customize. Add only the configuration storage/state management needed here. Add/import place, choose icon, review bindings, save/cancel; no host mutations until an authenticated boundary exists. Preferences may reorder sections deliberately, not unexpectedly.
+
+## Then: StoryOrbit Day
+
+Use the signature name StoryOrbit. Orbit, chapters and flattened place timelines share one temporal dataset and selection, initially deterministic fixtures. Real data needs authorized history, timezone/DST tests, explicit coverage gaps and binding policy. Place filters scroll when long. Week/hourly Patterns and full Engine analytics stay deferred.
+
+## Live services and release
+
+Review native sign-in, device sessions, secure storage, renewal/revocation and household authorization. Browser cookies are not automatically mobile auth. Reuse the Lucia host where suitable; no mobile microservice by default. No admin secrets or inferred device-control authority in clients.
+
+Release requires actual phone/tablet light/dark, text scaling, safe areas, screen readers, keyboard/back, offline/reconnect, suspend/resume, revoked sessions, performance and signing tests. iOS needs a Mac/device matrix. Physical actions, push and operational analytics need separate approved designs.

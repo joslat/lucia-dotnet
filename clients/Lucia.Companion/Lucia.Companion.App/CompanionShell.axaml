@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.CompanionShell" Background="{DynamicResource CanvasBrush}">
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="16,8,16,0">
+      <TextBlock Text="Lucia" FontFamily="{DynamicResource DisplayFont}" FontSize="24" VerticalAlignment="Center" />
+    <WrapPanel HorizontalAlignment="Right">
+      <Button Name="AppearanceButton" Content="Theme" Classes="theme" Margin="0,0,8,0" />
+      <Button Name="BuildHomeButton" Content="Setup" AutomationProperties.Name="Build your home" Classes="theme" Margin="0,0,8,0" />
+      <Button Name="LabButton" Content="Controls" Classes="theme" />
+    </WrapPanel>
+    </DockPanel>
+    <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">
+      <TextBlock Name="StorageStatus" Classes="muted" FontSize="13" />
+      <Button Name="RetrySaveButton" Content="Retry save" Classes="theme" IsVisible="False" HorizontalAlignment="Left" />
+    </StackPanel>
+    <ContentControl Name="ScreenHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+  </DockPanel>
+</UserControl>

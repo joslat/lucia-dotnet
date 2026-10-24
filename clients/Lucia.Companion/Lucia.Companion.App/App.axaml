@@ -1,0 +1,41 @@
+<Application xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.App" RequestedThemeVariant="Default">
+  <Application.Resources>
+    <ResourceDictionary>
+      <FontFamily x:Key="BodyFont">avares://Lucia.Companion.App/Assets/Fonts#DM Sans</FontFamily>
+      <FontFamily x:Key="DisplayFont">avares://Lucia.Companion.App/Assets/Fonts#Outfit</FontFamily>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="CanvasBrush">#0d0c0a</SolidColorBrush>
+          <SolidColorBrush x:Key="PanelBrush">#171512</SolidColorBrush>
+          <SolidColorBrush x:Key="ControlBrush">#1a1816</SolidColorBrush>
+          <SolidColorBrush x:Key="LineBrush">#918b84</SolidColorBrush>
+          <SolidColorBrush x:Key="TextBrush">#ddd8d1</SolidColorBrush>
+          <SolidColorBrush x:Key="MutedBrush">#b0aaa3</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentBrush">#e2a84b</SolidColorBrush>
+          <SolidColorBrush x:Key="InfoBrush">#60a5fa</SolidColorBrush>
+          <SolidColorBrush x:Key="ProblemBrush">#d4756b</SolidColorBrush>
+          <SolidColorBrush x:Key="GraphLineBrush">#3a3733</SolidColorBrush>
+          <SolidColorBrush x:Key="SageBrush">#7dab8c</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="CanvasBrush">#f1f2ef</SolidColorBrush>
+          <SolidColorBrush x:Key="PanelBrush">#ffffff</SolidColorBrush>
+          <SolidColorBrush x:Key="ControlBrush">#f5f6f3</SolidColorBrush>
+          <SolidColorBrush x:Key="LineBrush">#626861</SolidColorBrush>
+          <SolidColorBrush x:Key="TextBrush">#292e29</SolidColorBrush>
+          <SolidColorBrush x:Key="MutedBrush">#626861</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentBrush">#8c5b0f</SolidColorBrush>
+          <SolidColorBrush x:Key="InfoBrush">#2563eb</SolidColorBrush>
+          <SolidColorBrush x:Key="ProblemBrush">#a13f3a</SolidColorBrush>
+          <SolidColorBrush x:Key="GraphLineBrush">#c1c6bd</SolidColorBrush>
+          <SolidColorBrush x:Key="SageBrush">#397151</SolidColorBrush>
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://Lucia.Companion.App/Styles/Controls.axaml" />
+  </Application.Styles>
+</Application>

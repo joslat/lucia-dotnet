@@ -32,6 +32,7 @@ obj/
 !infra/appliance/release/**
 *.mode*
 *.app/
+!clients/Lucia.Companion/Lucia.Companion.App/
 *.pyc
 .svn/
 *.log

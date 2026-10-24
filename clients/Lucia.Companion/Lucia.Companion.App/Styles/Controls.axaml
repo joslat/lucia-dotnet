@@ -1,0 +1,71 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Lucia.Companion.App.Controls">
+  <Styles.Resources>
+    <ControlTheme x:Key="{x:Type c:PlaceOrb}" TargetType="c:PlaceOrb">
+      <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+      <Setter Property="MinWidth" Value="100" />
+      <Setter Property="MinHeight" Value="126" />
+      <Setter Property="Padding" Value="10" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="FocusBorder" CornerRadius="12" BorderThickness="2" BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
+            <StackPanel Spacing="6" HorizontalAlignment="Center">
+              <Grid Name="Orb" Width="72" Height="72">
+                  <Ellipse Name="StateRing" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2" />
+                  <Ellipse Name="SelectionRing" Margin="-6" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1" StrokeDashArray="2,4" IsVisible="{TemplateBinding IsSelected}" />
+                  <Path Width="28" Height="28" Stretch="Uniform" Data="{TemplateBinding Icon}"
+                      Stroke="{TemplateBinding Foreground}" StrokeThickness="1.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <Path IsVisible="{TemplateBinding IsPinned}" Width="12" Height="12" Margin="0,2,2,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Data="M4,2 L10,2 9,7 11,9 7,9 7,14 M5,9 L3,9 5,7 Z" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" />
+              </Grid>
+              <TextBlock Text="{TemplateBinding PlaceName}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextAlignment="Center" MaxWidth="132" TextWrapping="Wrap" />
+              <TextBlock Text="{TemplateBinding StateText}" Foreground="{TemplateBinding Foreground}" FontSize="13" TextAlignment="Center" />
+            </StackPanel>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover /template/ Ellipse#StateRing"><Setter Property="Fill" Value="{DynamicResource PanelBrush}" /></Style>
+      <Style Selector="^.changed, ^.waiting"><Setter Property="Foreground" Value="{DynamicResource AccentBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
+      <Style Selector="^.working"><Setter Property="Foreground" Value="{DynamicResource InfoBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource InfoBrush}" /></Style>
+      <Style Selector="^.problem"><Setter Property="Foreground" Value="{DynamicResource ProblemBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource ProblemBrush}" /></Style>
+      <Style Selector="^:selected /template/ Border#FocusBorder"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
+      <Style Selector="^:focus-visible /template/ Border#FocusBorder"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /></Style>
+      <Style Selector="^:pressed /template/ Grid#Orb"><Setter Property="Opacity" Value="0.7" /></Style>
+      <Style Selector="^:disabled"><Setter Property="Opacity" Value="0.5" /></Style>
+      <Style Selector="^.constellation.quiet /template/ Ellipse#StateRing"><Setter Property="Fill" Value="Transparent" /><Setter Property="Stroke" Value="Transparent" /></Style>
+      <Style Selector="^.constellation.unavailable /template/ Ellipse#StateRing"><Setter Property="Fill" Value="Transparent" /><Setter Property="StrokeThickness" Value="1" /><Setter Property="StrokeDashArray" Value="2,4" /></Style>
+      <Style Selector="^.constellation:selected /template/ Border#FocusBorder"><Setter Property="BorderBrush" Value="Transparent" /></Style>
+      <Style Selector="^.constellation:focus-visible /template/ Border#FocusBorder"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /></Style>
+    </ControlTheme>
+    <ControlTheme x:Key="{x:Type c:BloomActionButton}" TargetType="c:BloomActionButton">
+      <Setter Property="Width" Value="88" /><Setter Property="Height" Value="94" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <StackPanel Spacing="5" HorizontalAlignment="Center">
+            <Border Name="ActionCircle" Width="48" Height="48" CornerRadius="24" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" BoxShadow="0 4 14 0 #40000000">
+              <Path Data="{TemplateBinding Icon}" Width="21" Height="21" Stretch="Uniform" Stroke="{DynamicResource TextBrush}" StrokeThickness="1.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Border Background="{DynamicResource PanelBrush}" CornerRadius="8" Padding="5,2">
+              <TextBlock Text="{TemplateBinding Label}" FontSize="13" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="78" />
+            </Border>
+          </StackPanel>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
+      <Style Selector="^:focus-visible /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /><Setter Property="BorderThickness" Value="3" /></Style>
+      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
+    </ControlTheme>
+  </Styles.Resources>
+  <Style Selector="TemplatedControl"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /></Style>
+  <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>
+  <Style Selector="TextBlock.title"><Setter Property="FontFamily" Value="{DynamicResource DisplayFont}" /><Setter Property="FontSize" Value="34" /><Setter Property="FontWeight" Value="Medium" /></Style>
+  <Style Selector="TextBlock.section"><Setter Property="FontFamily" Value="{DynamicResource DisplayFont}" /><Setter Property="FontSize" Value="24" /></Style>
+  <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{DynamicResource MutedBrush}" /><Setter Property="TextWrapping" Value="Wrap" /></Style>
+  <Style Selector="Button.theme"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /><Setter Property="MinHeight" Value="48" /><Setter Property="Background" Value="{DynamicResource ControlBrush}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>
+  <Style Selector="c|PlaceOrb.constellation /template/ TextBlock"><Setter Property="FontSize" Value="14" /></Style>
+  <Style Selector="Border.panel"><Setter Property="Background" Value="{DynamicResource PanelBrush}" /><Setter Property="CornerRadius" Value="16" /><Setter Property="Padding" Value="20" /><Setter Property="BorderBrush" Value="{DynamicResource GraphLineBrush}" /><Setter Property="BorderThickness" Value="1" /></Style>
+  <Style Selector="TextBox"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /><Setter Property="MinHeight" Value="48" /></Style>
+  <Style Selector="ComboBox, ListBoxItem, CheckBox, MenuItem"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /></Style>
+</Styles>

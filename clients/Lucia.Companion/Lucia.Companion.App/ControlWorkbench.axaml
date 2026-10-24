@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.ControlWorkbench" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: Build from truthful native atoms, not a simulated live dashboard.
+       OWN-WORLD: Constellation orbs, Observatory palette, Outfit and DM Sans, named states.
+       STORY: Inspect sample places, switch theme, select an orb and read qualified observations.
+       FIRST VIEWPORT: Title and sample notice, theme buttons, wrapping place orbs, selected-place details.
+       FORM: Native adaptive control workbench. Seed: approved-constellation-native-atoms.
+       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="24" Spacing="20" MaxWidth="1040" HorizontalAlignment="Stretch">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Lucia" Classes="title" />
+        <TextBlock Text="Constellation · control workbench" Classes="section" TextWrapping="Wrap" />
+        <TextBlock Text="Synthetic sample · offline · no device actions" Classes="muted" />
+      </StackPanel>
+      <WrapPanel Orientation="Horizontal">
+        <Button Name="SystemTheme" Classes="theme" Content="System" Margin="0,0,8,8" AutomationProperties.Name="Use system theme" />
+        <Button Name="LightTheme" Classes="theme" Content="Light" Margin="0,0,8,8" AutomationProperties.Name="Use light theme" />
+        <Button Name="DarkTheme" Classes="theme" Content="Dark" Margin="0,0,8,8" AutomationProperties.Name="Use dark theme" />
+      </WrapPanel>
+      <StackPanel Spacing="8">
+        <TextBlock Text="Your places" Classes="section" />
+        <TextBlock Text="Select a place to inspect its sample observations. Color always has a written meaning." Classes="muted" />
+      </StackPanel>
+      <WrapPanel Name="PlacesPanel" Orientation="Horizontal" />
+      <Border Background="{DynamicResource PanelBrush}" CornerRadius="16" Padding="20">
+        <StackPanel Spacing="8">
+          <TextBlock Name="SelectedName" Classes="section" TextWrapping="Wrap" />
+          <TextBlock Name="SelectedReason" Classes="muted" />
+          <StackPanel Name="ObservationsPanel" />
+        </StackPanel>
+      </Border>
+      <TextBlock Text="This is the native foundation, not a connected home. Closed does not mean locked. A completed request is not proof of a physical result." Classes="muted" FontSize="13" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

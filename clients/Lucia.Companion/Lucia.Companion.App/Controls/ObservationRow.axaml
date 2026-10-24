@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.Controls.ObservationRow">
+  <Border Padding="0,14" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1">
+    <StackPanel Spacing="5">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <TextBlock Name="LabelText" TextWrapping="Wrap" />
+        <TextBlock Name="ValueText" Grid.Column="1" FontWeight="SemiBold" MaxWidth="150" TextWrapping="Wrap" />
+      </Grid>
+      <TextBlock Name="PreviousText" Classes="muted" FontSize="13" />
+      <TextBlock Name="TimeText" Classes="muted" FontSize="13" />
+    </StackPanel>
+  </Border>
+</UserControl>

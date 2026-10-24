@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Lucia.Companion.App.Controls" x:Class="Lucia.Companion.App.Controls.HomeConstellation">
+  <StackPanel Spacing="10">
+    <TextBlock Name="EmptyText" Text="No places yet. Add a room, porch or garden to build your home." Classes="muted" Margin="0,24" />
+    <Grid>
+      <c:ConnectionLayer Name="Links" IsHitTestVisible="False" ConnectionBrush="{DynamicResource GraphLineBrush}" />
+      <c:ConstellationPanel Name="Map" />
+    </Grid>
+    <TextBlock Text="Lines show configured connections, not a floor plan." Classes="muted" FontSize="13" />
+  </StackPanel>
+</UserControl>

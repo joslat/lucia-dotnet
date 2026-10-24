@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Lucia.Companion.Core/Lucia.Companion.Core.csproj" />
+  <Project Path="Lucia.Companion.App/Lucia.Companion.App.csproj" />
+  <Project Path="Lucia.Companion.Desktop/Lucia.Companion.Desktop.csproj" />
+  <Project Path="Lucia.Companion.Tests/Lucia.Companion.Tests.csproj" />
+</Solution>

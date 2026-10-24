@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="Lucia.Companion.App.Controls.LuciaNow">
+  <StackPanel Spacing="8">
+    <TextBlock Text="Lucia now" Classes="section" />
+    <TextBlock Text="Example request: read the kitchen temperature" TextWrapping="Wrap" />
+    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+      <StackPanel Spacing="6">
+        <Border Width="16" Height="16" CornerRadius="8" BorderBrush="{DynamicResource SageBrush}" BorderThickness="2" HorizontalAlignment="Left" />
+        <TextBlock Text="Received · done" FontSize="13" Foreground="{DynamicResource SageBrush}" TextWrapping="Wrap" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="6">
+        <Border Width="16" Height="16" CornerRadius="8" Background="{DynamicResource InfoBrush}" HorizontalAlignment="Left" />
+        <TextBlock Text="Reading · current" FontSize="13" Foreground="{DynamicResource InfoBrush}" TextWrapping="Wrap" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Spacing="6">
+        <Border Width="16" Height="16" CornerRadius="8" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" HorizontalAlignment="Left" />
+        <TextBlock Text="Result · pending" FontSize="13" Classes="muted" TextWrapping="Wrap" />
+      </StackPanel>
+    </Grid>
+    <TextBlock Text="Synthetic task state. No request is running and no device is connected." Classes="muted" FontSize="13" />
+  </StackPanel>
+</UserControl>

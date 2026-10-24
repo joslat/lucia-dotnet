@@ -121,6 +121,14 @@
 
 ## Deployment
 
+### Experimental native companion
+
+- **Scope:** isolated offline Constellation Home, local setup and control workbench under `clients/Lucia.Companion`, separate from React and server solutions. Setup persists only versioned names/icons, connections, order and pins. Sensor readings and task history are never part of that file.
+- **Runtime:** .NET 10; Avalonia 12.1.4, Fluent native controls, Desktop and Android launchers. Shared Core has no UI/backend dependencies; shared App adapts by available width.
+- **Tests:** xUnit v3 3.2.2 and Avalonia.Headless.XUnit/Skia 12.1.4 for native interaction and rendering. Existing server xUnit v2 tests are unchanged. The newer test package is required by Avalonia 12's headless integration.
+- **Assets:** self-hosted OFL Outfit/DM Sans static TTF faces; source hashes/licenses retained. fonttools 4.60.1 is an optional asset-rebuild tool only.
+- **Rationale:** one native control implementation for phone/tablet, with thin platform lifecycles and testable observation semantics. No WebView, new service, cloud dependency or physical actions. iOS/browser launchers and production auth remain future work.
+
 ### Environments
 - **Production:** Kubernetes cluster (home lab)
 - **Staging:** Docker Compose

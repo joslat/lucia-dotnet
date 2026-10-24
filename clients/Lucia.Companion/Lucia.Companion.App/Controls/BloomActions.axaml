@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Controls.BloomActions">
+  <Grid Width="288" Height="292">
+    <Ellipse Fill="{DynamicResource PanelBrush}" />
+  <Canvas Width="288" Height="292">
+    <c:BloomActionButton Name="ReadingsButton" Canvas.Left="100" Canvas.Top="0" Label="Readings" Icon="M3,4 L21,4 21,20 3,20 Z M7,8 L17,8 M7,12 L17,12 M7,16 L13,16" />
+    <Border Canvas.Left="108" Canvas.Top="110" Width="72" Height="72" CornerRadius="36" Background="{DynamicResource PanelBrush}" BorderThickness="2" BorderBrush="{DynamicResource AccentBrush}" BoxShadow="0 5 22 0 #60000000">
+      <Path Name="PlaceIcon" Width="28" Height="28" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Border>
+    <Border Canvas.Left="88" Canvas.Top="187" Width="112" Background="{DynamicResource PanelBrush}" CornerRadius="8" Padding="4,2">
+      <TextBlock Name="Heading" FontSize="13" TextAlignment="Center" TextWrapping="Wrap" />
+    </Border>
+    <c:BloomActionButton Name="PinButton" Canvas.Left="5" Canvas.Top="174" Label="Pin place" Icon="M6,3 L18,3 16,11 20,15 4,15 8,11 Z M12,15 L12,23" />
+    <c:BloomActionButton Name="CloseButton" Canvas.Left="195" Canvas.Top="174" Label="Close" Icon="M5,5 L19,19 M19,5 L5,19" />
+  </Canvas>
+  </Grid>
+</UserControl>

@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.Screens.HomeEditorScreen" Background="{DynamicResource CanvasBrush}">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="16" RowSpacing="16">
+    <StackPanel Spacing="8">
+      <TextBlock Text="Build your home" Classes="title" TextWrapping="Wrap" />
+      <TextBlock Text="Names, icons and physical connections. Local setup only, no device control." Classes="muted" />
+      <TextBlock Name="ReplacementWarning" IsVisible="False" Text="The saved setup could not be read. Saving replaces that file. Cancel leaves it untouched." TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
+      <TextBlock Name="ErrorText" IsVisible="False" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <Grid Name="EditorGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+        <Border Name="PlaceListCard" Classes="panel">
+          <StackPanel Spacing="12">
+            <TextBlock Text="Home name" />
+            <TextBox Name="HomeNameInput" MaxLength="80" AutomationProperties.Name="Home name" />
+            <TextBlock Text="Your places" Classes="section" />
+            <TextBlock Text="The saved order keeps your home stable." Classes="muted" FontSize="13" />
+            <ListBox Name="PlacesList" MaxHeight="280" AutomationProperties.Name="Choose a place to edit" />
+            <ComboBox Name="PlaceChooser" HorizontalAlignment="Stretch" AutomationProperties.Name="Choose a place to edit" MinHeight="48" />
+            <Button Name="AddPlace" Content="Add place" Classes="theme" HorizontalAlignment="Left" />
+          </StackPanel>
+        </Border>
+        <Border Name="PlaceFormCard" Classes="panel" Grid.Column="1">
+          <StackPanel Spacing="12">
+            <TextBlock Text="Place setup" Classes="section" />
+            <TextBlock Text="Place name" />
+            <TextBox Name="PlaceNameInput" MaxLength="80" AutomationProperties.Name="Place name" />
+            <TextBlock Text="Icon" />
+            <ComboBox Name="IconInput" HorizontalAlignment="Stretch" AutomationProperties.Name="Place icon" MinHeight="48" />
+            <TextBlock Text="Connects to" />
+            <TextBlock Text="Optional. Select physical neighbors, not sensor owners." Classes="muted" FontSize="13" />
+            <StackPanel Name="ConnectionsList" Spacing="6" />
+            <TextBlock Text="New places have no observation bindings. They stay unavailable until a source is configured." Classes="muted" FontSize="13" />
+            <WrapPanel>
+              <Button Name="MoveEarlier" Content="Move earlier" Classes="theme" Margin="0,0,8,8" />
+              <Button Name="MoveLater" Content="Move later" Classes="theme" Margin="0,0,8,8" />
+            </WrapPanel>
+            <Button Name="RemovePlace" Content="Remove place" Classes="theme" HorizontalAlignment="Left" />
+            <StackPanel Name="RemovalConfirmation" IsVisible="False" Spacing="8">
+              <TextBlock Text="Remove this place and its connections from the draft? You can still discard all edits with Cancel." Classes="muted" />
+              <WrapPanel>
+                <Button Name="ConfirmRemove" Content="Confirm removal" Classes="theme" Margin="0,0,8,8" Foreground="{DynamicResource ProblemBrush}" />
+                <Button Name="KeepPlace" Content="Keep place" Classes="theme" />
+              </WrapPanel>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </ScrollViewer>
+    <WrapPanel Grid.Row="2">
+      <Button Name="SaveHome" Content="Save setup" Classes="theme" Margin="0,0,12,8" />
+      <Button Name="CancelEdit" Content="Cancel" Classes="theme" />
+    </WrapPanel>
+  </Grid>
+</UserControl>

@@ -1,0 +1,509 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T13:31:39Z",
+  "title": "Design System: Lucia Companion",
+  "extensions": {
+    "colorMeta": {
+      "light-canvas": {
+        "role": "neutral",
+        "displayName": "Light canvas / CanvasBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.00411 121.56)",
+          "oklch(26.43% 0.00411 121.56)",
+          "oklch(37.86% 0.00411 121.56)",
+          "oklch(49.29% 0.00411 121.56)",
+          "oklch(60.71% 0.00411 121.56)",
+          "oklch(72.14% 0.00411 121.56)",
+          "oklch(83.57% 0.00411 121.56)",
+          "oklch(95.00% 0.00411 121.56)"
+        ]
+      },
+      "light-panel": {
+        "role": "neutral",
+        "displayName": "Light panel / PanelBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 89.88)",
+          "oklch(26.43% 0.00000 89.88)",
+          "oklch(37.86% 0.00000 89.88)",
+          "oklch(49.29% 0.00000 89.88)",
+          "oklch(60.71% 0.00000 89.88)",
+          "oklch(72.14% 0.00000 89.88)",
+          "oklch(83.57% 0.00000 89.88)",
+          "oklch(95.00% 0.00000 89.88)"
+        ]
+      },
+      "light-control": {
+        "role": "neutral",
+        "displayName": "Light control / ControlBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.00410 121.56)",
+          "oklch(26.43% 0.00410 121.56)",
+          "oklch(37.86% 0.00410 121.56)",
+          "oklch(49.29% 0.00410 121.56)",
+          "oklch(60.71% 0.00410 121.56)",
+          "oklch(72.14% 0.00410 121.56)",
+          "oklch(83.57% 0.00410 121.56)",
+          "oklch(95.00% 0.00410 121.56)"
+        ]
+      },
+      "light-line": {
+        "role": "neutral",
+        "displayName": "Light line / LineBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.01313 141.23)",
+          "oklch(26.43% 0.01313 141.23)",
+          "oklch(37.86% 0.01313 141.23)",
+          "oklch(49.29% 0.01313 141.23)",
+          "oklch(60.71% 0.01313 141.23)",
+          "oklch(72.14% 0.01313 141.23)",
+          "oklch(83.57% 0.01313 141.23)",
+          "oklch(95.00% 0.01313 141.23)"
+        ]
+      },
+      "light-text": {
+        "role": "neutral",
+        "displayName": "Light text / TextBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.01135 145.28)",
+          "oklch(26.43% 0.01135 145.28)",
+          "oklch(37.86% 0.01135 145.28)",
+          "oklch(49.29% 0.01135 145.28)",
+          "oklch(60.71% 0.01135 145.28)",
+          "oklch(72.14% 0.01135 145.28)",
+          "oklch(83.57% 0.01135 145.28)",
+          "oklch(95.00% 0.01135 145.28)"
+        ]
+      },
+      "light-muted": {
+        "role": "neutral",
+        "displayName": "Light muted / MutedBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.01313 141.23)",
+          "oklch(26.43% 0.01313 141.23)",
+          "oklch(37.86% 0.01313 141.23)",
+          "oklch(49.29% 0.01313 141.23)",
+          "oklch(60.71% 0.01313 141.23)",
+          "oklch(72.14% 0.01313 141.23)",
+          "oklch(83.57% 0.01313 141.23)",
+          "oklch(95.00% 0.01313 141.23)"
+        ]
+      },
+      "light-accent": {
+        "role": "primary",
+        "displayName": "Light accent / AccentBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.10491 71.07)",
+          "oklch(26.43% 0.10491 71.07)",
+          "oklch(37.86% 0.10491 71.07)",
+          "oklch(49.29% 0.10491 71.07)",
+          "oklch(60.71% 0.10491 71.07)",
+          "oklch(72.14% 0.10491 71.07)",
+          "oklch(83.57% 0.10491 71.07)",
+          "oklch(95.00% 0.10491 71.07)"
+        ]
+      },
+      "light-info": {
+        "role": "secondary",
+        "displayName": "Light info / InfoBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.21521 262.88)",
+          "oklch(26.43% 0.21521 262.88)",
+          "oklch(37.86% 0.21521 262.88)",
+          "oklch(49.29% 0.21521 262.88)",
+          "oklch(60.71% 0.21521 262.88)",
+          "oklch(72.14% 0.21521 262.88)",
+          "oklch(83.57% 0.21521 262.88)",
+          "oklch(95.00% 0.21521 262.88)"
+        ]
+      },
+      "light-problem": {
+        "role": "tertiary",
+        "displayName": "Light problem / ProblemBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.13145 25.86)",
+          "oklch(26.43% 0.13145 25.86)",
+          "oklch(37.86% 0.13145 25.86)",
+          "oklch(49.29% 0.13145 25.86)",
+          "oklch(60.71% 0.13145 25.86)",
+          "oklch(72.14% 0.13145 25.86)",
+          "oklch(83.57% 0.13145 25.86)",
+          "oklch(95.00% 0.13145 25.86)"
+        ]
+      },
+      "dark-canvas": {
+        "role": "neutral",
+        "displayName": "Dark canvas / CanvasBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.00449 84.57)",
+          "oklch(26.43% 0.00449 84.57)",
+          "oklch(37.86% 0.00449 84.57)",
+          "oklch(49.29% 0.00449 84.57)",
+          "oklch(60.71% 0.00449 84.57)",
+          "oklch(72.14% 0.00449 84.57)",
+          "oklch(83.57% 0.00449 84.57)",
+          "oklch(95.00% 0.00449 84.57)"
+        ]
+      },
+      "dark-panel": {
+        "role": "neutral",
+        "displayName": "Dark panel / PanelBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.00669 78.16)",
+          "oklch(26.43% 0.00669 78.16)",
+          "oklch(37.86% 0.00669 78.16)",
+          "oklch(49.29% 0.00669 78.16)",
+          "oklch(60.71% 0.00669 78.16)",
+          "oklch(72.14% 0.00669 78.16)",
+          "oklch(83.57% 0.00669 78.16)",
+          "oklch(95.00% 0.00669 78.16)"
+        ]
+      },
+      "dark-control": {
+        "role": "neutral",
+        "displayName": "Dark control / ControlBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.00501 67.55)",
+          "oklch(26.43% 0.00501 67.55)",
+          "oklch(37.86% 0.00501 67.55)",
+          "oklch(49.29% 0.00501 67.55)",
+          "oklch(60.71% 0.00501 67.55)",
+          "oklch(72.14% 0.00501 67.55)",
+          "oklch(83.57% 0.00501 67.55)",
+          "oklch(95.00% 0.00501 67.55)"
+        ]
+      },
+      "dark-line": {
+        "role": "neutral",
+        "displayName": "Dark line / LineBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.01255 71.83)",
+          "oklch(26.43% 0.01255 71.83)",
+          "oklch(37.86% 0.01255 71.83)",
+          "oklch(49.29% 0.01255 71.83)",
+          "oklch(60.71% 0.01255 71.83)",
+          "oklch(72.14% 0.01255 71.83)",
+          "oklch(83.57% 0.01255 71.83)",
+          "oklch(95.00% 0.01255 71.83)"
+        ]
+      },
+      "dark-text": {
+        "role": "neutral",
+        "displayName": "Dark text / TextBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.01098 76.59)",
+          "oklch(26.43% 0.01098 76.59)",
+          "oklch(37.86% 0.01098 76.59)",
+          "oklch(49.29% 0.01098 76.59)",
+          "oklch(60.71% 0.01098 76.59)",
+          "oklch(72.14% 0.01098 76.59)",
+          "oklch(83.57% 0.01098 76.59)",
+          "oklch(95.00% 0.01098 76.59)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark muted / MutedBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.01210 71.86)",
+          "oklch(26.43% 0.01210 71.86)",
+          "oklch(37.86% 0.01210 71.86)",
+          "oklch(49.29% 0.01210 71.86)",
+          "oklch(60.71% 0.01210 71.86)",
+          "oklch(72.14% 0.01210 71.86)",
+          "oklch(83.57% 0.01210 71.86)",
+          "oklch(95.00% 0.01210 71.86)"
+        ]
+      },
+      "dark-accent": {
+        "role": "primary",
+        "displayName": "Dark accent / AccentBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.12822 76.43)",
+          "oklch(26.43% 0.12822 76.43)",
+          "oklch(37.86% 0.12822 76.43)",
+          "oklch(49.29% 0.12822 76.43)",
+          "oklch(60.71% 0.12822 76.43)",
+          "oklch(72.14% 0.12822 76.43)",
+          "oklch(83.57% 0.12822 76.43)",
+          "oklch(95.00% 0.12822 76.43)"
+        ]
+      },
+      "dark-info": {
+        "role": "secondary",
+        "displayName": "Dark info / InfoBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.14338 254.62)",
+          "oklch(26.43% 0.14338 254.62)",
+          "oklch(37.86% 0.14338 254.62)",
+          "oklch(49.29% 0.14338 254.62)",
+          "oklch(60.71% 0.14338 254.62)",
+          "oklch(72.14% 0.14338 254.62)",
+          "oklch(83.57% 0.14338 254.62)",
+          "oklch(95.00% 0.14338 254.62)"
+        ]
+      },
+      "dark-problem": {
+        "role": "tertiary",
+        "displayName": "Dark problem / ProblemBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.12074 27.07)",
+          "oklch(26.43% 0.12074 27.07)",
+          "oklch(37.86% 0.12074 27.07)",
+          "oklch(49.29% 0.12074 27.07)",
+          "oklch(60.71% 0.12074 27.07)",
+          "oklch(72.14% 0.12074 27.07)",
+          "oklch(83.57% 0.12074 27.07)",
+          "oklch(95.00% 0.12074 27.07)"
+        ]
+      },
+      "light-graph-line": {
+        "role": "neutral",
+        "displayName": "Light graph line / GraphLineBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.01354 130.81)",
+          "oklch(26.43% 0.01354 130.81)",
+          "oklch(37.86% 0.01354 130.81)",
+          "oklch(49.29% 0.01354 130.81)",
+          "oklch(60.71% 0.01354 130.81)",
+          "oklch(72.14% 0.01354 130.81)",
+          "oklch(83.57% 0.01354 130.81)",
+          "oklch(95.00% 0.01354 130.81)"
+        ]
+      },
+      "dark-graph-line": {
+        "role": "neutral",
+        "displayName": "Dark graph line / GraphLineBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.00806 75.29)",
+          "oklch(26.43% 0.00806 75.29)",
+          "oklch(37.86% 0.00806 75.29)",
+          "oklch(49.29% 0.00806 75.29)",
+          "oklch(60.71% 0.00806 75.29)",
+          "oklch(72.14% 0.00806 75.29)",
+          "oklch(83.57% 0.00806 75.29)",
+          "oklch(95.00% 0.00806 75.29)"
+        ]
+      },
+      "light-sage": {
+        "role": "secondary",
+        "displayName": "Light sage / SageBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.07906 156.88)",
+          "oklch(26.43% 0.07906 156.88)",
+          "oklch(37.86% 0.07906 156.88)",
+          "oklch(49.29% 0.07906 156.88)",
+          "oklch(60.71% 0.07906 156.88)",
+          "oklch(72.14% 0.07906 156.88)",
+          "oklch(83.57% 0.07906 156.88)",
+          "oklch(95.00% 0.07906 156.88)"
+        ]
+      },
+      "dark-sage": {
+        "role": "secondary",
+        "displayName": "Dark sage / SageBrush",
+        "tonalRamp": [
+          "oklch(15.00% 0.06706 154.85)",
+          "oklch(26.43% 0.06706 154.85)",
+          "oklch(37.86% 0.06706 154.85)",
+          "oklch(49.29% 0.06706 154.85)",
+          "oklch(60.71% 0.06706 154.85)",
+          "oklch(72.14% 0.06706 154.85)",
+          "oklch(83.57% 0.06706 154.85)",
+          "oklch(95.00% 0.06706 154.85)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display / Outfit",
+        "purpose": "Workbench and Home setup titles. Source requests weight 500; static Regular 400 and SemiBold 600 are packaged."
+      },
+      "headline": {
+        "displayName": "Headline / Outfit",
+        "purpose": "Section labels and selected-place name."
+      },
+      "body": {
+        "displayName": "Body / DM Sans",
+        "purpose": "Explanations, readings and explicit theme-button typography. Packaged static 400 and 600 faces carry OFL licenses."
+      },
+      "value": {
+        "displayName": "Value / DM Sans SemiBold",
+        "purpose": "Workbench place names and observation current-value position."
+      },
+      "label": {
+        "displayName": "Label / DM Sans",
+        "purpose": "Workbench states, timing, last-known values, task steps and synthetic notices. Native line height and tracking remain defaults."
+      },
+      "compact-value": {
+        "displayName": "Compact value / DM Sans SemiBold",
+        "purpose": "Home constellation names and attention place/state labels."
+      },
+      "constellation-state": {
+        "displayName": "Constellation state / DM Sans",
+        "purpose": "Home place state labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "bloom-action",
+        "value": "0 4px 14px 0 rgba(0,0,0,0.25098)",
+        "purpose": "Action-circle shadow. CSS translation of native BoxShadow 0 4 14 0 #40000000; no animated elevation."
+      },
+      {
+        "name": "bloom-center",
+        "value": "0 5px 22px 0 rgba(0,0,0,0.37647)",
+        "purpose": "Selected Bloom center shadow. CSS translation of native BoxShadow 0 5 22 0 #60000000."
+      }
+    ],
+    "motion": [],
+    "breakpoints": [
+      {
+        "name": "home-expanded",
+        "value": "900px"
+      },
+      {
+        "name": "setup-expanded",
+        "value": "800px"
+      },
+      {
+        "name": "constellation-four-column-cap",
+        "value": "800px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Theme controls and CompanionShell",
+      "kind": "nav",
+      "refersTo": "theme-button-light",
+      "description": "Illustrative representation of the implemented shell, theme choices and footer status. Native Theme opens a ContextMenu for System, Light and Dark; Setup opens the editor; Controls toggles the workbench. Browser disclosure and focus styling approximate Fluent. Font fallback may differ from packaged native fonts. This snippet does not navigate or save.",
+      "html": "<div class=\"ds-shell\"><nav class=\"ds-shell-nav\" aria-label=\"Companion\"><span class=\"ds-shell-brand\">Lucia</span><details class=\"ds-theme-menu\"><summary>Theme</summary><div class=\"ds-theme-options\"><button>System</button><button>Light</button><button>Dark</button></div></details><button class=\"ds-shell-button\">Setup</button><button class=\"ds-shell-button\">Controls</button></nav><p class=\"ds-shell-status\">Local setup and pins only. Synthetic readings.</p></div>",
+      "css": ".ds-shell { background:#f1f2ef; color:#292e29; font:16px 'DM Sans',sans-serif; } .ds-shell-nav { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 16px 0; } .ds-shell-brand { margin-right:auto; font:24px Outfit,sans-serif; } .ds-shell-button,.ds-theme-menu summary,.ds-theme-options button { font:16px 'DM Sans',sans-serif; min-height:48px; background:#f5f6f3; color:#292e29; cursor:pointer; } .ds-theme-menu summary { display:flex; align-items:center; padding:0 8px; } .ds-theme-options { display:flex; flex-wrap:wrap; gap:8px; } .ds-shell-button:hover,.ds-theme-options button:hover { cursor:pointer; } .ds-shell-button:focus-visible,.ds-theme-menu summary:focus-visible,.ds-theme-options button:focus-visible { outline:auto; } .ds-shell-status { padding:8px 16px 12px; color:#626861; font-size:13px; } @media(prefers-color-scheme:dark) { .ds-shell { background:#0d0c0a; color:#ddd8d1; } .ds-shell-button,.ds-theme-menu summary,.ds-theme-options button { background:#1a1816; color:#ddd8d1; } .ds-shell-status { color:#b0aaa3; } }"
+    },
+    {
+      "name": "Home PlaceOrb states",
+      "kind": "button",
+      "refersTo": "place-orb-light",
+      "description": "Illustrative representation of the six Home states. Quiet has no state ring; Unavailable has a dotted ring; active states use color. Circular dotted selection remains separate from rectangular keyboard focus. Selection and pinning are static in the preview; native Buttons, Geometry, pseudo-classes and context menus own actual behavior. Workbench additionally retains its selected rectangular frame.",
+      "html": "<div class=\"ds-places\"><button class=\"ds-place ds-quiet\" aria-pressed=\"false\" aria-label=\"Living room. Quiet. Synthetic sample.\"><span class=\"ds-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5,11 L5,5 19,5 19,11 M3,10 L6,10 6,15 18,15 18,10 21,10 21,20 3,20 Z M5,20 L5,22 M19,20 L19,22\"/></svg></span><span class=\"ds-place-name\">Living room</span><span class=\"ds-state\">Quiet</span></button><button class=\"ds-place ds-changed\" aria-pressed=\"false\" aria-label=\"Garden. Changed. Synthetic sample.\"><span class=\"ds-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12,21 L12,11 M12,15 C3,15 3,5 3,5 C12,5 12,12 12,12 M12,12 C12,3 21,3 21,3 C21,12 12,12 12,12\"/></svg></span><span class=\"ds-place-name\">Garden</span><span class=\"ds-state\">Changed</span></button><button class=\"ds-place ds-working\" aria-pressed=\"false\" aria-label=\"Kitchen. Working. Synthetic sample.\"><span class=\"ds-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3,4 L21,4 21,21 3,21 Z M3,9 L21,9 M7,6 L9,6 M15,6 L17,6 M7,12 L17,12 17,18 7,18 Z\"/></svg></span><span class=\"ds-place-name\">Kitchen</span><span class=\"ds-state\">Working</span></button><button class=\"ds-place ds-waiting\" aria-pressed=\"false\" aria-label=\"Porch. Waiting. Synthetic sample.\"><span class=\"ds-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5,21 L5,3 18,3 18,21 M2,21 L22,21 M14,12 L15,12\"/></svg></span><span class=\"ds-place-name\">Porch</span><span class=\"ds-state\">Waiting</span></button><button class=\"ds-place ds-unavailable\" aria-pressed=\"false\" aria-label=\"Bedroom. Unavailable. Synthetic sample.\"><span class=\"ds-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3,19 L3,9 21,9 21,19 M3,16 L21,16 M6,9 L6,4 18,4 18,9 M9,6 L9,9 M15,6 L15,9\"/></svg></span><span class=\"ds-place-name\">Bedroom</span><span class=\"ds-state\">Unavailable</span></button><button class=\"ds-place ds-problem ds-selected\" aria-pressed=\"true\" aria-label=\"Utility. Problem. Synthetic sample.\"><span class=\"ds-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3,11 L12,3 21,11 M5,10 L5,21 10,21 10,15 14,15 14,21 19,21 19,10\"/></svg><svg class=\"ds-selection\" viewBox=\"0 0 84 84\" aria-hidden=\"true\"><circle cx=\"42\" cy=\"42\" r=\"41.5\"/></svg></span><span class=\"ds-place-name\">Utility</span><span class=\"ds-state\">Problem</span></button></div>",
+      "css": ".ds-places { display:flex; flex-wrap:wrap; background:#f1f2ef; } .ds-place { min-width:100px; min-height:126px; padding:10px; border:2px solid transparent; border-radius:12px; display:flex; flex-direction:column; align-items:center; gap:6px; background:transparent; color:#626861; font:14px 'DM Sans',sans-serif; cursor:pointer; } .ds-circle { position:relative; display:flex; align-items:center; justify-content:center; width:68px; height:68px; border:2px solid #626861; border-radius:36px; background:#f5f6f3; } .ds-place-name { color:#292e29; font-weight:600; max-width:132px; } .ds-selection { position:absolute; left:-8px; top:-8px; width:84px; height:84px; fill:none; stroke:#8c5b0f; stroke-width:1; stroke-dasharray:2 4; } .ds-quiet .ds-circle { border-color:transparent; background:transparent; } .ds-unavailable .ds-circle { border:1px dotted #626861; width:70px; height:70px; background:transparent; } .ds-changed,.ds-waiting { color:#8c5b0f; } .ds-changed .ds-circle,.ds-waiting .ds-circle { border-color:#8c5b0f; } .ds-working { color:#2563eb; } .ds-working .ds-circle { border-color:#2563eb; } .ds-problem { color:#a13f3a; } .ds-problem .ds-circle { border-color:#a13f3a; } .ds-place:hover .ds-circle { background:#ffffff; } .ds-quiet:hover .ds-circle,.ds-unavailable:hover .ds-circle { background:transparent; } .ds-place:active .ds-circle { opacity:.7; } .ds-place:disabled { opacity:.5; } .ds-place:focus-visible { outline:none; border-color:#292e29; } .ds-icon { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.7; } @media(prefers-color-scheme:dark) { .ds-places { background:#0d0c0a; } .ds-place { color:#b0aaa3; } .ds-circle { background:#1a1816; border-color:#918b84; } .ds-place-name { color:#ddd8d1; } .ds-selection { stroke:#e2a84b; } .ds-quiet .ds-circle { border-color:transparent; background:transparent; } .ds-unavailable .ds-circle { border-color:#918b84; background:transparent; } .ds-changed,.ds-waiting { color:#e2a84b; } .ds-changed .ds-circle,.ds-waiting .ds-circle { border-color:#e2a84b; } .ds-working { color:#60a5fa; } .ds-working .ds-circle { border-color:#60a5fa; } .ds-problem { color:#d4756b; } .ds-problem .ds-circle { border-color:#d4756b; } .ds-place:hover .ds-circle { background:#171512; } .ds-quiet:hover .ds-circle,.ds-unavailable:hover .ds-circle { background:transparent; } .ds-place:focus-visible { border-color:#ddd8d1; } }"
+    },
+    {
+      "name": "ObservationRow",
+      "kind": "custom",
+      "refersTo": "observation-row",
+      "description": "Illustrative representation of a native qualified observation. Current values and stale or unavailable old values remain separate. This read-only row has no interactive hover or focus state.",
+      "html": "<div class=\"ds-observations\"><div class=\"ds-observation\" role=\"group\" aria-label=\"Temperature: 21.4 degrees Celsius. Observed 2026-10-24 12:00 UTC\"><div class=\"ds-reading\"><span>Temperature</span><strong>21.4 °C</strong></div><span class=\"ds-time\">Observed 2026-10-24 12:00 UTC</span></div><div class=\"ds-observation\" role=\"group\" aria-label=\"Humidity: Stale. Last known: 65 percent. Observed 2026-10-24 11:00 UTC\"><div class=\"ds-reading\"><span>Humidity</span><strong>Stale</strong></div><span class=\"ds-time\">Last known: 65 %. Observed 2026-10-24 11:00 UTC</span></div></div>",
+      "css": ".ds-observations { background:#ffffff; color:#292e29; font-family:'DM Sans',sans-serif; font-size:16px; } .ds-observation { padding:14px 0; border-bottom:1px solid #626861; display:flex; flex-direction:column; gap:5px; } .ds-reading { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; } .ds-reading strong { max-width:150px; font-weight:600; overflow-wrap:anywhere; } .ds-time { color:#626861; font-size:13px; overflow-wrap:anywhere; } @media(prefers-color-scheme:dark) { .ds-observations { background:#171512; color:#ddd8d1; } .ds-observation { border-color:#918b84; } .ds-time { color:#b0aaa3; } }"
+    },
+    {
+      "name": "PlaceDetail",
+      "kind": "card",
+      "refersTo": "detail-panel-light",
+      "description": "Illustrative representation of the implemented selected-place readings card, its icon anchor, Place actions entry point and named neighbors. Native Home keeps this alongside the graph at 900 units and above; below that it uses a separate detail view with Back and focus restoration. The preview button does not open native Bloom.",
+      "html": "<section class=\"ds-detail\"><div class=\"ds-detail-heading\"><span class=\"ds-detail-anchor\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12,21 L12,11 M12,15 C3,15 3,5 3,5 C12,5 12,12 12,12 M12,12 C12,3 21,3 21,3 C21,12 12,12 12,12\"/></svg></span><h2>Garden</h2></div><p class=\"ds-detail-reason\">Changed. A contact reading changed in this sample.</p><button class=\"ds-detail-actions\">Place actions</button><p class=\"ds-detail-connections\">Connected to Porch.</p><div class=\"ds-detail-row\"><div class=\"ds-detail-reading\"><span>Gate contact</span><strong>Open</strong></div><span class=\"ds-detail-time\">Observed 2026-10-24 12:00 UTC</span></div><div class=\"ds-detail-row\"><div class=\"ds-detail-reading\"><span>Soil moisture</span><strong>Unknown</strong></div><span class=\"ds-detail-time\">Observation time unknown</span></div></section>",
+      "css": ".ds-detail { background:#ffffff; color:#292e29; border:1px solid #c1c6bd; border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px; font:16px 'DM Sans',sans-serif; } .ds-detail-heading { display:grid; grid-template-columns:56px 1fr; gap:12px; align-items:center; } .ds-detail-anchor { width:54px; height:54px; border:1px solid #c1c6bd; border-radius:28px; background:#f5f6f3; display:flex; align-items:center; justify-content:center; } .ds-detail-anchor .ds-icon { width:26px; height:26px; } .ds-detail-heading h2 { margin:0; font:24px Outfit,sans-serif; } .ds-detail-reason,.ds-detail-connections { margin:0; color:#626861; } .ds-detail-connections { font-size:13px; } .ds-detail-actions { align-self:start; min-height:48px; font:16px 'DM Sans',sans-serif; color:#292e29; background:#f5f6f3; } .ds-detail-actions:hover { cursor:pointer; } .ds-detail-actions:focus-visible { outline:auto; } .ds-detail-row { padding:14px 0; border-bottom:1px solid #626861; display:flex; flex-direction:column; gap:5px; } .ds-detail-reading { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; } .ds-detail-reading strong { max-width:150px; font-weight:600; } .ds-detail-time { color:#626861; font-size:13px; } .ds-icon { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.7; } @media(prefers-color-scheme:dark) { .ds-detail { background:#171512; color:#ddd8d1; border-color:#3a3733; } .ds-detail-anchor { background:#1a1816; border-color:#3a3733; } .ds-detail-reason,.ds-detail-connections,.ds-detail-time { color:#b0aaa3; } .ds-detail-actions { color:#ddd8d1; background:#1a1816; } .ds-detail-row { border-color:#918b84; } }"
+    },
+    {
+      "name": "PlaceIcons",
+      "kind": "custom",
+      "description": "Illustrative SVG representation of the six actual 24-unit native Geometry paths: Home, Garden, Door, Sofa, Kitchen and Bed. Native PlaceOrb stretches geometry uniformly into a 28-unit box with stroke 1.7; SVG viewBox scaling is an approximation. Icons are static and noninteractive.",
+      "html": "<div class=\"ds-icon-set\"><span class=\"ds-icon-item\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3,11 L12,3 21,11 M5,10 L5,21 10,21 10,15 14,15 14,21 19,21 19,10\"/></svg><span>Home</span></span><span class=\"ds-icon-item\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12,21 L12,11 M12,15 C3,15 3,5 3,5 C12,5 12,12 12,12 M12,12 C12,3 21,3 21,3 C21,12 12,12 12,12\"/></svg><span>Garden</span></span><span class=\"ds-icon-item\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5,21 L5,3 18,3 18,21 M2,21 L22,21 M14,12 L15,12\"/></svg><span>Door</span></span><span class=\"ds-icon-item\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5,11 L5,5 19,5 19,11 M3,10 L6,10 6,15 18,15 18,10 21,10 21,20 3,20 Z M5,20 L5,22 M19,20 L19,22\"/></svg><span>Sofa</span></span><span class=\"ds-icon-item\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3,4 L21,4 21,21 3,21 Z M3,9 L21,9 M7,6 L9,6 M15,6 L17,6 M7,12 L17,12 17,18 7,18 Z\"/></svg><span>Kitchen</span></span><span class=\"ds-icon-item\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3,19 L3,9 21,9 21,19 M3,16 L21,16 M6,9 L6,4 18,4 18,9 M9,6 L9,9 M15,6 L15,9\"/></svg><span>Bed</span></span></div>",
+      "css": ".ds-icon-set { display:flex; flex-wrap:wrap; gap:20px; background:#f1f2ef; color:#626861; font-family:'DM Sans',sans-serif; font-size:13px; } .ds-icon-item { display:flex; flex-direction:column; align-items:center; gap:6px; } .ds-icon { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.7; } @media(prefers-color-scheme:dark) { .ds-icon-set { background:#0d0c0a; color:#b0aaa3; } }"
+    },
+    {
+      "name": "HomeConstellation and ConnectionLayer",
+      "kind": "custom",
+      "refersTo": "place-orb-light",
+      "description": "Illustrative static representation of stable varied place positions, authored icon paths and configured neighbor lines. Native ConstellationPanel measures child sizes, preserves supplied order, allows at most three columns below its own 800-unit width and four above, and wraps larger homes. Lines and the faint dot field are decorative; this SVG is not the native layout engine or a floor plan.",
+      "html": "<figure class=\"ds-graph\"><figcaption>Your places</figcaption><p class=\"ds-graph-note\">Synthetic sample · configured connections</p><svg class=\"ds-graph-svg\" viewBox=\"0 0 600 350\" role=\"img\" aria-label=\"Living room connects to Kitchen and Porch. Porch connects to Garden. Kitchen connects to Bedroom and Utility. Static sample graph.\"><defs><pattern id=\"ds-dots\" width=\"24\" height=\"24\" patternUnits=\"userSpaceOnUse\"><circle cx=\"12\" cy=\"12\" r=\".6\" class=\"ds-dot\"/></pattern></defs><rect width=\"600\" height=\"350\" fill=\"url(#ds-dots)\"/><g class=\"ds-edges\"><path d=\"M130 70 L470 82 M100 110 L110 210 M142 217 L270 90 M463 116 L325 235 M490 122 L495 236\"/></g><g class=\"ds-graph-quiet\" transform=\"translate(100,70)\"><circle class=\"ds-graph-state\" r=\"36\"/><path class=\"ds-graph-icon\" transform=\"translate(-14,-14) scale(1.1667)\" d=\"M5,11 L5,5 19,5 19,11 M3,10 L6,10 6,15 18,15 18,10 21,10 21,20 3,20 Z M5,20 L5,22 M19,20 L19,22\"/><text class=\"ds-graph-name\" y=\"62\">Living room</text><text class=\"ds-graph-state-text\" y=\"83\">Quiet</text></g><g class=\"ds-graph-amber\" transform=\"translate(300,54)\"><circle class=\"ds-graph-state\" r=\"36\"/><path class=\"ds-graph-icon\" transform=\"translate(-14,-14) scale(1.1667)\" d=\"M12,21 L12,11 M12,15 C3,15 3,5 3,5 C12,5 12,12 12,12 M12,12 C12,3 21,3 21,3 C21,12 12,12 12,12\"/><text class=\"ds-graph-name\" y=\"62\">Garden</text><text class=\"ds-graph-state-text\" y=\"83\">Changed</text></g><g class=\"ds-graph-blue\" transform=\"translate(500,82)\"><circle class=\"ds-graph-state\" r=\"36\"/><path class=\"ds-graph-icon\" transform=\"translate(-14,-14) scale(1.1667)\" d=\"M3,4 L21,4 21,21 3,21 Z M3,9 L21,9 M7,6 L9,6 M15,6 L17,6 M7,12 L17,12 17,18 7,18 Z\"/><text class=\"ds-graph-name\" y=\"62\">Kitchen</text><text class=\"ds-graph-state-text\" y=\"83\">Working</text></g><g class=\"ds-graph-amber\" transform=\"translate(110,250)\"><circle class=\"ds-graph-state\" r=\"36\"/><path class=\"ds-graph-icon\" transform=\"translate(-14,-14) scale(1.1667)\" d=\"M5,21 L5,3 18,3 18,21 M2,21 L22,21 M14,12 L15,12\"/><text class=\"ds-graph-name\" y=\"62\">Porch</text><text class=\"ds-graph-state-text\" y=\"83\">Waiting</text></g><g class=\"ds-graph-unavailable\" transform=\"translate(310,265)\"><circle class=\"ds-graph-state\" r=\"36\"/><path class=\"ds-graph-icon\" transform=\"translate(-14,-14) scale(1.1667)\" d=\"M3,19 L3,9 21,9 21,19 M3,16 L21,16 M6,9 L6,4 18,4 18,9 M9,6 L9,9 M15,6 L15,9\"/><text class=\"ds-graph-name\" y=\"62\">Bedroom</text><text class=\"ds-graph-state-text\" y=\"83\">Unavailable</text></g><g class=\"ds-graph-red\" transform=\"translate(500,270)\"><circle class=\"ds-graph-state\" r=\"36\"/><path class=\"ds-graph-icon\" transform=\"translate(-14,-14) scale(1.1667)\" d=\"M3,11 L12,3 21,11 M5,10 L5,21 10,21 10,15 14,15 14,21 19,21 19,10\"/><text class=\"ds-graph-name\" y=\"62\">Utility</text><text class=\"ds-graph-state-text\" y=\"83\">Problem</text></g></svg><p class=\"ds-graph-note\">Lines show configured connections, not a floor plan.</p></figure>",
+      "css": ".ds-graph { margin:0; padding:12px; background:#ffffff; border:1px solid #c1c6bd; border-radius:16px; font:14px 'DM Sans',sans-serif; color:#292e29; } .ds-graph figcaption { font:24px Outfit,sans-serif; } .ds-graph-note { color:#626861; font-size:13px; } .ds-graph-svg { width:100%; height:auto; overflow:visible; } .ds-dot { fill:#c1c6bd; opacity:.28; } .ds-edges { fill:none; stroke:#c1c6bd; stroke-width:1; } .ds-graph-state { fill:#f5f6f3; stroke:currentColor; stroke-width:2; } .ds-graph-icon { fill:none; stroke:currentColor; stroke-width:1.7; } .ds-graph-name { fill:#292e29; font-weight:600; text-anchor:middle; } .ds-graph-state-text { fill:currentColor; text-anchor:middle; } .ds-graph-quiet,.ds-graph-unavailable { color:#626861; } .ds-graph-quiet .ds-graph-state { fill:none; stroke:none; } .ds-graph-unavailable .ds-graph-state { fill:none; stroke-width:1; stroke-dasharray:2 4; } .ds-graph-amber { color:#8c5b0f; } .ds-graph-blue { color:#2563eb; } .ds-graph-red { color:#a13f3a; } @media(prefers-color-scheme:dark) { .ds-graph { background:#171512; border-color:#3a3733; color:#ddd8d1; } .ds-graph-note { color:#b0aaa3; } .ds-dot { fill:#3a3733; } .ds-edges { stroke:#3a3733; } .ds-graph-state { fill:#1a1816; } .ds-graph-name { fill:#ddd8d1; } .ds-graph-quiet,.ds-graph-unavailable { color:#b0aaa3; } .ds-graph-quiet .ds-graph-state,.ds-graph-unavailable .ds-graph-state { fill:none; } .ds-graph-unavailable .ds-graph-state { stroke:#918b84; } .ds-graph-amber { color:#e2a84b; } .ds-graph-blue { color:#60a5fa; } .ds-graph-red { color:#d4756b; } }"
+    },
+    {
+      "name": "BloomActions and BloomActionButton",
+      "kind": "button",
+      "refersTo": "bloom-action-circle-light",
+      "description": "Illustrative representation of the native 288 by 292 radial overlay: Readings above a centered place icon, Pin or Unpin and Close below. Actual Popup uses Center placement at the graph/detail icon, overlay-layer light dismissal, Escape, initial Readings focus and restoration to its origin. HTML is static and does not implement native popup lifecycle or pin persistence. CSS shadows translate native ARGB; circular backing conceals underlying content.",
+      "html": "<div class=\"ds-bloom-stage\"><div class=\"ds-bloom-shade\"></div><div class=\"ds-bloom\" role=\"group\" aria-label=\"Garden place actions\"><span class=\"ds-bloom-center\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12,21 L12,11 M12,15 C3,15 3,5 3,5 C12,5 12,12 12,12 M12,12 C12,3 21,3 21,3 C21,12 12,12 12,12\"/></svg></span><span class=\"ds-bloom-heading\">Garden</span><button class=\"ds-bloom-action ds-bloom-readings\" aria-label=\"View Garden readings\"><span class=\"ds-bloom-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3,4 L21,4 21,20 3,20 Z M7,8 L17,8 M7,12 L17,12 M7,16 L13,16\"/></svg></span><span class=\"ds-bloom-label\">Readings</span></button><button class=\"ds-bloom-action ds-bloom-pin\" aria-label=\"Pin Garden\"><span class=\"ds-bloom-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6,3 L18,3 16,11 20,15 4,15 8,11 Z M12,15 L12,23\"/></svg></span><span class=\"ds-bloom-label\">Pin place</span></button><button class=\"ds-bloom-action ds-bloom-close\" aria-label=\"Close Garden actions\"><span class=\"ds-bloom-circle\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5,5 L19,19 M19,5 L5,19\"/></svg></span><span class=\"ds-bloom-label\">Close</span></button></div></div>",
+      "css": ".ds-bloom-stage { position:relative; min-height:320px; display:grid; place-items:center; background:#f1f2ef; color:#292e29; } .ds-bloom-shade { position:absolute; inset:0; background:rgba(0,0,0,.50196); } .ds-bloom { position:relative; width:288px; height:292px; background:#ffffff; border-radius:50%; font:13px 'DM Sans',sans-serif; } .ds-bloom-center { position:absolute; left:108px; top:110px; width:68px; height:68px; border:2px solid #8c5b0f; border-radius:36px; background:#ffffff; color:#8c5b0f; box-shadow:0 5px 22px 0 rgba(0,0,0,.37647); display:grid; place-items:center; } .ds-bloom-heading { position:absolute; left:88px; top:187px; width:104px; padding:2px 4px; text-align:center; border-radius:8px; background:#ffffff; } .ds-bloom-action { position:absolute; width:88px; height:94px; padding:0; border:0; background:transparent; color:#292e29; display:flex; flex-direction:column; align-items:center; gap:5px; font:13px 'DM Sans',sans-serif; cursor:pointer; } .ds-bloom-readings { left:100px; top:0; } .ds-bloom-pin { left:5px; top:174px; } .ds-bloom-close { left:195px; top:174px; } .ds-bloom-circle { width:46px; height:46px; border:1px solid #626861; border-radius:24px; background:#ffffff; box-shadow:0 4px 14px 0 rgba(0,0,0,.25098); display:grid; place-items:center; } .ds-bloom-circle .ds-icon { width:21px; height:21px; } .ds-bloom-label { max-width:78px; padding:2px 5px; border-radius:8px; background:#ffffff; text-align:center; } .ds-bloom-action:hover .ds-bloom-circle { border-color:#8c5b0f; } .ds-bloom-action:focus-visible { outline:none; } .ds-bloom-action:focus-visible .ds-bloom-circle { border-color:#292e29; border-width:3px; width:42px; height:42px; } .ds-bloom-action:active { opacity:.7; } .ds-icon { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.7; } @media(prefers-color-scheme:dark) { .ds-bloom-stage { background:#0d0c0a; color:#ddd8d1; } .ds-bloom,.ds-bloom-center,.ds-bloom-heading,.ds-bloom-circle,.ds-bloom-label { background:#171512; } .ds-bloom-center { border-color:#e2a84b; color:#e2a84b; } .ds-bloom-action { color:#ddd8d1; } .ds-bloom-circle { border-color:#918b84; } .ds-bloom-action:hover .ds-bloom-circle { border-color:#e2a84b; } .ds-bloom-action:focus-visible .ds-bloom-circle { border-color:#ddd8d1; } }"
+    },
+    {
+      "name": "AttentionList",
+      "kind": "button",
+      "refersTo": "theme-button-light",
+      "description": "Illustrative representation of native full-width attention rows in Problem, Waiting, Unavailable priority order. Native buttons open place readings. The visible reason is limited to two lines, while the accessible name retains it in full. Empty state uses written text. Browser clipping and focus approximate the native Fluent button.",
+      "html": "<section class=\"ds-attention\"><h2>Needs a look</h2><button class=\"ds-attention-row\" aria-label=\"Utility. Problem. A sample water sensor reports a leak. Show readings.\"><strong class=\"ds-attention-problem\">Utility · Problem</strong><span>A sample water sensor reports a leak.</span></button><button class=\"ds-attention-row\" aria-label=\"Porch. Waiting. A sample request is waiting for a response. Show readings.\"><strong class=\"ds-attention-waiting\">Porch · Waiting</strong><span>A sample request is waiting for a response.</span></button><button class=\"ds-attention-row\" aria-label=\"Bedroom. Unavailable. The sample source is unavailable; the old value is not current. Show readings.\"><strong>Bedroom · Unavailable</strong><span>The sample source is unavailable; the old value is not current.</span></button></section>",
+      "css": ".ds-attention { padding:16px; border:1px solid #c1c6bd; border-radius:16px; background:#ffffff; color:#292e29; display:flex; flex-direction:column; gap:8px; font-family:'DM Sans',sans-serif; } .ds-attention h2 { margin:0; font:24px Outfit,sans-serif; } .ds-attention-row { text-align:left; padding:8px; min-height:48px; background:#f5f6f3; border:0; color:#626861; display:flex; flex-direction:column; gap:5px; cursor:pointer; font-family:'DM Sans',sans-serif; } .ds-attention-row strong { font-size:14px; font-weight:600; } .ds-attention-row span { font-size:13px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .ds-attention-problem { color:#a13f3a; } .ds-attention-waiting { color:#8c5b0f; } .ds-attention-row:hover { cursor:pointer; } .ds-attention-row:focus-visible { outline:auto; } @media(prefers-color-scheme:dark) { .ds-attention { background:#171512; color:#ddd8d1; border-color:#3a3733; } .ds-attention-row { background:#1a1816; color:#b0aaa3; } .ds-attention-problem { color:#d4756b; } .ds-attention-waiting { color:#e2a84b; } }"
+    },
+    {
+      "name": "LuciaNow compact task fixture",
+      "kind": "custom",
+      "description": "Illustrative representation of the actual three equal-column task strip. Sage outline means Received done, filled blue means Reading current, neutral outline means Result pending. Static fixture with no running request, sensor connection or physical-outcome claim; no interactive or animated state exists.",
+      "html": "<section class=\"ds-now\"><h2>Lucia now</h2><p>Example request: read the kitchen temperature</p><div class=\"ds-now-steps\"><div class=\"ds-now-done\"><i></i><span>Received · done</span></div><div class=\"ds-now-current\"><i></i><span>Reading · current</span></div><div class=\"ds-now-pending\"><i></i><span>Result · pending</span></div></div><p class=\"ds-now-note\">Synthetic task state. No request is running and no device is connected.</p></section>",
+      "css": ".ds-now { padding:12px; border:1px solid #c1c6bd; border-radius:16px; background:#ffffff; color:#292e29; display:flex; flex-direction:column; gap:8px; font:16px 'DM Sans',sans-serif; } .ds-now h2 { margin:0; font:24px Outfit,sans-serif; } .ds-now p { margin:0; } .ds-now-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } .ds-now-steps>div { display:flex; flex-direction:column; gap:6px; font-size:13px; } .ds-now-steps i { display:block; width:16px; height:16px; border-radius:8px; } .ds-now-done { color:#397151; } .ds-now-done i { width:12px; height:12px; border:2px solid #397151; } .ds-now-current { color:#2563eb; } .ds-now-current i { background:#2563eb; } .ds-now-pending { color:#626861; } .ds-now-pending i { width:14px; height:14px; border:1px solid #626861; } .ds-now-note { color:#626861; font-size:13px; } @media(prefers-color-scheme:dark) { .ds-now { background:#171512; color:#ddd8d1; border-color:#3a3733; } .ds-now-done { color:#7dab8c; } .ds-now-done i { border-color:#7dab8c; } .ds-now-current { color:#60a5fa; } .ds-now-current i { background:#60a5fa; } .ds-now-pending,.ds-now-note { color:#b0aaa3; } .ds-now-pending i { border-color:#918b84; } }"
+    },
+    {
+      "name": "Home setup fields and ordering",
+      "kind": "input",
+      "refersTo": "setup-input",
+      "description": "Illustrative representation of native labelled TextBoxes, place list or compact chooser, icon ComboBox and neighbor CheckBoxes. Source changes at the editor's 800-unit Bounds.Width, keeps Save and Cancel outside the scrolling form, and uses named draft actions and inline warnings. Browser field appearance is approximate. No save, import, bindings or persistence is implemented by the snippet.",
+      "html": "<section class=\"ds-setup\"><h1>Build your home</h1><p>Names, icons and physical connections. Local setup only, no device control.</p><div class=\"ds-setup-grid\"><section class=\"ds-setup-card\"><label>Home name<input value=\"Sample home\" maxlength=\"80\"></label><h2>Your places</h2><p>The saved order keeps your home stable.</p><select class=\"ds-setup-list\" size=\"6\" aria-label=\"Choose a place to edit\"><option selected>Living room</option><option>Garden</option><option>Kitchen</option><option>Porch</option><option>Bedroom</option><option>Utility</option></select><select class=\"ds-setup-chooser\" aria-label=\"Choose a place to edit\"><option>Living room</option><option>Garden</option></select><button type=\"button\">Add place</button></section><section class=\"ds-setup-card\"><h2>Place setup</h2><label>Place name<input value=\"Living room\" maxlength=\"80\"></label><label>Icon<select><option>Sofa</option><option>Garden</option><option>Home</option></select></label><p>Connects to</p><p>Optional. Select physical neighbors, not sensor owners.</p><label class=\"ds-setup-check\"><input type=\"checkbox\">Garden</label><label class=\"ds-setup-check\"><input type=\"checkbox\" checked>Kitchen</label><label class=\"ds-setup-check\"><input type=\"checkbox\" checked>Porch</label><p>New places have no observation bindings.</p><div class=\"ds-setup-actions\"><button type=\"button\" disabled>Move earlier</button><button type=\"button\">Move later</button><button type=\"button\">Remove place</button></div></section></div><footer class=\"ds-setup-actions\"><button type=\"button\">Save setup</button><button type=\"button\">Cancel</button></footer></section>",
+      "css": ".ds-setup { padding:16px; background:#f1f2ef; color:#292e29; font:16px 'DM Sans',sans-serif; } .ds-setup h1 { margin:0; font:500 34px Outfit,sans-serif; } .ds-setup h2 { margin:0; font:24px Outfit,sans-serif; } .ds-setup p { margin:0; color:#626861; } .ds-setup-grid { display:grid; gap:16px; margin:16px 0; } .ds-setup-card { padding:20px; background:#ffffff; border:1px solid #c1c6bd; border-radius:16px; display:flex; flex-direction:column; gap:12px; } .ds-setup-card label { display:flex; flex-direction:column; gap:8px; } .ds-setup input:not([type=checkbox]),.ds-setup select { min-height:48px; font:16px 'DM Sans',sans-serif; color:#292e29; background:#ffffff; } .ds-setup button { min-height:48px; font:16px 'DM Sans',sans-serif; color:#292e29; background:#f5f6f3; } .ds-setup button:hover { cursor:pointer; } .ds-setup button:focus-visible,.ds-setup input:focus-visible,.ds-setup select:focus-visible { outline:auto; } .ds-setup-check { flex-direction:row!important; align-items:center; min-height:48px; } .ds-setup-list { display:none; max-height:280px; } .ds-setup-actions { display:flex; flex-wrap:wrap; gap:8px; } @media(min-width:800px) { .ds-setup-grid { grid-template-columns:1fr 1fr; } .ds-setup-list { display:block; } .ds-setup-chooser { display:none; } } @media(prefers-color-scheme:dark) { .ds-setup { background:#0d0c0a; color:#ddd8d1; } .ds-setup p { color:#b0aaa3; } .ds-setup-card { background:#171512; border-color:#3a3733; } .ds-setup input:not([type=checkbox]),.ds-setup select { color:#ddd8d1; background:#0d0c0a; } .ds-setup button { color:#ddd8d1; background:#1a1816; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Constellation / Observatory",
+    "overview": "Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.\n\nThis record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story, authentication, live household and sensor bindings, import and section-order preferences remain unbuilt.\n\nNative sources own this system: `Lucia.Companion.App/App.axaml`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. The sidecar HTML/CSS snippets are illustrative representations for a design panel. They do not drive the native UI or qualify real-device accessibility, safe areas or performance.",
+    "keyCharacteristics": [
+      "Place icons pair names and written states with distinct state and selection rings.",
+      "Semantic brushes switch together between light and dark.",
+      "Observations distinguish current readings from last-known values and unknown times.",
+      "Home and setup use separate native width thresholds for compact and expanded layouts.",
+      "Configured connections and stable offsets give the home graph structure without a floor-plan claim.",
+      "Contextual Bloom actions surround the selected place icon.",
+      "The implemented controls and compositions use no animation."
+    ],
+    "rules": [
+      {
+        "name": "The Written State Rule",
+        "body": "Every place color has a visible state label. Color alone cannot distinguish Quiet from Unavailable or Changed from Waiting.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Family Rule",
+        "body": "Use Outfit for titles and section headings, and DM Sans for control labels, readings and supporting text.",
+        "section": "typography"
+      },
+      {
+        "name": "The Stable Home Rule",
+        "body": "Preserve explicit room order through selection, pinning and state display. Reordering belongs to the user's Move earlier and Move later setup controls.",
+        "section": "layout"
+      },
+      {
+        "name": "The Still Observatory Rule",
+        "body": "The implemented screens add no pulsing, orbiting, transition or loading animation. A place state remains understandable while stationary.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use the semantic brush pairs for light and dark rather than hardcoding a single theme into a native control.",
+      "Do show each place's name and written state alongside its icon.",
+      "Do retain the explicit DM Sans body-size override on theme buttons.",
+      "Do keep observation quality, last-known values and observation time visible.",
+      "Do identify Home and workbench data as synthetic and offline before the place controls.",
+      "Do use the authored household paths for the implemented place icons.",
+      "Do preserve explicit place order and keep pinning independent of graph position.",
+      "Do keep Home's circular selection ring distinct from its rectangular keyboard-focus frame.",
+      "Do attach Bloom to the selected icon, keep its named actions legible and restore focus when dismissed."
+    ],
+    "donts": [
+      "Don't use color as the only indication of place state or selection.",
+      "Don't promote an old reading to the current-value position.",
+      "Don't infer locked from closed, occupancy from Quiet, or a physical result from a completed request.",
+      "Don't present Story, authentication, live bindings, import or section-order preferences as built.",
+      "Don't claim real-device accessibility, safe-area or performance qualification from desktop renders.",
+      "Don't treat illustrative sidecar HTML/CSS or generated color ramps as native implementation tokens.",
+      "Don't treat configured graph connections or static layout offsets as a measured floor plan."
+    ]
+  }
+}
