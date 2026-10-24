@@ -11,8 +11,14 @@ export interface CompanionGrant {
 }
 export interface CompanionDevice { id: string; deviceName: string; expiresAt: string; grant: CompanionGrant }
 export interface CompanionReview { id: string; homeId: string; deviceName: string; expiresAt: string; status: 'Pending' | 'Approved' }
+export interface CompanionCatalogPlace { placeId: string; name: string; fields: CompanionField[]; sourceCount: number }
+export interface CompanionCatalog { homeId: string; capturedAt: string; places: CompanionCatalogPlace[] }
 
 const base = '/api/companion/owner'
+const maximumOwnerBodyBytes = 16_000
+const approvalBody = (value: CompanionGrant) => ({ codeConfirmed: true, grant: value })
+const bodyFits = (serialized: string) => new TextEncoder().encode(serialized).length <= maximumOwnerBodyBytes
+export const companionApprovalFits = (value: CompanionGrant) => bodyFits(JSON.stringify(approvalBody(value)))
 export const validCompanionId = (value: string) => /^[A-Za-z0-9_.:-]{1,128}$/.test(value)
 export function normalizeCompanionCode(value: string): string | null {
   const code = value.trim().replaceAll('-', '').toUpperCase()
@@ -74,7 +80,7 @@ function grant(value: unknown): CompanionGrant {
 
 async function mutate(path: string, body?: unknown, method = 'POST', signal?: AbortSignal): Promise<Response> {
   const serialized = body === undefined ? undefined : JSON.stringify(body)
-  if (serialized && new TextEncoder().encode(serialized).length > 16_000) throw new Error('Access selection is too large. Choose fewer places before approving.')
+  if (serialized && !bodyFits(serialized)) throw new Error('Access selection is too large. Choose fewer places before approving.')
   const proof = object(await json(await request('/antiforgery', {}, signal)))
   const token = text(proof.requestToken, value => value.length > 0 && value.length <= 8192 && !/[\r\n]/.test(value))
   const header = text(proof.headerName, value => value === 'RequestVerificationToken' || value === 'X-CSRF-TOKEN')
@@ -96,11 +102,57 @@ export async function reviewCompanionDevice(code: string, signal?: AbortSignal):
   return { id: identifier(item.id), homeId: identifier(item.homeId), deviceName: deviceName(item.deviceName), expiresAt: expiry(item.expiresAt), status: item.status }
 }
 export async function approveCompanionDevice(id: string, value: CompanionGrant, signal?: AbortSignal): Promise<void> {
-  await mutate(`/pairings/${encodeURIComponent(identifier(id))}/approve`, { codeConfirmed: true, grant: grant(value) }, 'POST', signal)
+  await mutate(`/pairings/${encodeURIComponent(identifier(id))}/approve`, approvalBody(grant(value)), 'POST', signal)
 }
 export async function declineCompanionDevice(id: string, signal?: AbortSignal): Promise<void> {
   await mutate(`/pairings/${encodeURIComponent(identifier(id))}/cancel`, undefined, 'POST', signal)
 }
 export async function revokeCompanionDevice(id: string, signal?: AbortSignal): Promise<void> {
   await mutate(`/sessions/${encodeURIComponent(identifier(id))}`, undefined, 'DELETE', signal)
+}
+
+export async function fetchCompanionCatalog(homeId: string, signal?: AbortSignal): Promise<CompanionCatalog> {
+  const invalid = () => new Error('Lucia returned invalid or oversized available places. Reload before choosing access.')
+  try {
+    const response = await request('/discovery', {}, signal)
+    const reader = response.body?.getReader()
+    if (!reader) throw invalid()
+    let body = ''
+    let bytes = 0
+    const decoder = new TextDecoder('utf-8', { fatal: true })
+    try {
+      while (true) {
+        const chunk = await reader.read()
+        if (chunk.done) break
+        bytes += chunk.value.byteLength
+        if (bytes > 524_288) { await reader.cancel(); throw invalid() }
+        body += decoder.decode(chunk.value, { stream: true })
+      }
+      body += decoder.decode()
+    } finally { await reader.cancel().catch(() => {}); reader.releaseLock() }
+    const catalog = object(JSON.parse(body))
+    if (identifier(catalog.homeId) !== homeId || !Array.isArray(catalog.places) || catalog.places.length > 2000) throw invalid()
+    const label = (value: unknown) => text(value, item => item.trim().length > 0 && item.length <= 200 && !/[\p{Cc}\p{Cf}]/u.test(item))
+    const seenSources = new Set<string>()
+    const places = catalog.places.map(value => {
+      const place = object(value)
+      if (!Array.isArray(place.sources)) throw invalid()
+      const fields = new Set<CompanionField>()
+      for (const value of place.sources) {
+        const source = object(value)
+        const sourceId = text(source.sourceId, item => item.length > 0 && item.length <= 256 && !/[\s\p{Cc}\p{Cf}]/u.test(item))
+        label(source.name)
+        if (!companionFields.some(field => field === source.field)) throw invalid()
+        const field = source.field as CompanionField
+        const identity = `${sourceId}\u0000${field}`
+        if (seenSources.has(identity) || seenSources.size >= 2000) throw invalid()
+        seenSources.add(identity); fields.add(field)
+      }
+      return { placeId: identifier(place.placeId), name: label(place.name), fields: companionFields.filter(field => fields.has(field)), sourceCount: place.sources.length }
+    })
+    if (new Set(places.map(place => place.placeId)).size !== places.length) throw invalid()
+    return { homeId, capturedAt: expiry(catalog.capturedAt), places }
+  } catch {
+    throw new Error('Lucia could not load valid available places. Check owner access and HA source configuration, then reload. No access was approved.')
+  }
 }

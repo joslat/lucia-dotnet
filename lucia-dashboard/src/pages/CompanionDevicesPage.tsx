@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ShieldCheck, Smartphone } from 'lucide-react'
 import Field from '../components/Field'
 import CompanionGrantEditor from '../components/CompanionGrantEditor'
-import { approveCompanionDevice, declineCompanionDevice, fetchCompanionDevices, normalizeCompanionCode, reviewCompanionDevice, revokeCompanionDevice } from '../companion-api'
+import { approveCompanionDevice, companionApprovalFits, declineCompanionDevice, fetchCompanionDevices, normalizeCompanionCode, reviewCompanionDevice, revokeCompanionDevice } from '../companion-api'
 import type { CompanionDevice, CompanionGrant, CompanionReview } from '../companion-api'
 
 type Confirmation = { kind: 'decline'; review: CompanionReview } | { kind: 'revoke'; device: CompanionDevice }
@@ -75,6 +75,9 @@ export default function CompanionDevicesPage() {
   async function approve(grant: CompanionGrant) {
     const current = review
     if (!current || current.status !== 'Pending' || Date.parse(current.expiresAt) <= Date.now()) return
+    if (!companionApprovalFits(grant)) {
+      setError('This access selection is too large. Deselect some places or observations; your choices are kept.'); setNotice(''); focusNotice(); return
+    }
     await perform(async signal => {
       // A lost response is ambiguous. Clear the editor before sending, never offer a blind replay.
       setReview(null); setConfirmation(null)

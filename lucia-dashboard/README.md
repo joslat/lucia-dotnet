@@ -166,7 +166,11 @@ Output is written to `dist/`. The production build is a static SPA that expects 
 
 Open Companion devices to review an intended phone/tablet's approval code. Use the trusted HTTPS dashboard with a current administrator session. The host must enable `Companion:Enabled` and configure a stable `Companion:HomeId`. Disabled, forbidden and failed reads show an error, never an empty successful list.
 
-Match the code and device with the intended person. Device names are untrusted labels. Choose an owner-assigned member ID and exact case-sensitive place IDs/observation fields. The pilot uses manual IDs until authorized discovery supplies a picker. No places or additional activity/history/Engine permissions are selected by default. These permissions do not enable physical controls or appliance administration, and live native adapters are still unfinished.
+Match the code and device with the intended person. Device names are untrusted labels. Choose an owner-assigned member ID, then use the authorized catalog to select exact places and supported observations. Place names are paired with case-sensitive IDs and source counts. Fields are never selected automatically. Search keeps chosen places visible; Show more places reveals another25 unselected choices. The member ID remains manual until a membership roster exists. No places or additional activity/history/Engine permissions are selected by default. These permissions do not enable physical controls or appliance administration. Connected native Home reads are implemented; production activity/history/Engine and platform qualification remain unfinished.
+
+Catalog discovery requires `Companion:SourceBaseUrl` to match the configured HA origin. It contains metadata only, never readings or raw HA attributes. The browser checks the reviewed home, a 512 KiB response cap, bounded counts, identifiers, labels, fields and duplicates. Loading, a legitimate empty catalog and failure are different states. Failure disables approval rather than showing old/manual/sample choices. Reload clears place selections and the intended-person confirmation before reading again. The owner must review the new selection deliberately.
+
+Selection is capped at 200 places and the serialized approval has a separate 16,000-byte UTF-8 limit. The editor and API share the exact wrapped-body size check. An oversized selection remains editable with written guidance; approval stays disabled until it fits. Local validation runs before discarding the review. Once an actual approval request begins, ambiguous failures still clear the editor and require a new code review, never a blind replay.
 
 Approval waits for device redemption before an issued session can appear. Refresh devices shows current server sessions with exact grants and expiry, not online status. Decline and revoke require separate inline confirmation. Keep restores focus; Escape closes the question. Editing a code discards its previous review. Expired requests cannot be approved. Ambiguous approval failure removes the editor and requires a new review; the browser does not replay it automatically. Every mutation obtains fresh antiforgery proof using the existing same-origin session. No owner/native secrets belong in the code field or URL.
 
@@ -174,11 +178,11 @@ The isolated tests in `lucia-playwright/e2e/00-companion-devices.spec.ts` interc
 
 ```powershell
 npm run build --prefix lucia-dashboard
-dotnet run --project lucia-playwright/fixtures/CompanionBrowserHost
+dotnet run --project lucia-playwright/fixtures/CompanionBrowserHost -- --owner-home
 # In a second terminal, use the loopback HTTPS URL printed by the fixture.
 $env:SKIP_DOCKER = '1'
 $env:COMPANION_HTTPS_URL = 'https://127.0.0.1:<printed-port>'
-npm exec --prefix lucia-playwright -- playwright test --config=lucia-playwright/playwright.config.ts lucia-playwright/e2e/00-companion-https.spec.ts
+npm exec --prefix lucia-playwright -- playwright test --config=lucia-playwright/playwright.config.ts 00-companion-https.spec.ts
 ```
 
-The fixture uses a temporary database and certificate, serves only built dashboard assets and listens on loopback. Stop it with Ctrl+C after the check. It never loads the real AgentHost, household configuration, HA, model or cloud services. Private captures belong outside the public repository.
+The fixture uses a temporary database/certificate, built dashboard assets and a synthetic HA REST/WebSocket source, all on loopback. Enter `stop` or press Ctrl+C afterward; owner-home mode also has a nine-minute safety limit. The integration chooses a discovered place/field, approves with fresh antiforgery proof, redeems a device session, reads its restricted source report and revokes access/refresh. It never loads real AgentHost secrets or contacts a household, real HA, model or cloud service. Private captures belong outside the public repository.

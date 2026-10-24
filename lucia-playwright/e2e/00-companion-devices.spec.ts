@@ -5,6 +5,10 @@ import path from 'node:path';
 const pairingId = 'a'.repeat(32);
 const sessionId = 'b'.repeat(32);
 const code = 'ABCDE-FGHJK';
+const ownerCatalog = () => ({ homeId: 'home-a', capturedAt: new Date().toISOString(), places: [
+  { placeId: 'porch', name: 'Porch', sources: [{ sourceId: 'sensor.porch_temperature', name: 'Porch temperature', field: 'Temperature' }, { sourceId: 'binary_sensor.porch_door', name: 'Porch contact', field: 'Contact' }] },
+  { placeId: 'garden', name: 'Garden', sources: [{ sourceId: 'sensor.garden_moisture', name: 'Garden moisture', field: 'Moisture' }] },
+] });
 
 async function ownerFixture(page: Page, sessions: unknown[] = []) {
   const writes: Array<{ path: string; method: string; body: unknown }> = [];
@@ -23,6 +27,10 @@ async function ownerFixture(page: Page, sessions: unknown[] = []) {
     }
     if (request.method() === 'GET' && path.endsWith('/sessions')) {
       await route.fulfill({ json: sessions });
+      return;
+    }
+    if (request.method() === 'GET' && path.endsWith('/discovery')) {
+      await route.fulfill({ json: ownerCatalog() });
       return;
     }
     expect(request.headers().requestverificationtoken).toBe('synthetic-csrf');
@@ -50,8 +58,7 @@ test('owner matches the code and chooses only exact read grants before approving
   await reviewCode(page);
   await expect(page.getByRole('button', { name: 'Approve read access', exact: true })).toBeDisabled();
   await page.getByLabel('Member ID').fill('member-a');
-  await page.getByRole('button', { name: 'Add place access' }).click();
-  await page.getByLabel('Place ID').fill('porch');
+  await page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true }).check();
   await page.getByLabel('Temperature', { exact: true }).check();
   await page.getByLabel('I matched this code and device with the intended person').check();
   await page.getByRole('button', { name: 'Approve read access', exact: true }).click();
@@ -132,19 +139,137 @@ test('ambiguous approval failure cannot be automatically replayed or leak the re
   expect(approvals).toBe(1);
 });
 
-test('duplicate place IDs and fieldless rows cannot be approved', async ({ page }) => {
+test('catalog selection cannot duplicate a place and fieldless selections cannot be approved', async ({ page }) => {
   const writes = await ownerFixture(page);
   await reviewCode(page);
   await page.getByLabel('Member ID').fill('member-a');
   await page.getByLabel('I matched this code and device with the intended person').check();
-  await page.getByRole('button', { name: 'Add place access' }).click();
-  await page.getByLabel('Place ID').fill('porch');
+  await page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true }).check();
   await expect(page.getByRole('button', { name: 'Approve read access', exact: true })).toBeDisabled();
   await page.getByLabel('Temperature', { exact: true }).check();
-  await page.getByRole('button', { name: 'Add place access' }).click();
-  await page.getByLabel('Place ID').nth(1).fill('porch');
-  await page.getByLabel('Contact', { exact: true }).nth(1).check();
+  await page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true }).check();
+  await expect(page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true })).toHaveCount(1);
+  await page.getByRole('button', { name: 'Approve read access', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('Approved');
+  const approval = writes.find(write => write.path.endsWith('/approve'))!;
+  expect((approval.body as { grant: { places: unknown[] } }).grant.places).toEqual([{ placeId: 'porch', fields: ['Temperature'] }]);
+});
+
+test('catalog failure is not an empty home and retry discards old selections and confirmation', async ({ page }) => {
+  await ownerFixture(page);
+  await page.route('**/api/companion/owner/discovery', route => route.fulfill({ status: 503, json: { secret: 'private-source-detail' } }));
+  await reviewCode(page);
+  await page.getByLabel('Member ID').fill('member-a');
+  await page.getByLabel('I matched this code and device with the intended person').check();
+  await expect(page.getByRole('alert')).toContainText('available places');
   await expect(page.getByRole('button', { name: 'Approve read access', exact: true })).toBeDisabled();
+  await expect(page.getByText('private-source-detail')).toHaveCount(0);
+  await page.unroute('**/api/companion/owner/discovery');
+  await page.getByRole('button', { name: 'Reload available places', exact: true }).click();
+  await page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true }).check();
+  await page.getByLabel('Temperature', { exact: true }).check();
+  await page.getByLabel('I matched this code and device with the intended person').check();
+  await page.getByRole('button', { name: 'Reload available places', exact: true }).click();
+  await expect(page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true })).not.toBeChecked();
+  await expect(page.getByLabel('I matched this code and device with the intended person')).not.toBeChecked();
+});
+
+for (const corruption of ['other-home', 'duplicate-place', 'duplicate-source', 'unknown-field', 'too-many-places', 'too-many-sources', 'invalid-label', 'oversize']) {
+  test(`invalid catalog is rejected before access selection: ${corruption}`, async ({ page }) => {
+    const writes = await ownerFixture(page);
+    const catalog = ownerCatalog();
+    if (corruption === 'other-home') catalog.homeId = 'another-home';
+    if (corruption === 'duplicate-place') catalog.places.push(catalog.places[0]);
+    if (corruption === 'duplicate-source') catalog.places[1].sources.push(catalog.places[0].sources[0]);
+    if (corruption === 'unknown-field') catalog.places[0].sources[0].field = 'UnlockDoor';
+    if (corruption === 'too-many-places') catalog.places = Array.from({ length: 2001 }, (_, index) => ({ placeId: `room-${index}`, name: 'Room', sources: [] }));
+    if (corruption === 'too-many-sources') catalog.places[0].sources = Array.from({ length: 2001 }, (_, index) => ({ sourceId: `sensor.temperature_${index}`, name: 'Temperature', field: 'Temperature' }));
+    if (corruption === 'invalid-label') catalog.places[0].name = 'Misleading\u202eplace';
+    await page.route('**/api/companion/owner/discovery', route => corruption === 'oversize'
+      ? route.fulfill({ body: 'x'.repeat(524289), contentType: 'application/json' }) : route.fulfill({ json: catalog }));
+    await reviewCode(page);
+    await expect(page.getByRole('alert')).toContainText('available places');
+    await expect(page.getByRole('checkbox', { name: /^Choose / })).toHaveCount(0);
+    expect(writes.filter(write => write.path.endsWith('/approve'))).toHaveLength(0);
+  });
+}
+
+test('only discovered fields are offered and a legitimate empty catalog stays explicit', async ({ page }) => {
+  await ownerFixture(page);
+  await reviewCode(page);
+  await page.getByRole('checkbox', { name: 'Choose Garden (garden)', exact: true }).check();
+  await expect(page.getByLabel('Moisture', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Contact', { exact: true })).toHaveCount(0);
+  await page.route('**/api/companion/owner/discovery', route => route.fulfill({ json: { ...ownerCatalog(), places: [] } }));
+  await page.getByRole('button', { name: 'Reload available places', exact: true }).click();
+  await expect(page.getByText('No supported places are available in this home.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+test('search retains chosen access and no field is silently selected', async ({ page }) => {
+  await ownerFixture(page);
+  await reviewCode(page);
+  await page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true }).check();
+  await expect(page.getByLabel('Temperature', { exact: true })).not.toBeChecked();
+  await expect(page.getByLabel('Contact', { exact: true })).not.toBeChecked();
+  await page.getByLabel('Temperature', { exact: true }).check();
+  await page.getByLabel('Find a place', { exact: true }).fill('garden');
+  await expect(page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true })).toBeChecked();
+  await expect(page.getByLabel('Temperature', { exact: true })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Choose Garden (garden)', exact: true })).toBeVisible();
+});
+
+test('large catalogs disclose more choices without losing selected fields during search', async ({ page }) => {
+  await ownerFixture(page);
+  await page.route('**/api/companion/owner/discovery', route => route.fulfill({ json: { ...ownerCatalog(), places: Array.from({ length: 60 }, (_, index) => ({
+    placeId: `room-${index}`, name: 'Side room', sources: [{ sourceId: `sensor.room_${index}`, name: 'Temperature', field: 'Temperature' }],
+  })) } }));
+  await reviewCode(page);
+  await expect(page.getByRole('checkbox', { name: /^Choose / })).toHaveCount(25);
+  await page.getByRole('button', { name: 'Show more places', exact: true }).click();
+  await expect(page.getByRole('checkbox', { name: /^Choose / })).toHaveCount(50);
+  await page.getByLabel('Find a place', { exact: true }).fill('room-55');
+  await page.getByRole('checkbox', { name: 'Choose Side room (room-55)', exact: true }).check();
+  await page.getByLabel('Temperature', { exact: true }).check();
+  await page.getByLabel('Find a place', { exact: true }).fill('room-1');
+  await expect(page.getByRole('checkbox', { name: 'Choose Side room (room-55)', exact: true })).toBeChecked();
+  await expect(page.getByLabel('Temperature', { exact: true })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Choose Side room (room-1)', exact: true })).toBeVisible();
+});
+
+test('oversized approval retains editable choices and reducing the selection restores approval', async ({ page }) => {
+  test.setTimeout(90000);
+  const writes = await ownerFixture(page);
+  const id = (index: number) => 'r'.repeat(125) + index.toString().padStart(3, '0');
+  await page.route('**/api/companion/owner/discovery', route => route.fulfill({ json: { ...ownerCatalog(), places: Array.from({ length: 100 }, (_, index) => ({
+    placeId: id(index), name: `Place ${index}`, sources: [{ sourceId: `sensor.room_${index}`, name: 'Temperature', field: 'Temperature' }],
+  })) } }));
+  await reviewCode(page);
+  await page.getByLabel('Member ID').fill('member-a');
+  await page.getByLabel('I matched this code and device with the intended person').check();
+  for (let more = 0; more < 3; more++) await page.getByRole('button', { name: 'Show more places', exact: true }).click();
+  for (let index = 0; index < 100; index++) {
+    await page.getByRole('checkbox', { name: `Choose Place ${index} (${id(index)})`, exact: true }).check();
+    await page.getByRole('group', { name: `Place ${index} observations`, exact: true }).getByLabel('Temperature', { exact: true }).check();
+  }
+  await expect(page.getByRole('button', { name: 'Approve read access', exact: true })).toBeDisabled();
+  await expect(page.getByRole('alert')).toContainText('too large');
+  await expect(page.getByLabel('Member ID')).toHaveValue('member-a');
+  await expect(page.getByRole('checkbox', { name: `Choose Place 99 (${id(99)})`, exact: true })).toBeChecked();
+  expect(writes.filter(write => write.path.endsWith('/approve'))).toHaveLength(0);
+  if (process.env.LUCIA_COMPANION_OWNER_CAPTURE_DIR) {
+    for (const width of [390, 1024]) for (const scale of [1, 2]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.evaluate(value => { document.documentElement.style.fontSize = `${value * 100}%`; }, scale);
+      await page.getByRole('alert').scrollIntoViewIfNeeded();
+      await page.screenshot({ path: path.join(process.env.LUCIA_COMPANION_OWNER_CAPTURE_DIR, `owner-size-${width}-${scale}.png`) });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    }
+    await page.evaluate(() => { document.documentElement.style.fontSize = '100%'; });
+  }
+  for (let index = 90; index < 100; index++) await page.getByRole('checkbox', { name: `Choose Place ${index} (${id(index)})`, exact: true }).uncheck();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Approve read access', exact: true })).toBeEnabled();
   expect(writes.filter(write => write.path.endsWith('/approve'))).toHaveLength(0);
 });
 
@@ -159,27 +284,30 @@ test('malformed device grants are an unavailable list, never an empty success', 
 
 for (const width of [390, 1024]) for (const dark of [false, true]) for (const scale of [1, 2]) {
   test(`owner layout ${width} ${dark ? 'dark' : 'light'} ${scale}x`, async ({ page }) => {
-    test.skip(!process.env.LUCIA_COMPANION_OWNER_CAPTURE_DIR, 'Opt-in bounded visual capture.');
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ colorScheme: dark ? 'dark' : 'light' });
     await ownerFixture(page, [{ id: sessionId, deviceName: 'Synthetic garden phone with a long owner-assigned name', expiresAt: new Date(Date.now() + 3_600_000).toISOString(), grant: { homeId: 'home-a', memberId: 'member-a', places: [{ placeId: 'garden', fields: ['Moisture', 'Temperature'] }], canReadActivity: false, canReadHistory: true, canReadEngine: false } }]);
     await page.evaluate(value => { document.documentElement.style.fontSize = `${value * 100}%`; }, scale);
-    const destination = process.env.LUCIA_COMPANION_OWNER_CAPTURE_DIR!;
-    await mkdir(destination, { recursive: true });
+    const destination = process.env.LUCIA_COMPANION_OWNER_CAPTURE_DIR;
     const prefix = `owner-${width}-${dark ? 'dark' : 'light'}-${scale}`;
-    await page.screenshot({ path: path.join(destination, `${prefix}-form.png`) });
+    const capture = async (state: string) => {
+      if (!destination) return;
+      await mkdir(destination, { recursive: true });
+      await page.screenshot({ path: path.join(destination, `${prefix}-${state}.png`) });
+    };
     await reviewCode(page);
     await page.getByLabel('Member ID').fill('synthetic-member');
-    await page.getByRole('button', { name: 'Add place access' }).click();
-    await page.getByLabel('Place ID').fill('porch');
+    await page.getByRole('heading', { name: 'Choose places and observations', exact: true }).scrollIntoViewIfNeeded();
+    await capture('picker');
+    await page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true }).check();
     await page.getByLabel('Temperature', { exact: true }).check();
-    await page.getByRole('heading', { name: 'Synthetic porch tablet', exact: true }).scrollIntoViewIfNeeded();
-    await page.screenshot({ path: path.join(destination, `${prefix}-review.png`) });
-    await page.getByText('Additional read access, off by default', { exact: true }).scrollIntoViewIfNeeded();
-    await page.screenshot({ path: path.join(destination, `${prefix}-grant.png`) });
-    await page.getByRole('button', { name: 'Revoke Synthetic garden phone with a long owner-assigned name', exact: true }).click();
-    await page.getByRole('button', { name: 'Keep device access', exact: true }).scrollIntoViewIfNeeded();
-    await page.screenshot({ path: path.join(destination, `${prefix}-revoke.png`) });
+    await page.getByRole('checkbox', { name: 'Choose Porch (porch)', exact: true }).scrollIntoViewIfNeeded();
+    await capture('selection');
+    await page.route('**/api/companion/owner/discovery', route => route.fulfill({ status: 503 }));
+    await page.getByRole('button', { name: 'Reload available places', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('available places');
+    await page.getByRole('alert').scrollIntoViewIfNeeded();
+    await capture('unavailable');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
   });
 }
