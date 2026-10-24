@@ -55,9 +55,21 @@ public sealed class CompanionShellTests
             NativeCapture.Save(window, $"setup-{width}-{(dark ? "dark" : "light")}.png");
             editor.FindControl<Button>("CancelEdit")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.Equal("Living room", state.Home.Places[0].Name);
-            shell.FindControl<Button>("LabButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            shell.FindControl<Button>("AppearanceButton")!.ContextMenu!.Items.OfType<MenuItem>()
+                .Single(item => Equals(item.Header, "Control lab")).RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
             Assert.IsType<ControlWorkbench>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
-            shell.FindControl<Button>("LabButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            shell.FindControl<Button>("StoryButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            var story = Assert.IsType<StoryScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
+            Dispatcher.UIThread.RunJobs();
+            NativeCapture.Save(window, $"app-story-{width}-{(dark ? "dark" : "light")}.png");
+            story.FindControl<CheckBox>("AnimateSelection")!.IsChecked = false;
+            story.State.SelectChapter(story.State.VisibleChapters.Last().Id);
+            Dispatcher.UIThread.RunJobs();
+            NativeCapture.Save(window, $"app-story-chapter-{width}-{(dark ? "dark" : "light")}.png");
+            story.FindControl<ScrollViewer>("StoryScroll")!.Offset = new Vector(0, 1000);
+            Dispatcher.UIThread.RunJobs();
+            NativeCapture.Save(window, $"app-story-lanes-{width}-{(dark ? "dark" : "light")}.png");
+            shell.FindControl<Button>("StoryButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.IsType<HomeScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
         }
         finally { window.Close(); }

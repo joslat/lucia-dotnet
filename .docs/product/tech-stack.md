@@ -123,7 +123,7 @@
 
 ### Experimental native companion
 
-- **Scope:** isolated offline Constellation Home, local setup and control workbench under `clients/Lucia.Companion`, separate from React and server solutions. Setup persists only versioned names/icons, connections, order and pins. Sensor readings and task history are never part of that file.
+- **Scope:** isolated offline Constellation Home, local setup, fixture-driven Story Day and control workbench under `clients/Lucia.Companion`, separate from React and server solutions. Setup persists only versioned names/icons, connections, order and pins. Sensor readings and task history are never part of that file. Story uses a pure timezone-aware temporal model and native shared selection, with no history service or presence inference.
 - **Runtime:** .NET 10; Avalonia 12.1.4, Fluent native controls, Desktop and Android launchers. Shared Core has no UI/backend dependencies; shared App adapts by available width.
 - **Tests:** xUnit v3 3.2.2 and Avalonia.Headless.XUnit/Skia 12.1.4 for native interaction and rendering. Existing server xUnit v2 tests are unchanged. The newer test package is required by Avalonia 12's headless integration.
 - **Assets:** self-hosted OFL Outfit/DM Sans static TTF faces; source hashes/licenses retained. fonttools 4.60.1 is an optional asset-rebuild tool only.

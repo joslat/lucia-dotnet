@@ -13,6 +13,9 @@ public sealed partial class CompanionShell : UserControl
     private readonly HomeScreen home;
     private readonly HomeProfileSession profileSession;
     private ControlWorkbench? workbench;
+    private StoryScreen? story;
+    private Core.HomeTopology? storyHome;
+    private readonly MenuItem controlLab = new() { Header = "Control lab" };
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
@@ -25,18 +28,20 @@ public sealed partial class CompanionShell : UserControl
         var appearance = this.FindControl<Button>("AppearanceButton")!;
         appearance.ContextMenu = new ContextMenu
         {
-            ItemsSource = new[] { ThemeItem("System", ThemeVariant.Default), ThemeItem("Light", ThemeVariant.Light), ThemeItem("Dark", ThemeVariant.Dark) }
+            ItemsSource = new[] { new MenuItem { Header = "Appearance", ItemsSource = new[]
+            {
+                ThemeItem("System", ThemeVariant.Default), ThemeItem("Light", ThemeVariant.Light), ThemeItem("Dark", ThemeVariant.Dark)
+            }}, controlLab }
         };
         appearance.Click += (_, _) => appearance.ContextMenu.Open(appearance);
         this.FindControl<Button>("BuildHomeButton")!.Click += (_, _) => OpenEditor();
         this.FindControl<Button>("RetrySaveButton")!.Click += (_, _) => profileSession.RetrySave();
-        this.FindControl<Button>("LabButton")!.Click += (_, _) =>
+        controlLab.Click += (_, _) =>
         {
-            var host = this.FindControl<ContentControl>("ScreenHost")!;
-            var showLab = ReferenceEquals(host.Content, home);
-            host.Content = showLab ? workbench ??= new ControlWorkbench() : home;
-            this.FindControl<Button>("LabButton")!.Content = showLab ? "Home" : "Controls";
+            this.FindControl<ContentControl>("ScreenHost")!.Content = workbench ??= new ControlWorkbench();
+            this.FindControl<Button>("StoryButton")!.Content = "Story";
         };
+        this.FindControl<Button>("StoryButton")!.Click += (_, _) => SwitchStory();
         profileSession.Changed += RefreshStorageState;
         AttachedToVisualTree += async (_, _) => await profileSession.InitializeAsync();
         RefreshStorageState();
@@ -54,15 +59,30 @@ public sealed partial class CompanionShell : UserControl
         };
         this.FindControl<ContentControl>("ScreenHost")!.Content = editor;
         this.FindControl<Button>("BuildHomeButton")!.IsEnabled = false;
-        this.FindControl<Button>("LabButton")!.IsEnabled = false;
+        this.FindControl<Button>("StoryButton")!.IsEnabled = false;
+        controlLab.IsEnabled = false;
     }
 
     private void ShowHome()
     {
         this.FindControl<ContentControl>("ScreenHost")!.Content = home;
         this.FindControl<Button>("BuildHomeButton")!.IsEnabled = true;
-        this.FindControl<Button>("LabButton")!.IsEnabled = true;
-        this.FindControl<Button>("LabButton")!.Content = "Controls";
+        this.FindControl<Button>("StoryButton")!.IsEnabled = true;
+        this.FindControl<Button>("StoryButton")!.Content = "Story";
+        controlLab.IsEnabled = true;
+    }
+
+    private void SwitchStory()
+    {
+        var host = this.FindControl<ContentControl>("ScreenHost")!;
+        if (host.Content is StoryScreen) { ShowHome(); return; }
+        if (!ReferenceEquals(storyHome, home.State.Home))
+        {
+            storyHome = home.State.Home;
+            story = new StoryScreen(new StoryViewModel(SampleStory.Create(storyHome)));
+        }
+        host.Content = story;
+        this.FindControl<Button>("StoryButton")!.Content = "Home";
     }
 
     private void RefreshStorageState()
@@ -72,6 +92,9 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<ContentControl>("ScreenHost")!.IsEnabled = !profileSession.IsLoading;
         this.FindControl<Button>("BuildHomeButton")!.IsEnabled = !profileSession.IsLoading &&
             this.FindControl<ContentControl>("ScreenHost")!.Content is not HomeEditorScreen;
+        this.FindControl<Button>("StoryButton")!.IsEnabled = !profileSession.IsLoading &&
+            this.FindControl<ContentControl>("ScreenHost")!.Content is not HomeEditorScreen;
+        controlLab.IsEnabled = this.FindControl<Button>("StoryButton")!.IsEnabled;
     }
 
     private static MenuItem ThemeItem(string label, ThemeVariant theme)

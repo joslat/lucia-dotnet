@@ -4,9 +4,9 @@
     <DockPanel DockPanel.Dock="Top" Margin="16,8,16,0">
       <TextBlock Text="Lucia" FontFamily="{DynamicResource DisplayFont}" FontSize="24" VerticalAlignment="Center" />
     <WrapPanel HorizontalAlignment="Right">
-      <Button Name="AppearanceButton" Content="Theme" Classes="theme" Margin="0,0,8,0" />
+      <Button Name="AppearanceButton" Content="Options" Classes="theme" Margin="0,0,8,0" />
       <Button Name="BuildHomeButton" Content="Setup" AutomationProperties.Name="Build your home" Classes="theme" Margin="0,0,8,0" />
-      <Button Name="LabButton" Content="Controls" Classes="theme" />
+      <Button Name="StoryButton" Content="Story" Classes="theme" />
     </WrapPanel>
     </DockPanel>
     <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">
