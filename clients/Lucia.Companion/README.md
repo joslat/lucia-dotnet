@@ -205,7 +205,7 @@ Stored documents have a versioned envelope and a 512 KiB budget. Missing layout 
 
 | Endpoint | Authority | Result |
 |---|---|---|
-| `GET /api/companion/owner/layout` | Current trusted owner | Checked document, storage revision, owner audit and `sourceMatches` binding indicator. It does not contact the source, so an owner can inspect a stale binding for recovery. The indicator is not a source-health check |
+| `GET /api/companion/owner/layout` | Current trusted owner | Configured home/source context, checked document, storage revision, owner audit and `sourceMatches` binding indicator. A missing document returns404with owner-only context for first creation. It does not contact the source, so an owner can inspect a stale binding for recovery. The indicator is not a source-health check |
 | `PUT /api/companion/owner/layout` | Current owner, plus antiforgery for cookies | Exact home/source, fresh area/source/field catalog validation, then checked create/replace. Body is `{ "expectedRevision": null, "layout": ... }` for first create; replacement supplies the owner revision |
 | `GET /api/companion/homes/{homeId}/layout` | Current native home/member identity | Only permitted current places, edges joining visible places and exact permitted source-role bindings. Separate member/session/grant-bound revision, never the storage document |
 

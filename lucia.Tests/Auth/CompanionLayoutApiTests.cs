@@ -142,4 +142,22 @@ public sealed class CompanionLayoutApiTests
         Assert.Equal("Our home", view.GetProperty("layout").GetProperty("name").GetString());
         A.CallTo(() => host.HomeAssistant.GetStatesAsync(A<CancellationToken>._)).MustNotHaveHappened();
     }
+
+    [Fact]
+    public async Task FirstCreateContextIsAvailableOnlyToTheCurrentOwnerNotToAMemberMissingView()
+    {
+        await using var host = await CompanionSecurityTestHost.StartAsync();
+        host.Client.DefaultRequestHeaders.Add("X-API-Key", "synthetic-owner");
+        using var owner = await host.Client.GetAsync("/api/companion/owner/layout"); Assert.Equal(HttpStatusCode.NotFound, owner.StatusCode);
+        var context = await owner.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("home-a", context.GetProperty("homeId").GetString());
+        Assert.Equal("http://synthetic-ha.invalid", context.GetProperty("sourceBaseUrl").GetString());
+        Assert.True(context.GetProperty("sourceMatches").GetBoolean());
+        A.CallTo(() => host.HomeAssistant.GetStatesAsync(A<CancellationToken>._)).MustNotHaveHappened();
+        host.Client.DefaultRequestHeaders.Remove("X-API-Key");
+        var issued = await host.Sessions.CreateAsync(new("home-a", "member-a", [new("porch", [CompanionField.Temperature])]), "Phone");
+        host.Client.DefaultRequestHeaders.Authorization = new("Bearer", issued.AccessToken);
+        using var member = await host.Client.GetAsync("/api/companion/homes/home-a/layout"); Assert.Equal(HttpStatusCode.NotFound, member.StatusCode);
+        var body = await member.Content.ReadAsStringAsync(); Assert.DoesNotContain("sourceBaseUrl", body); Assert.DoesNotContain("synthetic-ha", body);
+    }
 }

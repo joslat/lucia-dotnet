@@ -28,7 +28,11 @@ public static class CompanionLayoutApi
         try { snapshot = await store.ReadAsync(options.Value.HomeId, context.RequestAborted).ConfigureAwait(false); }
         catch (Exception error) when (error is InvalidDataException or DbException) { invalid = true; }
         if (!await CompanionOwnerFilter.HasCurrentOwnerAsync(context, keys, clock).ConfigureAwait(false)) { return Results.StatusCode(StatusCodes.Status403Forbidden); }
-        return invalid ? Unavailable() : snapshot is null ? Missing() : EncodeOwner(snapshot, options.Value, sourceOptions.CurrentValue.BaseUrl);
+        if (invalid) { return Unavailable(); }
+        var sourceMatches = SameSource(sourceOptions.CurrentValue.BaseUrl, options.Value.SourceBaseUrl);
+        return snapshot is null ? Results.Json(new { error = "layout_not_configured", homeId = options.Value.HomeId,
+            sourceBaseUrl = options.Value.SourceBaseUrl, sourceMatches }, CompanionApiJson.Options, statusCode: StatusCodes.Status404NotFound)
+            : EncodeOwner(snapshot, options.Value, sourceOptions.CurrentValue.BaseUrl);
     }
 
     private static async Task<IResult> WriteOwnerAsync(ICompanionLayoutStore store, CompanionHomeReader reader, IOptions<CompanionOptions> options,
@@ -90,7 +94,7 @@ public static class CompanionLayoutApi
         catch (ArgumentException) { return false; }
     }
     private static IResult EncodeOwner(CompanionLayoutSnapshot snapshot, CompanionOptions options, string currentSource) => Encode(new
-    { snapshot.Revision, snapshot.Layout, snapshot.UpdatedAt, snapshot.UpdatedBy,
+    { homeId = options.HomeId, sourceBaseUrl = options.SourceBaseUrl, snapshot.Revision, snapshot.Layout, snapshot.UpdatedAt, snapshot.UpdatedBy,
         sourceMatches = SameSource(snapshot.Layout.SourceBaseUrl, options.SourceBaseUrl) && SameSource(currentSource, options.SourceBaseUrl) }, 1_048_576);
     private static IResult Encode(object result, int maximum)
     {
