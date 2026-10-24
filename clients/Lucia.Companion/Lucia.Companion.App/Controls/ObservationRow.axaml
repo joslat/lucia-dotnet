@@ -6,8 +6,8 @@
         <TextBlock Name="LabelText" TextWrapping="Wrap" />
         <TextBlock Name="ValueText" Grid.Column="1" FontWeight="SemiBold" MaxWidth="150" TextWrapping="Wrap" />
       </Grid>
-      <TextBlock Name="PreviousText" Classes="muted" FontSize="13" />
-      <TextBlock Name="TimeText" Classes="muted" FontSize="13" />
+      <TextBlock Name="PreviousText" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+      <TextBlock Name="TimeText" Classes="muted" FontSize="{DynamicResource TextSize13}" />
     </StackPanel>
   </Border>
 </UserControl>

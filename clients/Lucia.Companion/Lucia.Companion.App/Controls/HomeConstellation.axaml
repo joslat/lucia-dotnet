@@ -6,6 +6,6 @@
       <c:ConnectionLayer Name="Links" IsHitTestVisible="False" ConnectionBrush="{DynamicResource GraphLineBrush}" />
       <c:ConstellationPanel Name="Map" />
     </Grid>
-    <TextBlock Text="Lines show configured connections, not a floor plan." Classes="muted" FontSize="13" />
+    <TextBlock Text="Lines show configured connections, not a floor plan." Classes="muted" FontSize="{DynamicResource TextSize13}" />
   </StackPanel>
 </UserControl>

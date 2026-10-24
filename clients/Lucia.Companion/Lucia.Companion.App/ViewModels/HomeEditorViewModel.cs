@@ -6,10 +6,18 @@ namespace Lucia.Companion.App.ViewModels;
 public sealed class HomeEditorViewModel
 {
     private HomeTopology draft;
-    public HomeEditorViewModel(HomeTopology home) => draft = home;
+    private readonly HomeTopology original;
+    public HomeEditorViewModel(HomeTopology home) { draft = original = home; }
     public IReadOnlyList<Place> Places => draft.Places;
     public IReadOnlyList<PlaceConnection> Connections => draft.Connections;
     public string HomeName => draft.Name;
+    public bool HasChanges => draft.Name != original.Name ||
+        !draft.Places.Select(place => (place.Id, place.Name, place.Icon)).SequenceEqual(original.Places.Select(place => (place.Id, place.Name, place.Icon))) ||
+        !draft.Connections.Select(EdgeKey).ToHashSet().SetEquals(original.Connections.Select(EdgeKey));
+
+    private static (string, string) EdgeKey(PlaceConnection edge) =>
+        StringComparer.Ordinal.Compare(edge.FromPlaceId, edge.ToPlaceId) < 0
+            ? (edge.FromPlaceId, edge.ToPlaceId) : (edge.ToPlaceId, edge.FromPlaceId);
 
     public string AddPlace(string name, PlaceIcon icon)
     {

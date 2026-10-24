@@ -1,20 +1,21 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Lucia.Companion.App.Screens.HomeEditorScreen" Background="{DynamicResource CanvasBrush}">
-  <Grid RowDefinitions="Auto,*,Auto" Margin="16" RowSpacing="16">
+  <Grid RowDefinitions="*,Auto" Margin="16" RowSpacing="16">
+    <ScrollViewer Name="EditorScroll" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Spacing="16">
     <StackPanel Spacing="8">
       <TextBlock Text="Build your home" Classes="title" TextWrapping="Wrap" />
       <TextBlock Text="Names, icons and physical connections. Local setup only, no device control." Classes="muted" />
       <TextBlock Name="ReplacementWarning" IsVisible="False" Text="The saved setup could not be read. Saving replaces that file. Cancel leaves it untouched." TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
       <TextBlock Name="ErrorText" IsVisible="False" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
     </StackPanel>
-    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
       <Grid Name="EditorGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
         <Border Name="PlaceListCard" Classes="panel">
           <StackPanel Spacing="12">
             <TextBlock Text="Home name" />
             <TextBox Name="HomeNameInput" MaxLength="80" AutomationProperties.Name="Home name" />
             <TextBlock Text="Your places" Classes="section" />
-            <TextBlock Text="The saved order keeps your home stable." Classes="muted" FontSize="13" />
+            <TextBlock Text="The saved order keeps your home stable." Classes="muted" FontSize="{DynamicResource TextSize13}" />
             <ListBox Name="PlacesList" MaxHeight="280" AutomationProperties.Name="Choose a place to edit" />
             <ComboBox Name="PlaceChooser" HorizontalAlignment="Stretch" AutomationProperties.Name="Choose a place to edit" MinHeight="48" />
             <Button Name="AddPlace" Content="Add place" Classes="theme" HorizontalAlignment="Left" />
@@ -28,9 +29,9 @@
             <TextBlock Text="Icon" />
             <ComboBox Name="IconInput" HorizontalAlignment="Stretch" AutomationProperties.Name="Place icon" MinHeight="48" />
             <TextBlock Text="Connects to" />
-            <TextBlock Text="Optional. Select physical neighbors, not sensor owners." Classes="muted" FontSize="13" />
+            <TextBlock Text="Optional. Select physical neighbors, not sensor owners." Classes="muted" FontSize="{DynamicResource TextSize13}" />
             <StackPanel Name="ConnectionsList" Spacing="6" />
-            <TextBlock Text="New places have no observation bindings. They stay unavailable until a source is configured." Classes="muted" FontSize="13" />
+            <TextBlock Text="New places have no observation bindings. They stay unavailable until a source is configured." Classes="muted" FontSize="{DynamicResource TextSize13}" />
             <WrapPanel>
               <Button Name="MoveEarlier" Content="Move earlier" Classes="theme" Margin="0,0,8,8" />
               <Button Name="MoveLater" Content="Move later" Classes="theme" Margin="0,0,8,8" />
@@ -46,10 +47,22 @@
           </StackPanel>
         </Border>
       </Grid>
+    </StackPanel>
     </ScrollViewer>
-    <WrapPanel Grid.Row="2">
-      <Button Name="SaveHome" Content="Save setup" Classes="theme" Margin="0,0,12,8" />
-      <Button Name="CancelEdit" Content="Cancel" Classes="theme" />
-    </WrapPanel>
+    <StackPanel Grid.Row="1" Spacing="8">
+      <Border Name="DiscardConfirmation" IsVisible="False" Classes="panel" Padding="12">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Discard the unsaved setup changes?" TextWrapping="Wrap" />
+          <WrapPanel>
+            <Button Name="StayInSetup" Content="Keep editing" Classes="theme" Margin="0,0,8,8" />
+            <Button Name="DiscardEdits" Content="Discard changes" Classes="theme" Foreground="{DynamicResource ProblemBrush}" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+      <WrapPanel Name="EditCommands">
+        <Button Name="SaveHome" Content="Save setup" Classes="theme" Margin="0,0,12,8" />
+        <Button Name="CancelEdit" Content="Cancel" Classes="theme" />
+      </WrapPanel>
+    </StackPanel>
   </Grid>
 </UserControl>

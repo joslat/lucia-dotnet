@@ -148,7 +148,7 @@ Places use household outline icons, written names and explicit state labels. The
 
 This record covers the built Avalonia Home screen, HomeConstellation, PlaceDetail, contextual Bloom actions, local Home setup, offline StoryOrbit Day, shell and control workbench. Home opens with an offline demo badge, synthetic reading time and a written attention summary. Its graph preserves explicit place order, and phone readings open in a separate detail view with Back. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Authentication, live household and sensor bindings, import and section-order preferences remain unbuilt.
 
-Native sources own this system: `Lucia.Companion.App/App.axaml`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. The sidecar HTML/CSS snippets are illustrative representations for a design panel. They do not drive the native UI or qualify real-device accessibility, safe areas or performance.
+Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
 **Key Characteristics:**
 
@@ -157,9 +157,10 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `Styles/Control
 - Observations distinguish current readings from last-known values and unknown times.
 - Home and setup use separate native width thresholds for compact and expanded layouts.
 - Configured connections and stable offsets give the home graph structure without a floor-plan claim.
-- Contextual Bloom actions surround the selected place icon.
+- Contextual Bloom actions surround the selected place icon at normal text sizes and become a readable action list at large text sizes.
 - Story keeps reported intervals, last-known values and missing reports visibly distinct.
 - Home and Bloom remain static; Story optionally transitions only its selected time hand.
+- Platform text settings resize individual type roles, with layout adaptations for larger text.
 
 ## Colors
 
@@ -201,6 +202,8 @@ Outfit is the display family. DM Sans is the body and label family. Both ship lo
 
 The title requests Medium, weight 500, although the package contains weights 400 and 600. Do not describe it as a separately bundled Medium face. Place names and observation values request SemiBold. Home constellation names and attention names use compact-value; constellation state labels use constellation-state. The explicit theme-button family and size are DM Sans at the body size; keep that override when using the Fluent button theme.
 
+Text uses dynamic resources TextSize12, TextSize13, TextSize14, TextSize16, TextSize24, TextSize32 and TextSize34. Their default values match their numeric suffixes and the frontmatter baseline. CompanionTypography maps each role independently. On Android, MainActivity converts each base SP size with TypedValue.ApplyDimension and divides by display density to obtain native layout units. It reapplies the mapping on configuration changes. Android owns the font-scale curve, including nonlinear scaling where supported; this is not a global zoom of the interface. Other hosts retain the default resource values until a platform mapping is applied.
+
 ### Hierarchy
 
 - Display names the workbench, Home setup and Story.
@@ -217,15 +220,19 @@ Line height and tracking use native defaults. No custom scale ratio, uppercase l
 
 **The Two Family Rule.** Use Outfit for titles and section headings, and DM Sans for control labels, readings and supporting text.
 
+**The Native Text Rule.** Bind text to its matching TextSize resource. Keep geometry independent of the platform's per-role text mapping, and adapt constrained compositions when text needs more room.
+
 ## Layout
 
 ### Home and setup
 
 Home and setup use 16-unit outer margins and composition gaps. Home changes to its expanded layout when its own Bounds.Width reaches 900 units. The graph and Lucia now sit in the main column; attention and selected-place details share a 340-unit side column. Below that threshold, attention moves between the graph and Lucia now. Selecting a place opens a separate vertically scrolling detail view with "Back to your home". Back and Escape return to the graph and restore focus to the selected place. Opening phone detail focuses Back.
 
-Setup changes at its own Bounds.Width of 800 units. Expanded setup uses two equal columns, a place list on the left and the selected place's form on the right. Compact setup replaces the list with a place chooser and stacks the form below it. Save and Cancel sit outside the scrolling form. These are control-width thresholds, not physical device categories or browser viewport breakpoints.
+When Home is narrower than 600 units and its home-name font exceeds 32 units, the offline badge moves below the name. The name then spans both header columns.
 
-The Home constellation keeps the supplied place order. Its panel derives column count from available width divided by 108, with up to three columns below 800 units of panel width and up to four above it. It measures each row from the tallest child, with a minimum row height of 148 units. Up to six places use fixed varied offsets. Larger homes continue in stable rows with alternating vertical offsets. No physics, animation, automatic sorting by state or inferred room position affects placement.
+Setup changes at its own Bounds.Width of 800 units. Expanded setup uses two equal columns, a place list on the left and the selected place's form on the right. Compact setup replaces the list with a place chooser and stacks the form below it. The header and forms share one scrolling region; Save and Cancel or the discard question sit outside it. These are control-width thresholds, not physical device categories or browser viewport breakpoints.
+
+The Home constellation keeps the supplied place order. Its panel starts with a 108-unit slot, multiplies that slot by the largest orb FontSize divided by its normal size of 16, and divides available width by the resulting slot width to derive column count. Larger text increases slot width and can reduce the column count. The cap remains three columns below 800 units of panel width and four above it. Child width can grow to 152 times that text ratio. The panel measures each row from the tallest child, with a minimum row height of 148 units. Up to six places use fixed varied offsets. Larger homes continue in stable rows with alternating vertical offsets. No physics, animation, automatic sorting by state or inferred room position affects placement.
 
 **The Stable Home Rule.** Preserve explicit room order through selection, pinning and state display. Reordering belongs to the user's Move earlier and Move later setup controls.
 
@@ -233,9 +240,11 @@ The Home constellation keeps the supplied place order. Its panel derives column 
 
 Story is one vertical ScrollViewer with a 16-unit horizontal and 20-unit vertical margin, section spacing, and no horizontal page scroll. At its own Bounds.Width of 900 units it places a 400-unit dial in a 420-unit left column and chapters in the flexible right column, with a 24-unit column gap. Below that threshold the dial sits above chapters and measures the available width minus 32 units, clamped between 240 and 340 units.
 
+When the mapped CenterTime font exceeds 36 units, selected time and offset move below the dial. Its center caption reads "Time below". Chapter icon/time rails measure their content from a 52-unit minimum instead of fixing the rail width.
+
 Place filters always form a manually scrolling horizontal strip, not an automatically rotating carousel. A native chooser containing All places and every configured place appears additionally when there are more than six places. The dial draws at most six visible place rings and prints their outer-to-inner order and count. The straight timelines remain available for every place in the current filter; the ring budget never limits access to reports.
 
-Place by place follows the dial and chapters after a thin divider. Each place has four independent tracks in Lighting, Contact, Motion and Lucia order, a visible native time ruler and wrapping report buttons. A 24-unit gap separates timelines. Ruler marks sit at the day boundary, quarter-elapsed instants and the next-day end. Local clock labels include offsets so repeated or skipped clock times do not change the elapsed-time coordinate system.
+Place by place follows the dial and chapters after a thin divider. Each place has four independent tracks in Lighting, Contact, Motion and Lucia order, a visible native time ruler and wrapping report buttons. A 24-unit gap separates timelines. Ruler positions cover the day boundary, quarter-elapsed instants and the next-day end. When the widest label needs more than one-sixth of the available ruler width, the first- and third-quarter labels hide, retaining the start, midpoint and next-day end. Local clock labels include offsets so repeated or skipped clock times do not change the elapsed-time coordinate system.
 
 **The Independent Tracks Rule.** A report on one track supplies no evidence for another. Unmarked ring portions mean no supplied report, and dotted timeline guides remain unknown until a report covers them.
 
@@ -277,6 +286,12 @@ System, Light and Dark are native buttons that change the application's Requeste
 
 CompanionShell exposes Options, Setup and Story. Options opens a native context menu with an Appearance submenu containing System, Light and Dark, plus Control lab for the workbench. Story opens Story Day and becomes Home while that screen is visible. Setup disables Setup, Story and Control lab until Save or Cancel returns Home; appearance remains available. A bottom status line can expose Retry save. There is no tab bar.
 
+Native Back and Escape first close Home's open Bloom, then compact place detail. Back from Story or Control lab returns Home. At the Home root the request stays unhandled so the OS can leave the app. Setup handles Back through its draft-discard question. The shell subscribes to its current TopLevel's BackRequested event while attached and unsubscribes when detached.
+
+Android temporarily sets `android:enableOnBackInvokedCallback="false"` in its manifest. In the API 36 emulator, default predictive Back bypassed the app callbacks even though the headless route checks passed. The checked APK with this compatibility opt-out returned from native Garden detail to Home instead of the launcher. Predictive Back and its gesture animation still need separate qualification before this temporary opt-out can be removed.
+
+The Android activity reuses one cached view only within the running process. An API 36 emulator density change and reset triggered recorded activity destruction and recreation in the same process, retaining an edited setup draft. This is not unsaved-draft storage. Process death restores saved metadata and pins only.
+
 ### PlaceOrb
 
 A native Button combines the circular icon, place name and written state. Activating it selects the place and opens its readings according to the compact or expanded Home layout. Selection and pinning are separate Boolean properties. Neither changes the place's state or order. A small amber pin path appears at the icon's upper right when pinned.
@@ -303,7 +318,9 @@ PlaceDetail contains the selected icon, name, written state and reason, a Place 
 
 ### BloomActions and BloomActionButton
 
-Bloom is a native overlay Popup with centered placement relative to the selected graph icon, or the PlaceDetail icon when opened from phone detail. Its composition measures 288 by 292 units, with Readings above and Pin place or Unpin and Close below the selected center icon. The opaque circular backing and shaded Home keep actions clear of underlying text. It is contextual, static and icon-led.
+Bloom is a native overlay Popup with centered placement relative to the selected graph icon, or the PlaceDetail icon when opened from phone detail. At normal text size its radial composition measures 288 by 292 units, with Readings above and Pin place or Unpin and Close below the selected center icon. The opaque circular backing and shaded Home keep actions clear of underlying text. It is contextual and static.
+
+When Bloom's mapped body FontSize exceeds 20 units, a 288-unit-wide panel replaces the radial layout. It has the place heading and full-width Readings, Pin place or Unpin, and Close native buttons in a vertical ScrollViewer. The scroll area has a 400-unit maximum height, with an additional cap based on available top-level height. Opening focuses the visible layout's Readings button. Both layouts invoke the same actions and dismissal paths.
 
 The named circular action buttons are native Buttons. Pointer-over colors their circle border amber. Keyboard focus uses a 3-unit text-colored circle border. Pressed lowers the whole action's opacity to 0.7. Labels stay visible; no hover, hold or special gesture is required.
 
@@ -321,7 +338,9 @@ The compact fixture has three equal columns. Received · done is a sage outlined
 
 Setup uses labelled native TextBoxes for home and place names, a place ListBox or ComboBox according to width, an icon ComboBox and named neighbor CheckBoxes. TextBoxes and chooser/neighbor targets have a 48-unit minimum height where set by source. Inputs use DM Sans body typography, with Fluent field, selection and focus presentation.
 
-Add place, Move earlier, Move later and Remove place edit a draft. Removal reveals Confirm removal and Keep place inline. Validation and unreadable-profile replacement warnings use ProblemBrush and written text. Save setup or Replace saved setup and Cancel remain available below the scroll region; Escape cancels. Local storage contains setup metadata and pins only. It does not establish visual tokens or persist sensor readings.
+Add place, Move earlier, Move later and Remove place edit a draft. Removal reveals Confirm removal and Keep place inline. Validation and unreadable-profile replacement warnings use ProblemBrush and written text. Save setup or Replace saved setup and Cancel sit below the scrolling header and form. Local storage contains setup metadata and pins only. It does not establish visual tokens or persist sensor readings.
+
+Back or Escape first closes an open removal question. With pending draft changes it asks "Discard the unsaved setup changes?" with Keep editing and Discard changes. The pending-change check includes invalid, uncommitted field text, icon changes and neighbor changes. While this question is visible, editing is disabled and normal Save/Cancel commands hide. Focus starts on Keep editing. Back again closes the question and retains the draft. With no changes, Back returns Home directly. The explicit Cancel command still leaves setup immediately without saving.
 
 ### PlaceIcons
 
@@ -331,7 +350,7 @@ Home, Garden, Door, Sofa, Kitchen and Bed are authored vector paths in `PlaceIco
 
 The built Day screen is explicitly sample history for 23 October 2026 in Europe/Zurich, not live household data. StoryViewModel holds one selected instant, place filter and optional chapter selection for the dial, chapter list, scrubber and timelines. Choosing a chapter moves the shared cursor to its start and highlights its outer arc. Choosing a report sets its place and start time. A pointer on the dial or track is an accelerator; named buttons and the native slider provide equivalent time selection.
 
-StoryDay maps elapsed instants between home-local day boundaries, including daylight-saving changes. The heading states the home timezone and elapsed day length. The dial center shows local time, UTC offset and Selected time or Chapter start. The native slider's arrows move one elapsed minute and page keys move one elapsed hour. Its accessible help includes the selected time.
+StoryDay maps elapsed instants between home-local day boundaries, including daylight-saving changes. The heading states the home timezone and elapsed day length. At normal text size the dial center shows local time, UTC offset and Selected time or Chapter start; larger selected time moves below it as described in Layout. The native slider's arrows move one elapsed minute and page keys move one elapsed hour. Its accessible help includes the selected time.
 
 The dial uses at most six place rings, recorded report arcs, hour tick marks and a shared time hand. Rings without supplied reports are dotted; otherwise their neutral base is a guide, not a claim of continuous data. Lighting arcs use a 3-unit stroke; other report arcs use 5 units. StoryDrawing supplies the marker, brush and dash grammar shared with the straight tracks. Native drawing stays separate from the textual evidence.
 
@@ -341,17 +360,17 @@ StoryLegend wraps named markers for Light report, Door / gate, Motion report, Lu
 
 ### ChapterList
 
-Authored sample chapters are native full-width buttons. Each has a 52-unit icon/time rail, an 8-unit column gap and 12-unit padding. The rail contains a 30-unit outlined circle with a 16-unit household icon and a written start time. The content has a semibold title, full local start/end range with offsets, and evidence labels. A selected chapter uses a 2-unit amber border; unselected chapters have no visible button border. Tablet aligns these beside the dial; phone stacks them below it. An empty filter explains that no recorded chapters were supplied.
+Authored sample chapters are native full-width buttons. Each has a content-sized icon/time rail with a 52-unit minimum, an 8-unit column gap and 12-unit padding. The rail contains a 30-unit outlined circle with a 16-unit household icon and a written start time that does not wrap. The content has a semibold title, full local start/end range with offsets, and evidence labels. A selected chapter uses a 2-unit amber border; unselected chapters have no visible button border. Tablet aligns these beside the dial; phone stacks them below it. An empty filter explains that no recorded chapters were supplied.
 
 Chapters reference recorded evidence that intersects their interval. Evidence ranges clip to that chapter rather than borrowing a report's full duration. These chapters are authored fixtures, not generated behavioral summaries.
 
 ### PlaceTimeline, TimelineTrackLayer and TimelineRuler
 
-Each place heading has its authored icon and name. Beneath it, a 64-unit drawing area holds four lanes at 14-unit intervals. Dotted neutral guides extend across each lane. Supplied intervals draw only on their own kind's lane, followed by a common vertical time cursor. The visible ruler labels time and offset at five elapsed-day positions and names the final boundary "next day".
+Each place heading has its authored icon and name. Beneath it, a 64-unit drawing area holds four lanes at 14-unit intervals. Dotted neutral guides extend across each lane. Supplied intervals draw only on their own kind's lane, followed by a common vertical time cursor. The visible ruler labels time and offset at up to five elapsed-day positions, reduces quarter labels when cramped, and names the final boundary "next day".
 
 Every supplied report also has a native button with its complete start/end range, both offsets, label and quality. Its accessible name names the place and report kind; accessible help identifies the synthetic source. Buttons wrap within available width. A place with no reports says that all four tracks are unknown. Last-known is dashed, unavailable is dotted, and missing reports never imply off, closed or unoccupied. Motion markers represent one-minute report buckets, not presence intervals.
 
-Story has no service history or history persistence. A changed Home topology rebuilds the sample Story from the current demo setup. The screen explicitly says historical binding policy is not implemented. Native headless rendering establishes the reviewed layout. An API 36 emulator smoke check covers Story launch, touch scrolling, chapter/cursor selection and in-app return Home. Real-device accessibility, safe-area and performance qualification remain release work.
+Story has no service history or history persistence. A changed Home topology rebuilds the sample Story from the current demo setup. The screen explicitly says historical binding policy is not implemented. Native headless rendering establishes the reviewed layout. A prior API 36 emulator smoke check covered Story launch, touch scrolling, chapter/cursor selection and in-app return Home. Scoped platform-hardening emulator checks also covered native Back with the temporary manifest opt-out, rotation, Android font_scale 2, focused-field visibility with the keyboard, and same-process activity recreation with draft retention. The corrupt-profile warning preserved the existing file bytes. These checks do not qualify predictive Back gesture animation, TalkBack, real devices, iOS, safe areas or performance.
 
 ## Do's and Don'ts
 
@@ -370,6 +389,9 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do preserve separate evidence tracks, full local time ranges, offsets, quality and source help.
 - Do provide the native slider and chapter/report buttons alongside decorative dial input.
 - Do keep the Story hand transition optional with the visible animation checkbox.
+- Do use dynamic TextSize resources for platform-adjusted type and let constrained layouts adapt.
+- Do keep all Bloom actions reachable in its large-text list.
+- Do preserve pending setup changes on Back until the user chooses Discard changes.
 
 ### Don't:
 
@@ -383,3 +405,5 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't treat unmarked ring segments, unknown track spans or absent chapters as proof that nothing happened.
 - Don't convert motion report buckets into occupancy or continuous presence.
 - Don't claim live history, persisted history or a historical binding policy from the authored Story fixture.
+- Don't treat the in-process activity-view cache as persisted unsaved drafts.
+- Don't claim TalkBack, device, iOS or performance qualification from text-resource mapping or headless checks.

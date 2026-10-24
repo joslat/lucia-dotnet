@@ -34,9 +34,9 @@ public sealed class PlaceTimeline : UserControl
         {
             var reportContent = new StackPanel { Spacing = 2 };
             reportContent.Children.Add(new TextBlock { Text = StoryDrawing.RangeLabel(state.Day, report.Start, report.End),
-                FontSize = 13, Classes = { "muted" }, MaxWidth = 320, TextWrapping = TextWrapping.Wrap });
+                [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13"), Classes = { "muted" }, MaxWidth = 320, TextWrapping = TextWrapping.Wrap });
             reportContent.Children.Add(new TextBlock { Text = $"{report.Label} · {report.Quality}",
-                FontSize = 13, MaxWidth = 320, TextWrapping = TextWrapping.Wrap });
+                [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13"), MaxWidth = 320, TextWrapping = TextWrapping.Wrap });
             var button = new Button
             {
                 Tag = report.Id, Classes = { "theme" }, Margin = new Thickness(0, 0, 8, 8),
@@ -48,7 +48,7 @@ public sealed class PlaceTimeline : UserControl
             buttons.Children.Add(button);
         }
         stack.Children.Add(reports.Length == 0
-            ? new TextBlock { Text = "No history supplied. All four tracks are unknown.", Classes = { "muted" }, FontSize = 13 }
+            ? new TextBlock { Text = "No history supplied. All four tracks are unknown.", Classes = { "muted" }, [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13") }
             : buttons);
         SizeChanged += (_, _) =>
         {

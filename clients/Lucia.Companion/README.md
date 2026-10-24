@@ -34,7 +34,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-Tests use headless Avalonia with the real Skia renderer, not HTML. They do not qualify phone/tablet runtime, safe areas, screen readers, large text, lifecycle or performance.
+Tests use headless Avalonia with the real Skia renderer, not HTML. The 85 cases cover shared semantics, native interactions, Back routing, draft protection and text-size mappings through 200% in phone/tablet light/dark layouts. These are not physical-device, safe-area, screen-reader or performance qualification.
 
 ### Android
 
@@ -51,9 +51,19 @@ dotnet build clients/Lucia.Companion/Lucia.Companion.Android -t:InstallAndroidDe
 dotnet build clients/Lucia.Companion/Lucia.Companion.Android -p:AndroidSdkDirectory="$PWD/.tools/android-sdk"
 ```
 
-Debug packages embed their assemblies and can be installed directly without IDE fast-deployment side files. Android backup is disabled for the local setup. Debug signing is not a distribution release. Device lifecycle, back navigation, system insets and suspend/resume remain unqualified.
+Debug packages embed their assemblies and can be installed directly without IDE fast-deployment side files. Android backup is disabled for the local setup. Debug signing is not a distribution release.
 
-An API 36 x86_64 emulator smoke check confirms direct APK installation, startup, place detail, named Bloom actions and local pin persistence. It also confirms Story launch, touch scrolling, chapter selection with a matching timeline cursor, and in-app return Home. It caught and fixed a zero-width startup layout failure. This is not physical-device or full mobile qualification.
+API 36 x86_64 emulator checks confirm direct APK installation, startup, place detail, Bloom actions, saved pins, Story scrolling and chapter/cursor selection. They also cover system Back, rotation, same-process activity recreation with an unsaved setup draft, a focused field above the keyboard, native font preference 2.0 and corrupt-setup preservation. These are bounded offline checks, not physical-device or full mobile qualification.
+
+### Native navigation and text
+
+Back closes Bloom before phone detail, then returns Story or the control lab to Home. At Home root it lets Android leave the app. Setup Back first closes a removal question, then asks before discarding changed fields, including invalid unsaved text. Keep editing preserves those fields; Discard changes never saves them. Explicit Cancel remains an intentional discard. The keyboard can consume the first Back to hide itself.
+
+The single Android activity reuses its view within the application process. Rotation and activity recreation retain the current screen, selection and draft. Process death starts from saved setup metadata and pins only. Unsaved drafts, readings and Story history are not written to disk.
+
+Android maps each of the seven base font sizes through native SP conversion. Layout expands with text rather than zooming all geometry. At larger text, Home uses fewer columns, Bloom offers a scrollable action list, and Story prints the selected time below the dial. Normal text retains the radial composition.
+
+The prototype temporarily opts out of predictive Back in its manifest. On the tested API 36 launcher, default predictive Back bypassed app navigation; the compatibility flag restored system Back routing. Android documents this [temporary migration option](https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back). Predictive gesture animation remains a release gate, alongside real-device/TalkBack traversal, broader keyboard/inset coverage, iOS, memory pressure, performance and distribution signing.
 
 ## Status and engineering boundaries
 

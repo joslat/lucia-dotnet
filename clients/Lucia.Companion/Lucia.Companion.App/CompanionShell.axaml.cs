@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Lucia.Companion.App.Screens;
@@ -16,6 +18,7 @@ public sealed partial class CompanionShell : UserControl
     private StoryScreen? story;
     private Core.HomeTopology? storyHome;
     private readonly MenuItem controlLab = new() { Header = "Control lab" };
+    private TopLevel? attachedTopLevel;
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
@@ -43,8 +46,37 @@ public sealed partial class CompanionShell : UserControl
         };
         this.FindControl<Button>("StoryButton")!.Click += (_, _) => SwitchStory();
         profileSession.Changed += RefreshStorageState;
-        AttachedToVisualTree += async (_, _) => await profileSession.InitializeAsync();
+        AttachedToVisualTree += async (_, _) =>
+        {
+            attachedTopLevel = TopLevel.GetTopLevel(this);
+            if (attachedTopLevel is not null) { attachedTopLevel.BackRequested += OnBackRequested; }
+            await profileSession.InitializeAsync();
+        };
+        DetachedFromVisualTree += (_, _) =>
+        {
+            if (attachedTopLevel is not null) { attachedTopLevel.BackRequested -= OnBackRequested; }
+            attachedTopLevel = null;
+            appearance.ContextMenu.Close();
+        };
+        KeyDown += (_, args) =>
+        {
+            if (args.Key == Key.Escape && !args.Handled) { args.Handled = NavigateBack(); }
+        };
         RefreshStorageState();
+    }
+
+    private void OnBackRequested(object? sender, RoutedEventArgs args)
+    {
+        if (!args.Handled) { args.Handled = NavigateBack(); }
+    }
+
+    private bool NavigateBack()
+    {
+        var content = this.FindControl<ContentControl>("ScreenHost")!.Content;
+        if (content is HomeEditorScreen editor) { editor.RequestBack(); return true; }
+        if (ReferenceEquals(content, home)) { return home.TryNavigateBack(); }
+        ShowHome();
+        return true;
     }
 
     private void OpenEditor()

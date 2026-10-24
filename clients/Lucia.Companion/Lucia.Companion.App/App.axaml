@@ -2,6 +2,13 @@
              x:Class="Lucia.Companion.App.App" RequestedThemeVariant="Default">
   <Application.Resources>
     <ResourceDictionary>
+      <x:Double x:Key="TextSize12">12</x:Double>
+      <x:Double x:Key="TextSize13">13</x:Double>
+      <x:Double x:Key="TextSize14">14</x:Double>
+      <x:Double x:Key="TextSize16">16</x:Double>
+      <x:Double x:Key="TextSize24">24</x:Double>
+      <x:Double x:Key="TextSize32">32</x:Double>
+      <x:Double x:Key="TextSize34">34</x:Double>
       <FontFamily x:Key="BodyFont">avares://Lucia.Companion.App/Assets/Fonts#DM Sans</FontFamily>
       <FontFamily x:Key="DisplayFont">avares://Lucia.Companion.App/Assets/Fonts#Outfit</FontFamily>
       <ResourceDictionary.ThemeDictionaries>

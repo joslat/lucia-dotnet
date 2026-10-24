@@ -2,6 +2,7 @@
         xmlns:c="using:Lucia.Companion.App.Controls">
   <Styles.Resources>
     <ControlTheme x:Key="{x:Type c:PlaceOrb}" TargetType="c:PlaceOrb">
+      <Setter Property="FontSize" Value="{DynamicResource TextSize16}" />
       <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
       <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
       <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
@@ -20,8 +21,8 @@
                   <Path IsVisible="{TemplateBinding IsPinned}" Width="12" Height="12" Margin="0,2,2,0" HorizontalAlignment="Right" VerticalAlignment="Top"
                         Data="M4,2 L10,2 9,7 11,9 7,9 7,14 M5,9 L3,9 5,7 Z" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" />
               </Grid>
-              <TextBlock Text="{TemplateBinding PlaceName}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextAlignment="Center" MaxWidth="132" TextWrapping="Wrap" />
-              <TextBlock Text="{TemplateBinding StateText}" Foreground="{TemplateBinding Foreground}" FontSize="13" TextAlignment="Center" />
+              <TextBlock Text="{TemplateBinding PlaceName}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap" />
+              <TextBlock Text="{TemplateBinding StateText}" Foreground="{TemplateBinding Foreground}" FontSize="{DynamicResource TextSize13}" TextAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
           </Border>
         </ControlTemplate>
@@ -48,7 +49,7 @@
               <Path Data="{TemplateBinding Icon}" Width="21" Height="21" Stretch="Uniform" Stroke="{DynamicResource TextBrush}" StrokeThickness="1.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <Border Background="{DynamicResource PanelBrush}" CornerRadius="8" Padding="5,2">
-              <TextBlock Text="{TemplateBinding Label}" FontSize="13" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="78" />
+              <TextBlock Text="{TemplateBinding Label}" FontSize="{DynamicResource TextSize13}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="78" />
             </Border>
           </StackPanel>
         </ControlTemplate>
@@ -58,14 +59,14 @@
       <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
     </ControlTheme>
   </Styles.Resources>
-  <Style Selector="TemplatedControl"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /></Style>
-  <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>
-  <Style Selector="TextBlock.title"><Setter Property="FontFamily" Value="{DynamicResource DisplayFont}" /><Setter Property="FontSize" Value="34" /><Setter Property="FontWeight" Value="Medium" /></Style>
-  <Style Selector="TextBlock.section"><Setter Property="FontFamily" Value="{DynamicResource DisplayFont}" /><Setter Property="FontSize" Value="24" /></Style>
+  <Style Selector="TemplatedControl"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /></Style>
+  <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>
+  <Style Selector="TextBlock.title"><Setter Property="FontFamily" Value="{DynamicResource DisplayFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize34}" /><Setter Property="FontWeight" Value="Medium" /></Style>
+  <Style Selector="TextBlock.section"><Setter Property="FontFamily" Value="{DynamicResource DisplayFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize24}" /></Style>
   <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{DynamicResource MutedBrush}" /><Setter Property="TextWrapping" Value="Wrap" /></Style>
-  <Style Selector="Button.theme"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /><Setter Property="MinHeight" Value="48" /><Setter Property="Background" Value="{DynamicResource ControlBrush}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>
-  <Style Selector="c|PlaceOrb.constellation /template/ TextBlock"><Setter Property="FontSize" Value="14" /></Style>
+  <Style Selector="Button.theme"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /><Setter Property="MinHeight" Value="48" /><Setter Property="Background" Value="{DynamicResource ControlBrush}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>
+  <Style Selector="c|PlaceOrb.constellation /template/ TextBlock"><Setter Property="FontSize" Value="{DynamicResource TextSize14}" /></Style>
   <Style Selector="Border.panel"><Setter Property="Background" Value="{DynamicResource PanelBrush}" /><Setter Property="CornerRadius" Value="16" /><Setter Property="Padding" Value="20" /><Setter Property="BorderBrush" Value="{DynamicResource GraphLineBrush}" /><Setter Property="BorderThickness" Value="1" /></Style>
-  <Style Selector="TextBox"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /><Setter Property="MinHeight" Value="48" /></Style>
-  <Style Selector="ComboBox, ListBoxItem, CheckBox, MenuItem"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="16" /></Style>
+  <Style Selector="TextBox"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /><Setter Property="MinHeight" Value="48" /></Style>
+  <Style Selector="ComboBox, ListBoxItem, CheckBox, MenuItem"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /></Style>
 </Styles>

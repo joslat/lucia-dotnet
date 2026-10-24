@@ -10,7 +10,7 @@ Approved 24 October 2026. Build native Constellation controls, not an HTML wrapp
 | Screens | Home and local setup; then StoryOrbit Day | Home/setup and thin Story Day implemented with fixtures; live history remains open |
 | Local metadata | Add/name/icon/connect/reorder/remove places, save/cancel, pin persistence | Implemented; no source import, binding editor or section-order preference yet |
 | Live boundary | Native session, secure storage, authorization, projections | Must precede live household data |
-| Qualification | Devices, accessibility, lifecycle, performance, distribution | Not completed |
+| Qualification | Devices, accessibility, lifecycle, performance, distribution | Offline API 36 navigation/recreation/text checks complete; physical devices and release gates remain open |
 
 ## HomeConstellation, initial implementation complete
 
@@ -33,6 +33,8 @@ StoryDay owns timezone-aware elapsed-day mapping, typed normalized intervals and
 Use the signature name StoryOrbit. Orbit, chapters and flattened place timelines share one temporal dataset and selection, initially deterministic fixtures. Real data needs authorized history, timezone/DST tests, explicit coverage gaps and binding policy. Place filters scroll when long. Week/hourly Patterns and full Engine analytics stay deferred.
 
 ## Live services and release
+
+The bounded offline Android hardening slice is complete. Shared tests cover Back hierarchy, dirty setup protection, handler reattachment and per-role text sizing through 200%. The API 36 emulator checks Back, rotation, density-triggered activity recreation with a retained draft, focused-field visibility with the keyboard, native text preference 2.0, corrupt-setup preservation and saved metadata after process restart. The launcher uses a temporary predictive-Back compatibility opt-out. No physical-device, TalkBack, predictive gesture animation, iOS, performance or distribution qualification is claimed. Unsaved drafts survive activity recreation only within the process, not process death. Do not expand this completed offline slice into live services without a new request.
 
 Review native sign-in, device sessions, secure storage, renewal/revocation and household authorization. Browser cookies are not automatically mobile auth. Reuse the Lucia host where suitable; no mobile microservice by default. No admin secrets or inferred device-control authority in clients.
 

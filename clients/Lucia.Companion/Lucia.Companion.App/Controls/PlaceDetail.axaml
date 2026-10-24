@@ -9,7 +9,7 @@
     </Grid>
     <TextBlock Name="Reason" Classes="muted" />
     <Button Name="ActionsButton" Classes="theme" Content="Place actions" HorizontalAlignment="Left" />
-    <TextBlock Name="Connections" Classes="muted" FontSize="13" />
+    <TextBlock Name="Connections" Classes="muted" FontSize="{DynamicResource TextSize13}" />
     <StackPanel Name="Observations" />
     <TextBlock Name="EmptyText" Text="No observation bindings configured for this place." Classes="muted" />
   </StackPanel>

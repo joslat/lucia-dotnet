@@ -8,14 +8,14 @@
        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
   <Grid RowDefinitions="Auto,*" Margin="16">
     <StackPanel Spacing="4" Margin="4,0,4,12">
-      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-        <TextBlock Name="HomeName" Classes="section" VerticalAlignment="Center" />
-        <Border Grid.Column="1" Background="{DynamicResource ControlBrush}" CornerRadius="12" Padding="12,8" VerticalAlignment="Center">
-          <TextBlock Text="Offline demo" FontSize="13" Foreground="{DynamicResource AccentBrush}" />
+      <Grid Name="HomeIdentity" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+        <TextBlock Name="HomeName" Classes="section" VerticalAlignment="Center" TextWrapping="Wrap" />
+        <Border Name="DemoBadge" Grid.Column="1" Background="{DynamicResource ControlBrush}" CornerRadius="12" Padding="12,8" VerticalAlignment="Center">
+          <TextBlock Text="Offline demo" FontSize="{DynamicResource TextSize13}" Foreground="{DynamicResource AccentBrush}" />
         </Border>
       </Grid>
-      <TextBlock Text="Synthetic readings · 24 Oct 2026 · 12:00 UTC" Classes="muted" FontSize="13" />
-      <TextBlock Name="AttentionSummary" FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
+      <TextBlock Text="Synthetic readings · 24 Oct 2026 · 12:00 UTC" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+      <TextBlock Name="AttentionSummary" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
     </StackPanel>
     <ScrollViewer Name="HomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
       <Grid Name="HomeGrid" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
@@ -23,7 +23,7 @@
         <Border Name="PlacesCard" Classes="panel" Padding="12">
           <StackPanel Spacing="10">
             <TextBlock Text="Your places" Classes="section" />
-            <TextBlock Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="13" />
+            <TextBlock Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="{DynamicResource TextSize13}" />
             <c:HomeConstellation Name="Constellation" />
           </StackPanel>
         </Border>

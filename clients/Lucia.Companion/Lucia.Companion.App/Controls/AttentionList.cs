@@ -16,14 +16,14 @@ public sealed class AttentionList : UserControl
         stack.Children.Add(new TextBlock { Text = places.Count == 0 ? "Nothing needs a look in this sample" : "Needs a look", Classes = { "section" }, TextWrapping = Avalonia.Media.TextWrapping.Wrap });
         foreach (var place in places)
         {
-            var label = new TextBlock { Text = $"{place.Name} · {place.State}", FontSize = 14, FontWeight = Avalonia.Media.FontWeight.SemiBold, TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+            var label = new TextBlock { Text = $"{place.Name} · {place.State}", [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize14"), FontWeight = Avalonia.Media.FontWeight.SemiBold, TextWrapping = Avalonia.Media.TextWrapping.Wrap };
             label[!TextBlock.ForegroundProperty] = new DynamicResourceExtension(place.State switch
             {
                 PlaceState.Problem => "ProblemBrush", PlaceState.Waiting => "AccentBrush", _ => "MutedBrush"
             });
             var content = new StackPanel { Spacing = 5 };
             content.Children.Add(label);
-            content.Children.Add(new TextBlock { Text = place.Reason, Classes = { "muted" }, FontSize = 13, MaxLines = 2, TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis });
+            content.Children.Add(new TextBlock { Text = place.Reason, Classes = { "muted" }, [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13"), MaxLines = 2, TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis });
             var button = new Button { Content = content, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Padding = new Thickness(8), Classes = { "theme" } };
             button.SetValue(AutomationProperties.NameProperty, $"{place.Name}. {place.State}. {place.Reason}. Show readings.");
             button.Click += (_, _) => PlaceInvoked?.Invoke(place.Id);

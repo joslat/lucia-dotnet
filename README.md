@@ -12,7 +12,7 @@
 
 Lucia *(pronounced LOO-sha)* is an open-source, privacy-focused AI assistant that serves as a complete replacement for Amazon Alexa and Google Home. Built on the [Microsoft Agent Framework](https://learn.microsoft.com/agent-framework/) with a multi-agent architecture, Lucia provides autonomous whole-home automation management through deep integration with Home Assistant. A full-featured React dashboard lets you manage agents, inspect traces, tune configuration, and export training data—all from a single UI.
 
-An experimental [native mobile/tablet companion](clients/Lucia.Companion/README.md) provides an offline Avalonia Home, local setup, Story Day and a reusable control lab. It is separate from the React administration dashboard and is not a connected or release-ready mobile app.
+An experimental [native mobile/tablet companion](clients/Lucia.Companion/README.md) provides an offline Avalonia Home, local setup, Story Day and a reusable control lab, with Android Back, draft recovery and text-scaling checks. It is separate from the React administration dashboard and is not a connected or release-ready mobile app.
 
 ## ☀️ About the Name
 

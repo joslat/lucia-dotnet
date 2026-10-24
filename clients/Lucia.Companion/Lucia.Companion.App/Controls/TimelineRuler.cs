@@ -24,11 +24,11 @@ public sealed class TimelineRuler : Panel
                 HorizontalAlignment = index == 0 ? HorizontalAlignment.Left : index == 4 ? HorizontalAlignment.Right : HorizontalAlignment.Center };
             tick[!Avalonia.Controls.Shapes.Line.StrokeProperty] = new DynamicResourceExtension("MutedBrush");
             content.Children.Add(tick);
-            content.Children.Add(new TextBlock { Text = label[..5], FontSize = 12, Classes = { "muted" }, TextAlignment = TextAlignment.Center });
-            content.Children.Add(new TextBlock { Text = label[6..], FontSize = 12, Classes = { "muted" }, TextAlignment = TextAlignment.Center });
+            content.Children.Add(new TextBlock { Text = label[..5], [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize12"), Classes = { "muted" }, TextAlignment = TextAlignment.Center });
+            content.Children.Add(new TextBlock { Text = label[6..], [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize12"), Classes = { "muted" }, TextAlignment = TextAlignment.Center });
             if (index == 4)
             {
-                content.Children.Add(new TextBlock { Text = "next day", FontSize = 12, Classes = { "muted" }, TextAlignment = TextAlignment.Center });
+                content.Children.Add(new TextBlock { Text = "next day", [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize12"), Classes = { "muted" }, TextAlignment = TextAlignment.Center });
             }
             Children.Add(content);
         }
@@ -37,6 +37,9 @@ public sealed class TimelineRuler : Panel
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = double.IsFinite(availableSize.Width) ? availableSize.Width : 326;
+        foreach (var child in Children) { child.Measure(new Size(Math.Max(0, width / 4), double.PositiveInfinity)); }
+        var sparse = Children.Select(child => child.DesiredSize.Width).DefaultIfEmpty(0).Max() > width / 6;
+        Children[1].IsVisible = Children[3].IsVisible = !sparse;
         foreach (var child in Children) { child.Measure(new Size(Math.Max(0, width / 4), double.PositiveInfinity)); }
         return new Size(width, Children.Select(child => child.DesiredSize.Height).DefaultIfEmpty(0).Max());
     }

@@ -9,11 +9,13 @@ public sealed class ConstellationPanel : Panel
     public event Action<IReadOnlyDictionary<string, Point>>? AnchorsChanged;
     private int columns = 3;
     private double rowHeight = 160;
+    private double textScale = 1;
 
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = double.IsFinite(availableSize.Width) ? availableSize.Width : 600;
-        columns = Math.Clamp((int)(width / 108), 1, Math.Max(1, Math.Min(Children.Count, width >= 800 ? 4 : 3)));
+        textScale = Children.OfType<PlaceOrb>().Select(orb => orb.FontSize / 16).DefaultIfEmpty(1).Max();
+        columns = Math.Clamp((int)(width / (108 * textScale)), 1, Math.Max(1, Math.Min(Children.Count, width >= 800 ? 4 : 3)));
         var cellWidth = width / columns;
         rowHeight = 148;
         foreach (var child in Children)
@@ -33,7 +35,7 @@ public sealed class ConstellationPanel : Panel
             var column = index % columns;
             var child = Children[index];
             // Android can briefly arrange a zero-width surface before its first viewport.
-            var width = Math.Clamp(cellWidth - 8, 0, 152);
+            var width = Math.Clamp(cellWidth - 8, 0, 152 * textScale);
             // Stable display offsets are not floor-plan coordinates or inferred room classifications.
             double[] lateral = [-0.35, 0.12, 0.35, -0.12, 0.35, -0.3];
             double[] vertical = [8, 0, 20, 0, 20, 12];

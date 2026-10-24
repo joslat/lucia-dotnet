@@ -2,7 +2,7 @@
              x:Class="Lucia.Companion.App.CompanionShell" Background="{DynamicResource CanvasBrush}">
   <DockPanel>
     <DockPanel DockPanel.Dock="Top" Margin="16,8,16,0">
-      <TextBlock Text="Lucia" FontFamily="{DynamicResource DisplayFont}" FontSize="24" VerticalAlignment="Center" />
+      <TextBlock Text="Lucia" FontFamily="{DynamicResource DisplayFont}" FontSize="{DynamicResource TextSize24}" VerticalAlignment="Center" />
     <WrapPanel HorizontalAlignment="Right">
       <Button Name="AppearanceButton" Content="Options" Classes="theme" Margin="0,0,8,0" />
       <Button Name="BuildHomeButton" Content="Setup" AutomationProperties.Name="Build your home" Classes="theme" Margin="0,0,8,0" />
@@ -10,7 +10,7 @@
     </WrapPanel>
     </DockPanel>
     <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">
-      <TextBlock Name="StorageStatus" Classes="muted" FontSize="13" />
+      <TextBlock Name="StorageStatus" Classes="muted" FontSize="{DynamicResource TextSize13}" />
       <Button Name="RetrySaveButton" Content="Retry save" Classes="theme" IsVisible="False" HorizontalAlignment="Left" />
     </StackPanel>
     <ContentControl Name="ScreenHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />

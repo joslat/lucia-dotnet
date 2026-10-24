@@ -30,7 +30,7 @@
           <StackPanel Name="ObservationsPanel" />
         </StackPanel>
       </Border>
-      <TextBlock Text="This is the native foundation, not a connected home. Closed does not mean locked. A completed request is not proof of a physical result." Classes="muted" FontSize="13" />
+      <TextBlock Text="This is the native foundation, not a connected home. Closed does not mean locked. A completed request is not proof of a physical result." Classes="muted" FontSize="{DynamicResource TextSize13}" />
     </StackPanel>
   </ScrollViewer>
 </UserControl>

@@ -50,6 +50,10 @@ public sealed partial class HomeScreen : UserControl
         AttachedToVisualTree += (_, _) => { State.PropertyChanged += StateChanged; Refresh(); };
         DetachedFromVisualTree += (_, _) => { State.PropertyChanged -= StateChanged; popup.IsOpen = false; };
         SizeChanged += (_, _) => Refresh();
+        this.FindControl<TextBlock>("HomeName")!.PropertyChanged += (_, change) =>
+        {
+            if (change.Property == TextBlock.FontSizeProperty) { Refresh(); }
+        };
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         if (State.SelectedPlace is null && State.Home.Places.Count > 0)
         {
@@ -64,6 +68,12 @@ public sealed partial class HomeScreen : UserControl
 
     private void Refresh()
     {
+        var stackIdentity = Bounds.Width < 600 && this.FindControl<TextBlock>("HomeName")!.FontSize > 32;
+        Grid.SetColumnSpan(this.FindControl<TextBlock>("HomeName")!, stackIdentity ? 2 : 1);
+        var badge = this.FindControl<Border>("DemoBadge")!;
+        Grid.SetRow(badge, stackIdentity ? 1 : 0);
+        Grid.SetColumn(badge, stackIdentity ? 0 : 1);
+        badge.HorizontalAlignment = stackIdentity ? Avalonia.Layout.HorizontalAlignment.Left : Avalonia.Layout.HorizontalAlignment.Stretch;
         var constellation = this.FindControl<HomeConstellation>("Constellation")!;
         var homeChanged = !ReferenceEquals(renderedHome, State.Home);
         if (homeChanged)
@@ -133,8 +143,14 @@ public sealed partial class HomeScreen : UserControl
     private void OnKeyDown(object? sender, KeyEventArgs args)
     {
         if (args.Key != Key.Escape) { return; }
-        if (State.IsActionsOpen) { CloseActions(); args.Handled = true; }
-        else if (!IsExpanded && State.IsDetailOpen) { ReturnHome(); args.Handled = true; }
+        args.Handled = TryNavigateBack();
+    }
+
+    public bool TryNavigateBack()
+    {
+        if (State.IsActionsOpen) { CloseActions(); return true; }
+        if (!IsExpanded && State.IsDetailOpen) { ReturnHome(); return true; }
+        return false;
     }
 
     private void CloseActions()

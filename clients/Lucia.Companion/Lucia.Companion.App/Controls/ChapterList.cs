@@ -30,10 +30,10 @@ public sealed class ChapterList : UserControl
             {
                 var content = new StackPanel { Spacing = 4 };
                 content.Children.Add(new TextBlock { Text = chapter.Title, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap });
-                content.Children.Add(new TextBlock { Text = StoryDrawing.RangeLabel(state.Day, chapter.Start, chapter.End), Classes = { "muted" }, FontSize = 13 });
+                content.Children.Add(new TextBlock { Text = StoryDrawing.RangeLabel(state.Day, chapter.Start, chapter.End), Classes = { "muted" }, [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13") });
                 var evidence = state.Day.EvidenceFor(chapter.Id).Where(interval => state.SelectedPlaceId is null || interval.PlaceId == state.SelectedPlaceId).ToArray();
                 content.Children.Add(new TextBlock { Text = string.Join(" · ", evidence.Select(interval => interval.Label)),
-                    Classes = { "muted" }, FontSize = 13, TextWrapping = TextWrapping.Wrap });
+                    Classes = { "muted" }, [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13"), TextWrapping = TextWrapping.Wrap });
                 var leadingPlace = state.Day.Places.Single(place => place.Id == evidence[0].PlaceId);
                 var glyph = new Avalonia.Controls.Shapes.Path { Data = PlaceIcons.For(leadingPlace.Icon),
                     Width = 16, Height = 16, Stretch = Stretch.Uniform, StrokeThickness = 1.7 };
@@ -44,8 +44,9 @@ public sealed class ChapterList : UserControl
                 circle[!Border.BackgroundProperty] = new DynamicResourceExtension("ControlBrush");
                 var rail = new StackPanel { Spacing = 5 };
                 rail.Children.Add(circle);
-                rail.Children.Add(new TextBlock { Text = state.Day.TimeLabel(chapter.Start)[..5], FontSize = 12, Classes = { "muted" } });
-                var row = new Grid { ColumnDefinitions = new ColumnDefinitions("52,*"), ColumnSpacing = 8 };
+                rail.MinWidth = 52;
+                rail.Children.Add(new TextBlock { Text = state.Day.TimeLabel(chapter.Start)[..5], [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize12"), Classes = { "muted" }, TextWrapping = TextWrapping.NoWrap });
+                var row = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*"), ColumnSpacing = 8 };
                 row.Children.Add(rail);
                 Grid.SetColumn(content, 1);
                 row.Children.Add(content);

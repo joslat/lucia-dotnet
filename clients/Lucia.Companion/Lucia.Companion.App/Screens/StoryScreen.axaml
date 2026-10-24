@@ -11,8 +11,8 @@
     <StackPanel Margin="16,20" Spacing="20">
       <StackPanel Spacing="6">
         <TextBlock Text="The story of your day" Classes="title" TextWrapping="Wrap" />
-        <TextBlock Name="DayLabel" Classes="muted" FontSize="14" />
-        <TextBlock Text="Sample history. No live household data." Classes="muted" FontSize="13" />
+        <TextBlock Name="DayLabel" Classes="muted" FontSize="{DynamicResource TextSize14}" />
+        <TextBlock Text="Sample history. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
       </StackPanel>
       <c:PlaceFilterBar Name="PlaceFilters" />
       <Grid Name="StoryGrid" ColumnDefinitions="*,0" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="20">
@@ -20,34 +20,35 @@
           <Grid Name="DialFrame" Width="340" Height="340" HorizontalAlignment="Center">
             <c:StoryOrbit Name="Orbit" />
             <StackPanel Width="112" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2" IsHitTestVisible="False">
-              <TextBlock Name="CenterTime" TextAlignment="Center" FontFamily="{DynamicResource DisplayFont}" FontSize="32" />
-              <TextBlock Name="CenterOffset" TextAlignment="Center" Classes="muted" FontSize="12" />
-              <TextBlock Name="CenterCaption" Text="Selected time" TextAlignment="Center" Classes="muted" FontSize="12" />
+              <TextBlock Name="CenterTime" TextAlignment="Center" FontFamily="{DynamicResource DisplayFont}" FontSize="{DynamicResource TextSize32}" />
+              <TextBlock Name="CenterOffset" TextAlignment="Center" Classes="muted" FontSize="{DynamicResource TextSize12}" />
+              <TextBlock Name="CenterCaption" Text="Selected time" TextAlignment="Center" Classes="muted" FontSize="{DynamicResource TextSize12}" />
             </StackPanel>
-            <TextBlock Name="TopTime" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="12" Classes="muted" />
-            <TextBlock Name="QuarterTime" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" Classes="muted" />
-            <TextBlock Name="HalfTime" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="12" Classes="muted" />
-            <TextBlock Name="ThreeQuarterTime" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" Classes="muted" />
+            <TextBlock Name="TopTime" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="{DynamicResource TextSize12}" Classes="muted" />
+            <TextBlock Name="QuarterTime" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="{DynamicResource TextSize12}" Classes="muted" />
+            <TextBlock Name="HalfTime" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="{DynamicResource TextSize12}" Classes="muted" />
+            <TextBlock Name="ThreeQuarterTime" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="{DynamicResource TextSize12}" Classes="muted" />
           </Grid>
-          <TextBlock Name="RingOrder" Classes="muted" FontSize="13" />
+          <TextBlock Name="LargeSelectedTime" IsVisible="False" TextWrapping="Wrap" />
+          <TextBlock Name="RingOrder" Classes="muted" FontSize="{DynamicResource TextSize13}" />
           <c:StoryLegend />
-          <TextBlock Text="Unmarked ring segments contain no supplied report. A report on one track says nothing about the others." Classes="muted" FontSize="13" />
+          <TextBlock Text="Unmarked ring segments contain no supplied report. A report on one track says nothing about the others." Classes="muted" FontSize="{DynamicResource TextSize13}" />
           <Slider Name="TimeScrubber" Minimum="0" Maximum="1" SmallChange="0.000694444" LargeChange="0.041666667"
                   AutomationProperties.Name="Selected time in home day" MinHeight="48" />
         </StackPanel>
         <StackPanel Name="ChapterPanel" Grid.Row="1" Spacing="8">
           <TextBlock Text="Chapters" Classes="section" />
           <c:ChapterList Name="Chapters" />
-          <TextBlock Text="Authored sample chapters, linked to the reports below." Classes="muted" FontSize="13" />
+          <TextBlock Text="Authored sample chapters, linked to the reports below." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         </StackPanel>
       </Grid>
       <Border Height="1" Background="{DynamicResource GraphLineBrush}" />
       <StackPanel Spacing="10">
         <TextBlock Text="Place by place" Classes="section" />
-        <TextBlock Text="Four tracks per place, top to bottom: lighting, door/gate, motion, Lucia. Dotted spans are unknown or unavailable; dashed spans are last-known." Classes="muted" FontSize="13" />
-        <TextBlock Name="SelectedReadout" TextWrapping="Wrap" FontSize="14" />
+        <TextBlock Text="Four tracks per place, top to bottom: lighting, door/gate, motion, Lucia. Dotted spans are unknown or unavailable; dashed spans are last-known." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <TextBlock Name="SelectedReadout" TextWrapping="Wrap" FontSize="{DynamicResource TextSize14}" />
         <StackPanel Name="Timelines" Spacing="24" />
-        <TextBlock Text="Missing reports never mean off, closed or unoccupied. Motion markers are one-minute report buckets, not presence intervals. Grouping uses this demo's current place setup; historical binding policy is not implemented." Classes="muted" FontSize="13" />
+        <TextBlock Text="Missing reports never mean off, closed or unoccupied. Motion markers are one-minute report buckets, not presence intervals. Grouping uses this demo's current place setup; historical binding policy is not implemented." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         <CheckBox Name="AnimateSelection" Content="Animate the time hand" IsChecked="True" MinHeight="48" />
       </StackPanel>
     </StackPanel>

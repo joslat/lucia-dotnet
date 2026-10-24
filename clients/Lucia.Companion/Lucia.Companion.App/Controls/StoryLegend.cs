@@ -29,7 +29,7 @@ public sealed class StoryLegend : UserControl
             if (dashed) { mark.StrokeDashArray = new AvaloniaList<double> { 3, 2 }; }
             var item = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, Margin = new Thickness(0, 0, 16, 6) };
             item.Children.Add(mark);
-            item.Children.Add(new TextBlock { Text = label, FontSize = 13, Classes = { "muted" } });
+            item.Children.Add(new TextBlock { Text = label, [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13"), Classes = { "muted" } });
             key.Children.Add(item);
         }
     }

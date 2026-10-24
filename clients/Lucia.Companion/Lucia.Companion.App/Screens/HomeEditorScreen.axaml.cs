@@ -51,9 +51,48 @@ public sealed partial class HomeEditorScreen : UserControl
             });
         };
         this.FindControl<Button>("CancelEdit")!.Click += (_, _) => CancelRequested?.Invoke();
-        KeyDown += (_, args) => { if (args.Key == Key.Escape) { CancelRequested?.Invoke(); args.Handled = true; } };
+        this.FindControl<Button>("StayInSetup")!.Click += (_, _) => ShowDiscardQuestion(false);
+        this.FindControl<Button>("DiscardEdits")!.Click += (_, _) => CancelRequested?.Invoke();
+        KeyDown += (_, args) => { if (args.Key == Key.Escape) { RequestBack(); args.Handled = true; } };
         SizeChanged += (_, _) => Adapt();
         RebuildList(draft.Places.FirstOrDefault()?.Id);
+    }
+
+    public void RequestBack()
+    {
+        var removal = this.FindControl<StackPanel>("RemovalConfirmation")!;
+        if (removal.IsVisible)
+        {
+            removal.IsVisible = false;
+            this.FindControl<Button>("RemovePlace")!.Focus();
+            return;
+        }
+        if (this.FindControl<Border>("DiscardConfirmation")!.IsVisible) { ShowDiscardQuestion(false); return; }
+        if (HasPendingChanges()) { ShowDiscardQuestion(true); }
+        else { CancelRequested?.Invoke(); }
+    }
+
+    private bool HasPendingChanges()
+    {
+        if (draft.HasChanges || this.FindControl<TextBox>("HomeNameInput")!.Text != draft.HomeName) { return true; }
+        var place = draft.Places.FirstOrDefault(place => place.Id == selectedId);
+        if (place is null) { return false; }
+        if (this.FindControl<TextBox>("PlaceNameInput")!.Text != place.Name ||
+            !Equals(this.FindControl<ComboBox>("IconInput")!.SelectedItem, place.Icon)) { return true; }
+        var neighbors = draft.Connections.Where(edge => edge.FromPlaceId == place.Id || edge.ToPlaceId == place.Id)
+            .Select(edge => edge.FromPlaceId == place.Id ? edge.ToPlaceId : edge.FromPlaceId).ToHashSet(StringComparer.Ordinal);
+        return !neighbors.SetEquals(this.FindControl<StackPanel>("ConnectionsList")!.Children.OfType<CheckBox>()
+            .Where(check => check.IsChecked == true).Select(check => (string)check.Tag!));
+    }
+
+    private void ShowDiscardQuestion(bool show)
+    {
+        this.FindControl<Border>("DiscardConfirmation")!.IsVisible = show;
+        this.FindControl<Grid>("EditorGrid")!.IsEnabled = !show;
+        this.FindControl<Button>("SaveHome")!.IsEnabled = !show;
+        this.FindControl<Button>("CancelEdit")!.IsEnabled = !show;
+        this.FindControl<WrapPanel>("EditCommands")!.IsVisible = !show;
+        this.FindControl<Button>(show ? "StayInSetup" : "CancelEdit")!.Focus();
     }
 
     public void WarnAboutReplacement()

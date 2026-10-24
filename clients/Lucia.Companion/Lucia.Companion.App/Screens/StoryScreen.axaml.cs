@@ -31,6 +31,10 @@ public sealed partial class StoryScreen : UserControl
         AttachedToVisualTree += (_, _) => { state.PropertyChanged += StateChanged; Refresh(); };
         DetachedFromVisualTree += (_, _) => state.PropertyChanged -= StateChanged;
         SizeChanged += (_, _) => Refresh();
+        this.FindControl<TextBlock>("CenterTime")!.PropertyChanged += (_, change) =>
+        {
+            if (change.Property == TextBlock.FontSizeProperty) { Refresh(); }
+        };
         Refresh();
     }
 
@@ -53,9 +57,14 @@ public sealed partial class StoryScreen : UserControl
             var frame = this.FindControl<Grid>("DialFrame")!;
             frame.Width = frame.Height = side;
             var time = State.Day.TimeLabel(State.SelectedInstant);
+            var largeClock = this.FindControl<TextBlock>("CenterTime")!.FontSize > 36;
+            this.FindControl<TextBlock>("CenterTime")!.IsVisible = !largeClock;
+            this.FindControl<TextBlock>("CenterOffset")!.IsVisible = !largeClock;
+            this.FindControl<TextBlock>("LargeSelectedTime")!.IsVisible = largeClock;
+            this.FindControl<TextBlock>("LargeSelectedTime")!.Text = $"Selected time · {time}";
             this.FindControl<TextBlock>("CenterTime")!.Text = time[..5];
             this.FindControl<TextBlock>("CenterOffset")!.Text = $"UTC{time[6..]}";
-            this.FindControl<TextBlock>("CenterCaption")!.Text = State.SelectedChapterId is null ? "Selected time" : "Chapter start";
+            this.FindControl<TextBlock>("CenterCaption")!.Text = largeClock ? "Time\nbelow" : State.SelectedChapterId is null ? "Selected time" : "Chapter start";
             foreach (var (name, fraction) in new[] { ("TopTime", 0d), ("QuarterTime", .25), ("HalfTime", .5), ("ThreeQuarterTime", .75) })
             {
                 this.FindControl<TextBlock>(name)!.Text = State.Day.TimeLabel(State.Day.InstantAt(fraction))[..5];
