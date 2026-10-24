@@ -76,10 +76,11 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
         ArgumentNullException.ThrowIfNull(expected);
         if (!expected.Session.CanReadActivity) { throw new ArgumentException("Activity requires its explicit grant.", nameof(expected)); }
         return ReadAuthorizedAsync((access, current, ct) => current.CanReadActivity ? api.GetActivityAsync(access, current, ct)
-            : throw new SessionStateException(SessionStateFailure.IdentityChanged), cancellationToken, expected);
+            : throw new ActivityAccessException(), cancellationToken, expected, activityRead: true);
     }
 
-    private async Task<T> ReadAuthorizedAsync<T>(Func<string, DeviceSession, CancellationToken, Task<T>> read, CancellationToken cancellationToken, ConnectionSession? expected = null)
+    private async Task<T> ReadAuthorizedAsync<T>(Func<string, DeviceSession, CancellationToken, Task<T>> read, CancellationToken cancellationToken,
+        ConnectionSession? expected = null, bool activityRead = false)
     {
         // Keep renewal, verification and data read under the same cross-instance lease. No token is returned to the app.
         await using var lease = await vault.OpenAsync(cancellationToken).ConfigureAwait(false);
@@ -90,6 +91,16 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
         var stored = await lease.ReadAsync(cancellationToken).ConfigureAwait(false)
             ?? throw new SessionStateException(SessionStateFailure.ConnectionRequired);
         try { return await read(stored.Credentials.AccessToken, metadata, cancellationToken).ConfigureAwait(false); }
+        catch (CompanionConnectionException error) when (activityRead && error.StatusCode == HttpStatusCode.Forbidden)
+        {
+            // A capability can disappear after metadata was read. No activity data was returned.
+            // Recheck the same protected identity, without retrying data or deleting a valid Home connection.
+            // VerifyAsync still clears revoked/expired or cross-home/member credentials.
+            var current = await VerifyAsync(lease, stored, cancellationToken).ConfigureAwait(false);
+            if (expected is not null && !MatchesHomeAccess(expected.Session, current))
+            { throw new SessionStateException(SessionStateFailure.IdentityChanged); }
+            throw new ActivityAccessException();
+        }
         catch (CompanionConnectionException error) when (error.Failure == ConnectionFailure.Unauthorized || error.StatusCode == HttpStatusCode.Forbidden)
         {
             await lease.ClearAsync(cancellationToken).ConfigureAwait(false);
