@@ -146,7 +146,7 @@ components:
 
 Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.
 
-The app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Owners review codes, choose exact grants and manage issued sessions in Companion devices on the trusted HTTPS dashboard. Open Home reads authorized source reports into the existing Constellation Home, with qualified readings, local setup, source bindings, save-conflict recovery and Customize section ordering. Bring your places in lets the user select authorized places, preview exact metadata additions and conflicts, add to the setup draft, then use the existing Save setup action. Import preserves existing names, icons, order, connections and source ownership. A saved binding grants no access.
+The app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Owners review codes, choose exact grants and manage issued sessions in Companion devices on the trusted HTTPS dashboard. Open Home reads authorized source reports into the existing Constellation Home, with qualified readings, local setup, source bindings, save-conflict recovery and Customize section ordering. Bring your places in lets the user select authorized places, preview exact metadata additions and conflicts, add to the setup draft, then use the existing Save setup action. Import preserves existing names, icons, order, connections and source ownership. A saved binding grants no access. While active, connected Home checks report revisions and keeps their original age. Temporary read failures show automatic-retry guidance; server waits disable retry without hiding Connection.
 
 Explore the demo explicitly opens the cached synthetic shell with its offline badge and synthetic reading time. That mode retains HomeConstellation, PlaceDetail, contextual Bloom actions, offline StoryOrbit Day and the control workbench. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Connected mode shares the Home composition but hides sample Story and Control lab and replaces the sample task stages with a written activity-not-connected notice. The scoped connected Home and import extension has a ship disposition. BUILD-PLAN.md still owns the unfinished Story, Week and Engine adapters and the remaining motion, performance, platform and release gates.
 
@@ -166,7 +166,7 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Customize changes the order of the three Home sections without hiding any section or rearranging places.
 - Source-binding metadata remains separate from physical neighbors, source access and qualified readings.
 - Import separates place selection from exact addition/conflict review before applying metadata to the setup draft.
-- Connected Home labels report quality and reported time, clears reports when access cannot be checked and keeps recovery explicit.
+- Connected Home keeps report quality, original age and reported time visible; read failures clear reports and show deliberate recovery.
 - Save-conflict recovery shows both metadata alternatives and requires an explicit checked choice.
 - Connection keeps the canonical HTTPS host and submitted device name beside the approval code.
 - Verified access discloses exact grants without substituting sample household data.
@@ -248,7 +248,7 @@ The default section order is Your places, Needs a look, Lucia now. Expanded Home
 
 When Home is narrower than 600 units and its home-name font exceeds 32 units, its mode badge moves below the name. The name then spans both header columns.
 
-Connected Home uses this same layout with a Connected badge and a report-capture notice. The identity stacking rule applies to either mode's badge. ConnectedHomeWorkspace replaces the shell with a vertically scrolling Home reports state while checking access or recovering from a failed read. That state has 20-unit horizontal and 32-unit vertical margins, 20-unit spacing, a 720-unit maximum width and the existing 44-unit household Home outline. Retry Home reports and Connection wrap below the written status.
+Connected Home uses this same layout with a Connected badge and a report-capture notice. The identity stacking rule applies to either mode's badge. ConnectedHomeWorkspace replaces the shell with a vertically scrolling Home reports state while checking access or recovering from a failed read. That state has 20-unit horizontal and 32-unit vertical margins, 20-unit spacing, a 720-unit maximum width and the existing 44-unit household Home outline. Retry Home reports and Connection wrap below the written status. Longer recovery text can put the actions below the first viewport at large text sizes; the same vertical scroll region keeps them reachable.
 
 Setup changes at its own Bounds.Width of 800 units. Expanded setup uses two equal columns, a place list on the left and the selected place's form on the right. Compact setup replaces the list with a place chooser and stacks the form below it. The header and forms share one scrolling region; Save and Cancel or the discard question sit outside it. These are control-width thresholds, not physical device categories or browser viewport breakpoints.
 
@@ -338,9 +338,17 @@ The Android activity reuses one cached view only within the running process. An 
 
 ConnectedHomeWorkspace requires a verified session and credential-bound data service. It opens the shared Home shell only after the authorized read succeeds. The existing graph, attention list, PlaceDetail and Bloom use the same semantic resources, household outline icons and Outfit/DM Sans roles as the demo. Connected Home prints its report capture time and the source-report qualification. Its Lucia now panel says task activity is not connected; it never displays the sample request stages. Story and Control lab remain available only through the explicit demo.
 
-ConnectedHomeController refreshes reports every 20 seconds while the view is active and reprojects their age on five-second ticks. Current reports can become Stale while displayed. Read duration contributes to the age bound. The implementation polls; it has no revision stream. Current means recently reported by the source, not independently checked physical state. Connected observations use Reported time. Quiet means recent configured reports, and neither Quiet nor missing attention proves safety, presence or occupancy.
+ConnectedHomeController conditionally reads a full Home snapshot every 20 seconds while the view is active. Each subscriber reads independently. The server's weak ETag covers the session, home, member, exact Home grants and sanitized report content, excluding capture time. A changed or unknown revision returns a complete replacement. There is no delta replay, push stream or atomic Home Assistant snapshot promise.
 
-A failed read clears reports, source choices and selection before showing the written recovery state. Suspend also clears them; resume checks access again. Retry Home reports explicitly repeats the check. Connection returns to connection recovery, and revoked or changed authority takes that path. The workspace never substitutes the sample home or treats saved metadata as an offline access grant.
+A 304 response confirms only the existing in-memory snapshot. It preserves the original capture time and monotonic age baseline. Five-second ticks reproject age, including the original read duration, so Current reports can become Stale even after an unchanged response. Current means recently reported by the source, not independently checked physical state. Connected observations use Reported time. Quiet means recent configured reports, and neither Quiet nor missing attention proves safety, presence or occupancy.
+
+A failed read clears the snapshot, revision, reports, source choices and selection before showing the written recovery state. Suspend also clears them. Recovery and resume read without a previous validator after rechecking protected identity and access. Reports, revisions and catalogs remain in memory only. Connection returns to connection recovery, and revoked or changed authority takes that path. The workspace never substitutes the sample home or treats saved metadata as an offline access grant.
+
+Transport failures and HTTP 408, 429, 500, 502, 503 and 504 retry automatically while the view is active. The delay grows through 20, 40, 80, 160 and 300 seconds, then stays capped at 300 seconds. A longer Retry-After takes precedence. A monotonic clock enforces that server wait across manual retry and suspend/resume. Authorization denial, protected-storage failure, invalid responses and bounded-capacity failures do not start an automatic retry loop.
+
+Retry Home reports disables while busy or during a server wait. Connection remains enabled. Status text explains source failure or server wait and automatic retry in the existing scrolling recovery view. Focus moves to the status once when recovery opens; timer updates do not take it again. Recovery retains the existing setup editor and unsaved input in process memory.
+
+The Home updates and recovery increment retains the incumbent native layout, typography and semantic brushes. Its finish review returned ship with no material visual fixes. The 24 reviewed captures cover recovery and restored setup at 390- and 1000-unit widths, light and dark, and normal and doubled text mappings. They do not broaden successful connected Home coverage or establish installed-APK TLS, physical-device, screen-reader, safe-area, iOS or performance qualification. At 390 units with doubled text, source-failure actions continue below the first viewport in the vertical scroll region. Physical scrolling and keyboard focus after restoring the editor remain unqualified.
 
 ConnectedProfileScope separates saved metadata by canonical host, home, member and exact Home place/field grants. Equal-access pairing can reuse that setup. A different scope gets a separate profile. Files contain local metadata, not the authorized catalog or source reports. Connected bindings retain SourcePlaceId alongside local place, source and role. Projection accepts only that exact authorized source place. A missing or moved source remains Unavailable and needs explicit binding review; import does not silently rebind an existing assignment.
 
@@ -506,7 +514,10 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do preview exact selected-place additions and source conflicts before Add to draft, then require Save setup for persistence.
 - Do preserve existing place metadata and source ownership during import, and require explicit review for moved sources.
 - Do show connected report quality, Reported time and capture time with the existing Home controls.
-- Do clear reports on read failure or suspend and recheck access before resuming connected Home.
+- Do clear reports on read failure or suspend and recheck protected identity and access before an unconditional recovery read.
+- Do retain original report age and capture time after an unchanged-revision response.
+- Do respect server-requested waits across retry and resume, and keep Connection available.
+- Do retain the current setup editor and unsaved input through temporary report recovery.
 
 ### Don't:
 
@@ -529,4 +540,4 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't present memory-only session changes as durable unsaved-draft recovery.
 - Don't show sample Story, task stages or Control lab inside connected mode.
 - Don't treat saved bindings, a previous report or an old grant as permission to display an offline household.
-- Don't claim revision streaming or broader successful-Home visual coverage from the import/recovery matrix.
+- Don't treat revisioned polling as event replay, a push stream or an atomic Home Assistant snapshot.

@@ -12,6 +12,7 @@ internal sealed class TestCompanionConnection : ICompanionConnection
     public Func<Task<PairingUpdate>> Poll { get; set; } = () => Task.FromResult(new PairingUpdate(PairingPollStatus.Pending, TimeSpan.FromSeconds(5)));
     public Func<Task<bool>> Disconnect { get; set; } = () => Task.FromResult(true);
     public Func<Task<HomeSnapshot>> Home { get; set; } = () => throw new SessionStateException(SessionStateFailure.ConnectionRequired);
+    public Func<string?, Task<HomeUpdate>>? HomeUpdate { get; set; }
     public Task<ConnectionSession?> RestoreAsync(CancellationToken cancellationToken = default) => Restore();
     public Task<PairingPrompt> BeginAsync(Uri endpoint, string deviceName, CancellationToken cancellationToken = default)
     {
@@ -23,6 +24,8 @@ internal sealed class TestCompanionConnection : ICompanionConnection
     public Task ForgetAsync(CancellationToken cancellationToken = default) { HasSavedConnection = false; return Task.CompletedTask; }
     public Task<HomeSnapshot> ReadHomeAsync(CancellationToken cancellationToken = default) => Home();
     public Task<HomeSnapshot> ReadHomeAsync(ConnectionSession expected, CancellationToken cancellationToken = default) => Home();
+    public async Task<HomeUpdate> ReadHomeUpdateAsync(ConnectionSession expected, string? revision, CancellationToken cancellationToken = default) =>
+        HomeUpdate is { } read ? await read(revision) : new(HomeUpdateClientTests.Revision, await Home());
     public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => throw new SessionStateException(SessionStateFailure.ConnectionRequired);
     internal static ConnectionSession Session() => new(new Uri("https://synthetic.invalid"), new DeviceSession(new string('a', 32), "Phone",
         DateTimeOffset.UtcNow.AddDays(30), "home-a", "member-a", [new("porch", [Core.ObservationRole.Contact])], canReadHistory: true));

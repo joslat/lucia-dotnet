@@ -16,6 +16,7 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
     private TopLevel? topLevel;
     private bool attached;
     private bool reportedAuthorityLoss;
+    private bool focusedReadState;
     public ConnectionSession Identity { get; }
     public HomeViewModel State { get; }
     public CompanionShell Shell { get; }
@@ -24,12 +25,12 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
 
     public ConnectedHomeWorkspace() => throw new InvalidOperationException("A verified connection and protected data service are required.");
 
-    public ConnectedHomeWorkspace(ICompanionConnection service, ConnectionSession identity, LocalHomeStore? store)
+    public ConnectedHomeWorkspace(ICompanionConnection service, ConnectionSession identity, LocalHomeStore? store, TimeProvider? clock = null)
     {
         Identity = identity;
         State = new(new(identity.Session.HomeId, "Your home", [], []), isDemo: false);
         Shell = new(State, store);
-        Controller = new(service, identity, State, Shell.ProfileSession);
+        Controller = new(service, identity, State, Shell.ProfileSession, clock);
         AvaloniaXamlLoader.Load(this);
         this.FindControl<ContentControl>("ConnectedShellHost")!.Content = Shell;
         Shell.ConnectionRequested += () => ConnectionRequested?.Invoke();
@@ -69,9 +70,11 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         this.FindControl<ContentControl>("ConnectedShellHost")!.IsVisible = Controller.HasData;
         this.FindControl<ScrollViewer>("HomeReadState")!.IsVisible = !Controller.HasData;
         this.FindControl<TextBlock>("HomeReadStatus")!.Text = Controller.StatusText;
-        this.FindControl<Button>("RetryHomeReports")!.IsEnabled = !Controller.IsBusy;
+        this.FindControl<Button>("RetryHomeReports")!.IsEnabled = Controller.CanRefresh;
         Shell.SetImportCatalog(Controller.Catalog); Shell.SetRefreshing(Controller.IsBusy);
-        if (!Controller.HasData && attached) { this.FindControl<TextBlock>("HomeReadStatus")!.Focus(); }
+        if (Controller.HasData) { focusedReadState = false; }
+        else if (attached && !focusedReadState)
+        { focusedReadState = true; this.FindControl<TextBlock>("HomeReadStatus")!.Focus(); }
         if (Controller.AuthorityLost && !Controller.IsBusy && !reportedAuthorityLoss)
         { reportedAuthorityLoss = true; refresh.Stop(); ConnectionRequested?.Invoke(); }
     }

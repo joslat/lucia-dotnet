@@ -15,13 +15,19 @@ public sealed class ConnectedHomeController : IDisposable
     private readonly HomeProfileSession persistence;
     private readonly TimeProvider clock;
     private HomeSnapshot? snapshot;
+    private string? revision;
     private long reportRequestStarted;
     private long lastAttempt;
+    private TimeSpan refreshDelay = TimeSpan.FromSeconds(20);
+    private TimeSpan serverDelay;
+    private int failures;
+    private bool automaticRead;
     private int generation;
     private bool suspended;
     private bool disposed;
     public bool HasData { get; private set; }
     public bool IsBusy { get; private set; }
+    public bool CanRefresh => !disposed && !suspended && !IsBusy && clock.GetElapsedTime(lastAttempt) >= serverDelay;
     public bool AuthorityLost { get; private set; }
     public string StatusText { get; private set; } = "Reading authorized Home reports.";
     public HomeCatalog? Catalog => snapshot is null ? null : ConnectedHomeProjection.Catalog(snapshot);
@@ -40,6 +46,11 @@ public sealed class ConnectedHomeController : IDisposable
         ObjectDisposedException.ThrowIf(disposed, this);
         if (suspended) { return Task.CompletedTask; }
         if (IsBusy) { return PendingOperation; }
+        if (!CanRefresh)
+        {
+            StatusText = "Lucia asked this device to wait. Reports remain hidden; retry will happen automatically while this view is active.";
+            Notify(); return Task.CompletedTask;
+        }
         PendingOperation = ReadAsync(hideWhileChecking, cancellationToken);
         return PendingOperation;
     }
@@ -47,27 +58,47 @@ public sealed class ConnectedHomeController : IDisposable
     private async Task ReadAsync(bool hideWhileChecking, CancellationToken cancellationToken)
     {
         var startedGeneration = generation;
-        IsBusy = true; AuthorityLost = false; lastAttempt = clock.GetTimestamp();
+        IsBusy = true; AuthorityLost = false; automaticRead = true; serverDelay = TimeSpan.Zero; lastAttempt = clock.GetTimestamp();
         if (hideWhileChecking) { ClearReports(); }
         StatusText = "Checking access and reading Home reports."; Notify();
         try
         {
             await persistence.InitializeAsync(cancellationToken);
             var started = clock.GetTimestamp();
-            var received = await service.ReadHomeAsync(identity, cancellationToken);
+            var update = await service.ReadHomeUpdateAsync(identity, revision, cancellationToken);
             if (disposed || suspended || startedGeneration != generation) { return; }
-            if (received.HomeId != identity.Session.HomeId) { throw new SessionStateException(SessionStateFailure.IdentityChanged); }
-            snapshot = received; reportRequestStarted = started;
-            state.SetSources(ConnectedHomeProjection.Sources(received));
+            if (update.Snapshot is { } received)
+            {
+                if (received.HomeId != identity.Session.HomeId) { throw new SessionStateException(SessionStateFailure.IdentityChanged); }
+                snapshot = received; reportRequestStarted = started;
+                state.SetSources(ConnectedHomeProjection.Sources(received));
+            }
+            else if (snapshot is null || revision != update.Revision)
+            { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
+            revision = update.Revision;
+            failures = 0; refreshDelay = TimeSpan.FromSeconds(20); serverDelay = TimeSpan.Zero;
             HasData = true;
             Reproject();
-            state.SetSourceNotice($"Reports captured {received.CapturedAt.UtcDateTime:yyyy-MM-dd HH:mm 'UTC'} · Refresh every 20 seconds while this view is active. Source reports are not physical verification.");
+            state.SetSourceNotice($"Reports captured {snapshot!.CapturedAt.UtcDateTime:yyyy-MM-dd HH:mm 'UTC'} · Refresh every 20 seconds while this view is active. Source reports are not physical verification.");
             StatusText = "Authorized reports loaded. Current means recently reported, not independently verified.";
         }
         catch (Exception error)
         {
+            // A late throttled response still controls the next request, even if the app backgrounded meanwhile.
+            if (!disposed && error is CompanionConnectionException connectionError && IsTransient(connectionError))
+            {
+                lastAttempt = clock.GetTimestamp();
+                serverDelay = connectionError.RetryAfter ?? (connectionError.StatusCode == HttpStatusCode.TooManyRequests ? TimeSpan.FromMinutes(1) : TimeSpan.Zero);
+            }
             if (disposed || suspended || startedGeneration != generation) { return; }
             ClearReports();
+            automaticRead = error is CompanionConnectionException retryable && IsTransient(retryable);
+            if (automaticRead)
+            {
+                refreshDelay = TimeSpan.FromSeconds(Math.Min(300, 20 * Math.Pow(2, Math.Min(failures++, 4))));
+                if (serverDelay > refreshDelay) { refreshDelay = serverDelay; }
+                lastAttempt = clock.GetTimestamp();
+            }
             AuthorityLost = error is CompanionConnectionException { Failure: ConnectionFailure.Unauthorized }
                 or CompanionConnectionException { StatusCode: HttpStatusCode.Forbidden } or SessionStateException;
             StatusText = error switch
@@ -76,21 +107,22 @@ public sealed class ConnectedHomeController : IDisposable
                     => "This device is no longer authorized. Return to Connection and pair again with the owner's approval.",
                 SessionStateException => "The saved connection changed or requires recovery. Return to Connection before opening a home again.",
                 CompanionConnectionException { StatusCode: HttpStatusCode.UnprocessableEntity } => "This approved Home is too large for the bounded read. Ask the owner to narrow its places or fields before pairing again.",
-                CompanionConnectionException { StatusCode: HttpStatusCode.TooManyRequests } => "Lucia is limiting requests. Wait a minute, then retry.",
-                CompanionConnectionException { StatusCode: HttpStatusCode.ServiceUnavailable } => "Lucia could not provide qualified source reports. Check its HA source binding and connection, then retry. No previous reports are shown.",
+                CompanionConnectionException { StatusCode: HttpStatusCode.TooManyRequests } => "Lucia asked this device to wait before retrying.",
+                CompanionConnectionException { StatusCode: HttpStatusCode.ServiceUnavailable } => "Home Assistant reports are unavailable. Check Lucia's source connection. Previous reports are hidden.",
                 SessionStorageException => "The protected connection could not be read safely. Open Connection to review storage recovery.",
                 OperationCanceledException => "The read stopped. Retry to revalidate access and read reports again.",
                 _ => "Home reports could not be verified. Check network, HTTPS trust and source configuration, then retry. No previous reports are shown."
             };
+            if (automaticRead) { StatusText += " Retrying automatically while this view is open."; }
         }
         finally { IsBusy = false; Notify(); }
     }
 
     public async Task TickAsync(CancellationToken cancellationToken = default)
     {
-        if (disposed || suspended || !HasData) { return; }
+        if (disposed || suspended) { return; }
         Reproject();
-        if (!IsBusy && clock.GetElapsedTime(lastAttempt) >= TimeSpan.FromSeconds(20)) { await RefreshAsync(false, cancellationToken); }
+        if (automaticRead && !IsBusy && clock.GetElapsedTime(lastAttempt) >= refreshDelay) { await RefreshAsync(false, cancellationToken); }
     }
 
     public void Suspend()
@@ -106,6 +138,7 @@ public sealed class ConnectedHomeController : IDisposable
         await PendingOperation;
         if (disposed) { return; }
         suspended = false;
+        if (AuthorityLost) { Notify(); return; }
         await RefreshAsync(cancellationToken: cancellationToken);
     }
     private void Reproject()
@@ -116,13 +149,16 @@ public sealed class ConnectedHomeController : IDisposable
     }
     private void ClearReports()
     {
-        HasData = false; snapshot = null;
+        HasData = false; snapshot = null; revision = null;
         state.ClearSelection(); state.SetSources([]);
         state.ReplaceHome(new(state.Home.Id, state.Home.Name, state.Home.Places.Select(place => place with
         { State = PlaceState.Unavailable, Reason = "No verified reports available.", Observations = Array.Empty<Observation>() }), state.Home.Connections, state.Home.Bindings), notifyPreferences: false);
         state.SetSourceNotice("No verified Home reports available.");
     }
     private void Notify() { if (!disposed) { Changed?.Invoke(); } }
+    private static bool IsTransient(CompanionConnectionException error) => error.Failure == ConnectionFailure.Transport
+        || error.Failure == ConnectionFailure.Rejected && error.StatusCode is HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests
+            or HttpStatusCode.InternalServerError or HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout;
     public void Dispose()
     {
         if (disposed) { return; }

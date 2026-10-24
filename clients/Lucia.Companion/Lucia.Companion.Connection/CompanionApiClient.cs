@@ -102,6 +102,23 @@ public sealed class CompanionApiClient : IDisposable
         return snapshot;
     }
 
+    public async Task<HomeUpdate> GetHomeUpdateAsync(string accessToken, DeviceSession session, string? revision, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        if (revision is not null && !HomeUpdate.IsRevision(revision)) { throw new ArgumentException("A bounded Home revision is required.", nameof(revision)); }
+        using var request = Authorized(HttpMethod.Get, $"homes/{session.HomeId}/snapshot", accessToken);
+        if (revision is not null) { request.Headers.IfNoneMatch.Add(EntityTagHeaderValue.Parse(revision)); }
+        using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+        if (response.StatusCode is not (HttpStatusCode.OK or HttpStatusCode.NotModified)) { throw Failure(response); }
+        var received = response.Headers.ETag?.ToString();
+        if (!HomeUpdate.IsRevision(received) || response.StatusCode == HttpStatusCode.NotModified && (revision is null || revision != received))
+        { throw new CompanionConnectionException(ConnectionFailure.InvalidResponse); }
+        if (response.StatusCode == HttpStatusCode.NotModified) { return new(received!, null); }
+        var snapshot = await ReadAsync<HomeSnapshot>(response, cancellationToken, 524_288).ConfigureAwait(false);
+        snapshot.RequireGrant(session);
+        return new(received!, snapshot);
+    }
+
     public async Task<HomeCatalog> GetDiscoveryAsync(string accessToken, DeviceSession session, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -160,7 +177,13 @@ public sealed class CompanionApiClient : IDisposable
 
     private static void Require(HttpResponseMessage response, HttpStatusCode expected)
     { if (response.StatusCode != expected) { throw Failure(response); } }
-    private static CompanionConnectionException Failure(HttpResponseMessage response) => new(
-        response.StatusCode == HttpStatusCode.Unauthorized ? ConnectionFailure.Unauthorized : ConnectionFailure.Rejected, response.StatusCode);
+    private static CompanionConnectionException Failure(HttpResponseMessage response)
+    {
+        var retryAfter = response.Headers.RetryAfter?.Delta;
+        if (retryAfter is null && response.Headers.RetryAfter?.Date is { } retryAt)
+        { retryAfter = retryAt - (response.Headers.Date ?? DateTimeOffset.UtcNow); }
+        return new(response.StatusCode == HttpStatusCode.Unauthorized ? ConnectionFailure.Unauthorized : ConnectionFailure.Rejected,
+            response.StatusCode, retryAfter);
+    }
     public void Dispose() => client.Dispose();
 }

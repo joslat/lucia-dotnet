@@ -25,6 +25,7 @@ public sealed class SyntheticCompanionHomeSource : IAsyncDisposable
     public HomeAssistantClient Client { get; }
     public ConcurrentBag<string> Reads { get; } = [];
     public DateTimeOffset ReportedAt { get; } = DateTimeOffset.UtcNow.AddSeconds(-1);
+    public bool ReportsUnavailable { get; set; }
     private const string Token = "synthetic-protocol-proof-only";
 
     private SyntheticCompanionHomeSource(WebApplication app, string origin)
@@ -50,6 +51,7 @@ public sealed class SyntheticCompanionHomeSource : IAsyncDisposable
         {
             if (context.Request.Headers.Authorization != "Bearer " + Token) { return Results.Unauthorized(); }
             fixture.Reads.Add("states");
+            if (fixture.ReportsUnavailable) { return Results.StatusCode(503); }
             return Results.Json(new[] {
                 new { entity_id = "sensor.porch_temperature", state = "21.5", attributes = new { device_class = "temperature", unit_of_measurement = "°C", private_attribute = "private-wire-marker" },
                     last_changed = fixture.ReportedAt.AddDays(-4), last_updated = fixture.ReportedAt.AddDays(-4), last_reported = fixture.ReportedAt,

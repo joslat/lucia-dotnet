@@ -66,6 +66,11 @@ public sealed class DeviceSessionCoordinator(CompanionApiClient api, ISessionVau
         return ReadAuthorizedAsync(api.GetHomeAsync, cancellationToken, expected);
     }
     public Task<HomeCatalog> DiscoverAsync(CancellationToken cancellationToken = default) => ReadAuthorizedAsync(api.GetDiscoveryAsync, cancellationToken);
+    public Task<HomeUpdate> ReadHomeUpdateAsync(ConnectionSession expected, string? revision, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(expected);
+        return ReadAuthorizedAsync((access, session, ct) => api.GetHomeUpdateAsync(access, session, revision, ct), cancellationToken, expected);
+    }
 
     private async Task<T> ReadAuthorizedAsync<T>(Func<string, DeviceSession, CancellationToken, Task<T>> read, CancellationToken cancellationToken, ConnectionSession? expected = null)
     {

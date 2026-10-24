@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Security.Cryptography;
 using lucia.AgentHost.Auth;
 using lucia.Agents.Companion;
 using lucia.Agents.Abstractions;
@@ -34,7 +35,9 @@ public static class CompanionHomeApi
         var current = await sessions.AuthenticateAsync(context.Request.Headers.Authorization.ToString()[7..], context.RequestAborted).ConfigureAwait(false);
         if (current is null || current.Id != initial.Id || current.Grant.HomeId != initial.Grant.HomeId || current.Grant.MemberId != initial.Grant.MemberId)
         { return Results.Unauthorized(); }
-        return failure is not null ? SourceFailure(failure) : Encode(CompanionHomeReader.Restrict(snapshot!, current.Grant), discovery);
+        if (failure is not null) { return SourceFailure(failure); }
+        var restricted = CompanionHomeReader.Restrict(snapshot!, current.Grant);
+        return discovery ? Encode(restricted, discovery: true) : EncodeSnapshot(restricted, current, context);
     }
 
     private static async Task<IResult> ReadOwnerAsync(CompanionHomeReader reader, IApiKeyService keys, TimeProvider clock, HttpContext context)
@@ -60,6 +63,27 @@ public static class CompanionHomeApi
         } : snapshot;
         var json = JsonSerializer.SerializeToUtf8Bytes(result, CompanionApiJson.Options);
         return json.Length <= 524_288 ? Results.Bytes(json, "application/json") : TooLarge();
+    }
+
+    private static IResult EncodeSnapshot(CompanionHomeSnapshot snapshot, CompanionSession session, HttpContext context)
+    {
+        var json = JsonSerializer.SerializeToUtf8Bytes(snapshot, CompanionApiJson.Options);
+        if (json.Length > 524_288) { return TooLarge(); }
+        // Semantic, session/grant-bound revision. Capture time alone does not change the reports.
+        // This is a weak validator, not a byte-identity or an atomic upstream revision promise.
+        var revisionBytes = JsonSerializer.SerializeToUtf8Bytes(new
+        {
+            session.Id, session.Grant.HomeId, session.Grant.MemberId,
+            grant = session.Grant.Places.OrderBy(place => place.PlaceId, StringComparer.Ordinal)
+                .Select(place => new { place.PlaceId, fields = place.Fields.OrderBy(field => field) }),
+            snapshot.MaximumObservationAgeSeconds, snapshot.Places
+        }, CompanionApiJson.Options);
+        var revision = "W/\"" + Convert.ToHexString(SHA256.HashData(revisionBytes)) + "\"";
+        context.Response.Headers.ETag = revision;
+        // Each subscriber reads independently. Unknown/missed revisions get a full replacement, never partial deltas.
+        var validators = context.Request.GetTypedHeaders().IfNoneMatch;
+        return validators?.Any(value => value.Tag.Value == "*" || value.Tag.Value == revision[2..]) == true
+            ? Results.StatusCode(StatusCodes.Status304NotModified) : Results.Bytes(json, "application/json");
     }
     private static IResult SourceFailure(CompanionDataUnavailableException error) => error.TooLarge ? TooLarge()
         : Results.Json(new { error = "home_source_unavailable", message = "Qualified home data is unavailable. Check source binding, network and freshness configuration. No cached or sample home was substituted." }, statusCode: 503);

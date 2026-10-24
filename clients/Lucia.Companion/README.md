@@ -36,7 +36,7 @@ $env:LUCIA_COMPANION_CAPTURE_DIR = Join-Path $env:TEMP 'lucia-companion-captures
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 ```
 
-The latest full Windows qualification passes 249 client tests, including the opt-in real-wire UI case. Ordinary runs skip that one case unless the isolated fixture is configured. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover bindings/import, source provenance, competing local writers, conflict recovery, section order, Back, drafts and text roles through 200% in phone/tablet light/dark layouts. Connection checks include demo separation, approval identity, grants and recovery. Windows-only DPAPI tests explicitly skip on other operating systems. None qualifies physical-device accessibility, safe areas or performance.
+The latest full Windows qualification passes 282 client tests, including the opt-in real-wire UI case. Ordinary runs skip that one case unless the isolated fixture is configured. UI cases use headless Avalonia with the real Skia renderer, not HTML. They cover bindings/import, source provenance, competing local writers, conflict recovery, section order, Back, drafts and text roles through 200% in phone/tablet light/dark layouts. Connection checks include demo separation, approval identity, grants, conditional revisions, conservative report aging and bounded recovery. Windows-only DPAPI tests explicitly skip on other operating systems. None qualifies physical-device accessibility, safe areas or performance.
 
 ### Android
 
@@ -77,7 +77,15 @@ The prototype temporarily opts out of predictive Back in its manifest. On the te
 
 ## Status and engineering boundaries
 
-Implemented: connection-first native access/recovery, owner approval/device management with catalog-backed exact grants, authorized Home snapshot/discovery and visible connected Home/import, observation semantics, topology, shared selection, HomeConstellation, attention, read-only detail, Bloom, local setup/preferences and a fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. Activity/history/Engine adapters, membership roster, revisioned updates, iOS storage and installed connected-platform qualification remain open.
+Implemented: connection-first native access/recovery, owner approval/device management with catalog-backed exact grants, authorized Home snapshot/discovery and visible connected Home/import, revisioned updates and reconnect recovery, observation semantics, topology, shared selection, HomeConstellation, attention, read-only detail, Bloom, local setup/preferences and a fixture-driven StoryOrbit Day. [BUILD-PLAN.md](BUILD-PLAN.md) records remaining gates. Activity/history/Engine adapters, membership roster, iOS storage and installed connected-platform qualification remain open.
+
+### Home updates and recovery
+
+Home polls every 20 seconds while active. The host reads its configured source, rechecks current device authority and filters the exact grant before returning a weak ETag. The revision includes the session, home, member, Home grants and allowed report content, not capture time alone or hidden fields. Separate clients do not consume each other's updates. A matching conditional read returns 304; a changed, missing or unknown revision returns a full snapshot. There are no partial deltas to replay or apply out of order. This is revisioned polling, not a pushed event stream, retained history or an atomic HA source revision. Weak conditional validation follows [HTTP semantics](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-none-match).
+
+The native client validates the bounded revision and the snapshot grant. It accepts 304 only for the exact revision of reports still in memory. It does not reset their capture time or monotonic age. Failure and suspend clear reports, catalog, selection and revision. Recovery, foreground resume and a cold start request a full replacement through the protected session checks. Local setup and an in-process unsaved editor survive a temporary read failure; readings and revisions never enter local metadata or credential storage.
+
+Temporary network/timeout, 408, 429, 500, 502, 503 and 504 failures retry after 20, 40, 80, 160 and then at most once per 300 seconds. A longer Retry-After wins, including an HTTP date measured against the server Date when supplied. Manual retry and resume cannot bypass that wait. Retry is disabled while busy or waiting for the server; Connection remains available. Backgrounded or disposed views do not poll. Revoked/changed identity, unsafe storage, invalid responses and oversized projections require explicit recovery rather than an automatic loop. Credential-changing operations still have no automatic transport retry.
 
 - Core references neither Avalonia nor server/HA/model packages. App references Core; launchers reference App. The separate host-side security module does not add server dependencies to the native client.
 - HomeViewModel owns shared selection and pins without UI dependencies. HomeEditorViewModel owns draft edits. HomeProfileSession coordinates persistence/recovery; LocalHomeStore owns file I/O. Controls raise named intents, not service calls.
@@ -165,7 +173,7 @@ The owner assigns an opaque member ID with the grant. There is no separate membe
 
 | Endpoint under `/api/companion` | Authority and response |
 |---|---|
-| `GET /homes/{homeId}/snapshot` | Current native Bearer. Granted places and fields only, source metadata and typed reports |
+| `GET /homes/{homeId}/snapshot` | Current native Bearer. Granted places/fields, source metadata and typed reports, with weak session-scoped ETag. Matching If-None-Match returns 304 only after fresh source and authority checks |
 | `GET /homes/{homeId}/discovery` | Same grant boundary. Place/source metadata without report values |
 | `GET /owner/discovery` | Current owner key/cookie only. Supported place/source catalog without report values. Native Bearer plus owner cookie is refused |
 
@@ -181,7 +189,7 @@ Only allowlisted reports cross the boundary. Temperature, humidity, moisture and
 
 `Companion:MaximumObservationAge` defaults to `00:30:00`, bounded from one second to one day. `Companion:HomeReadTimeout` defaults to `00:00:10`, bounded from one to thirty seconds, including providers that ignore cancellation. Source errors return 503 without cached/sample substitution or upstream diagnostic text. Limits are 2,000 raw areas, 20,000 raw entities/devices/states each, 2,000 projected sources and 512 KiB serialized output. Oversize returns 422 `home_projection_too_large`, never partial results. Existing credential/owner rate limits cover these reads. These pilot limits do not bound an adversarial upstream HTTP body or distributed load.
 
-The expanded Companion/auth/migration/SQLite-key regression passes 215 cases, including actual HTTP states and three registry WebSocket commands against a synthetic loopback HA-protocol fixture. The expansion exposed two pre-existing SQLite API-key expiry failures on a non-UTC host. UTC-normalized reads now fix them, with four additional timestamp-format cases. The owner picker additionally passes 30 browser checks and an actual isolated production-bundle catalog/approval/restricted-read/revoke test. These prove isolated adapter behavior, not an installed HA version or household. Revisioned updates, activity/history/Engine and platform gates remain open.
+The expanded Companion/auth/migration/SQLite-key regression passes 222 cases, including actual HTTP states and three registry WebSocket commands against a synthetic loopback HA-protocol fixture. It covers conditional reads through protected renewal, temporary source failure, full resynchronization and revocation. An earlier expansion exposed two pre-existing SQLite API-key expiry failures on a non-UTC host. UTC-normalized reads fix them, with four additional timestamp-format cases. The owner picker retains its 30 browser checks and actual isolated production-bundle catalog/approval/restricted-read/revoke proof. These establish isolated adapter behavior, not an installed HA version or household. Activity/history/Engine and platform gates remain open.
 
 ### Native transport library
 

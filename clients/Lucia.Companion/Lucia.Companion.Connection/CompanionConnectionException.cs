@@ -3,7 +3,7 @@ using System.Net;
 namespace Lucia.Companion.Connection;
 
 /// <summary>Safe to show/log. Never includes response bodies, credentials or raw transport diagnostics.</summary>
-public sealed class CompanionConnectionException(ConnectionFailure failure, HttpStatusCode? statusCode = null)
+public sealed class CompanionConnectionException(ConnectionFailure failure, HttpStatusCode? statusCode = null, TimeSpan? retryAfter = null)
     : Exception(failure switch
     {
         ConnectionFailure.Transport => "Lucia could not be reached securely. A credential-changing request may have completed; do not replay it.",
@@ -14,4 +14,5 @@ public sealed class CompanionConnectionException(ConnectionFailure failure, Http
 {
     public ConnectionFailure Failure { get; } = failure;
     public HttpStatusCode? StatusCode { get; } = statusCode;
+    public TimeSpan? RetryAfter { get; } = retryAfter is { } delay && delay > TimeSpan.Zero ? delay : null;
 }
