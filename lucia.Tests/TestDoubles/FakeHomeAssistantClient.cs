@@ -326,6 +326,9 @@ internal sealed class FakeHomeAssistantClient : IHomeAssistantClient
                 ? name.ToString() : null
         }).ToArray());
 
+    public Task<DeviceRegistryEntry[]> GetDeviceRegistryAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(Array.Empty<DeviceRegistryEntry>());
+
     private static HomeAssistantState? DeserializeEntity(JsonElement el, JsonSerializerOptions options)
     {
         var entityId = el.GetProperty("entity_id").GetString();

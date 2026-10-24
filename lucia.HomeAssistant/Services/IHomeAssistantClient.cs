@@ -116,6 +116,9 @@ public interface IHomeAssistantClient
     /// <summary>Returns all entity entries from the config registry.</summary>
     Task<EntityRegistryEntry[]> GetEntityRegistryAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>Returns device location/availability metadata, including optional parent devices.</summary>
+    Task<DeviceRegistryEntry[]> GetDeviceRegistryAsync(CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Returns voice assistant exposure settings for all entities.
     /// Uses the <c>homeassistant/expose_entity/list</c> WebSocket command.

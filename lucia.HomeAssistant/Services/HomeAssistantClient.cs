@@ -482,6 +482,12 @@ public sealed class HomeAssistantClient : IHomeAssistantClient
             "config/entity_registry/list", cancellationToken) ?? [];
     }
 
+    public async Task<DeviceRegistryEntry[]> GetDeviceRegistryAsync(CancellationToken cancellationToken = default)
+    {
+        return await SendWebSocketCommandAsync<DeviceRegistryEntry[]>(
+            "config/device_registry/list", cancellationToken) ?? [];
+    }
+
     /// <summary>
     /// Returns voice assistant exposure settings for all entities via WebSocket.
     /// The <c>homeassistant/expose_entity/list</c> command wraps the entity map in an

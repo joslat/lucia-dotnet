@@ -19,6 +19,9 @@ public class HomeAssistantState
     [JsonPropertyName("last_updated")]
     public DateTime LastUpdated { get; set; }
 
+    [JsonPropertyName("last_reported")]
+    public DateTimeOffset? LastReported { get; set; }
+
     [JsonPropertyName("context")]
     public HomeAssistantContext Context { get; set; } = new();
 }

@@ -18,10 +18,13 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.DataProtection;
+using lucia.HomeAssistant.Services;
+using lucia.HomeAssistant.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace lucia.Tests.Auth;
 
-/// <summary>Loopback HTTPS only. No AgentHost startup, user secrets, HA client, model, or household fixture.</summary>
+/// <summary>Loopback HTTPS only. No AgentHost startup, user secrets, models or household fixtures. HA is fake unless an explicit synthetic source is supplied.</summary>
 public sealed class CompanionSecurityTestHost : IAsyncDisposable
 {
     private readonly SqliteTestHelper database;
@@ -31,6 +34,8 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     public ICompanionSessionService Sessions { get; }
     public ICompanionPairingService Pairings { get; }
     public IApiKeyService Keys { get; }
+    public IHomeAssistantClient HomeAssistant { get; }
+    public HomeAssistantOptions SourceSettings => app.Services.GetRequiredService<IOptionsMonitor<HomeAssistantOptions>>().CurrentValue;
 
     public Lucia.Companion.Connection.CompanionApiClient CreateNativeClient()
     {
@@ -43,12 +48,14 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
     }
 
     private CompanionSecurityTestHost(SqliteTestHelper database, WebApplication app, X509Certificate2 certificate,
-        HttpClient client, ICompanionSessionService sessions, ICompanionPairingService pairings, IApiKeyService keys)
+        HttpClient client, ICompanionSessionService sessions, ICompanionPairingService pairings, IApiKeyService keys, IHomeAssistantClient homeAssistant)
     {
         this.database = database; this.app = app; this.certificate = certificate; Client = client; Sessions = sessions; Pairings = pairings; Keys = keys;
+        HomeAssistant = homeAssistant;
     }
 
-    public static async Task<CompanionSecurityTestHost> StartAsync(TimeProvider? clock = null, Action<WebApplication>? configureApp = null)
+    public static async Task<CompanionSecurityTestHost> StartAsync(TimeProvider? clock = null, Action<WebApplication>? configureApp = null,
+        IHomeAssistantClient? homeSource = null, string sourceBaseUrl = "http://synthetic-ha.invalid")
     {
         clock ??= TimeProvider.System;
         using var rsa = RSA.Create(2048);
@@ -65,7 +72,8 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         using (var command = connection.CreateCommand()) { command.CommandText = CompanionSchema.Sql + CompanionPairingSchema.Sql; command.ExecuteNonQuery(); }
         var configuration = new Dictionary<string, string?>
         {
-            ["Companion:Enabled"] = "true", ["Companion:HomeId"] = "home-a", ["InternalAuth:Token"] = "synthetic-internal"
+            ["Companion:Enabled"] = "true", ["Companion:HomeId"] = "home-a", ["InternalAuth:Token"] = "synthetic-internal",
+            ["Companion:SourceBaseUrl"] = sourceBaseUrl
         };
         var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
         builder.Configuration.Sources.Clear();
@@ -85,6 +93,9 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
             new Claim(ClaimTypes.NameIdentifier, "owner-a"), new Claim(ClaimTypes.Role, AuthOptions.AdministratorRole)]);
         builder.Services.AddSingleton(keys);
         builder.Services.AddSingleton(cookies);
+        var homeAssistant = homeSource ?? A.Fake<IHomeAssistantClient>();
+        builder.Services.AddSingleton(homeAssistant);
+        builder.Services.Configure<HomeAssistantOptions>(settings => settings.BaseUrl = sourceBaseUrl);
         builder.Services.AddSingleton<TimeProvider>(clock);
         var sessions = new RelationalCompanionSessionService(_ => ValueTask.FromResult<DbConnection>(database.ConnectionFactory.CreateConnection()),
             new() { Enabled = true, HomeId = "home-a" }, clock);
@@ -94,6 +105,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         builder.Services.AddSingleton<ICompanionPairingService>(pairings);
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         builder.Services.AddLuciaAuthentication(builder.Configuration);
+        builder.Services.AddCompanionHomeReads();
         var app = builder.Build();
         app.UseMiddleware<CompanionBoundaryMiddleware>();
         app.UseRateLimiter();
@@ -107,6 +119,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         app.MapGet("/activity/{homeId}", () => "activity").RequireAuthorization(CompanionAuthentication.ActivityPolicy);
         app.MapCompanionSessionApi();
         app.MapCompanionPairingApi();
+        app.MapCompanionHomeApi();
         configureApp?.Invoke(app);
         await app.StartAsync();
         var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
@@ -116,7 +129,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
             UseCookies = false, AllowAutoRedirect = false,
             ServerCertificateCustomValidationCallback = (_, presented, _, _) => presented?.GetCertHashString(HashAlgorithmName.SHA256) == fingerprint
         };
-        return new(database, app, certificate, new HttpClient(handler) { BaseAddress = new Uri(address) }, sessions, pairings, keys);
+        return new(database, app, certificate, new HttpClient(handler) { BaseAddress = new Uri(address) }, sessions, pairings, keys, homeAssistant);
     }
 
     public async ValueTask DisposeAsync()

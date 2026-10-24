@@ -278,6 +278,7 @@ builder.Services.AddSingleton<ISessionService>(sp => sp.GetRequiredService<HmacS
 builder.Services.AddSingleton<IAsyncInitializable>(sp => sp.GetRequiredService<HmacSessionService>());
 
 builder.Services.AddLuciaAuthentication(builder.Configuration);
+builder.Services.AddCompanionHomeReads();
 
 builder.Services.AddHttpClient("AgentProxy");
 builder.Services.AddHttpClient("OllamaModels", client =>
@@ -407,6 +408,7 @@ else
 app.MapAuthApi();
 app.MapCompanionSessionApi();
 app.MapCompanionPairingApi();
+app.MapCompanionHomeApi();
 app.MapSetupApi();
 app.MapApiKeyManagementApi(isInstalledAppliance);
 app.MapAgentRegistryApiV1();

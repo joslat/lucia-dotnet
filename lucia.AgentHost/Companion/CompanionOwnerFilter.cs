@@ -11,9 +11,7 @@ public sealed class CompanionOwnerFilter(IApiKeyService keys, IAntiforgery antif
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext invocation, EndpointFilterDelegate next)
     {
         var context = invocation.HttpContext;
-        var keyId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var key = keyId is null ? null : await keys.GetKeyAsync(keyId, context.RequestAborted).ConfigureAwait(false);
-        if (key is null || key.IsRevoked || key.ExpiresAt <= clock.GetUtcNow().UtcDateTime || !key.Scopes.Contains(AuthOptions.AdministratorScope, StringComparer.Ordinal))
+        if (!await HasCurrentOwnerAsync(context, keys, clock).ConfigureAwait(false))
         {
             return Results.StatusCode(StatusCodes.Status403Forbidden);
         }
@@ -23,5 +21,13 @@ public sealed class CompanionOwnerFilter(IApiKeyService keys, IAntiforgery antif
             catch (AntiforgeryValidationException) { return Results.Json(new { error = "antiforgery_required" }, statusCode: StatusCodes.Status403Forbidden); }
         }
         return await next(invocation).ConfigureAwait(false);
+    }
+
+    internal static async Task<bool> HasCurrentOwnerAsync(HttpContext context, IApiKeyService keys, TimeProvider clock)
+    {
+        var keyId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var key = keyId is null ? null : await keys.GetKeyAsync(keyId, context.RequestAborted).ConfigureAwait(false);
+        return key is not null && !key.IsRevoked && !(key.ExpiresAt <= clock.GetUtcNow().UtcDateTime)
+            && key.Scopes.Contains(AuthOptions.AdministratorScope, StringComparer.Ordinal);
     }
 }
