@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-24T00:00:00.000Z",
+  "generatedAt": "2026-10-25T00:00:00.000Z",
   "title": "Design System: Lucia Observatory",
   "extensions": {
     "typographyMeta": {
@@ -149,17 +149,25 @@
       "description": "Static representation of the owner route's inline removal question. The implemented route focuses Keep, closes with Keep or Escape, restores the invoking control and waits for host confirmation. This specimen performs no mutation and supplies no runtime focus behavior.",
       "html": "<section class=\"ds-companion-confirm\"><p>Revoke access for Kitchen tablet?</p><p class=\"ds-companion-confirm-help\">The host will reject this session on its next request, including renewal. Offline screens cannot be remotely erased.</p><div class=\"ds-companion-confirm-actions\"><button class=\"ds-companion-keep\" type=\"button\">Keep device access</button><button class=\"ds-companion-revoke\" type=\"button\">Confirm revocation</button></div></section>",
       "css": ".ds-companion-confirm { margin-top:16px; border-top:1px solid var(--color-stone); padding-top:16px; color:var(--color-light); font:400 14px/20px 'DM Sans',system-ui,sans-serif; } .ds-companion-confirm p { margin:0 0 12px; } .ds-companion-confirm-help { max-width:65ch; color:var(--color-fog); } .ds-companion-confirm-actions { display:flex; flex-wrap:wrap; gap:12px; } .ds-companion-keep,.ds-companion-revoke { min-height:3rem; border:1px solid var(--color-stone); border-radius:12px; background:var(--color-basalt); padding:8px 16px; color:var(--color-fog); font:400 14px/20px 'DM Sans',system-ui,sans-serif; cursor:pointer; } .ds-companion-revoke { color:var(--color-rose); } .ds-companion-keep:hover,.ds-companion-revoke:hover { border-color:var(--color-amber); color:var(--color-light); } .ds-companion-keep:focus-visible,.ds-companion-revoke:focus-visible { outline:2px solid var(--color-amber); outline-offset:2px; } .ds-companion-keep:disabled,.ds-companion-revoke:disabled { opacity:0.5; }"
+    },
+    {
+      "name": "Companion shared layout review",
+      "kind": "custom",
+      "description": "Static summary from CompanionLayoutSummary.tsx, used in review and kept-draft/latest-setup comparison. Exact source bindings and explicit neighbors describe presentation, never device permission. The runtime editor provides authenticated memory-only drafts, fresh comparison on route return, checked save and explicit recovery; this specimen has no editing, saving or focus-transition behavior.",
+      "html": "<section class=\"ds-layout-summary\"><h4>Our home</h4><p class=\"ds-layout-counts\">1 places · 0 physical connections · 1 source bindings</p><ul class=\"ds-layout-places\"><li class=\"ds-layout-place\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M13 21h8M3 21h3M6 21V4a1 1 0 0 1 .864-.991l6-1A1 1 0 0 1 14 3v18H6ZM14 3h4a1 1 0 0 1 1 1v17M10 12h.01\"/></svg><div class=\"ds-layout-place-copy\"><p class=\"ds-layout-name\">Front porch beside the garden and side entrance</p><p class=\"ds-layout-neighbors\">Icon: Door. Connected to: No configured neighbors.</p><details><summary>Sources for Front porch beside the garden and side entrance</summary><p class=\"ds-layout-source-place\">Source place: porch</p><ul class=\"ds-layout-bindings\"><li>sensor.porch_temperature · Temperature</li></ul></details></div></li></ul></section>",
+      "css": ".ds-layout-summary { min-width:0; color:var(--color-cloud); font:400 0.875rem/1.25rem 'DM Sans',system-ui,sans-serif; } .ds-layout-summary h4 { margin:0; overflow-wrap:break-word; color:var(--color-light); font:600 1.125rem/1.75rem 'Outfit',system-ui,sans-serif; } .ds-layout-counts { margin:16px 0; color:var(--color-fog); } .ds-layout-places { margin:0; border-block:1px solid var(--color-stone); padding:0; list-style:none; } .ds-layout-place { display:flex; min-width:0; gap:12px; padding-block:16px; } .ds-layout-place svg { flex-shrink:0; margin-top:2px; color:var(--color-fog); } .ds-layout-place-copy { min-width:0; overflow-wrap:break-word; } .ds-layout-name { margin:0; color:var(--color-light); font-weight:600; } .ds-layout-neighbors { margin:8px 0; color:var(--color-fog); } .ds-layout-summary summary { min-height:3rem; padding-block:12px; color:var(--color-fog); cursor:pointer; } .ds-layout-summary summary:hover { cursor:pointer; } .ds-layout-summary summary:focus-visible { outline:2px solid var(--color-amber); outline-offset:2px; } .ds-layout-source-place { margin:0; color:var(--color-fog); } .ds-layout-bindings { margin:0; padding:0 0 8px 20px; color:var(--color-cloud); }"
     }
   ],
   "narrative": {
     "northStar": "The Daylight Observatory",
-    "overview": "Lucia Observatory is an Operate-mode system for long technical sessions. It keeps the authenticated dashboard dense and predictable while warm mineral neutrals, amber focus, and small changes in depth preserve the product's identity in both bright and dim rooms.\n\nTheme choice extends the existing shell instead of becoming a separate destination. System, Light, and Dark use one semantic role vocabulary, so setup, login, navigation, charts, dialogs, and operational pages keep the same hierarchy when the resolved mode changes.\n\nCompanion devices at `/companion-devices` extends this Operate system with owner approval and session management. The route keeps code matching, device identity and catalog-backed exact read access in one inline task, followed by issued sessions. It uses the existing Observatory identity and tokens. The direction contract in the first body comment of `lucia-dashboard/index.html` records `not-applicable-narrow-extension`; this increment introduces no new visual world.",
+    "overview": "Lucia Observatory is an Operate-mode system for long technical sessions. It keeps the authenticated dashboard dense and predictable while warm mineral neutrals, amber focus, and small changes in depth preserve the product's identity in both bright and dim rooms.\n\nTheme choice extends the existing shell instead of becoming a separate destination. System, Light, and Dark use one semantic role vocabulary, so setup, login, navigation, charts, dialogs, and operational pages keep the same hierarchy when the resolved mode changes.\n\nCompanion devices at `/companion-devices` extends this Operate system with owner approval and session management. The route keeps code matching, device identity and catalog-backed exact read access in one inline task, followed by issued sessions. It uses the existing Observatory identity and tokens. The direction contract in the first body comment of `lucia-dashboard/index.html` records `not-applicable-narrow-extension`; this increment introduces no new visual world.\n\nShared home layout extends the same route with an inline owner draft, complete review and checked save. Owners choose canonical places, display names, icons, exact source bindings and explicit physical neighbors. The first body comment of `lucia-dashboard/index.html` now records this narrow extension, with the earlier companion approval contract retained below it. Shared metadata never grants device access or changes Home Assistant.",
     "keyCharacteristics": [
       "Compact operational controls and route-first composition",
       "Warm neutral surfaces with amber reserved for focus, selection, and progress",
       "One semantic token vocabulary across light and dark modes",
       "Borders, translucency, and low glows instead of heavy elevation",
-      "Inline device review and explicit access choices before owner approval"
+      "Inline device review and explicit access choices before owner approval",
+      "Inline shared-layout drafts with complete review, checked save and explicit recovery choices"
     ],
     "rules": [
       {
@@ -191,6 +199,11 @@
         "name": "The Exact Grant Rule",
         "body": "Show the reviewed device and code before authorization, keep each read permission explicit and off until selected, and report only the session or revocation state the host confirmed.",
         "section": "components"
+      },
+      {
+        "name": "The Checked Layout Rule",
+        "body": "Keep shared presentation separate from permission, require explicit source bindings and neighbors, and save only after complete review against an inspected owner revision. A kept draft requires a fresh comparison after route return or an uncertain save.",
+        "section": "components"
       }
     ],
     "dos": [
@@ -201,7 +214,10 @@
       "Do reserve amber for focus, selection, primary action, progress, and active system state.",
       "Do keep intended-person code matching, catalog-backed exact grants and separate default-deny Activity, History and Engine choices visible in companion approval.",
       "Do retain conservative Keep focus and Escape return paths for inline decline and revocation.",
-      "Do distinguish reviewed approval, issued sessions, last-checked metadata and host-confirmed revocation."
+      "Do distinguish reviewed approval, issued sessions, last-checked metadata and host-confirmed revocation.",
+      "Do show exact shared-layout source bindings and explicit neighbors separately from device grants.",
+      "Do retain an unsaved layout draft only in authenticated session memory and require fresh comparison after route return or uncertain save.",
+      "Do keep source text within enlarged phone panels and return focus after inline questions, recovery choices and binding removal."
     ],
     "donts": [
       "Don't add mode-specific classes or raw light/dark palette values to page components; remap semantic tokens at the root.",
@@ -210,7 +226,10 @@
       "Don't replace semantic success, error, information, and progress states with amber alone.",
       "Don't infer access from a device name, place name, physical connection or unselected observation field.",
       "Don't automatically replay an owner mutation after an ambiguous failure or reuse a review after the code changes.",
-      "Don't present issued sessions as online devices or owner approval as completed native live-data, platform or release work."
+      "Don't present issued sessions as online devices or owner approval as completed native live-data, platform or release work.",
+      "Don't infer a source binding or physical connection from place names, icons or layout order.",
+      "Don't replay a shared-layout save, silently discard a kept draft or treat its retained baseline as a fresh comparison.",
+      "Don't present saved owner metadata as completed native adoption or hardware and accessibility qualification."
     ]
   }
 }

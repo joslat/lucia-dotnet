@@ -37,6 +37,7 @@ import CommandTraceDetailPage from './pages/CommandTraceDetailPage'
 import AppliancePage from './pages/AppliancePage'
 import UserMemoriesPage from './pages/UserMemoriesPage'
 import CompanionDevicesPage from './pages/CompanionDevicesPage'
+import CompanionLayoutDraftProvider from './components/CompanionLayoutDraftProvider'
 import TaskTracker from './components/TaskTracker'
 import { ThemeSelector } from './theme/ThemeSelector'
 import { isInstallerMode } from './installer-api'
@@ -234,7 +235,7 @@ function AppRoutes() {
   }
 
   return (
-    <div className="min-h-screen bg-observatory">
+    <CompanionLayoutDraftProvider><div className="min-h-screen bg-observatory">
       {/* ── Mobile overlay ── */}
       {sidebarOpen && (
         <div
@@ -385,7 +386,7 @@ function AppRoutes() {
 
         <TaskTracker />
       </div>
-    </div>
+    </div></CompanionLayoutDraftProvider>
   )
 }
 

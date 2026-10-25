@@ -115,12 +115,15 @@ Theme choice extends the existing shell instead of becoming a separate destinati
 
 Companion devices at `/companion-devices` extends this Operate system with owner approval and session management. The route keeps code matching, device identity and catalog-backed exact read access in one inline task, followed by issued sessions. It uses the existing Observatory identity and tokens. The direction contract in the first body comment of `lucia-dashboard/index.html` records `not-applicable-narrow-extension`; this increment introduces no new visual world.
 
+Shared home layout extends the same route with an inline owner draft, complete review and checked save. Owners choose canonical places, display names, icons, exact source bindings and explicit physical neighbors. The first body comment of `lucia-dashboard/index.html` now records this narrow extension, with the earlier companion approval contract retained below it. Shared metadata never grants device access or changes Home Assistant.
+
 **Key Characteristics:**
 - Compact operational controls and route-first composition
 - Warm neutral surfaces with amber reserved for focus, selection, and progress
 - One semantic token vocabulary across light and dark modes
 - Borders, translucency, and low glows instead of heavy elevation
 - Inline device review and explicit access choices before owner approval
+- Inline shared-layout drafts with complete review, checked save and explicit recovery choices
 
 ## Colors
 
@@ -185,6 +188,8 @@ Public setup and login screens center a single column over the observatory canva
 The theme selector sits at the upper-right shell edge on loading, setup, and login views with a fixed `170px` width. After authentication it moves into the sidebar footer under the Appearance label.
 
 Companion devices centers a single column capped at `64rem`, with `32px` between major groups. Its heading and security guidance precede the labelled code form. Review expands inside the approval panel; connected sessions follow below. The panel uses `20px` padding, increasing to `24px` at `640px`. Forms and action rows wrap, long identities break within their available width, and the approval code can wrap between its two five-character groups. Actions and checkbox labels in this route have a `3rem` minimum height. These are local task adaptations, not replacements for the shared shell or compact control scale.
+
+Shared home layout opens inline between device approval and issued sessions. The editor stacks place selection and details below `1280px`; at that breakpoint it uses two columns with a `1:1.6` ratio and zero minimum track widths. Fieldsets, rows and text containers can shrink. Source names and legends wrap, while exact source IDs can break anywhere to stay inside the panel during enlarged phone text stress. Review and recovery remain vertical lists with stone dividers and wrapping action rows. No new palette, elevation or entrance motion accompanies this editor.
 
 ### Named Rules
 
@@ -271,6 +276,30 @@ The catalog picker finish review returned `ship` after one material fix for over
 
 One production-bundle browser integration passed again after the fix. It used HTTPS, SQLite and a Home Assistant wire fixture to select Porch Temperature, obtain antiforgery proof, approve and redeem the grant, read a restricted native report of 21.5, reject administration and revoke access and refresh. It used a synthetic owner-cookie validator and a browser-only fixture certificate bypass. This evidence does not establish production certificate trust, real login, household acceptance, Android TLS, hardware or accessibility qualification. Doubled root font size is synthetic text and rem stress, not browser zoom. The single scoped detector returned no findings before the size fix; it was not rerun. The final build and scoped four-file lint passed with the existing bundle-size warning. Private captures remain outside the public repository. Native Home, Story, Week and Engine work, motion, platform and release goals remain governed by the companion BUILD-PLAN; this picker is one checkpoint.
 
+### Companion shared layout
+
+`CompanionDevicesPage.tsx` places `CompanionLayoutEditor.tsx` before the issued-session list. The editor uses the existing charcoal panel, stone borders, Outfit headings, DM Sans fields, labelled native selects and checkboxes, and decorative Lucide outlines. Primary Review and Save actions use amber; removal and discard actions use rose text on secondary controls. Actions retain the route's `3rem` minimum height and visible amber focus.
+
+`CompanionLayoutPlaceEditor.tsx` edits presentation names and one of the supported Home, Sofa, Garden, Kitchen, Door or Bed icons. Adding a catalog place creates no bindings or connections. The owner chooses each exact `sourcePlaceId`, `sourceId` and observation `field`; source labels never determine ownership. A source-and-field pair already bound elsewhere is disabled. Missing or moved bindings remain visible and block review until the owner removes them explicitly. Reload available sources leaves the draft intact. Physical connections require explicit neighboring-place choices. They describe adjacency, not a measured floor plan, source ownership or access.
+
+Place order changes only through Move place earlier or Move place later. `CompanionLayoutSummary.tsx` lists the complete shared name, counts, places, icons and neighbors, with exact source-place IDs and source-and-field bindings in native disclosures. The summary appears in review and in both kept-draft and latest-setup recovery sections. Review focuses its heading; Back to editing returns focus to Review shared changes. Save replaces shared presentation metadata at the inspected version. Personal pins, client section order, local drafts and device permissions remain independent.
+
+`companion-layout.ts` validates names, exact metadata keys, canonical source bindings and explicit connections before review. Limits are 200 places, 1,000 connections, 2,000 bindings and a 524,288-byte UTF-8 save request. `companion-layout-api.ts` reads owner metadata with a one-MiB response cap and sends a checked `PUT` through the existing owner-session transport with fresh antiforgery proof. First creation uses a null expected revision. Replacement uses the inspected owner revision, a 32-character lowercase hexadecimal GUID. It is distinct from the member projection revision, a 64-character uppercase hexadecimal hash. A verified save response must match the submitted layout, home and source binding.
+
+Conflict, network loss or an unverifiable save response keeps the draft in recovery without replay. Read latest shared setup fetches both owner metadata and the current source catalog. The owner then chooses Review my draft against this version or Discard my draft and use latest. Reading alone neither replaces the draft nor authorizes another save. A changed home or source disables reuse of the draft against that baseline. Unavailable places or bindings return the kept draft to editing for explicit correction. Recovery choices focus the review heading or status target as appropriate; removing an unavailable binding focuses the persistent Sources fieldset.
+
+`CompanionLayoutDraftProvider.tsx` wraps authenticated routes in `App.tsx`. Its context in `components/companion-layout-draft-context.ts` holds one metadata-only draft and its owner baseline in memory across route links and browser Back/Forward. It stores no credentials, permission cache or catalog and writes no draft to browser storage. Returning to the editor always opens recovery with no catalog, comparison or Save action. Fresh owner and catalog reads must precede an explicit baseline choice. The provider retains the unload warning while the draft exists across routes. Reload, closing the dashboard or leaving the authenticated scope loses the draft; sign-out and sign-in start without it.
+
+Place removal and closing a dirty editor each open an inline question with Keep focused. Keep and Escape cancel without mutation and return focus to the invoking control. Confirming place removal deletes only that draft place and its bindings and connections, then focuses the remaining-place select or available-place select. Explicit close discards the draft and returns focus to Edit shared layout. Written status and error feedback use programmatic focus targets.
+
+**The Checked Layout Rule.** Keep shared presentation separate from permission, require explicit source bindings and neighbors, and save only after complete review against an inspected owner revision. A kept draft requires a fresh comparison after route return or an uncertain save.
+
+The owner shared-layout final review returned `ship` for four repaired findings: draft loss across authenticated route navigation, enlarged-phone source overflow, Escape cancellation of removal and discard questions, and focus after recovery or unavailable-binding removal. The private round2 matrix contains 24 PNGs across `390px` and `1280px`, light and dark themes, normal and doubled root text, and edit, review and comparison states. The final reviewer inspected six of these captures plus source and targeted assertions. Element captures retain a sticky-mobile-header limitation. Doubled root text is synthetic rem stress, not browser zoom or accessibility qualification.
+
+Supplied final execution evidence was 30 Node metadata and transport checks, 58 production-browser checks with zero skipped, build and scoped lint, and two isolated actual loopback HTTPS/SQLite/synthetic Home Assistant protocol browser checks. Those two checks cover shared first creation, conflict, replacement and real antiforgery, plus existing pairing and revoke. The earlier development-server run passed 56 checks and failed two; their causes remain unproven, and both passed in the final production run. The final reviewer did not rerun tests, launch a browser, create captures or run another detector. The known bundle warning and original single empty detector result remain bounded evidence. Earlier native 441 and server 576 test counts belong to the prior transport checkpoint and were not rerun for this editor.
+
+The verdict covers this owner editor checkpoint. Shared delivery remains active, and native review and adoption remain unimplemented. These checks do not establish household acceptance, hardware, accessibility, native/platform/release completion, real production login or production certificate trust. No private evidence paths or new visual tokens are part of this record.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -283,6 +312,9 @@ One production-bundle browser integration passed again after the fix. It used HT
 - **Do** keep intended-person code matching, catalog-backed exact grants and separate default-deny Activity, History and Engine choices visible in companion approval.
 - **Do** retain conservative Keep focus and Escape return paths for inline decline and revocation.
 - **Do** distinguish reviewed approval, issued sessions, last-checked metadata and host-confirmed revocation.
+- **Do** show exact shared-layout source bindings and explicit neighbors separately from device grants.
+- **Do** retain an unsaved layout draft only in authenticated session memory and require fresh comparison after route return or uncertain save.
+- **Do** keep source text within enlarged phone panels and return focus after inline questions, recovery choices and binding removal.
 
 ### Don't:
 
@@ -293,3 +325,6 @@ One production-bundle browser integration passed again after the fix. It used HT
 - **Don't** infer access from a device name, place name, physical connection or unselected observation field.
 - **Don't** automatically replay an owner mutation after an ambiguous failure or reuse a review after the code changes.
 - **Don't** present issued sessions as online devices or owner approval as completed native live-data, platform or release work.
+- **Don't** infer a source binding or physical connection from place names, icons or layout order.
+- **Don't** replay a shared-layout save, silently discard a kept draft or treat its retained baseline as a fresh comparison.
+- **Don't** present saved owner metadata as completed native adoption or hardware and accessibility qualification.

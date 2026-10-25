@@ -41,7 +41,20 @@ When launched through the .NET Aspire AppHost (`dotnet run --project lucia.AppHo
 | `npm run dev` | Start Vite dev server with HMR |
 | `npm run build` | Type-check with `tsc` then build for production |
 | `npm run lint` | Run ESLint across the project |
+| `npm run test:companion-layout` | Validate shared-layout metadata and owner transport with synthetic responses, no running host |
 | `npm run preview` | Preview the production build locally |
+
+## Shared companion layout
+
+Companion devices includes an inline Shared home layout editor. It reuses the current owner cookie and obtains fresh antiforgery proof for each checked save. No owner key enters the native app. Choose canonical source places, edit display names and outline icons, reorder places, choose exact source-role bindings and configure optional physical neighbors. The editor changes Lucia presentation metadata only, not Home Assistant registries, device permissions or physical state.
+
+Changes stay in a draft until Review shared changes and Save shared layout. Missing or moved source bindings remain explicit and require deliberate removal; no source reassignment or automatic room connection is inferred. Personal pins and Home section order remain separate. The owner revision is a 32-character lowercase storage identifier, distinct from the member view's 64-character uppercase hash.
+
+Stale or unconfirmed saves keep the draft and remove Save. Read latest shared setup shows both alternatives. Review my draft against this version deliberately chooses that checked baseline; Discard my draft and use latest explicitly replaces the draft. Another intervening write still causes a conflict. Lost delivery is never automatically replayed, even if the server might already have committed.
+
+One metadata-only draft stays in memory within the authenticated dashboard shell across route links and Back/Forward. Returning to the editor opens recovery and requires a fresh owner/source read and comparison before saving again. Nothing is written to localStorage or sessionStorage. Closing/discarding, successful save, sign-out or destruction of that authenticated shell clears the retained draft. Reload/closing the dashboard loses it; a native unload warning is requested while a draft is retained. This is not durable recovery or an offline permission cache.
+
+The editor reuses Observatory tokens, local Outfit/DM Sans, Lucide outlines and labelled Field controls. It stacks on narrow screens, pairs place selection/details at the existing wide breakpoint, wraps source IDs and supports Escape/Keep focus for inline removal and discard questions. Browser tests include synthetic doubled root-font stress, not screen-reader or native-device qualification. `lucia-playwright/e2e/00-companion-layout.spec.ts` intercepts every API; `00-companion-layout-https.spec.ts` is opt-in against the isolated `CompanionBrowserHost --owner-home` fixture and its production bundle. Native shared-layout adoption, complete cross-client UI acceptance and the broader mobile/tablet goal remain unfinished.
 
 ## Project Structure
 

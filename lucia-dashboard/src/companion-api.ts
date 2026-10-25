@@ -13,6 +13,8 @@ export interface CompanionDevice { id: string; deviceName: string; expiresAt: st
 export interface CompanionReview { id: string; homeId: string; deviceName: string; expiresAt: string; status: 'Pending' | 'Approved' }
 export interface CompanionCatalogPlace { placeId: string; name: string; fields: CompanionField[]; sourceCount: number }
 export interface CompanionCatalog { homeId: string; capturedAt: string; places: CompanionCatalogPlace[] }
+export interface CompanionCatalogSource { sourceId: string; name: string; field: CompanionField }
+export interface CompanionSourceCatalog { homeId: string; capturedAt: string; places: { placeId: string; name: string; sources: CompanionCatalogSource[] }[] }
 
 const base = '/api/companion/owner'
 const maximumOwnerBodyBytes = 16_000
@@ -35,7 +37,7 @@ function failure(status: number): Error {
   return new Error(message)
 }
 
-async function request(path: string, init: RequestInit = {}, signal?: AbortSignal): Promise<Response> {
+async function request(path: string, init: RequestInit = {}, signal?: AbortSignal, acceptedStatuses: readonly number[] = []): Promise<Response> {
   let response: Response
   try {
     response = await fetch(`${base}${path}`, {
@@ -45,7 +47,7 @@ async function request(path: string, init: RequestInit = {}, signal?: AbortSigna
   } catch {
     throw new Error('Lucia could not be reached securely. No operation was confirmed or automatically replayed.')
   }
-  if (!response.ok) throw failure(response.status)
+  if (!response.ok && !acceptedStatuses.includes(response.status)) throw failure(response.status)
   return response
 }
 async function json(response: Response): Promise<unknown> {
@@ -78,13 +80,15 @@ function grant(value: unknown): CompanionGrant {
   return { homeId: identifier(item.homeId), memberId: identifier(item.memberId), places, canReadActivity: flag(item.canReadActivity), canReadHistory: flag(item.canReadHistory), canReadEngine: flag(item.canReadEngine) }
 }
 
-async function mutate(path: string, body?: unknown, method = 'POST', signal?: AbortSignal): Promise<Response> {
+async function mutate(path: string, body?: unknown, method = 'POST', signal?: AbortSignal, acceptedStatuses: readonly number[] = []): Promise<Response> {
   const serialized = body === undefined ? undefined : JSON.stringify(body)
-  if (serialized && !bodyFits(serialized)) throw new Error('Access selection is too large. Choose fewer places before approving.')
+  const maximum = path === '/layout' && method === 'PUT' ? 524_288 : maximumOwnerBodyBytes
+  if (serialized && new TextEncoder().encode(serialized).length > maximum) throw new Error(path === '/layout'
+    ? 'Shared setup is too large. Remove places, connections or bindings before reviewing again.' : 'Access selection is too large. Choose fewer places before approving.')
   const proof = object(await json(await request('/antiforgery', {}, signal)))
   const token = text(proof.requestToken, value => value.length > 0 && value.length <= 8192 && !/[\r\n]/.test(value))
   const header = text(proof.headerName, value => value === 'RequestVerificationToken' || value === 'X-CSRF-TOKEN')
-  return request(path, { method, headers: { [header]: token, ...(serialized ? { 'Content-Type': 'application/json' } : {}) }, body: serialized }, signal)
+  return request(path, { method, headers: { [header]: token, ...(serialized ? { 'Content-Type': 'application/json' } : {}) }, body: serialized }, signal, acceptedStatuses)
 }
 export async function fetchCompanionDevices(signal?: AbortSignal): Promise<CompanionDevice[]> {
   const values = await json(await request('/sessions', {}, signal))
@@ -111,7 +115,7 @@ export async function revokeCompanionDevice(id: string, signal?: AbortSignal): P
   await mutate(`/sessions/${encodeURIComponent(identifier(id))}`, undefined, 'DELETE', signal)
 }
 
-export async function fetchCompanionCatalog(homeId: string, signal?: AbortSignal): Promise<CompanionCatalog> {
+export async function fetchCompanionSourceCatalog(homeId: string, signal?: AbortSignal): Promise<CompanionSourceCatalog> {
   const invalid = () => new Error('Lucia returned invalid or oversized available places. Reload before choosing access.')
   try {
     const response = await request('/discovery', {}, signal)
@@ -137,8 +141,7 @@ export async function fetchCompanionCatalog(homeId: string, signal?: AbortSignal
     const places = catalog.places.map(value => {
       const place = object(value)
       if (!Array.isArray(place.sources)) throw invalid()
-      const fields = new Set<CompanionField>()
-      for (const value of place.sources) {
+      const sources = place.sources.map(value => {
         const source = object(value)
         const sourceId = text(source.sourceId, item => item.length > 0 && item.length <= 256 && !/[\s\p{Cc}\p{Cf}]/u.test(item))
         label(source.name)
@@ -146,9 +149,10 @@ export async function fetchCompanionCatalog(homeId: string, signal?: AbortSignal
         const field = source.field as CompanionField
         const identity = `${sourceId}\u0000${field}`
         if (seenSources.has(identity) || seenSources.size >= 2000) throw invalid()
-        seenSources.add(identity); fields.add(field)
-      }
-      return { placeId: identifier(place.placeId), name: label(place.name), fields: companionFields.filter(field => fields.has(field)), sourceCount: place.sources.length }
+        seenSources.add(identity)
+        return { sourceId, name: label(source.name), field }
+      })
+      return { placeId: identifier(place.placeId), name: label(place.name), sources }
     })
     if (new Set(places.map(place => place.placeId)).size !== places.length) throw invalid()
     return { homeId, capturedAt: expiry(catalog.capturedAt), places }
@@ -156,3 +160,12 @@ export async function fetchCompanionCatalog(homeId: string, signal?: AbortSignal
     throw new Error('Lucia could not load valid available places. Check owner access and HA source configuration, then reload. No access was approved.')
   }
 }
+
+export async function fetchCompanionCatalog(homeId: string, signal?: AbortSignal): Promise<CompanionCatalog> {
+  const catalog = await fetchCompanionSourceCatalog(homeId, signal)
+  return { ...catalog, places: catalog.places.map(place => ({ placeId: place.placeId, name: place.name,
+    fields: companionFields.filter(field => place.sources.some(source => source.field === field)), sourceCount: place.sources.length })) }
+}
+
+// Shared layout uses the same fixed-origin cookie/antiforgery boundary, never native or owner-key headers.
+export { request as requestCompanionOwner, mutate as mutateCompanionOwner }

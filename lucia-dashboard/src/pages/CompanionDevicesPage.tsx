@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ShieldCheck, Smartphone } from 'lucide-react'
 import Field from '../components/Field'
 import CompanionGrantEditor from '../components/CompanionGrantEditor'
+import CompanionLayoutEditor from '../components/CompanionLayoutEditor'
 import { approveCompanionDevice, companionApprovalFits, declineCompanionDevice, fetchCompanionDevices, normalizeCompanionCode, reviewCompanionDevice, revokeCompanionDevice } from '../companion-api'
 import type { CompanionDevice, CompanionGrant, CompanionReview } from '../companion-api'
 
@@ -151,6 +152,7 @@ export default function CompanionDevicesPage() {
         {confirmation?.kind === 'decline' && removalQuestion()}
       </div>}
     </section>
+    <CompanionLayoutEditor />
     <section aria-labelledby="devices-heading" className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="devices-heading" className="font-display text-xl font-semibold text-light">Connected devices</h2><button type="button" disabled={busy || listBusy} onClick={() => void readDevices(lifetime.current!.signal)} className={secondaryStyle}>Refresh devices</button></div>
       <p className="max-w-prose text-sm text-fog">Issued, unexpired sessions, not proof that a device is online. Revocation requires a response from Lucia.{checkedAt && ` Last checked ${checkedAt.toLocaleTimeString()}.`}</p>
