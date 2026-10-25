@@ -4,6 +4,7 @@ namespace Lucia.Companion.Core;
 public sealed record HomeProfile(int SchemaVersion, string HomeId, string HomeName,
     IReadOnlyList<PlaceSetting> Places, IReadOnlyList<PlaceConnection> Connections, IReadOnlyList<string> PinnedPlaceIds)
 {
+    public const int MaximumNameLength = 200;
     public IReadOnlyList<HomeSection>? SectionOrder { get; init; }
     public IReadOnlyList<ObservationBinding>? Bindings { get; init; }
 
@@ -20,7 +21,7 @@ public sealed record HomeProfile(int SchemaVersion, string HomeId, string HomeNa
         if (SectionOrder is not null) { HomeSections.ValidateOrder(SectionOrder); }
         if (Places.Count > 200) { throw new ArgumentException("This prototype supports at most 200 places."); }
         var home = BuildTopology([]);
-        if (HomeName.Length > 80 || Places.Any(place => place.Name.Length > 80 || place.Id.Length > 128))
+        if (HomeName.Length > MaximumNameLength || Places.Any(place => place.Name.Length > MaximumNameLength || place.Id.Length > 128))
         {
             throw new ArgumentException("A saved name or identifier is too long.");
         }
