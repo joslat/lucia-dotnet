@@ -32,7 +32,7 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
     {
         Identity = identity;
         State = new(new(identity.Session.HomeId, "Your home", [], []), isDemo: false);
-        Shell = new(State, store);
+        Shell = new(State, store, service, identity);
         Controller = new(service, identity, State, Shell.ProfileSession, clock);
         ActivityController = new(service, identity, clock);
         Shell.BindActivity(ActivityController);
@@ -75,7 +75,7 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         await Controller.ResumeAsync();
         await activityResume;
     }
-    public void Suspend() { refresh.Stop(); activityHomeReady = false; ActivityController.Suspend(); Controller.Suspend(); }
+    public void Suspend() { refresh.Stop(); activityHomeReady = false; Shell.InvalidateSharedLayout(); ActivityController.Suspend(); Controller.Suspend(); }
     private void OnBack(object? sender, RoutedEventArgs args)
     {
         if (!args.Handled && !Controller.HasData) { args.Handled = true; ConnectionRequested?.Invoke(); }
@@ -94,6 +94,7 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         this.FindControl<TextBlock>("HomeReadStatus")!.Text = Controller.StatusText;
         this.FindControl<Button>("RetryHomeReports")!.IsEnabled = Controller.CanRefresh;
         Shell.SetImportCatalog(Controller.Catalog); Shell.SetRefreshing(Controller.IsBusy);
+        if (!Controller.HasData) { Shell.InvalidateSharedLayout(); }
         if (Controller.HasData) { focusedReadState = false; }
         else if (attached && !focusedReadState)
         { focusedReadState = true; this.FindControl<TextBlock>("HomeReadStatus")!.Focus(); }

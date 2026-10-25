@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Screens.HomeSharedLayoutScreen" Background="{DynamicResource CanvasBrush}">
+  <!-- Narrow Operate extension of native setup. Compare explicit metadata, recheck, then stage only. No new world or motion. -->
+  <ScrollViewer Name="SharedReviewScroll" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="16" Spacing="20">
+      <TextBlock Name="SharedReviewTitle" Text="Shared home setup" Classes="title" TextWrapping="Wrap" Focusable="True" />
+      <TextBlock Text="Compare the owner's permitted setup with this draft. No readings, device actions or access grants are changed." Classes="muted" />
+      <TextBlock Name="SharedReviewStatus" TextWrapping="Wrap" Focusable="True" AutomationProperties.LiveSetting="Polite" />
+      <Grid Name="SharedComparison" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="20" RowSpacing="20">
+        <Border Name="LocalAlternative" Classes="panel">
+          <StackPanel Spacing="12"><TextBlock Text="This setup draft" FontWeight="SemiBold" TextWrapping="Wrap" /><c:HomeLayoutSummary Name="LocalLayoutSummary" /></StackPanel>
+        </Border>
+        <Border Name="SharedAlternative" Classes="panel" Grid.Column="1" IsVisible="False">
+          <StackPanel Spacing="12"><TextBlock Text="Shared setup on Lucia" FontWeight="SemiBold" TextWrapping="Wrap" /><c:HomeLayoutSummary Name="SharedLayoutSummary" /></StackPanel>
+        </Border>
+      </Grid>
+      <StackPanel Name="SharedConsequences" IsVisible="False" Spacing="12">
+        <TextBlock Name="SharedReplacementNotice" TextWrapping="Wrap" />
+        <TextBlock Text="Your Home section order stays personal. Pins remain only for place IDs kept by this setup; pins are never guessed or moved to a different room. Cancel keeps your current draft." Classes="muted" />
+        <TextBlock Text="Add shared setup to draft rechecks access and the inspected version. Review the result, then Save setup on this device. It does not change the owner's layout." Classes="muted" />
+      </StackPanel>
+      <WrapPanel>
+        <Button Name="ReadSharedSetup" Classes="theme" Margin="0,0,12,12"><TextBlock Text="Read shared setup" TextWrapping="Wrap" /></Button>
+        <Button Name="AddSharedSetupToDraft" Classes="theme" Margin="0,0,12,12" IsEnabled="False"><TextBlock Text="Add shared setup to draft" TextWrapping="Wrap" /></Button>
+        <Button Name="KeepSetupDraft" Classes="theme" Margin="0,0,12,12"><TextBlock Text="Keep this draft" TextWrapping="Wrap" /></Button>
+        <Button Name="SharedConnection" Classes="theme" Margin="0,0,12,12" IsVisible="False"><TextBlock Text="Open Connection" TextWrapping="Wrap" /></Button>
+      </WrapPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

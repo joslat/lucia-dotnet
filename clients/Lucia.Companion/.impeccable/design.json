@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-24T22:57:36.673Z",
+  "generatedAt": "2026-10-25T00:26:01Z",
   "title": "Design System: Lucia Companion",
   "extensions": {
     "colorMeta": {
@@ -550,7 +550,7 @@
   ],
   "narrative": {
     "northStar": "Constellation / Observatory",
-    "overview": "Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.\n\nThe app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Owners review codes, choose exact grants and manage issued sessions in Companion devices on the trusted HTTPS dashboard. Open Home reads authorized source reports into the existing Constellation Home, with qualified readings, local setup, source bindings, save-conflict recovery and Customize section ordering. Bring your places in lets the user select authorized places, preview exact metadata additions and conflicts, add to the setup draft, then use the existing Save setup action. Import preserves existing names, icons, order, connections and source ownership. A saved binding grants no access. While active, connected Home checks report revisions and keeps their original age. Temporary read failures show automatic-retry guidance; server waits disable retry without hiding Connection.\n\nExplore the demo explicitly opens the cached synthetic shell with its offline badge and synthetic reading time. That mode retains HomeConstellation, PlaceDetail, contextual Bloom actions, offline StoryOrbit Day and the control workbench. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Connected mode shares the Home composition, hides sample Story and Control lab, and shows separately authorized, attributed request activity in Lucia now. Allowlisted topic headings, written outcomes and reported UTC times qualify the compact phase paths. Current target areas require exact server-observed requested IDs, fresh bound registries and current place grants. Unknown and partial areas remain explicit. The scoped connected Home and import extension has a ship disposition. The final target-area finish verdict returned ship with the documentation-only finding resolved. BUILD-PLAN.md records the delivered H03 implementation separately from the unfinished Story, Week and Engine adapters and the remaining motion, performance, platform and release gates.\n\nNative sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.",
+    "overview": "Places use household outline icons, written names and explicit state labels. Their circles distinguish activity, unavailability and selection. The Observatory palette gives them quiet, warm surroundings in dark mode and pale, neutral surroundings in light mode. Outfit names screens and sections. DM Sans carries readings, control labels and explanations.\n\nThe app opens on ConnectionScreen and checks protected storage before showing a host form or verified connection. Owners review codes, choose exact grants and manage issued sessions in Companion devices on the trusted HTTPS dashboard. Open Home reads authorized source reports into the existing Constellation Home, with qualified readings, local setup, source bindings, save-conflict recovery and Customize section ordering. Bring your places in lets the user select authorized places, preview exact metadata additions and conflicts, add to the setup draft, then use the existing Save setup action. Import preserves existing names, icons, order, connections and source ownership. A saved binding grants no access. While active, connected Home checks report revisions and keeps their original age. Temporary read failures show automatic-retry guidance; server waits disable retry without hiding Connection.\n\nExplore the demo explicitly opens the cached synthetic shell with its offline badge and synthetic reading time. That mode retains HomeConstellation, PlaceDetail, contextual Bloom actions, offline StoryOrbit Day and the control workbench. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Connected mode shares the Home composition, hides sample Story and Control lab, and shows separately authorized, attributed request activity in Lucia now. Allowlisted topic headings, written outcomes and reported UTC times qualify the compact phase paths. Current target areas require exact server-observed requested IDs, fresh bound registries and current place grants. Unknown and partial areas remain explicit. The scoped connected Home and import extension has a ship disposition. The final target-area finish verdict returned ship with the documentation-only finding resolved. BUILD-PLAN.md records the delivered H03 implementation separately from the unfinished Story, Week and Engine adapters and the remaining motion, performance, platform and release gates.\n\nConnected setup also offers Review shared setup. It compares the owner's permitted metadata with the current draft, shows exact binding disclosures and names replacement consequences. A protected reread checks access, identity and the inspected version before Add shared setup to draft. Save setup remains a separate local choice. The scoped native shared-review finish returned ship with no material fixes. Shared-layout implementation acceptance is complete with 499 native tests, including all three opt-in actual wire UI cases, and 576 relevant server regression tests, with zero failures or skips. The Android debug build completed with zero warnings or errors. The broader application and its platform and release gates remain unfinished.\n\nNative sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.",
     "keyCharacteristics": [
       "Place icons pair names and written states with distinct state and selection rings.",
       "Semantic brushes switch together between light and dark.",
@@ -571,7 +571,8 @@
       "Recovery distinguishes retry, local forgetting and a request to revoke the device session.",
       "Connected activity leads with request topics, written outcomes and qualified current target areas, with reported UTC times and separate activity access.",
       "Activity phase labels reflow vertically when their natural widths no longer fit; exceptional outcomes carry no invented reached phase.",
-      "Activity recovery reveals its written status after an affected action disappears, while healthy polling leaves focus and status quiet."
+      "Activity recovery reveals its written status after an affected action disappears, while healthy polling leaves focus and status quiet.",
+      "Shared setup compares permitted metadata with the draft, rechecks before replacement and keeps local Save separate."
     ],
     "rules": [
       {
@@ -603,6 +604,11 @@
         "name": "The Still Observatory Rule",
         "body": "Home, place states and Bloom remain static. Story may transition its dial hand for 280 milliseconds with native CubicEaseOut when selection changes. The \"Animate the time hand\" checkbox below the timelines disables that transition. Reports, chapters and time selection remain usable without motion; no automatic playback or rotating carousel exists.",
         "section": "elevation"
+      },
+      {
+        "name": "The Reviewed Draft Rule",
+        "body": "Reading shared setup changes no draft. Recheck protected identity, current access and the inspected version before replacing the reviewed draft; require a separate Save setup for persistence.",
+        "section": "components"
       }
     ],
     "dos": [
@@ -637,7 +643,11 @@
       "Do show activity's topic, written outcome, reported UTC time, qualified current target areas and explicit unknown or partial coverage.",
       "Do retain registry-check UTC help and refresh or clear target areas even when the lifecycle revision is unchanged.",
       "Do reflow complete activity phase labels without reducing their mapped type size.",
-      "Do keep activity permission separate from Home access and reveal recovery status when the affected control disappears."
+      "Do keep activity permission separate from Home access and reveal recovery status when the affected control disappears.",
+      "Do compare permitted shared setup with the current draft and expose each place's exact binding IDs and source-place provenance.",
+      "Do name shared replacement consequences, preserve personal section order and retain pins only for matching place IDs.",
+      "Do recheck protected identity, access and the inspected shared version before replacing the draft, then require Save setup separately.",
+      "Do clear a shared review on suspension or data loss, keep the editor draft and respect focus moved outside the review."
     ],
     "donts": [
       "Don't use color as the only indication of place state or selection.",
@@ -662,7 +672,9 @@
       "Don't treat revisioned polling as event replay, a push stream or an atomic Home Assistant snapshot.",
       "Don't draw a reached activity phase for failure, unknown outcome or a later turn without source evidence.",
       "Don't infer request origin, occupancy, transcript content, model/tool steps or physical success from an activity record or its current target areas.",
-      "Don't announce healthy activity polls or move focus away from the user's current control."
+      "Don't announce healthy activity polls or move focus away from the user's current control.",
+      "Don't stage a shared setup from a stale, canceled or failed review, or silently shorten accepted names during import.",
+      "Don't treat shared setup metadata, a native finish verdict or headless captures as completion of shared delivery or the wider app."
     ]
   }
 }

@@ -5,6 +5,7 @@ using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.App.Controls;
 using Lucia.Companion.Core;
 using Lucia.Companion.Connection;
+using Lucia.Companion.App.Configuration;
 
 namespace Lucia.Companion.App.Screens;
 
@@ -14,18 +15,24 @@ public sealed partial class HomeEditorScreen : UserControl
     private readonly IReadOnlyList<ObservationSource> sources;
     private string? selectedId;
     private bool filling;
+    private readonly Func<Func<HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public event Action<HomeTopology>? SaveRequested;
     public event Action? CancelRequested;
+    public event Action? ConnectionRequested;
 
     public HomeEditorScreen() : this(SampleHome.Create()) { }
 
-    public HomeEditorScreen(HomeTopology home, IReadOnlyList<ObservationSource>? sources = null, HomeCatalog? importCatalog = null)
+    public HomeEditorScreen(HomeTopology home, IReadOnlyList<ObservationSource>? sources = null, HomeCatalog? importCatalog = null,
+        Func<Func<HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory = null)
     {
         draft = new(home);
         this.sources = Array.AsReadOnly((sources ?? []).ToArray());
+        this.sharedLayoutFactory = sharedLayoutFactory;
         AvaloniaXamlLoader.Load(this);
         this.FindControl<Button>("ImportPlaces")!.IsVisible = importCatalog is not null;
         this.FindControl<Button>("ImportPlaces")!.Click += (_, _) => { if (importCatalog is not null) { OpenImport(importCatalog); } };
+        this.FindControl<Button>("ReviewSharedSetup")!.IsVisible = sharedLayoutFactory is not null;
+        this.FindControl<Button>("ReviewSharedSetup")!.Click += (_, _) => OpenSharedSetup();
         var bindings = this.FindControl<SourceBindingPicker>("BindingPicker")!;
         bindings.BindingRequested += (source, role) =>
         {
@@ -70,11 +77,13 @@ public sealed partial class HomeEditorScreen : UserControl
         this.FindControl<Button>("DiscardEdits")!.Click += (_, _) => CancelRequested?.Invoke();
         KeyDown += (_, args) => { if (args.Key == Key.Escape) { RequestBack(); args.Handled = true; } };
         SizeChanged += (_, _) => Adapt();
+        DetachedFromVisualTree += (_, _) => InvalidateSharedLayout();
         RebuildList(draft.Places.FirstOrDefault()?.Id);
     }
 
     public void RequestBack()
     {
+        if (this.FindControl<ContentControl>("ImportHost")! is { IsVisible: true, Content: HomeSharedLayoutScreen shared }) { shared.RequestBack(); return; }
         if (this.FindControl<ContentControl>("ImportHost")! is { IsVisible: true, Content: HomeImportScreen import }) { import.RequestBack(); return; }
         var removal = this.FindControl<StackPanel>("RemovalConfirmation")!;
         if (removal.IsVisible)
@@ -88,6 +97,33 @@ public sealed partial class HomeEditorScreen : UserControl
         else { CancelRequested?.Invoke(); }
     }
 
+    public void InvalidateSharedLayout()
+    {
+        if (this.FindControl<ContentControl>("ImportHost")!.Content is HomeSharedLayoutScreen review) { review.Controller.Invalidate(); }
+    }
+
+    private void OpenSharedSetup()
+    {
+        if (sharedLayoutFactory is null || this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible
+            || !TryApplyCurrent() || !RunEdit(() => draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty))) { return; }
+        var review = new HomeSharedLayoutScreen(sharedLayoutFactory(draft.Build));
+        review.CancelRequested += CloseImport;
+        review.ConnectionRequested += () => ConnectionRequested?.Invoke();
+        review.AddRequested += updated =>
+        {
+            if (!RunEdit(() => draft.ReplaceWithReviewedSetup(updated))) { return; }
+            this.FindControl<TextBox>("HomeNameInput")!.Text = updated.Name;
+            RebuildList(updated.Places.FirstOrDefault()?.Id);
+            this.FindControl<TextBlock>("ImportDraftStatus")!.Text = "Shared setup added to this draft. Review names, connections and bindings, then Save setup to keep it on this device.";
+            this.FindControl<TextBlock>("ImportDraftStatus")!.IsVisible = true;
+            CloseImport();
+        };
+        this.FindControl<ScrollViewer>("EditorScroll")!.IsVisible = false;
+        this.FindControl<StackPanel>("EditorCommands")!.IsVisible = false;
+        var host = this.FindControl<ContentControl>("ImportHost")!;
+        host.Content = review; host.IsVisible = true;
+    }
+
     private void OpenImport(HomeCatalog catalog)
     {
         if (!TryApplyCurrent() || !RunEdit(() => draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty))) { return; }
@@ -99,6 +135,7 @@ public sealed partial class HomeEditorScreen : UserControl
             {
                 draft.ApplyImport(plan);
                 RebuildList(plan.AddedPlaceIds.FirstOrDefault() ?? selectedId ?? draft.Places.FirstOrDefault()?.Id);
+                this.FindControl<TextBlock>("ImportDraftStatus")!.Text = "Places added to this draft. Review their setup, then Save setup to keep them.";
                 this.FindControl<TextBlock>("ImportDraftStatus")!.IsVisible = true;
                 CloseImport();
             }
@@ -113,10 +150,12 @@ public sealed partial class HomeEditorScreen : UserControl
     private void CloseImport()
     {
         var host = this.FindControl<ContentControl>("ImportHost")!;
+        var wasShared = host.Content is HomeSharedLayoutScreen;
+        if (host.Content is HomeSharedLayoutScreen shared) { shared.Dispose(); }
         host.IsVisible = false; host.Content = null;
         this.FindControl<ScrollViewer>("EditorScroll")!.IsVisible = true;
         this.FindControl<StackPanel>("EditorCommands")!.IsVisible = true;
-        this.FindControl<Button>("ImportPlaces")!.Focus();
+        this.FindControl<Button>(wasShared ? "ReviewSharedSetup" : "ImportPlaces")!.Focus();
     }
 
     private bool HasPendingChanges()

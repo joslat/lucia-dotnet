@@ -150,6 +150,8 @@ The app opens on ConnectionScreen and checks protected storage before showing a 
 
 Explore the demo explicitly opens the cached synthetic shell with its offline badge and synthetic reading time. That mode retains HomeConstellation, PlaceDetail, contextual Bloom actions, offline StoryOrbit Day and the control workbench. Story links a one-day dial, authored chapters and readable place timelines through one selection state. Connected mode shares the Home composition, hides sample Story and Control lab, and shows separately authorized, attributed request activity in Lucia now. Allowlisted topic headings, written outcomes and reported UTC times qualify the compact phase paths. Current target areas require exact server-observed requested IDs, fresh bound registries and current place grants. Unknown and partial areas remain explicit. The scoped connected Home and import extension has a ship disposition. The final target-area finish verdict returned ship with the documentation-only finding resolved. BUILD-PLAN.md records the delivered H03 implementation separately from the unfinished Story, Week and Engine adapters and the remaining motion, performance, platform and release gates.
 
+Connected setup also offers Review shared setup. It compares the owner's permitted metadata with the current draft, shows exact binding disclosures and names replacement consequences. A protected reread checks access, identity and the inspected version before Add shared setup to draft. Save setup remains a separate local choice. The scoped native shared-review finish returned ship with no material fixes. Shared-layout implementation acceptance is complete with 499 native tests, including all three opt-in actual wire UI cases, and 576 relevant server regression tests, with zero failures or skips. The Android debug build completed with zero warnings or errors. The broader application and its platform and release gates remain unfinished.
+
 Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypography.cs`, `Styles/Controls.axaml`, `CompanionShell.axaml`, the files in `Screens/` and `Controls/`, and `ControlWorkbench.axaml`. Frontmatter lengths use CSS-compatible px notation for interchange. In native source these are Avalonia device-independent units, not physical screen pixels. Font sizes record the normal-size baseline; Android maps each text role through its native SP converter. The sidecar HTML/CSS snippets are illustrative normal-size representations for a design panel. They do not drive the native UI or qualify TalkBack, real-device accessibility, iOS, safe areas or performance.
 
 **Key Characteristics:**
@@ -174,6 +176,7 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Connected activity leads with request topics, written outcomes and qualified current target areas, with reported UTC times and separate activity access.
 - Activity phase labels reflow vertically when their natural widths no longer fit; exceptional outcomes carry no invented reached phase.
 - Activity recovery reveals its written status after an affected action disappears, while healthy polling leaves focus and status quiet.
+- Shared setup compares permitted metadata with the draft, rechecks before replacement and keeps local Save separate.
 
 ## Colors
 
@@ -266,6 +269,10 @@ The Home constellation keeps the supplied place order. Its panel starts with a 1
 HomeImportScreen uses a 16-unit margin, a vertical ScrollViewer with horizontal scrolling disabled and a 1040-unit maximum content width. Its title and explanation precede place selection and review. At a control width of at least 900 units, while the mapped ImportStatus body text is at most 20 units, selection and review occupy equal columns with a 24-unit gap. Narrower widths or larger body text show them as separate steps. In that compact layout, Preview additions hides selection and opens review; Change selection returns to the selected place and requires a fresh preview. Back from compact review also returns to selection before leaving import.
 
 Status and wrapping action buttons sit below the scrolling content. Place rows use a straight GraphLineBrush divider, 12-unit vertical padding and the existing 24-unit household outline icon with a 1.7-unit stroke. Their selection CheckBoxes, icon chooser, source Expander, shared TextBoxes and theme buttons retain a 48-unit minimum height. Selected-place fields indent 12 units; source details stay inside Sources to bind. There is no new card, palette, type family or motion treatment.
+
+### Shared setup review
+
+HomeSharedLayoutScreen uses one vertical ScrollViewer with horizontal scrolling disabled. Its title, status, comparison, replacement consequences and wrapping actions all share that scroll area, with a 16-unit margin and 20-unit major gaps. At its own width of at least 900 units, while the mapped SharedReviewStatus body font is at most 20 units, the draft and permitted shared alternatives occupy equal columns with a 20-unit gap. Narrower widths or larger body text stack the draft before the shared alternative. Titles, names, exact identifiers and action captions wrap. Shared theme buttons retain a 48-unit minimum height and cap their width to the available screen width.
 
 ### Save-conflict review
 
@@ -367,6 +374,20 @@ Add to draft applies the reviewed plan to the unchanged setup draft and returns 
 
 The completed extension passed 249 native tests with zero failures or skips, including the opt-in actual UI, Windows DPAPI, HTTPS, SQLite and HA-wire synthetic-fixture checks. Its reviewed import/recovery evidence includes 12 layout/matrix cases and 24 second-round captures. Captures and review evidence are retained outside the public repository. Independent finish review returned ship with no material fixes. Successful connected Home has narrower visual coverage than that import/recovery matrix. This evidence does not establish an actual household connection, installed Android TLS, iOS, hardware, TalkBack, safe-area or performance qualification. Story, Week and Engine goals remain unfinished.
 
+### HomeSharedLayoutScreen and HomeLayoutSummary
+
+Review shared setup opens inside connected setup after valid current field edits enter the draft. It reuses the existing CanvasBrush, panel treatment, Outfit headings, DM Sans text and native theme buttons. Each alternative names the home and counts places, connections and bindings. Visible place rows pair authored 24-unit household outline icons with names, written icon identity and named configured neighbors. Each row has a native Exact bindings Expander with the place ID, source-role IDs and source-place provenance. These disclosures describe metadata only. Physical neighbors never establish source ownership or readings.
+
+Reading compares the owner's permitted setup with the current draft without changing either. Unqualified source bindings are omitted with a written warning. The replacement notice names draft places absent from the shared setup and explains that adding replaces draft names, icons, place order, connections and bindings. Home section order stays personal. Pins survive only for matching place IDs; they never move to a guessed room.
+
+Add shared setup to draft rechecks protected identity, current access, the inspected shared version and the current draft before staging the accepted topology. It changes no owner layout or access grant. The editor then exposes the result for review and the separate Save setup action. Keep this draft, native Back and Escape return to the existing editor without applying the shared alternative. Returning restores focus to Review shared setup. Cancellation and invalidation prevent a late successful read from staging metadata.
+
+Suspend or loss of connected data invalidates the shared review while retaining the editor and its unsaved input in process memory. Failed, unavailable or stale reads clear the shared alternative and use safe written recovery guidance. Authorization or protected-storage failures expose Open Connection. Server-requested waits constrain another read. The status has a polite live setting. Read completion focuses the review heading or status only if focus has not moved outside the review; a slow read does not take focus from another control.
+
+**The Reviewed Draft Rule.** Reading shared setup changes no draft. Recheck protected identity, current access and the inspected version before replacing the reviewed draft; require a separate Save setup for persistence.
+
+The scoped native finish review returned ship with no material fixes after the bounded layout fix. Its final evidence comprises 24 native headless Skia captures across 390- and 1194-unit widths, light and dark, normal and doubled text, and review, exact-details and unavailable states. These are native source and layout evidence, not an HTML/CSS detector result. They do not establish installed-device behavior, hardware, TalkBack, platform zoom, iOS, safe areas or performance. Shared-layout implementation acceptance for SH01 through SH04 is complete. Final validation passed 499 native tests, including all three opt-in actual wire UI cases, and 576 relevant server regression tests, with zero failures or skips. The Android debug build completed with zero warnings or errors. The new shared-layout wire case uses two independent native roots and workspaces, separate Windows DPAPI vaults, HTTPS, SQLite and a synthetic Home Assistant protocol. Both clients reject an owner update between review and confirmation, then explicitly reread, add and separately save metadata-only profiles. Matching-ID pins and personal section order persist. Revoking the phone clears its protected credential and returns it to Connection while the tablet remains usable. Controller and composition tests cover source failure and recovery, alongside actual transport and source API coverage. These results close the scoped shared-layout implementation acceptance, not the wider application's installed-device, hardware, TalkBack, platform zoom, iOS, safe-area, performance, distribution or release qualification.
+
 ### PlaceOrb
 
 A native Button combines the circular icon, place name and written state. Activating it selects the place and opens its readings according to the compact or expanded Home layout. Selection and pinning are separate Boolean properties. Neither changes the place's state or order. A small amber pin path appears at the icon's upper right when pinned.
@@ -428,6 +449,8 @@ ActivityStatus is focusable and has a polite live setting. With retained request
 The earlier activity review resolved its phase, recovery-visibility, label-layout and documentation findings and returned ship for that scoped UI increment. The fresh target-area finish review examined all 42 second-round captures, including phone/tablet, light/dark, normal/doubled text, target details, denial recovery and two source-wire views. Its final verdict returned ship with the documentation-only finding resolved and no material findings open. No UI rebuild, new asset or new capture was required. Parent-observed final regression results were 377 native tests passed and 479 isolated scoped server/conversation tests passed, with zero failures or skips in either run. The Android build exited 0 with zero warnings or errors. BUILD-PLAN.md records delivered H03 implementation and its engineering acceptance separately from the unfinished full application and platform/release gates. The captures use synthetic fixtures and bounded synthetic wire data. They establish no successful installed TLS session, actual household or physical result, TalkBack, iOS, performance, release readiness or completion of the wider app. The existing approved composition, fonts and palette remain intact.
 
 ### HomeEditorScreen
+
+Home and place names share a 200-character limit across the profile store, setup editor and import. Import validates catalog place names against that budget without silently shortening them.
 
 Setup uses labelled native TextBoxes for home and place names, a place ListBox or ComboBox according to width, an icon ComboBox, named neighbor CheckBoxes and SourceBindingPicker. TextBoxes and chooser/neighbor targets have a 48-unit minimum height where set by source. Inputs use DM Sans body typography, with Fluent field, selection and focus presentation. The binding picker follows the physical-neighbor controls inside the same scrolling place form.
 
@@ -543,6 +566,10 @@ Story has no service history or history persistence. A changed Home topology reb
 - Do retain registry-check UTC help and refresh or clear target areas even when the lifecycle revision is unchanged.
 - Do reflow complete activity phase labels without reducing their mapped type size.
 - Do keep activity permission separate from Home access and reveal recovery status when the affected control disappears.
+- Do compare permitted shared setup with the current draft and expose each place's exact binding IDs and source-place provenance.
+- Do name shared replacement consequences, preserve personal section order and retain pins only for matching place IDs.
+- Do recheck protected identity, access and the inspected shared version before replacing the draft, then require Save setup separately.
+- Do clear a shared review on suspension or data loss, keep the editor draft and respect focus moved outside the review.
 
 ### Don't:
 
@@ -569,3 +596,5 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't draw a reached activity phase for failure, unknown outcome or a later turn without source evidence.
 - Don't infer request origin, occupancy, transcript content, model/tool steps or physical success from an activity record or its current target areas.
 - Don't announce healthy activity polls or move focus away from the user's current control.
+- Don't stage a shared setup from a stale, canceled or failed review, or silently shorten accepted names during import.
+- Don't treat shared setup metadata, a native finish verdict or headless captures as completion of shared delivery or the wider app.

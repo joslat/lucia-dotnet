@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:core="using:Lucia.Companion.Core"
              x:Class="Lucia.Companion.App.Controls.HomeImportPlaceRow">
   <Border BorderBrush="{DynamicResource GraphLineBrush}" BorderThickness="0,0,0,1" Padding="0,12">
     <StackPanel Spacing="12">
@@ -15,8 +15,7 @@
         <TextBlock Name="ExistingPlaceNotice" IsVisible="False" Classes="muted" />
         <StackPanel Name="NewPlaceFields" Spacing="8">
           <TextBlock Text="Name on this device" />
-          <TextBox Name="ImportPlaceName" MaxLength="80" />
-          <TextBlock Name="ShortNameNotice" IsVisible="False" Text="Suggested name shortened to fit. Review it before adding." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+          <TextBox Name="ImportPlaceName" MaxLength="{x:Static core:HomeProfile.MaximumNameLength}" />
           <TextBlock Text="Icon" />
           <ComboBox Name="ImportPlaceIconChoice" MinHeight="48" HorizontalAlignment="Stretch" />
         </StackPanel>

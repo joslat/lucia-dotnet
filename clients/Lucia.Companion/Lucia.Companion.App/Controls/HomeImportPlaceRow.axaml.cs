@@ -26,14 +26,13 @@ public sealed partial class HomeImportPlaceRow : UserControl
         AvaloniaXamlLoader.Load(this);
         this.FindControl<TextBlock>("ImportSourcePlaceName")!.Text = place.Name;
         this.FindControl<TextBlock>("ImportSourceCount")!.Text = $"{place.Sources.Count} {(place.Sources.Count == 1 ? "source" : "sources")} in the authorized catalog";
-        var name = existing?.Name ?? SuggestName(place.Name);
+        var name = existing?.Name ?? place.Name;
         this.FindControl<TextBox>("ImportPlaceName")!.Text = name;
         var icons = this.FindControl<ComboBox>("ImportPlaceIconChoice")!;
         icons.ItemsSource = Enum.GetValues<PlaceIcon>();
         icons.SelectedItem = existing?.Icon ?? PlaceIcon.Home;
         this.FindControl<Path>("ImportPlaceIcon")!.Data = PlaceIcons.For(existing?.Icon ?? PlaceIcon.Home);
         this.FindControl<StackPanel>("NewPlaceFields")!.IsVisible = existing is null;
-        this.FindControl<TextBlock>("ShortNameNotice")!.IsVisible = existing is null && name != place.Name;
         var kept = this.FindControl<TextBlock>("ExistingPlaceNotice")!;
         kept.IsVisible = existing is not null;
         kept.Text = existing is null ? string.Empty : $"Keep {existing.Name} and its existing icon, order and connections.";
@@ -55,14 +54,4 @@ public sealed partial class HomeImportPlaceRow : UserControl
         };
     }
 
-    private static string SuggestName(string value)
-    {
-        var length = 0;
-        foreach (var rune in value.EnumerateRunes())
-        {
-            if (length + rune.Utf16SequenceLength > 80) { break; }
-            length += rune.Utf16SequenceLength;
-        }
-        return value[..length];
-    }
 }

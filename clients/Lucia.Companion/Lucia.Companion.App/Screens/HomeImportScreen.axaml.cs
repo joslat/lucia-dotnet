@@ -110,7 +110,7 @@ public sealed partial class HomeImportScreen : UserControl
         {
             reviewed = null;
             this.FindControl<Button>("AddImportToDraft")!.IsEnabled = false;
-            Status("The selection cannot be added. Use readable names up to 80 characters and keep the setup within 200 places and 2,000 bindings.", true);
+            Status($"The selection cannot be added. Use readable names up to {HomeProfile.MaximumNameLength} characters and keep the setup within 200 places and 2,000 bindings.", true);
             this.FindControl<TextBlock>("ImportStatus")!.Focus();
         }
     }

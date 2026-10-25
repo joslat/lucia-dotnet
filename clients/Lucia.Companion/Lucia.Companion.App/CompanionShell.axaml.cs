@@ -25,6 +25,7 @@ public sealed partial class CompanionShell : UserControl
     private TopLevel? attachedTopLevel;
     private HomeCatalog? importCatalog;
     private bool refreshing;
+    private readonly Func<Func<Core.HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public HomeProfileSession ProfileSession => profileSession;
     public event Action? ConnectionRequested;
     public event Action? RefreshRequested;
@@ -33,10 +34,12 @@ public sealed partial class CompanionShell : UserControl
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create(), SampleObservationSources.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
-    public CompanionShell(HomeViewModel state, LocalHomeStore? store)
+    public CompanionShell(HomeViewModel state, LocalHomeStore? store, ICompanionConnection? connection = null, ConnectionSession? identity = null)
     {
         home = new HomeScreen(state);
         profileSession = new(state, store);
+        if (!state.IsDemo && connection is not null && identity is not null)
+        { sharedLayoutFactory = draft => new(connection, identity, draft); }
         AvaloniaXamlLoader.Load(this);
         this.FindControl<ContentControl>("ScreenHost")!.Content = home;
         var appearance = this.FindControl<Button>("AppearanceButton")!;
@@ -100,7 +103,8 @@ public sealed partial class CompanionShell : UserControl
     private void OpenEditor()
     {
         if (profileSession.HasUnreadableProfile && !profileSession.CanReplaceUnreadableProfile) { return; }
-        var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog, importCatalog);
+        var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog, importCatalog, sharedLayoutFactory);
+        editor.ConnectionRequested += RequestConnection;
         if (profileSession.HasUnreadableProfile) { editor.WarnAboutReplacement(); }
         editor.CancelRequested += ShowHome;
         editor.SaveRequested += updated =>
@@ -183,6 +187,10 @@ public sealed partial class CompanionShell : UserControl
     }
 
     public void SetImportCatalog(HomeCatalog? catalog) => importCatalog = catalog;
+    public void InvalidateSharedLayout()
+    {
+        if (this.FindControl<ContentControl>("ScreenHost")!.Content is HomeEditorScreen editor) { editor.InvalidateSharedLayout(); }
+    }
     public void SetRefreshing(bool value) { refreshing = value; RefreshStorageState(); }
 
     private static MenuItem ThemeItem(string label, ThemeVariant theme)

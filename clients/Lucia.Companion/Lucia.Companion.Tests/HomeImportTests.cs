@@ -73,7 +73,7 @@ public sealed class HomeImportTests
             "missing" => [new("missing", "Missing", PlaceIcon.Home)],
             "case" => [new("ATTIC", "Attic", PlaceIcon.Home)],
             "duplicate" => [new("attic", "Office", PlaceIcon.Home), new("attic", "Again", PlaceIcon.Home)],
-            "long-name" => [new("attic", new string('a', 81), PlaceIcon.Home)],
+            "long-name" => [new("attic", new string('a', 201), PlaceIcon.Home)],
             _ => [new("attic", "Office", PlaceIcon.Home)]
         };
         var places = original.Places.ToArray();

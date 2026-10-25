@@ -73,8 +73,8 @@ public sealed class HomeImportPlan
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         var name = value.Trim();
-        if (name.Length > 80 || name.Any(character => char.IsControl(character) || char.GetUnicodeCategory(character) == UnicodeCategory.Format))
-        { throw new ArgumentException("Choose a readable place name of at most 80 characters."); }
+        if (name.Length > HomeProfile.MaximumNameLength || name.Any(character => char.IsControl(character) || char.GetUnicodeCategory(character) == UnicodeCategory.Format))
+        { throw new ArgumentException($"Choose a readable place name of at most {HomeProfile.MaximumNameLength} characters."); }
         return name;
     }
 }

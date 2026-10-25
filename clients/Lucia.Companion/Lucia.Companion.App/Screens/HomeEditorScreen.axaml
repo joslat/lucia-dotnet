@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls" xmlns:core="using:Lucia.Companion.Core"
              x:Class="Lucia.Companion.App.Screens.HomeEditorScreen" Background="{DynamicResource CanvasBrush}">
   <Grid RowDefinitions="*,Auto" Margin="16" RowSpacing="16">
     <ScrollViewer Name="EditorScroll" HorizontalScrollBarVisibility="Disabled">
@@ -13,13 +13,14 @@
         <Border Name="PlaceListCard" Classes="panel">
           <StackPanel Spacing="12">
             <TextBlock Text="Home name" />
-            <TextBox Name="HomeNameInput" MaxLength="80" AutomationProperties.Name="Home name" />
+            <TextBox Name="HomeNameInput" MaxLength="{x:Static core:HomeProfile.MaximumNameLength}" AutomationProperties.Name="Home name" />
             <TextBlock Text="Your places" Classes="section" />
             <TextBlock Text="The saved order keeps your home stable." Classes="muted" FontSize="{DynamicResource TextSize13}" />
             <ListBox Name="PlacesList" MaxHeight="280" AutomationProperties.Name="Choose a place to edit" />
             <ComboBox Name="PlaceChooser" HorizontalAlignment="Stretch" AutomationProperties.Name="Choose a place to edit" MinHeight="48" />
             <Button Name="AddPlace" Content="Add place" Classes="theme" HorizontalAlignment="Left" />
             <Button Name="ImportPlaces" Classes="theme" HorizontalAlignment="Left" IsVisible="False"><TextBlock Text="Import authorized places" TextWrapping="Wrap" /></Button>
+            <Button Name="ReviewSharedSetup" Classes="theme" HorizontalAlignment="Left" IsVisible="False"><TextBlock Text="Review shared setup" TextWrapping="Wrap" /></Button>
             <TextBlock Name="ImportDraftStatus" IsVisible="False" Text="Places added to this draft. Review their setup, then Save setup to keep them." Classes="muted" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
         </Border>
@@ -27,7 +28,7 @@
           <StackPanel Spacing="12">
             <TextBlock Text="Place setup" Classes="section" />
             <TextBlock Text="Place name" />
-            <TextBox Name="PlaceNameInput" MaxLength="80" AutomationProperties.Name="Place name" />
+            <TextBox Name="PlaceNameInput" MaxLength="{x:Static core:HomeProfile.MaximumNameLength}" AutomationProperties.Name="Place name" />
             <TextBlock Text="Icon" />
             <ComboBox Name="IconInput" HorizontalAlignment="Stretch" AutomationProperties.Name="Place icon" MinHeight="48" />
             <TextBlock Text="Connects to" />

@@ -89,6 +89,13 @@ public sealed class HomeEditorViewModel
 
     public HomeTopology Build() => draft;
     public void ApplyImport(HomeImportPlan plan) => draft = plan.ApplyTo(draft);
+    public void ReplaceWithReviewedSetup(HomeTopology home)
+    {
+        ArgumentNullException.ThrowIfNull(home);
+        if (home.Id != draft.Id) { throw new ArgumentException("The reviewed setup belongs to another home."); }
+        HomeProfile.From(home, []).Validate();
+        draft = home;
+    }
     private void Replace(IEnumerable<Place> places, IEnumerable<PlaceConnection> connections, IEnumerable<ObservationBinding>? bindings = null)
     {
         var snapshot = places.ToArray();
@@ -107,7 +114,7 @@ public sealed class HomeEditorViewModel
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         var value = name.Trim();
-        if (value.Length > 80) { throw new ArgumentException("Keep the name to 80 characters or fewer.", nameof(name)); }
+        if (value.Length > HomeProfile.MaximumNameLength) { throw new ArgumentException($"Keep the name to {HomeProfile.MaximumNameLength} characters or fewer.", nameof(name)); }
         return value;
     }
 }
