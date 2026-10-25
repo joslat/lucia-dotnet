@@ -9,7 +9,8 @@ internal static class CompanionApiJson
     public static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter<CompanionField>(allowIntegerValues: false), new JsonStringEnumConverter<CompanionReadingQuality>(allowIntegerValues: false),
-            new JsonStringEnumConverter<CompanionActivityState>(allowIntegerValues: false), new JsonStringEnumConverter<CompanionActivityCategory>(allowIntegerValues: false) }
+            new JsonStringEnumConverter<CompanionActivityState>(allowIntegerValues: false), new JsonStringEnumConverter<CompanionActivityCategory>(allowIntegerValues: false),
+            new JsonStringEnumConverter<CompanionHistoryQuality>(allowIntegerValues: false) }
     };
     public static async Task<T?> ReadAsync<T>(HttpContext context)
     {

@@ -158,17 +158,26 @@ public sealed class HomeAssistantClient : IHomeAssistantClient
         var qs = BuildQueryString(
             ("filter_entity_id", filterEntityId),
             ("end_time", endTime),
-            ("minimal_response", minimalResponse),
-            ("no_attributes", noAttributes),
-            ("significant_changes_only", significantChangesOnly));
+            // HA tests presence for the first two flags, and only the literal 0 disables significant-only filtering.
+            ("minimal_response", minimalResponse == true ? "1" : null),
+            ("no_attributes", noAttributes == true ? "1" : null),
+            ("significant_changes_only", significantChangesOnly is null ? null : significantChangesOnly.Value ? "1" : "0"));
 
         var path = $"/api/history/period/{Uri.EscapeDataString(timestamp)}{qs}";
         EnsureHttpClientConfigured();
         _logger.GetRequest(path);
+        // ResponseHeadersRead ends HttpClient's own timeout at the headers. Bound the body as well.
+        using var bodyTimeout = new CancellationTokenSource(_httpClient.Timeout, _timeProvider);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, bodyTimeout.Token);
+        var readToken = linked.Token;
         try
         {
-            var result = await _httpClient.GetFromJsonAsync<HomeAssistantState[][]>(path, HomeAssistantJsonOptions.Default, cancellationToken);
-            return result ?? [];
+            using var response = await _httpClient.GetAsync(path, HttpCompletionOption.ResponseHeadersRead, readToken);
+            response.EnsureSuccessStatusCode();
+            // A malformed or unbounded recorder response must not become a successful empty history.
+            await response.Content.LoadIntoBufferAsync(8 * 1024 * 1024, readToken);
+            return await response.Content.ReadFromJsonAsync<HomeAssistantState[][]>(HomeAssistantJsonOptions.Default, readToken)
+                ?? throw new JsonException("History must be an array of entity tracks.");
         }
         catch (HttpRequestException ex)
         {

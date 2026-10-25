@@ -185,17 +185,19 @@ public sealed class CompanionHomeApiTests
         A.CallTo(() => host.HomeAssistant.GetAreaRegistryAsync(A<CancellationToken>._)).MustNotHaveHappened();
     }
 
-    internal static void ConfigureHome(CompanionSecurityTestHost host)
+    internal static void ConfigureHome(CompanionSecurityTestHost host) => ConfigureHome(host.HomeAssistant);
+
+    internal static void ConfigureHome(lucia.HomeAssistant.Services.IHomeAssistantClient source)
     {
-        A.CallTo(() => host.HomeAssistant.GetAreaRegistryAsync(A<CancellationToken>._)).Returns([
+        A.CallTo(() => source.GetAreaRegistryAsync(A<CancellationToken>._)).Returns([
             new() { AreaId = "porch", Name = "Porch" }, new() { AreaId = "bedroom", Name = "private-bedroom-marker" }
         ]);
-        A.CallTo(() => host.HomeAssistant.GetEntityRegistryAsync(A<CancellationToken>._)).Returns([
+        A.CallTo(() => source.GetEntityRegistryAsync(A<CancellationToken>._)).Returns([
             new() { EntityId = "sensor.porch_temperature", AreaId = "porch", OriginalName = "Porch temperature" },
             new() { EntityId = "sensor.porch_humidity", AreaId = "porch", OriginalName = "excluded-humidity-marker" },
             new() { EntityId = "sensor.bedroom_temperature", AreaId = "bedroom", OriginalName = "private-bedroom-marker" }
         ]);
-        A.CallTo(() => host.HomeAssistant.GetStatesAsync(A<CancellationToken>._)).Returns([
+        A.CallTo(() => source.GetStatesAsync(A<CancellationToken>._)).Returns([
             State("sensor.porch_temperature", "21.5", "temperature", "°C"),
             State("sensor.porch_humidity", "89", "humidity", "%"),
             State("sensor.bedroom_temperature", "19", "temperature", "°C")

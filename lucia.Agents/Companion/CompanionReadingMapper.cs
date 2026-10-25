@@ -36,6 +36,16 @@ internal static class CompanionReadingMapper
         { reported = new DateTimeOffset(state.LastUpdated.ToUniversalTime()); }
         if (reported > now || reported < DateTimeOffset.UnixEpoch) { reported = null; }
         var quality = state.State == "unavailable" ? CompanionReadingQuality.Unavailable : CompanionReadingQuality.Unknown;
+        var (number, active, unit) = Values(state, field);
+        if (number.HasValue || active.HasValue)
+        { quality = reported is null ? CompanionReadingQuality.Unknown : now - reported <= maximumAge ? CompanionReadingQuality.Current : CompanionReadingQuality.Stale; }
+        // Untimed/future reports cannot become even a dated last-known value.
+        if (reported is null) { number = null; active = null; unit = null; }
+        return new(state.EntityId, field, quality, reported, number, active, unit);
+    }
+
+    internal static (double? Number, bool? Active, string? Unit) Values(HomeAssistantState state, CompanionField field)
+    {
         double? number = null;
         bool? active = null;
         string? unit = null;
@@ -48,12 +58,8 @@ internal static class CompanionReadingMapper
                     && ValidNumber(field, candidateUnit, value)) { number = value; unit = candidateUnit; }
             }
             else if (state.State is "on" or "off") { active = state.State == "on"; }
-            if (number.HasValue || active.HasValue)
-            { quality = reported is null ? CompanionReadingQuality.Unknown : now - reported <= maximumAge ? CompanionReadingQuality.Current : CompanionReadingQuality.Stale; }
         }
-        // Untimed/future reports cannot become even a dated last-known value.
-        if (reported is null) { number = null; active = null; unit = null; }
-        return new(state.EntityId, field, quality, reported, number, active, unit);
+        return (number, active, unit);
     }
 
     private static bool ValidNumber(CompanionField field, string? unit, double value) => field switch

@@ -26,6 +26,7 @@ public sealed class SyntheticCompanionHomeSource : IAsyncDisposable
     public ConcurrentBag<string> Reads { get; } = [];
     public DateTimeOffset ReportedAt { get; } = DateTimeOffset.UtcNow.AddSeconds(-1);
     public bool ReportsUnavailable { get; set; }
+    public string? HistoryJson { get; set; }
     private const string Token = "synthetic-protocol-proof-only";
 
     private SyntheticCompanionHomeSource(WebApplication app, string origin)
@@ -47,6 +48,24 @@ public sealed class SyntheticCompanionHomeSource : IAsyncDisposable
         var app = builder.Build();
         app.UseWebSockets();
         SyntheticCompanionHomeSource fixture = null!;
+        app.MapGet("/api/config", (HttpContext context) =>
+        {
+            if (context.Request.Headers.Authorization != "Bearer " + Token) { return Results.Unauthorized(); }
+            fixture.Reads.Add("config");
+            return Results.Json(new { time_zone = "Europe/Zurich", components = new[] { "history", "recorder" },
+                config_dir = "/private-wire-marker", elevation = 0, latitude = 0, longitude = 0, location_name = "private-wire-marker",
+                unit_system = new { length = "km", mass = "g", temperature = "°C", volume = "L" }, version = "synthetic-not-a-real-host" });
+        });
+        app.MapGet("/api/history/period/{timestamp}", (HttpContext context) =>
+        {
+            if (context.Request.Headers.Authorization != "Bearer " + Token) { return Results.Unauthorized(); }
+            var query = context.Request.Query;
+            if (query["filter_entity_id"] != "sensor.porch_temperature" || query.ContainsKey("minimal_response")
+                || query.ContainsKey("no_attributes") || query.ContainsKey("skip_initial_state") || query["significant_changes_only"] != "0")
+            { return Results.BadRequest(); }
+            fixture.Reads.Add("history:" + query["filter_entity_id"]);
+            return fixture.ReportsUnavailable ? Results.StatusCode(503) : Results.Text(fixture.HistoryJson ?? "[]", "application/json");
+        });
         app.MapGet("/api/states", (HttpContext context) =>
         {
             if (context.Request.Headers.Authorization != "Bearer " + Token) { return Results.Unauthorized(); }

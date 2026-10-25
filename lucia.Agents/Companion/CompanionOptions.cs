@@ -13,9 +13,12 @@ public sealed class CompanionOptions
     public string SourceBaseUrl { get; set; } = string.Empty;
     public TimeSpan MaximumObservationAge { get; set; } = TimeSpan.FromMinutes(30);
     public TimeSpan HomeReadTimeout { get; set; } = TimeSpan.FromSeconds(10);
+    public int HistoryLookbackDays { get; set; } = 30;
 
     public void Validate()
     {
+        if (HistoryLookbackDays is < 1 or > 3660)
+        { throw new ArgumentException("History lookback must be between 1 and 3660 days. It does not guarantee recorder retention."); }
         if (Enabled) { CompanionIdentifier.Validate(HomeId); }
         if (MaximumObservationAge < TimeSpan.FromSeconds(1) || MaximumObservationAge > TimeSpan.FromDays(1)
             || HomeReadTimeout < TimeSpan.FromSeconds(1) || HomeReadTimeout > TimeSpan.FromSeconds(30))

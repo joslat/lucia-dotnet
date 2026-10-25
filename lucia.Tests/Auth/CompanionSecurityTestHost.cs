@@ -111,6 +111,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         builder.Services.AddLuciaAuthentication(builder.Configuration);
         builder.Services.AddCompanionHomeReads();
+        builder.Services.AddCompanionHistory();
         builder.Services.AddCompanionActivity();
         configureServices?.Invoke(builder.Services);
         var app = builder.Build();
@@ -127,6 +128,7 @@ public sealed class CompanionSecurityTestHost : IAsyncDisposable
         app.MapCompanionSessionApi();
         app.MapCompanionPairingApi();
         app.MapCompanionHomeApi();
+        app.MapCompanionHistoryApi();
         app.MapCompanionActivityApi();
         app.MapCompanionLayoutApi();
         configureApp?.Invoke(app);
