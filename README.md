@@ -428,12 +428,11 @@ Track active and archived tasks with status counters (Active, Completed, Failed,
 
 Manage the Home Assistant entity hierarchy — floors, areas, and entities — with visibility controls. Toggle entity visibility to control which devices Lucia agents can see. Pull the HA exposed-entity list over WebSocket for pre-filtered entity management. Search and filter entities by area, domain, or name.
 
-Agent-scoped location, entity and hierarchy searches share the entity allow-list
-policy. Timer and alarm location resolution uses the registered `timer-agent`
-identity, including presence-based lookup when an alarm fires. Administrative
-inventory stays unfiltered. Visibility filtering is not a Home Assistant
-authorization boundary; direct entity IDs and execution-time revocation need
-separate checks. See [agent-scoped entity discovery](docs/AGENT_ENTITY_VISIBILITY.md).
+Visibility applies to the timer agent too. Timers and alarms resolve a location
+through the agent-scoped hierarchy search as `timer-agent`, including the
+presence lookup when an alarm fires. The dashboard's own entity search stays
+unfiltered. Visibility controls discovery, not Home Assistant authorization, so
+a full entity ID still passes through. See [agent-scoped entity discovery](docs/AGENT_ENTITY_VISIBILITY.md).
 
 ### Matcher Debug
 
@@ -604,6 +603,14 @@ See `infra/docker/.env.lucia.example` for a full template. ComfyUI, Whisper, Pip
 | **Agents** | Agent definitions and registration |
 | **ModelProviders** | LLM backend configurations (per-agent model assignment) |
 | **PromptCache** | Routing and chat cache thresholds (hot-reloadable) |
+
+Tool-result previews are off by default. Set `TraceCapture:CaptureToolResults` to
+`true` to store sanitized, bounded previews. `TraceCapture:MaxToolResultBytes`
+defaults to 4096 UTF-8 bytes per result. Newly generated training exports exclude
+results unless `TraceCapture:IncludeToolResultsInTrainingExport` is also enabled.
+`TraceCapture:Enabled=false` disables both orchestrator and per-agent trace
+persistence. See [safe tool-result capture](docs/TOOL_RESULT_CAPTURE.md) for scope,
+limits and migration notes.
 
 ### Home Assistant Integration Setup
 
@@ -888,7 +895,7 @@ The **Plugins** page has three tabs:
 
 ### Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download) or later
+- [.NET 10 SDK 10.0.403](https://dotnet.microsoft.com/download/dotnet/10.0) or a later stable .NET 10 SDK, with runtime 10.0.14 or later
 - [Node.js 22+](https://nodejs.org/) (for the dashboard)
 - [Docker](https://www.docker.com/) (required for Redis and PostgreSQL via Aspire)
 
@@ -946,10 +953,10 @@ Lucia can run natively on a Jetson Orin Nano Super without Docker. The
 experimental microSD installer provisions A/B Jetson Linux 36.5.2 slots, a
 versioned Lucia partition, persistent Redis and SQLite data, captive setup, and
 appliance management.
-The disk image creates both OS partitions but does not enable RootFS A/B in the
-Jetson's boot firmware. The installer warns when firmware readiness is unverified.
-OS updates require verified redundancy and a consistent boot layout; Lucia-only
-updates remain available.
+The installer writes both OS partitions. OS updates write the inactive partition
+and Lucia boots it once through GRUB, which NVIDIA's UEFI launcher supports on
+stock firmware; the new OS is committed only after it passes health checks, and
+any failed boot returns to the previous OS. No firmware flash is needed.
 
 The recovery password chosen during setup signs in as `lucia-recovery` over
 SSH or at the local console and authorizes sudo. Direct root SSH login is
@@ -1032,6 +1039,19 @@ Lucia includes OpenTelemetry instrumentation out of the box via the `lucia.Servi
 - **Logs** — Structured logging with correlation IDs and agent-specific filtering
 
 The Aspire Dashboard provides built-in log aggregation, trace visualization, and metrics during development. Lucia's own Activity Dashboard shows a live agent mesh graph and real-time event stream. For production, export to Prometheus, Grafana, Jaeger, or any OTLP-compatible backend.
+
+Model-provider telemetry records prompts and responses by default, as earlier
+releases did, which helps with troubleshooting and collecting training data. The
+setup wizard explains this and lets you turn it off. Upgraded installs keep it on.
+To change it later, set `ModelTelemetry:IncludeModelContent` on the Configuration
+page and restart Lucia. With it off, traces keep model metadata, timing, token
+usage and errors without message content.
+
+Personality rewrites share a configurable `PersonalityPrompt:MaxOutputTokens`
+output ceiling. Missing or blank values fall back to 4096 tokens. A rewrite that
+reaches its output limit returns the original response instead of partial text.
+See [model telemetry privacy and personality limits](docs/MODEL_PRIVACY_AND_PERSONALITY.md)
+for configuration, scope and tests.
 
 ## 🗺️ Roadmap
 
