@@ -9,6 +9,8 @@
     <SupportedOSPlatformVersion>31</SupportedOSPlatformVersion>
     <!-- A directly installable prototype must not require IDE fast-deployment side files. -->
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <!-- The repository pins the desktop runtime patch; Android runtime packs version with the workload, which global.json selects through the SDK band. -->
+    <RuntimeFrameworkVersion></RuntimeFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" />
