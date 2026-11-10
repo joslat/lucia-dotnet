@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Controls.PlacePage">
+  <!-- THESIS: One place, explained: what it reports now, why it is shown this way, and (in the demo) how its day looked.
+       OWN-WORLD: The Home orb at hero size, Observatory panels, Outfit title, DM Sans readings; no new palette.
+       STORY: Read the status and its plain explanation, scan readings with type icons, pin the place, open its actions or the whole story.
+       FIRST VIEWPORT: Back, breadcrumb and pin; hero and status chip; the explanation card.
+       FORM: Full page on phone and, from the side pane's Detail, on tablet. Sample charts and timeline only in the demo. -->
+  <StackPanel Name="PageContent" Spacing="16" MaxWidth="760">
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+      <Button Name="BackToHome" Classes="link" AutomationProperties.Name="Back to Home">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <Path Data="M15,6 L9,12 15,18" Width="24" Height="24" Stretch="None" StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round" Stroke="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+          <TextBlock Text="Home" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <TextBlock Name="Breadcrumb" Grid.Column="1" Classes="muted" FontSize="{DynamicResource TextSize13}" TextAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+      <ToggleButton Name="PinToggle" Grid.Column="2" Classes="pin" AutomationProperties.Name="Pin this place">
+        <Path Data="M9,3 L15,3 14,9 17,12 12,12 12,20 M7,12 L12,12" Width="24" Height="24" Stretch="None" StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round"
+              Stroke="{Binding $parent[ToggleButton].Foreground}" />
+      </ToggleButton>
+    </Grid>
+
+    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="18">
+      <Grid Name="PlaceAnchor" Width="96" Height="96">
+        <Ellipse Name="HeroFill" Fill="{DynamicResource ControlBrush}" />
+        <Ellipse Name="HeroRing" StrokeThickness="2" />
+        <Path Name="HeroIcon" Width="24" Height="24" Stretch="None" StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path.RenderTransform><ScaleTransform ScaleX="1.5" ScaleY="1.5" /></Path.RenderTransform>
+        </Path>
+      </Grid>
+      <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+        <TextBlock Name="PageTitle" Classes="title" TextWrapping="Wrap" />
+        <Border Name="StatusChip" CornerRadius="14" BorderThickness="1" Padding="10,4" HorizontalAlignment="Left">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Viewbox Name="StatusChipIconBox" Width="14" Height="14" VerticalAlignment="Center">
+              <Path Name="StatusChipIcon" Width="24" Height="24" Stretch="None" StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round" />
+            </Viewbox>
+            <TextBlock Name="StatusChipText" FontSize="{DynamicResource TextSize13}" VerticalAlignment="Center" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Grid>
+
+    <Border Classes="panel">
+      <StackPanel Spacing="10">
+        <TextBlock Name="ExplanationTitle" FontWeight="SemiBold" FontSize="{DynamicResource TextSize16}" TextWrapping="Wrap" />
+        <TextBlock Name="ExplanationBody" Classes="muted" FontSize="{DynamicResource TextSize14}" />
+        <WrapPanel ItemSpacing="8" LineSpacing="8">
+          <ToggleButton Name="WhyShown" Classes="theme" Content="Why shown" />
+          <Button Name="PageActionsButton" Classes="theme" Content="Place actions" />
+        </WrapPanel>
+        <TextBlock Name="WhyText" Classes="muted" FontSize="{DynamicResource TextSize13}" IsVisible="False" />
+        <TextBlock Name="PageConnections" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+      </StackPanel>
+    </Border>
+
+    <Border Classes="panel">
+      <StackPanel Spacing="4">
+        <TextBlock Name="ReadingsTitle" Classes="section" TextWrapping="Wrap" />
+        <StackPanel Name="PageObservations" />
+        <TextBlock Name="PageEmptyText" Classes="muted" />
+      </StackPanel>
+    </Border>
+
+    <Border Name="ChartCard" Classes="panel">
+      <StackPanel Spacing="8">
+        <TextBlock Name="ChartTitle" Classes="section" TextWrapping="Wrap" />
+        <TextBlock Name="ChartCaption" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <c:ReadingChart Name="TodayChart" />
+      </StackPanel>
+    </Border>
+
+    <Border Name="TimelineCard" Classes="panel">
+      <StackPanel Spacing="8">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBlock Name="TimelineTitle" Classes="section" TextWrapping="Wrap" VerticalAlignment="Center" />
+          <Button Name="OpenStory" Grid.Column="1" Classes="link" AutomationProperties.Name="Whole home story">
+            <TextBlock Text="Whole home story" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+          </Button>
+        </Grid>
+        <TextBlock Name="TimelineCaption" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <StackPanel Name="TimelineEntries" Spacing="6" />
+      </StackPanel>
+    </Border>
+
+    <TextBlock Name="HistoryNote" Text="Charts and this place's day appear once household history is connected." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+  </StackPanel>
+</UserControl>

@@ -69,7 +69,7 @@ public sealed class HomeScreenTests
             NativeCapture.Save(window, "home-phone-actions.png");
             window.KeyPress(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);
             Assert.False(view.State.IsActionsOpen);
-            view.FindControl<Button>("BackToHome")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            view.FindControl<PlacePage>("PlacePage")!.FindControl<Button>("BackToHome")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.False(view.State.IsDetailOpen);
             Assert.Equal("garden", view.State.SelectedPlace.Id);
             Assert.True(garden.IsSelected);

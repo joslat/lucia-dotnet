@@ -64,14 +64,7 @@
       </StackPanel>
     </ScrollViewer>
     <ScrollViewer Name="DetailScroll" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel Name="DetailScrollContent" Spacing="16">
-        <Button Name="BackToHome" Classes="theme" Content="Back to your home" HorizontalAlignment="Left" />
-        <Border Classes="panel">
-          <StackPanel Spacing="18">
-            <c:PlaceDetail Name="PhoneDetail" />
-          </StackPanel>
-        </Border>
-      </StackPanel>
+      <c:PlacePage Name="PlacePage" />
     </ScrollViewer>
     <Border Name="BloomShade" Grid.RowSpan="2" Background="#80000000" IsVisible="False" IsHitTestVisible="False" />
     <Popup Name="ActionPopup" Grid.Row="1" Placement="Center" IsLightDismissEnabled="True" ShouldUseOverlayLayer="True">

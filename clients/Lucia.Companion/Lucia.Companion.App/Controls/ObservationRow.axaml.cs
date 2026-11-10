@@ -13,6 +13,9 @@ public sealed partial class ObservationRow : UserControl
     {
         ArgumentNullException.ThrowIfNull(observation);
         this.FindControl<TextBlock>("LabelText")!.Text = observation.Label;
+        var icon = this.FindControl<Avalonia.Controls.Shapes.Path>("ReadingIcon")!;
+        icon.Data = ReadingIcons.For(observation.Role);
+        icon.IsVisible = true;
         this.FindControl<TextBlock>("ValueText")!.Text = observation.CurrentText;
         this.FindControl<TextBlock>("PreviousText")!.Text = observation.PreviousText;
         this.FindControl<TextBlock>("PreviousText")!.IsVisible = observation.PreviousText.Length > 0;

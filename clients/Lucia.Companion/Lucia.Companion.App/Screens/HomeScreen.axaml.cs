@@ -22,10 +22,15 @@ public sealed partial class HomeScreen : UserControl
     private HomeTopology? renderedHome;
     private Place? renderedPlace;
     private DateTimeOffset? renderedReportTime;
+    private DateTimeOffset? renderedPageReportTime;
     private bool actionsWereOpen;
     private bool detailWasOpen;
     public HomeViewModel State { get; }
     public bool IsExpanded => Bounds.Width >= 900;
+    /// <summary>Phone shows the place page whenever detail is open; tablet only after the side pane's Detail.</summary>
+    public bool IsPageVisible => IsExpanded ? State.IsPageOpen : State.IsDetailOpen;
+    /// <summary>The place page's "Whole home story" link, for the shell to open Story filtered to that place.</summary>
+    public event Action<string>? StoryRequested;
 
     public HomeScreen() : this(new HomeViewModel(SampleHome.Create())) { }
 
@@ -38,12 +43,14 @@ public sealed partial class HomeScreen : UserControl
         constellation.ActionsRequested += id => { State.SelectPlace(id); State.CloseDetail(); State.OpenActions(); };
         constellation.PinRequested += id => { State.SelectPlace(id); State.TogglePin(); };
         this.FindControl<AttentionList>("Attention")!.PlaceInvoked += State.SelectPlace;
-        this.FindControl<Button>("BackToHome")!.Click += (_, _) => ReturnHome();
+        var page = this.FindControl<PlacePage>("PlacePage")!;
+        page.BackRequested += () => { if (IsExpanded) { ClosePage(); } else { ReturnHome(); } };
+        page.PinToggled += State.TogglePin;
+        page.ActionsRequested += State.OpenActions;
+        page.StoryRequested += id => StoryRequested?.Invoke(id);
+        this.FindControl<PlaceDetail>("DesktopDetail")!.PageRequested += State.OpenPage;
         this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.OrderChanged += order => State.SetSectionOrder(order);
-        foreach (var name in new[] { "DesktopDetail", "PhoneDetail" })
-        {
-            this.FindControl<PlaceDetail>(name)!.ActionsRequested += State.OpenActions;
-        }
+        this.FindControl<PlaceDetail>("DesktopDetail")!.ActionsRequested += State.OpenActions;
 
         var actions = this.FindControl<BloomActions>("PlaceActions")!;
         actions.PinRequested += State.TogglePin;
@@ -97,12 +104,14 @@ public sealed partial class HomeScreen : UserControl
         constellation.UpdateSelection(State.SelectedPlace?.Id, State.IsPinned);
         if (State.SelectedPlace is { } place)
         {
-            if (homeChanged || !ReferenceEquals(renderedPlace, place))
+            if (homeChanged || !ReferenceEquals(renderedPlace, place) || renderedPageReportTime != State.ReportTime)
             {
                 this.FindControl<PlaceDetail>("DesktopDetail")!.SetPlace(place, State.Home);
-                this.FindControl<PlaceDetail>("PhoneDetail")!.SetPlace(place, State.Home);
+                this.FindControl<PlacePage>("PlacePage")!.SetPlace(place, State.Home, State.IsDemo, State.ReportTime);
                 renderedPlace = place;
+                renderedPageReportTime = State.ReportTime;
             }
+            this.FindControl<PlacePage>("PlacePage")!.SetPinned(State.IsPinned(place.Id));
 
             this.FindControl<BloomActions>("PlaceActions")!.SetPlace(place, State.IsPinned(place.Id));
         }
@@ -116,8 +125,10 @@ public sealed partial class HomeScreen : UserControl
         this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.SetOrder(State.SectionOrder);
         side.IsVisible = IsExpanded;
         this.FindControl<Border>("DesktopDetailCard")!.IsVisible = IsExpanded && State.SelectedPlace is not null;
-        this.FindControl<ScrollViewer>("HomeScroll")!.IsVisible = IsExpanded || !State.IsDetailOpen;
-        this.FindControl<ScrollViewer>("DetailScroll")!.IsVisible = !IsExpanded && State.IsDetailOpen;
+        var pageOpen = IsPageVisible;
+        this.FindControl<ScrollViewer>("HomeScroll")!.IsVisible = !pageOpen;
+        this.FindControl<ScrollViewer>("DetailScroll")!.IsVisible = pageOpen;
+        this.FindControl<Grid>("HomeContext")!.IsVisible = !pageOpen;
         var popup = this.FindControl<Popup>("ActionPopup")!;
         this.FindControl<Border>("BloomShade")!.IsVisible = State.IsActionsOpen;
         if (!State.IsActionsOpen) { popup.IsOpen = false; }
@@ -127,23 +138,24 @@ public sealed partial class HomeScreen : UserControl
             {
                 if (State.IsActionsOpen)
                 {
-                    popup.PlacementTarget = !IsExpanded && State.IsDetailOpen
-                        ? this.FindControl<PlaceDetail>("PhoneDetail")!.GetPlaceAnchor()
+                    popup.PlacementTarget = IsPageVisible
+                        ? this.FindControl<PlacePage>("PlacePage")!.GetPlaceAnchor()
                         : constellation.GetPlaceAnchor(State.SelectedPlace?.Id);
                     if (popup.PlacementTarget is not null && TopLevel.GetTopLevel(this) is not null) { popup.IsOpen = true; }
                 }
             }, DispatcherPriority.Loaded);
         }
-        else if (!IsExpanded && State.IsDetailOpen && !detailWasOpen)
+        else if (pageOpen && !detailWasOpen)
         {
+            this.FindControl<ScrollViewer>("DetailScroll")!.Offset = default;
             Dispatcher.UIThread.Post(() =>
             {
-                if (!IsExpanded && State.IsDetailOpen && !State.IsActionsOpen) { this.FindControl<Button>("BackToHome")!.Focus(); }
+                if (IsPageVisible && !State.IsActionsOpen) { this.FindControl<PlacePage>("PlacePage")!.FocusBack(); }
             }, DispatcherPriority.Loaded);
         }
 
         actionsWereOpen = State.IsActionsOpen;
-        detailWasOpen = State.IsDetailOpen;
+        detailWasOpen = pageOpen;
     }
 
     private void RefreshHeader()
@@ -255,7 +267,7 @@ public sealed partial class HomeScreen : UserControl
     public bool TryNavigateBack()
     {
         if (State.IsActionsOpen) { CloseActions(); return true; }
-        if (!IsExpanded && State.IsDetailOpen) { ReturnHome(); return true; }
+        if (IsPageVisible) { if (IsExpanded) { ClosePage(); } else { ReturnHome(); } return true; }
         var customize = this.FindControl<Expander>("CustomizeHome")!;
         if (customize.IsExpanded) { customize.IsExpanded = false; customize.Focus(); return true; }
         return false;
@@ -264,8 +276,14 @@ public sealed partial class HomeScreen : UserControl
     private void CloseActions()
     {
         State.CloseActions();
-        if (!IsExpanded && State.IsDetailOpen) { this.FindControl<PlaceDetail>("PhoneDetail")!.FocusActions(); }
+        if (IsPageVisible) { this.FindControl<PlacePage>("PlacePage")!.FocusActions(); }
         else { this.FindControl<HomeConstellation>("Constellation")!.FocusPlace(State.SelectedPlace?.Id); }
+    }
+
+    private void ClosePage()
+    {
+        State.ClosePage();
+        this.FindControl<PlaceDetail>("DesktopDetail")!.FocusActions();
     }
 
     private void ReturnHome()

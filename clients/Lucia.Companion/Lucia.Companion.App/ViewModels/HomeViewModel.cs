@@ -19,6 +19,8 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
     public Place? SelectedPlace { get; private set; }
     public bool IsActionsOpen { get; private set; }
     public bool IsDetailOpen { get; private set; }
+    /// <summary>The full place page. Phone shows it whenever detail is open; tablet only after the side pane's Detail.</summary>
+    public bool IsPageOpen { get; private set; }
     public IReadOnlyList<string> PinnedPlaceIds => Home.Places.Where(place => pinnedIds.Contains(place.Id)).Select(place => place.Id).ToArray();
     public IReadOnlyList<HomeSection> SectionOrder { get; private set; } = HomeSections.DefaultOrder;
     public IReadOnlyList<Place> AttentionPlaces => Home.Places
@@ -63,7 +65,9 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
     }
 
     public void CloseActions() { IsActionsOpen = false; Notify(); }
-    public void CloseDetail() { IsDetailOpen = false; IsActionsOpen = false; Notify(); }
+    public void CloseDetail() { IsDetailOpen = false; IsPageOpen = false; IsActionsOpen = false; Notify(); }
+    public void OpenPage() { if (SelectedPlace is null) { return; } IsDetailOpen = true; IsPageOpen = true; IsActionsOpen = false; Notify(); }
+    public void ClosePage() { IsPageOpen = false; IsActionsOpen = false; Notify(); }
     public void ClearSelection() { SelectedPlace = null; CloseDetail(); }
 
     public void TogglePin()

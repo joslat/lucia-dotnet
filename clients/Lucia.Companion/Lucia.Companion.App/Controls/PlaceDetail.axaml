@@ -1,11 +1,20 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Lucia.Companion.App.Controls.PlaceDetail">
   <StackPanel Spacing="12">
-    <Grid ColumnDefinitions="56,*" ColumnSpacing="12">
+    <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12">
       <Border Name="PlaceAnchor" Width="56" Height="56" CornerRadius="28" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource GraphLineBrush}" BorderThickness="1">
         <Path Name="PlaceIcon" Width="26" Height="26" Stretch="Uniform" Stroke="{DynamicResource TextBrush}" StrokeThickness="1.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
       </Border>
-      <TextBlock Name="PlaceName" Grid.Column="1" Classes="section" TextWrapping="Wrap" VerticalAlignment="Center" />
+      <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+        <TextBlock Name="PlaceName" Classes="section" TextWrapping="Wrap" />
+        <TextBlock Name="StatusLine" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
+      </StackPanel>
+      <Button Name="OpenPlacePage" Grid.Column="2" Classes="theme" VerticalAlignment="Center" AutomationProperties.Name="Open the full place page">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <TextBlock Text="Detail" VerticalAlignment="Center" />
+          <Path Data="M9,6 L15,12 9,18" Width="24" Height="24" Stretch="None" StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round" Stroke="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
     </Grid>
     <TextBlock Name="Reason" Classes="muted" />
     <Button Name="ActionsButton" Classes="theme" Content="Place actions" HorizontalAlignment="Left" />

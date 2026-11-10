@@ -59,6 +59,7 @@ public sealed partial class CompanionShell : UserControl
         AvaloniaXamlLoader.Load(this);
         Host.Content = home;
         Navigation.DestinationRequested += Navigate;
+        home.StoryRequested += OpenStoryFor;
         this.FindControl<Button>("RetrySaveButton")!.Click += (_, _) => profileSession.RetrySave();
         this.FindControl<Button>("ReviewSaveConflict")!.Click += async (_, _) => await OpenSaveConflictAsync();
         profileSession.Changed += RefreshStorageState;
@@ -173,6 +174,13 @@ public sealed partial class CompanionShell : UserControl
             story = new StoryScreen(new StoryViewModel(SampleStory.Create(storyHome)));
         }
         Host.Content = story;
+    }
+
+    /// <summary>Opens Story filtered to one place. Connected Story has no history yet, so it shows that state instead.</summary>
+    public void OpenStoryFor(string placeId)
+    {
+        Navigate(ShellDestination.Story);
+        if (Host.Content is StoryScreen screen && screen.State.Day.Places.Any(place => place.Id == placeId)) { screen.State.SelectPlace(placeId); }
     }
 
     private LuciaScreen LuciaDestination()

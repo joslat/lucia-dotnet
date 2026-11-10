@@ -7,17 +7,22 @@ namespace Lucia.Companion.App.Controls;
 public sealed partial class PlaceDetail : UserControl
 {
     public event Action? ActionsRequested;
+    public event Action? PageRequested;
     public PlaceDetail()
     {
         AvaloniaXamlLoader.Load(this);
         this.FindControl<Button>("ActionsButton")!.Click += (_, _) => ActionsRequested?.Invoke();
+        this.FindControl<Button>("OpenPlacePage")!.Click += (_, _) => PageRequested?.Invoke();
     }
 
     public void SetPlace(Place place, HomeTopology home)
     {
         this.FindControl<Avalonia.Controls.Shapes.Path>("PlaceIcon")!.Data = PlaceIcons.For(place.Icon);
         this.FindControl<TextBlock>("PlaceName")!.Text = place.Name;
-        this.FindControl<TextBlock>("Reason")!.Text = $"{place.State}. {place.Reason}";
+        var status = this.FindControl<TextBlock>("StatusLine")!;
+        status.Text = PlaceStateBrushes.StatusLabel(place);
+        status[!TextBlock.ForegroundProperty] = new Avalonia.Markup.Xaml.MarkupExtensions.DynamicResourceExtension(PlaceStateBrushes.Key(place.State));
+        this.FindControl<TextBlock>("Reason")!.Text = place.Reason;
         var neighborIds = home.Connections.Where(edge => edge.FromPlaceId == place.Id || edge.ToPlaceId == place.Id)
             .Select(edge => edge.FromPlaceId == place.Id ? edge.ToPlaceId : edge.FromPlaceId).ToHashSet(StringComparer.Ordinal);
         var neighbors = home.Places.Where(candidate => neighborIds.Contains(candidate.Id)).Select(candidate => candidate.Name).ToArray();
