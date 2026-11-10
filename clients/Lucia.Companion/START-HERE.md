@@ -1,10 +1,16 @@
 # Start here: companion handoff
 
-Updated 10 November 2026. The user resumed work on the **app-only track**. Read "Direction update, 10 November 2026" in [BUILD-PLAN.md](BUILD-PLAN.md) first; it supersedes the W4 instructions below.
+Updated 10 November 2026, end of the app-only track. Read "Direction update, 10 November 2026" in [BUILD-PLAN.md](BUILD-PLAN.md) first; it supersedes the W4 instructions below. The owner keeps a private plan and a live status tracker outside this repository; if they disagree with these files, they win.
 
-- The upstream v2 branch (`feat/personal-assistant-harness-api`) will provide identity and the app API (`/api/me`). Do not change server code, pairing, sessions, grants or migrations until it settles.
-- Work in this order: V01 inventory, V00 navigation shell, Home completion, V02 Bloom gestures, Story UI and motion on labelled sample data.
-- Building needs .NET SDK 10.0.403 (master's `global.json`) and the Android workload.
+**Where it stands.** The W5 app-only track is done: V00 navigation (phone bottom bar, tablet rail), V06 Home header and Needs you, V07 place captions and zones, V08 place page, V02 Bloom actions with hold-slide-release, V09 Story Day/Week and dates, V10 Story now/future and Lucia lane, V11 Today so far and V03 motion with Reduce motion. Three review rounds followed and their fixes are in. History-backed views run on clearly labelled sample data in the demo only; connected mode never falls back to samples. At head the full native suite passes (3 opt-in wire tests skipped) and the Android project builds with 0 warnings and 0 errors.
+
+**What is next.**
+
+- Without v2: a demo-mode check on a real Android phone (Q01), which is the only way to qualify touch hold-and-slide, predictive Back, large text, safe areas and motion. iOS needs a Mac with Xcode and an Apple developer account and has no project yet.
+- Waits for the upstream v2 branch (`feat/personal-assistant-harness-api`, identity and the `/api/me` app API): porting pairing, sessions and reads onto v2; W4 Story on real history (T02–T05); Bloom's Ask Lucia and richer Lucia stages; the V05 Engine room.
+- Do not change server code, pairing, sessions, grants or migrations until v2 settles, and do not build on v2 yet.
+
+**Working setup.** .NET SDK 10.0.403 (master's `global.json`) and the Android workload. Run builds and tests one at a time on low-memory machines. Test-first, one class per file, and the impeccable skill before any UI change (see `AGENTS.md`).
 
 The 25 October handoff below remains the record of the server-side history prerequisite.
 

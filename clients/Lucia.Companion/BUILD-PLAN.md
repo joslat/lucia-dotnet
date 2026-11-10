@@ -16,6 +16,7 @@ Consequences for this plan:
   6. a demo-mode check on a real phone and tablet.
 
   None of these depend on the server API.
+- **App-only track status (10 November, end of session):** V00, V06, V07, V08, V02, V09, V10, V11 and V03 are delivered, followed by three review rounds whose fixes are in. Next without v2: a demo-mode check on a real Android phone (Q01). Everything else in W4 and W5 that is still open waits for v2 or for history.
 - **Branch state:** fork master was merged in at `9de17e0`, bringing in the .NET 10.0.14 security update, which needs SDK 10.0.403. Android's runtime pin was fixed at `6e2f47e`. Verification passed: native tests 496/499 (3 opt-in skipped), a clean Android build, and 898/910 selected server tests; the 4 failures are live-model evaluations that need a model not installed locally.
 
 ## Session handoff, 25 October 2026
