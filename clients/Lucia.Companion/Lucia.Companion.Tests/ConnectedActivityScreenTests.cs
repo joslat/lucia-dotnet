@@ -209,8 +209,15 @@ public sealed class ConnectedActivityScreenTests
             state.SelectPlace("porch"); window.UpdateLayout();
             Assert.Equal(ScrollBarVisibility.Disabled, view.FindControl<ScrollViewer>("DetailScroll")!.VerticalScrollBarVisibility);
             CompanionTypography.Apply(size => size); window.UpdateLayout();
+            // On phone widths the header always scrolls away with the content, as in the Home artboard.
+            Assert.Equal(ScrollBarVisibility.Auto, view.FindControl<ScrollViewer>("ContextScroll")!.VerticalScrollBarVisibility);
+            Assert.Equal(ScrollBarVisibility.Disabled, view.FindControl<ScrollViewer>("DetailScroll")!.VerticalScrollBarVisibility);
+            // At tablet widths with normal text the header stays put above its own scrolling regions.
+            window.Content = null; window.Close();
+            window = new Window { Width = 1194, Height = 834, Content = view }; window.Show(); window.UpdateLayout();
+            Assert.True(view.IsExpanded);
             Assert.Equal(ScrollBarVisibility.Disabled, view.FindControl<ScrollViewer>("ContextScroll")!.VerticalScrollBarVisibility);
-            Assert.Equal(ScrollBarVisibility.Auto, view.FindControl<ScrollViewer>("DetailScroll")!.VerticalScrollBarVisibility);
+            Assert.Equal(ScrollBarVisibility.Auto, view.FindControl<ScrollViewer>("HomeScroll")!.VerticalScrollBarVisibility);
         }
         finally { window.Close(); CompanionTypography.Apply(size => size); }
     }

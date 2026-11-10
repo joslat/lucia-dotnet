@@ -13,7 +13,9 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
     public HomeTopology Home { get; private set; } = home ?? throw new ArgumentNullException(nameof(home));
     public IReadOnlyList<ObservationSource> SourceCatalog { get; private set; } = Array.AsReadOnly((sources ?? []).ToArray());
     public bool IsDemo { get; } = isDemo;
-    public string SourceNotice { get; private set; } = isDemo ? "Synthetic readings · 24 Oct 2026 · 12:00 UTC" : "No verified Home reports available.";
+    public string SourceNotice { get; private set; } = isDemo ? "Synthetic readings. No live household data." : "No verified Home reports available.";
+    /// <summary>When the shown reports were captured: the sample clock in the demo, the last verified read when connected.</summary>
+    public DateTimeOffset? ReportTime { get; private set; } = isDemo ? SampleHome.CapturedAt : null;
     public Place? SelectedPlace { get; private set; }
     public bool IsActionsOpen { get; private set; }
     public bool IsDetailOpen { get; private set; }
@@ -33,6 +35,7 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
     }
 
     public void SetSourceNotice(string notice) { SourceNotice = notice; Notify(); }
+    public void SetReportTime(DateTimeOffset? time) { if (ReportTime == time) { return; } ReportTime = time; Notify(); }
 
     public void SetSectionOrder(IEnumerable<HomeSection> order, bool notifyPreferences = true)
     {

@@ -79,6 +79,7 @@ public sealed class ConnectedHomeController : IDisposable
             failures = 0; refreshDelay = TimeSpan.FromSeconds(20); serverDelay = TimeSpan.Zero;
             HasData = true;
             Reproject();
+            state.SetReportTime(snapshot!.CapturedAt);
             state.SetSourceNotice($"Reports captured {snapshot!.CapturedAt.UtcDateTime:yyyy-MM-dd HH:mm 'UTC'} · Refresh every 20 seconds while this view is active. Source reports are not physical verification.");
             StatusText = "Authorized reports loaded. Current means recently reported, not independently verified.";
         }
@@ -154,6 +155,7 @@ public sealed class ConnectedHomeController : IDisposable
         state.ReplaceHome(new(state.Home.Id, state.Home.Name, state.Home.Places.Select(place => place with
         { State = PlaceState.Unavailable, Reason = "No verified reports available.", Observations = Array.Empty<Observation>() }), state.Home.Connections, state.Home.Bindings), notifyPreferences: false);
         state.SetSourceNotice("No verified Home reports available.");
+        state.SetReportTime(null);
     }
     private void Notify() { if (!disposed) { Changed?.Invoke(); } }
     private static bool IsTransient(CompanionConnectionException error) => error.Failure == ConnectionFailure.Transport

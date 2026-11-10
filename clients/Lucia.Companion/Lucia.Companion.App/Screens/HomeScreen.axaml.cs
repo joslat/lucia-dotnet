@@ -1,6 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Automation;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Shapes;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -9,6 +12,7 @@ using Avalonia.VisualTree;
 using Lucia.Companion.App.Controls;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.Core;
+using System.Globalization;
 
 namespace Lucia.Companion.App.Screens;
 
@@ -17,6 +21,7 @@ public sealed partial class HomeScreen : UserControl
 {
     private HomeTopology? renderedHome;
     private Place? renderedPlace;
+    private DateTimeOffset? renderedReportTime;
     private bool actionsWereOpen;
     private bool detailWasOpen;
     public HomeViewModel State { get; }
@@ -69,28 +74,24 @@ public sealed partial class HomeScreen : UserControl
 
     private void Refresh()
     {
-        this.FindControl<TextBlock>("HomeModeLabel")!.Text = State.IsDemo ? "Offline demo" : "Connected";
         this.FindControl<TextBlock>("SourceNotice")!.Text = State.SourceNotice;
         this.FindControl<LuciaNow>("DemoLuciaNow")!.IsVisible = State.IsDemo;
         this.FindControl<ConnectedLuciaNow>("ConnectedLuciaNotice")!.IsVisible = !State.IsDemo;
         ArrangeContextForTextSize();
-        var stackIdentity = Bounds.Width < 600 && this.FindControl<TextBlock>("HomeName")!.FontSize > 32;
-        Grid.SetColumnSpan(this.FindControl<TextBlock>("HomeName")!, stackIdentity ? 2 : 1);
-        var badge = this.FindControl<Border>("DemoBadge")!;
-        Grid.SetRow(badge, stackIdentity ? 1 : 0);
-        Grid.SetColumn(badge, stackIdentity ? 0 : 1);
-        badge.HorizontalAlignment = stackIdentity ? Avalonia.Layout.HorizontalAlignment.Left : Avalonia.Layout.HorizontalAlignment.Stretch;
+        ArrangeHeader();
         var constellation = this.FindControl<HomeConstellation>("Constellation")!;
         var homeChanged = !ReferenceEquals(renderedHome, State.Home);
         if (homeChanged)
         {
             this.FindControl<TextBlock>("HomeName")!.Text = State.Home.Name;
-            this.FindControl<TextBlock>("AttentionSummary")!.Text = State.AttentionPlaces.Count == 0
-                ? State.IsDemo ? "No places need a look in this sample." : "Configured reports only. No safety or presence conclusion."
-                : $"{State.AttentionPlaces.Count} places need a look · {State.AttentionPlaces[0].Name} first";
             constellation.SetHome(State.Home);
-            this.FindControl<AttentionList>("Attention")!.SetPlaces(State.AttentionPlaces, State.IsDemo);
             renderedHome = State.Home;
+        }
+        if (homeChanged || renderedReportTime != State.ReportTime)
+        {
+            RefreshHeader();
+            this.FindControl<AttentionList>("Attention")!.SetPlaces(State.AttentionPlaces, State.IsDemo, State.ReportTime);
+            renderedReportTime = State.ReportTime;
         }
 
         constellation.UpdateSelection(State.SelectedPlace?.Id, State.IsPinned);
@@ -145,9 +146,72 @@ public sealed partial class HomeScreen : UserControl
         detailWasOpen = State.IsDetailOpen;
     }
 
+    private void RefreshHeader()
+    {
+        var attention = State.AttentionPlaces;
+        this.FindControl<TextBlock>("AttentionHeadline")!.Text = HomeAttention.Headline(attention.Count);
+        this.FindControl<TextBlock>("AttentionSummary")!.Text = HomeAttention.Subline(attention.FirstOrDefault()?.Name, attention.Count, State.Home.Places.Count, State.IsDemo);
+        var date = this.FindControl<TextBlock>("HomeDate")!;
+        date.IsVisible = State.ReportTime is not null;
+        date.Text = State.ReportTime is { } time ? time.UtcDateTime.ToString("dddd d MMM · HH:mm 'UTC'", CultureInfo.InvariantCulture) : null;
+        var live = !State.IsDemo && State.ReportTime is not null;
+        var label = this.FindControl<TextBlock>("HomeModeLabel")!;
+        label.Text = State.IsDemo ? "Offline demo" : live ? "Live" : "Connected";
+        label[!TextBlock.ForegroundProperty] = new DynamicResourceExtension(State.IsDemo ? "AccentBrush" : live ? "SageBrush" : "MutedBrush");
+        this.FindControl<Ellipse>("LiveDot")!.IsVisible = live;
+        AutomationProperties.SetName(this.FindControl<Border>("DemoBadge")!, State.IsDemo ? "Offline demo, synthetic readings" : live ? $"Live reports, read {date.Text}" : "Connected, no reports yet");
+    }
+
+    /// <summary>Phone stacks the header; tablet puts the date and name, a divider, the headline and the mode chip on one line.</summary>
+    private void ArrangeHeader()
+    {
+        var context = this.FindControl<Grid>("HomeContext")!;
+        var identity = this.FindControl<StackPanel>("HomeIdentity")!;
+        var headline = this.FindControl<StackPanel>("HeadlineBlock")!;
+        var date = this.FindControl<TextBlock>("HomeDate")!;
+        var name = this.FindControl<TextBlock>("HomeName")!;
+        var badge = this.FindControl<Border>("DemoBadge")!;
+        var notice = this.FindControl<TextBlock>("SourceNotice")!;
+        var divider = this.FindControl<Border>("HeaderDivider")!;
+        var title = this.FindControl<TextBlock>("AttentionHeadline")!;
+        var expanded = IsExpanded;
+        var dateHome = expanded ? identity : headline;
+        if (!ReferenceEquals(date.Parent, dateHome))
+        {
+            ((Panel)date.Parent!).Children.Remove(date);
+            dateHome.Children.Insert(0, date);
+        }
+        title[!TextBlock.FontSizeProperty] = new DynamicResourceExtension(expanded ? "TextSize24" : "TextSize34");
+        divider.IsVisible = expanded;
+        context.ColumnDefinitions = new ColumnDefinitions(expanded ? "Auto,Auto,*,Auto" : "*,Auto");
+        context.RowDefinitions = new RowDefinitions(expanded ? "Auto,Auto" : "Auto,Auto,Auto,Auto");
+        identity.MaxWidth = expanded ? 380 : double.PositiveInfinity;
+        if (expanded)
+        {
+            Place(identity, 0, 0); Place(divider, 0, 1); Place(headline, 0, 2); Place(badge, 0, 3); Place(notice, 1, 0, 4);
+            badge.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
+            return;
+        }
+        // At large text on a narrow screen the chip moves under the name so the name can use the full width.
+        var stackBadge = Bounds.Width < 600 && name.FontSize > 32;
+        Place(identity, 0, 0, stackBadge ? 2 : 1);
+        Place(badge, stackBadge ? 1 : 0, stackBadge ? 0 : 1);
+        badge.HorizontalAlignment = stackBadge ? Avalonia.Layout.HorizontalAlignment.Left : Avalonia.Layout.HorizontalAlignment.Right;
+        Place(headline, stackBadge ? 2 : 1, 0, 2);
+        Place(notice, stackBadge ? 3 : 2, 0, 2);
+    }
+
+    private static void Place(Control control, int row, int column, int columnSpan = 1)
+    {
+        Grid.SetRow(control, row);
+        Grid.SetColumn(control, column);
+        Grid.SetColumnSpan(control, columnSpan);
+    }
+
     private void ArrangeContextForTextSize()
     {
-        var scrolling = this.FindControl<TextBlock>("HomeName")!.FontSize > 32;
+        // Phone widths scroll the header away with the content, as in the Home artboard; large text does too at any width.
+        var scrolling = this.FindControl<TextBlock>("HomeName")!.FontSize > 32 || !IsExpanded;
         this.FindControl<ScrollViewer>("ContextScroll")!.VerticalScrollBarVisibility = scrolling ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
         foreach (var name in new[] { "HomeScroll", "DetailScroll" })
         {

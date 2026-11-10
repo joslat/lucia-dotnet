@@ -84,6 +84,30 @@
       <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
       <Style Selector="^:disabled"><Setter Property="Opacity" Value="0.5" /></Style>
     </ControlTheme>
+    <ControlTheme x:Key="AttentionRowButton" TargetType="Button">
+      <Setter Property="FontFamily" Value="{DynamicResource BodyFont}" />
+      <Setter Property="FontSize" Value="{DynamicResource TextSize16}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="MinHeight" Value="48" />
+      <Setter Property="Padding" Value="10" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="RowFrame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="14" Padding="{TemplateBinding Padding}">
+            <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^.lead"><Setter Property="Background" Value="{DynamicResource ControlBrush}" /><Setter Property="Padding" Value="12" /></Style>
+      <Style Selector="^.lead.problem"><Setter Property="BorderBrush" Value="{DynamicResource ProblemBrush}" /></Style>
+      <Style Selector="^.lead.waiting"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
+      <Style Selector="^.lead.unavailable"><Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" /></Style>
+      <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource ControlBrush}" /></Style>
+      <Style Selector="^:focus-visible /template/ Border#RowFrame"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /><Setter Property="BorderThickness" Value="2" /></Style>
+      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
+    </ControlTheme>
   </Styles.Resources>
   <Style Selector="TemplatedControl"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /></Style>
   <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>

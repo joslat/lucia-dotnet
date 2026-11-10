@@ -8,16 +8,25 @@
        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
   <ScrollViewer Name="ContextScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
   <Grid Name="HomeRoot" RowDefinitions="Auto,*" Margin="16">
-    <StackPanel Name="HomeContext" Spacing="4" Margin="4,0,4,12">
-      <Grid Name="HomeIdentity" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
-        <TextBlock Name="HomeName" Classes="section" VerticalAlignment="Center" TextWrapping="Wrap" />
-        <Border Name="DemoBadge" Grid.Column="1" Background="{DynamicResource ControlBrush}" CornerRadius="12" Padding="12,8" VerticalAlignment="Center">
-          <TextBlock Name="HomeModeLabel" Text="Offline demo" FontSize="{DynamicResource TextSize13}" Foreground="{DynamicResource AccentBrush}" />
-        </Border>
-      </Grid>
-      <TextBlock Name="SourceNotice" Text="Synthetic readings · 24 Oct 2026 · 12:00 UTC" Classes="muted" FontSize="{DynamicResource TextSize13}" />
-      <TextBlock Name="AttentionSummary" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
-    </StackPanel>
+    <!-- Phone: name and chip, then date, headline and subline stacked. Tablet: date and name, a divider, the headline beside them, the chip at the end. -->
+    <Grid Name="HomeContext" Margin="4,0,4,16" ColumnSpacing="10" RowSpacing="10">
+      <StackPanel Name="HomeIdentity" Spacing="2" VerticalAlignment="Center">
+        <TextBlock Name="HomeName" Classes="section" TextWrapping="Wrap" />
+      </StackPanel>
+      <Border Name="HeaderDivider" Width="1" Margin="14,4" Background="{DynamicResource GraphLineBrush}" IsVisible="False" />
+      <StackPanel Name="HeadlineBlock" Spacing="4">
+        <TextBlock Name="HomeDate" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <TextBlock Name="AttentionHeadline" FontFamily="{DynamicResource DisplayFont}" FontWeight="Medium" TextWrapping="Wrap" />
+        <TextBlock Name="AttentionSummary" Classes="muted" FontSize="{DynamicResource TextSize14}" TextWrapping="Wrap" />
+      </StackPanel>
+      <Border Name="DemoBadge" Background="{DynamicResource ControlBrush}" CornerRadius="16" Padding="12,8" VerticalAlignment="Top" HorizontalAlignment="Right">
+        <StackPanel Orientation="Horizontal" Spacing="7">
+          <Ellipse Name="LiveDot" Width="8" Height="8" Fill="{DynamicResource SageBrush}" VerticalAlignment="Center" IsVisible="False" />
+          <TextBlock Name="HomeModeLabel" Text="Offline demo" FontSize="{DynamicResource TextSize13}" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Border>
+      <TextBlock Name="SourceNotice" Text="Synthetic readings. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+    </Grid>
     <ScrollViewer Name="HomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Name="HomeScrollContent" Spacing="12">
       <Grid Name="HomeGrid" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">

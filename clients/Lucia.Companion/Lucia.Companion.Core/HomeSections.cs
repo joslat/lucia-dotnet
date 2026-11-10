@@ -20,7 +20,7 @@ public static class HomeSections
     public static string Label(HomeSection section) => section switch
     {
         HomeSection.Places => "Your places",
-        HomeSection.Attention => "Needs a look",
+        HomeSection.Attention => "Needs you",
         HomeSection.LuciaNow => "Lucia now",
         _ => throw new ArgumentOutOfRangeException(nameof(section))
     };
