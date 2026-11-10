@@ -64,16 +64,20 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<Button>("ReviewSaveConflict")!.Click += async (_, _) => await OpenSaveConflictAsync();
         profileSession.Changed += RefreshStorageState;
         SizeChanged += (_, _) => ArrangeNavigation();
+        ApplyMotion();
         AttachedToVisualTree += async (_, _) =>
         {
             attachedTopLevel = TopLevel.GetTopLevel(this);
             if (attachedTopLevel is not null) { attachedTopLevel.BackRequested += OnBackRequested; }
+            MotionSettings.Current.Changed += ApplyMotion;
+            ApplyMotion();
             await profileSession.InitializeAsync();
         };
         DetachedFromVisualTree += (_, _) =>
         {
             if (attachedTopLevel is not null) { attachedTopLevel.BackRequested -= OnBackRequested; }
             attachedTopLevel = null;
+            MotionSettings.Current.Changed -= ApplyMotion;
         };
         KeyDown += (_, args) =>
         {
@@ -95,6 +99,10 @@ public sealed partial class CompanionShell : UserControl
         Navigation.Select(destination);
         RefreshStorageState();
     }
+
+    /// <summary>Destinations cross-fade in 180 ms; with reduced motion or in the background they switch at once.</summary>
+    private void ApplyMotion() =>
+        ((TransitioningContentControl)Host).PageTransition = MotionSettings.Current.IsEnabled ? new Avalonia.Animation.CrossFade(TimeSpan.FromMilliseconds(180)) : null;
 
     private void ArrangeNavigation()
     {

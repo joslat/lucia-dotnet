@@ -56,8 +56,8 @@ public sealed partial class StoryScreen : UserControl
             this.FindControl<StoryWeek>("Week")!.DayRequested += navigator.ShowDay;
             navigator.PropertyChanged += (_, _) => NavigatorChanged();
         }
-        AttachedToVisualTree += (_, _) => { attached = true; State.PropertyChanged += StateChanged; Refresh(); };
-        DetachedFromVisualTree += (_, _) => { attached = false; State.PropertyChanged -= StateChanged; };
+        AttachedToVisualTree += (_, _) => { attached = true; State.PropertyChanged += StateChanged; MotionSettings.Current.Changed += Refresh; Refresh(); };
+        DetachedFromVisualTree += (_, _) => { attached = false; State.PropertyChanged -= StateChanged; MotionSettings.Current.Changed -= Refresh; };
         SizeChanged += (_, _) => Refresh();
         this.FindControl<TextBlock>("CenterTime")!.PropertyChanged += (_, change) =>
         {
@@ -166,7 +166,7 @@ public sealed partial class StoryScreen : UserControl
                 this.FindControl<TextBlock>(name)!.Text = State.Day.TimeLabel(State.Day.InstantAt(fraction))[..5];
             }
             var orbit = this.FindControl<StoryOrbit>("Orbit")!;
-            orbit.SetState(State, this.FindControl<CheckBox>("AnimateSelection")!.IsChecked == true);
+            orbit.SetState(State, this.FindControl<CheckBox>("AnimateSelection")!.IsChecked == true && MotionSettings.Current.IsEnabled);
             var ringPlaces = State.VisiblePlaces.Take(6).ToArray();
             this.FindControl<TextBlock>("RingOrder")!.Text = ringPlaces.Length == 0 ? "No places configured." :
                 $"Outer to inner: {string.Join(", ", ringPlaces.Select(place => place.Name))}. Showing {ringPlaces.Length} of {State.VisiblePlaces.Count} places.";

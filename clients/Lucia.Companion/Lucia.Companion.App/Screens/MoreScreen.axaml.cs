@@ -38,6 +38,8 @@ public sealed partial class MoreScreen : UserControl
                 if (!syncingTheme && sender is RadioButton { IsChecked: true } && Application.Current is { } app) { app.RequestedThemeVariant = theme; }
             };
         }
+        var reduce = this.FindControl<CheckBox>("ReduceMotion")!;
+        reduce.IsCheckedChanged += (_, _) => { if (!syncingTheme) { MotionSettings.Current.ReduceMotion = reduce.IsChecked == true; } };
         AttachedToVisualTree += (_, _) => SyncTheme();
         SyncTheme();
     }
@@ -59,6 +61,7 @@ public sealed partial class MoreScreen : UserControl
             this.FindControl<RadioButton>("ThemeSystem")!.IsChecked = current == ThemeVariant.Default;
             this.FindControl<RadioButton>("ThemeLight")!.IsChecked = current == ThemeVariant.Light;
             this.FindControl<RadioButton>("ThemeDark")!.IsChecked = current == ThemeVariant.Dark;
+            this.FindControl<CheckBox>("ReduceMotion")!.IsChecked = MotionSettings.Current.ReduceMotion;
         }
         finally { syncingTheme = false; }
     }

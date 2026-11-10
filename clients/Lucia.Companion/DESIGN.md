@@ -163,7 +163,7 @@ Native sources own this system: `Lucia.Companion.App/App.axaml`, `CompanionTypog
 - Configured connections and stable offsets give the home graph structure without a floor-plan claim.
 - Contextual Bloom actions surround the selected place icon at normal text sizes and become a readable action list at large text sizes.
 - Story keeps reported intervals, last-known values and missing reports visibly distinct.
-- Home and Bloom remain static; Story optionally transitions only its selected time hand.
+- Motion is brief and optional: destinations cross-fade, Bloom grows open and Story's hand glides; Reduce motion and backgrounding turn all of it off.
 - Platform text settings resize individual type roles, with layout adaptations for larger text.
 - Customize changes the order of the three Home sections without hiding any section or rearranging places.
 - Source-binding metadata remains separate from physical neighbors, source access and qualified readings.
@@ -314,7 +314,7 @@ Screens and panels use tonal layering and outlines. Panels carry a 1-unit GraphL
 
 Bloom is the deliberate lifted exception. Its opaque PanelBrush ellipse separates the radial actions from underlying text. A half-opacity black shade dims Home behind it. The action circles use native BoxShadow `0 4 14 0 #40000000`; the selected center uses `0 5 22 0 #60000000`. The sidecar translates these Avalonia ARGB shadows to CSS RGBA for previews. There is no blur backdrop, animated elevation or glow. Theme buttons and form controls retain their Fluent template for interaction details not explicitly overridden here.
 
-**The Still Observatory Rule.** Home, place states and Bloom remain static. Story may transition its dial hand for 280 milliseconds with native CubicEaseOut when selection changes. The "Animate the time hand" checkbox below the timelines disables that transition. Reports, chapters and time selection remain usable without motion; no automatic playback or rotating carousel exists.
+**The Quiet Motion Rule.** Places, states and readings never animate on their own: no pulsing, looping or automatic playback. Motion only follows something the person did. Switching destinations cross-fades the screen in 180 milliseconds. Bloom grows from 86% scale and fades in over 200 milliseconds with CubicEaseOut. Story's dial hand transitions for 280 milliseconds with CubicEaseOut when selection changes, and its "Animate the time hand" checkbox turns that off for Story alone. MotionSettings holds Reduce motion (a checkbox under Appearance in More, kept for the session) and a background pause set by the app's suspend and resume hooks. When either applies, every one of these changes happens at once. Transitions retarget from their current value, so a new choice interrupts one in flight. Reports, chapters and time selection never depend on motion.
 
 ## Shapes
 

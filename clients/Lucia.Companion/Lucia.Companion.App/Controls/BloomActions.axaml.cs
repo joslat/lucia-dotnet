@@ -94,5 +94,29 @@ public sealed partial class BloomActions : UserControl
         fallback.MaxHeight = Math.Max(120, (TopLevel.GetTopLevel(this)?.Bounds.Height ?? 464) - 64);
     }
 
+    /// <summary>With motion, Bloom grows from 86% and fades in over 200 ms; without it, it simply appears.</summary>
+    public void PlayOpening(bool animate)
+    {
+        Transitions = null;
+        if (!animate)
+        {
+            Opacity = 1;
+            RenderTransform = null;
+            return;
+        }
+        Opacity = 0;
+        RenderTransform = Avalonia.Media.Transformation.TransformOperations.Parse("scale(0.86)");
+        Transitions =
+        [
+            new Avalonia.Animation.DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromMilliseconds(200), Easing = new Avalonia.Animation.Easings.CubicEaseOut() },
+            new Avalonia.Animation.TransformOperationsTransition { Property = RenderTransformProperty, Duration = TimeSpan.FromMilliseconds(200), Easing = new Avalonia.Animation.Easings.CubicEaseOut() },
+        ];
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            Opacity = 1;
+            RenderTransform = Avalonia.Media.Transformation.TransformOperations.Parse("scale(1)");
+        }, Avalonia.Threading.DispatcherPriority.Render);
+    }
+
     public void FocusFirstAction() => this.FindControl<Button>(IsLargeText ? "LargeOpen" : "OpenButton")!.Focus();
 }

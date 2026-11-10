@@ -12,8 +12,8 @@ public sealed partial class App : Application
     public static Func<ICompanionConnection>? ConnectionFactory { get; set; }
     /// <summary>One in-process view for the single Android main activity. Process death revalidates protected access before any demo entry.</summary>
     public Control CreateActivityView() => activityView ??= CreateRoot();
-    public void SuspendConnectionPolling() { if (activityView is CompanionRoot root) { root.SuspendConnectionPolling(); } }
-    public void VerifyConnectionForeground() { if (activityView is CompanionRoot root) { _ = root.VerifyForegroundAsync(); } }
+    public void SuspendConnectionPolling() { MotionSettings.Current.Pause(); if (activityView is CompanionRoot root) { root.SuspendConnectionPolling(); } }
+    public void VerifyConnectionForeground() { MotionSettings.Current.Resume(); if (activityView is CompanionRoot root) { _ = root.VerifyForegroundAsync(); } }
     private static CompanionRoot CreateRoot()
     {
         ICompanionConnection? connection;

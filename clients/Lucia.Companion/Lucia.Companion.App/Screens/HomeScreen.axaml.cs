@@ -157,7 +157,11 @@ public sealed partial class HomeScreen : UserControl
                     popup.PlacementTarget = IsPageVisible
                         ? this.FindControl<PlacePage>("PlacePage")!.GetPlaceAnchor()
                         : constellation.GetPlaceAnchor(State.SelectedPlace?.Id);
-                    if (popup.PlacementTarget is not null && TopLevel.GetTopLevel(this) is not null) { popup.IsOpen = true; }
+                    if (popup.PlacementTarget is not null && TopLevel.GetTopLevel(this) is not null)
+                    {
+                        this.FindControl<BloomActions>("PlaceActions")!.PlayOpening(MotionSettings.Current.IsEnabled);
+                        popup.IsOpen = true;
+                    }
                 }
             }, DispatcherPriority.Loaded);
         }
