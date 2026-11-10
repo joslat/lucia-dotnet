@@ -19,7 +19,10 @@ public static class SampleStory
     /// <summary>The original authored day, Friday 23 October.</summary>
     public static StoryDay Create(HomeTopology home) => Day(home, new DateOnly(2026, 10, 23));
 
-    public static StoryNavigator Navigator(HomeTopology home) => new(Dates, Today, date => Day(home, date));
+    public static StoryNavigator Navigator(HomeTopology home) => new(Dates, Today, date => Day(home, date))
+    {
+        AttentionCount = home.Places.Count(place => place.State is PlaceState.Problem or PlaceState.Waiting or PlaceState.Unavailable),
+    };
 
     public static StoryDay Day(HomeTopology home, DateOnly date)
     {
@@ -59,6 +62,6 @@ public static class SampleStory
             End = chapter.End > now ? now : chapter.End,
             EvidenceIds = chapter.EvidenceIds.Where(id => intervals.Any(interval => interval.Id == id)).ToArray()
         }).Where(chapter => chapter.EvidenceIds.Count > 0);
-        return new(home, date, Zone, intervals, availableChapters);
+        return new(home, date, Zone, intervals, availableChapters) { Now = date == Today ? SampleHome.CapturedAt : null };
     }
 }

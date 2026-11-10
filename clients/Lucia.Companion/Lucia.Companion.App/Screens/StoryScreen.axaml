@@ -13,6 +13,7 @@
         <TextBlock Text="The story of your day" Classes="title" TextWrapping="Wrap" />
         <TextBlock Name="DayLabel" Classes="muted" FontSize="{DynamicResource TextSize14}" />
         <TextBlock Text="Sample history. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <TextBlock Name="StatsLine" FontSize="{DynamicResource TextSize14}" TextWrapping="Wrap" IsVisible="False" />
       </StackPanel>
       <StackPanel Name="StoryNavigation" Spacing="10" IsVisible="False">
         <Border Classes="segments" HorizontalAlignment="Left">
@@ -67,6 +68,11 @@
         <TextBlock Text="Four tracks per place, top to bottom: lighting, door/gate, motion, Lucia. Dotted spans are unknown or unavailable; dashed spans are last-known." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         <TextBlock Name="SelectedReadout" TextWrapping="Wrap" FontSize="{DynamicResource TextSize14}" />
         <StackPanel Name="Timelines" Spacing="24" />
+        <StackPanel Name="LuciaLanePanel" Spacing="6">
+          <TextBlock Text="Lucia" Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold" />
+          <c:WeekDayLane Name="LuciaLane" Height="22" />
+          <TextBlock Name="LuciaLaneCaption" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        </StackPanel>
         <TextBlock Text="Missing reports never mean off, closed or unoccupied. Motion markers are one-minute report buckets, not presence intervals. Grouping uses this demo's current place setup; historical binding policy is not implemented." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         <CheckBox Name="AnimateSelection" Content="Animate the time hand" IsChecked="True" MinHeight="48" />
       </StackPanel>

@@ -13,6 +13,7 @@ public sealed class WeekDayLane : Control
 {
     private StoryDay? day;
     private IReadOnlyList<StoryInterval> intervals = [];
+    public IReadOnlyList<StoryInterval> Intervals => intervals;
 
     public WeekDayLane()
     {
@@ -33,6 +34,17 @@ public sealed class WeekDayLane : Control
         if (day is null || Bounds.Width <= 0) { return; }
         var middle = Bounds.Height / 2;
         context.DrawLine(new Pen(StoryDrawing.Brush(this, "GraphLineBrush"), 4, lineCap: PenLineCap.Round), new Point(2, middle), new Point(Bounds.Width - 2, middle));
+        if (day.Now is { } now && day.HasFuture)
+        {
+            var from = 2 + (Bounds.Width - 4) * day.Fraction(now);
+            using (context.PushClip(new Rect(from, 0, Bounds.Width - from, Bounds.Height)))
+            using (context.PushOpacity(0.4))
+            {
+                var hatch = new Pen(StoryDrawing.Brush(this, "MutedBrush"), 1);
+                for (var x = from - Bounds.Height; x < Bounds.Width; x += 6) { context.DrawLine(hatch, new Point(x, Bounds.Height), new Point(x + Bounds.Height, 0)); }
+            }
+            context.DrawLine(new Pen(StoryDrawing.Brush(this, "AccentBrush"), 2), new Point(from, 0), new Point(from, Bounds.Height));
+        }
         foreach (var interval in intervals)
         {
             var from = 2 + (Bounds.Width - 4) * day.Fraction(interval.Start);

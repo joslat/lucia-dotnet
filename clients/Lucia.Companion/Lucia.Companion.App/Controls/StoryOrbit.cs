@@ -17,6 +17,8 @@ public sealed class StoryOrbit : Control
         AvaloniaProperty.Register<StoryOrbit, double>(nameof(CursorFraction));
     public double CursorFraction { get => GetValue(CursorFractionProperty); set => SetValue(CursorFractionProperty, value); }
     public StoryViewModel? State { get; private set; }
+    /// <summary>True when the shown day is still in progress, so the part after now is hatched as not yet known.</summary>
+    public bool HasFuture => State?.Day.HasFuture == true;
     public int RenderedPlaceCount => Math.Min(6, State?.VisiblePlaces.Count ?? 0);
     public event Action<double>? TimeInvoked;
     private bool animate;
@@ -98,6 +100,28 @@ public sealed class StoryOrbit : Control
             var chapter = state.Day.Chapters.Single(chapter => chapter.Id == chapterId);
             StoryDrawing.Arc(context, center, outer + 9, state.Day.Fraction(chapter.Start), state.Day.Fraction(chapter.End),
                 new Pen(StoryDrawing.Brush(this, "AccentBrush"), 2));
+        }
+        if (state.Day.Now is { } now && state.Day.HasFuture)
+        {
+            // The rest of today is not yet known: hatch the rings from now to midnight and mark now on the rim.
+            var from = state.Day.Fraction(now);
+            var inner = Math.Max(50, outer - (Math.Max(1, places.Length) - 1) * spacing) - 6;
+            var wedge = new StreamGeometry();
+            using (var stream = wedge.Open())
+            {
+                stream.BeginFigure(StoryDrawing.OnCircle(center, outer + 6, from), true);
+                const int steps = 48;
+                for (var step = 1; step <= steps; step++) { stream.LineTo(StoryDrawing.OnCircle(center, outer + 6, from + (1 - from) * step / steps)); }
+                for (var step = steps; step >= 0; step--) { stream.LineTo(StoryDrawing.OnCircle(center, inner, from + (1 - from) * step / steps)); }
+                stream.EndFigure(true);
+            }
+            using (context.PushGeometryClip(wedge))
+            using (context.PushOpacity(0.35))
+            {
+                var hatch = new Pen(StoryDrawing.Brush(this, "MutedBrush"), 1);
+                for (var x = -Bounds.Height; x < Bounds.Width; x += 9) { context.DrawLine(hatch, new Point(x, Bounds.Height), new Point(x + Bounds.Height, 0)); }
+            }
+            context.DrawLine(new Pen(StoryDrawing.Brush(this, "AccentBrush"), 2), StoryDrawing.OnCircle(center, inner, from), StoryDrawing.OnCircle(center, outer + 18, from));
         }
         var end = StoryDrawing.OnCircle(center, outer + 15, CursorFraction);
         context.DrawLine(new Pen(text, 1.5), center, end);

@@ -50,6 +50,17 @@ internal sealed class TimelineTrackLayer : Control
                 }
             }
         }
+        if (state.Day.Now is { } now && state.Day.HasFuture)
+        {
+            var from = 2 + state.Day.Fraction(now) * width;
+            using (context.PushClip(new Rect(from, 0, width + 2 - from, 60)))
+            using (context.PushOpacity(0.35))
+            {
+                var hatch = new Pen(StoryDrawing.Brush(this, "MutedBrush"), 1);
+                for (var x = from - 60; x < width + 2; x += 8) { context.DrawLine(hatch, new Point(x, 60), new Point(x + 60, 0)); }
+            }
+            context.DrawLine(new Pen(StoryDrawing.Brush(this, "AccentBrush"), 2), new Point(from, 0), new Point(from, 60));
+        }
         var cursor = 2 + state.CursorFraction * width;
         context.DrawLine(new Pen(StoryDrawing.Brush(this, "TextBrush"), 1.5), new Point(cursor, 0), new Point(cursor, 60));
     }

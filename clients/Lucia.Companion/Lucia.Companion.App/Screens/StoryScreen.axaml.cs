@@ -18,7 +18,8 @@ public sealed partial class StoryScreen : UserControl
 
     /// <summary>The day currently shown. With a navigator this changes as the person moves between days.</summary>
     public StoryViewModel State { get; private set; }
-    public bool IsExpanded => Bounds.Width >= 900;
+    /// <summary>Dial and chapters sit side by side from 720 units, which a portrait 834 tablet has beside the rail.</summary>
+    public bool IsExpanded => Bounds.Width >= 720;
 
     public StoryScreen() : this(new StoryViewModel(SampleStory.Create(SampleHome.Create()))) { }
 
@@ -65,6 +66,29 @@ public sealed partial class StoryScreen : UserControl
         Refresh();
     }
 
+    /// <summary>The wide-layout summary: reports and Lucia requests in this day, and, for today only, how many places need you now.</summary>
+    private void RefreshStats(int attention)
+    {
+        var recorded = State.Day.Intervals.Count(interval => interval.Quality == StoryQuality.Recorded);
+        var requests = State.Day.Intervals.Count(interval => interval.Kind == StoryKind.Lucia && interval.Quality == StoryQuality.Recorded);
+        var parts = new List<string> { recorded == 1 ? "1 report" : $"{recorded} reports", requests == 1 ? "1 Lucia request" : $"{requests} Lucia requests" };
+        if (State.Day.Now is not null && attention > 0) { parts.Add(attention == 1 ? "1 reason for attention" : $"{attention} reasons for attention"); }
+        var stats = this.FindControl<TextBlock>("StatsLine")!;
+        stats.Text = string.Join(" · ", parts);
+        stats.IsVisible = IsExpanded;
+    }
+
+    /// <summary>Lucia's requests across the visible places on one lane, so they can be read apart from the place tracks.</summary>
+    private void RefreshLuciaLane()
+    {
+        var visible = State.VisiblePlaces.Select(place => place.Id).ToHashSet(StringComparer.Ordinal);
+        var requests = State.Day.Intervals.Where(interval => interval.Kind == StoryKind.Lucia && visible.Contains(interval.PlaceId)).ToArray();
+        this.FindControl<WeekDayLane>("LuciaLane")!.SetDay(State.Day, requests);
+        this.FindControl<TextBlock>("LuciaLaneCaption")!.Text = requests.Length == 0
+            ? State.SelectedPlaceId is null ? "No Lucia requests in this day." : "No Lucia requests for this place in this day."
+            : $"{requests.Length} Lucia request{(requests.Length == 1 ? string.Empty : "s")} in this day, {(State.SelectedPlaceId is null ? "from any place" : "for this place")}.";
+    }
+
     private void StateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args) => Refresh();
 
     private void NavigatorChanged()
@@ -109,13 +133,14 @@ public sealed partial class StoryScreen : UserControl
             if (week) { return; }
 
             var grid = this.FindControl<Grid>("StoryGrid")!;
-            grid.ColumnDefinitions[0].Width = IsExpanded ? new GridLength(420) : GridLength.Star;
+            var expandedDial = Math.Clamp((Bounds.Width - 32) * 0.5, 300, 400);
+            grid.ColumnDefinitions[0].Width = IsExpanded ? new GridLength(expandedDial + 20) : GridLength.Star;
             grid.ColumnDefinitions[1].Width = IsExpanded ? GridLength.Star : new GridLength(0);
             grid.ColumnSpacing = IsExpanded ? 24 : 0;
             var chapters = this.FindControl<StackPanel>("ChapterPanel")!;
             Grid.SetColumn(chapters, IsExpanded ? 1 : 0);
             Grid.SetRow(chapters, IsExpanded ? 0 : 1);
-            var side = IsExpanded ? 400 : Math.Clamp(Bounds.Width - 32, 240, 340);
+            var side = IsExpanded ? expandedDial : Math.Clamp(Bounds.Width - 32, 240, 340);
             var frame = this.FindControl<Grid>("DialFrame")!;
             frame.Width = frame.Height = side;
             var time = State.Day.TimeLabel(State.SelectedInstant);
@@ -126,7 +151,13 @@ public sealed partial class StoryScreen : UserControl
             this.FindControl<TextBlock>("LargeSelectedTime")!.Text = $"Selected time · {time}";
             this.FindControl<TextBlock>("CenterTime")!.Text = time[..5];
             this.FindControl<TextBlock>("CenterOffset")!.Text = $"UTC{time[6..]}";
-            this.FindControl<TextBlock>("CenterCaption")!.Text = largeClock ? "Time\nbelow" : State.SelectedChapterId is null ? "Selected time" : "Chapter start";
+            var atNow = State.Day.Now is { } now && State.SelectedInstant == now;
+            var attention = navigator?.AttentionCount ?? 0;
+            this.FindControl<TextBlock>("CenterCaption")!.Text = largeClock ? "Time\nbelow"
+                : atNow ? attention > 0 ? $"now · {attention} need you" : "now"
+                : State.SelectedChapterId is null ? "Selected time" : "Chapter start";
+            RefreshStats(attention);
+            RefreshLuciaLane();
             foreach (var (name, fraction) in new[] { ("TopTime", 0d), ("QuarterTime", .25), ("HalfTime", .5), ("ThreeQuarterTime", .75) })
             {
                 this.FindControl<TextBlock>(name)!.Text = State.Day.TimeLabel(State.Day.InstantAt(fraction))[..5];

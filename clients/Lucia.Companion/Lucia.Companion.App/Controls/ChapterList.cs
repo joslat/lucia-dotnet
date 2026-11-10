@@ -45,7 +45,7 @@ public sealed class ChapterList : UserControl
                 var rail = new StackPanel { Spacing = 5 };
                 rail.Children.Add(circle);
                 rail.MinWidth = 52;
-                rail.Children.Add(new TextBlock { Text = state.Day.TimeLabel(chapter.Start)[..5], [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize12"), Classes = { "muted" }, TextWrapping = TextWrapping.NoWrap });
+                rail.Children.Add(new TextBlock { Text = $"{state.Day.TimeLabel(chapter.Start)[..5]}–\n{state.Day.TimeLabel(chapter.End)[..5]}", [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize12"), Classes = { "muted" }, TextWrapping = TextWrapping.NoWrap });
                 var row = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*"), ColumnSpacing = 8 };
                 row.Children.Add(rail);
                 Grid.SetColumn(content, 1);

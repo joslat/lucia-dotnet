@@ -9,7 +9,7 @@ public sealed class StoryViewModel : INotifyPropertyChanged
     public StoryViewModel(StoryDay day)
     {
         Day = day;
-        SelectedInstant = day.Intervals.FirstOrDefault(interval => interval.Quality == StoryQuality.Recorded)?.Start ?? day.Start;
+        SelectedInstant = day.Now ?? day.Intervals.FirstOrDefault(interval => interval.Quality == StoryQuality.Recorded)?.Start ?? day.Start;
     }
     public event PropertyChangedEventHandler? PropertyChanged;
     public StoryDay Day { get; }

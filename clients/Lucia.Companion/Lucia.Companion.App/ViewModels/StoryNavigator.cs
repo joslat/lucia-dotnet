@@ -28,6 +28,8 @@ public sealed class StoryNavigator : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public IReadOnlyList<DateOnly> Dates { get; }
     public DateOnly Today { get; }
+    /// <summary>How many places need the person now; shown only with today, since it describes the present.</summary>
+    public int AttentionCount { get; init; }
     public DateOnly Date { get; private set; }
     public StoryMode Mode { get; private set; }
     public StoryViewModel Day { get; private set; }

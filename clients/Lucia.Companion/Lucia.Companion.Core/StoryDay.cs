@@ -64,6 +64,21 @@ public sealed class StoryDay
     public TimeZoneInfo TimeZone { get; }
     public DateTimeOffset Start { get; }
     public DateTimeOffset End { get; }
+    private readonly DateTimeOffset? now;
+    /// <summary>
+    /// For a day still in progress, the instant reports run up to. Time after it is the future, drawn as not yet known.
+    /// Null for a finished day.
+    /// </summary>
+    public DateTimeOffset? Now
+    {
+        get => now;
+        init
+        {
+            if (value is { } instant && (instant < Start || instant > End)) { throw new ArgumentOutOfRangeException(nameof(Now), "Now must fall within the day."); }
+            now = value;
+        }
+    }
+    public bool HasFuture => Now is { } instant && instant < End;
     public IReadOnlyList<PlaceSetting> Places { get; }
     public IReadOnlyList<StoryInterval> Intervals { get; }
     public IReadOnlyList<StoryChapter> Chapters { get; }
