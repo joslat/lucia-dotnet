@@ -35,6 +35,7 @@ public sealed partial class HomeConstellation : UserControl
     private PlaceOrb? pressedOrb;
     private bool suppressClick;
     private bool rebuilding;
+    private HomeTopology? pendingHome;
 
     public HomeConstellation()
     {
@@ -50,7 +51,7 @@ public sealed partial class HomeConstellation : UserControl
 
     public void SetHome(HomeTopology home)
     {
-        if (rebuilding) { return; }
+        if (rebuilding) { pendingHome = home; return; }
         var order = DisplayOrder(home.Places).ToArray();
         if (SameLayout(order))
         {
@@ -69,6 +70,8 @@ public sealed partial class HomeConstellation : UserControl
         rebuilding = true;
         try { Rebuild(home, order); }
         finally { rebuilding = false; }
+        // Something during the rebuild offered a newer home; draw it now rather than leave older places on screen.
+        if (pendingHome is { } newer) { pendingHome = null; SetHome(newer); }
     }
 
     private void Rebuild(HomeTopology home, IReadOnlyList<(string? Label, Place? Place)> order)
@@ -199,8 +202,11 @@ public sealed partial class HomeConstellation : UserControl
     {
         holdTimer.Stop();
         pressedOrb = null;
-        suppressClick = false;
-        if (gesture.Release() == HoldGestureState.Holding && cancelled) { HoldCancelled?.Invoke(); }
+        var wasHolding = gesture.Release() == HoldGestureState.Holding;
+        if (!wasHolding) { suppressClick = false; return; }
+        // A release may still reach the orb after a lost capture; keep it from also counting as a tap until then.
+        Dispatcher.UIThread.Post(() => suppressClick = false, DispatcherPriority.Input);
+        if (cancelled) { HoldCancelled?.Invoke(); }
     }
 
     public void UpdateSelection(string? selectedId, Func<string, bool> isPinned)

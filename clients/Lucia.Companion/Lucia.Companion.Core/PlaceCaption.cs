@@ -29,6 +29,14 @@ public static class PlaceCaption
         return changes.Length > 0 ? string.Join(" · ", changes) : Caption(place);
     }
 
+    /// <summary>When what <see cref="WhatChanged"/> describes was reported: its newest contact or motion reading, else the newest reading.</summary>
+    public static DateTimeOffset? WhatChangedAt(Place place)
+    {
+        ArgumentNullException.ThrowIfNull(place);
+        var changes = place.Observations.Where(item => item.IsCurrent && item.Role is ObservationRole.Contact or ObservationRole.Motion).Take(2).ToArray();
+        return changes.Length > 0 ? changes.Max(item => item.ObservedAt!.Value) : HomeAttention.LatestReadingAt(place);
+    }
+
     public static string? Status(Place place)
     {
         ArgumentNullException.ThrowIfNull(place);

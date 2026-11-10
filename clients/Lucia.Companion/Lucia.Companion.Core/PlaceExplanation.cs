@@ -15,7 +15,11 @@ public static class PlaceExplanation
         switch (place.State)
         {
             case PlaceState.Unavailable when current.Length > 0:
-                return "Some sources report now, but at least one is missing, stale or unavailable, so the place isn't shown as normal.";
+                var quiet = place.Observations.Where(item => !item.IsCurrent && item.Value is not null && item.ObservedAt.HasValue)
+                    .OrderByDescending(item => item.ObservedAt).FirstOrDefault();
+                return quiet is null
+                    ? "Some sources report now, but at least one is missing, stale or unavailable, so the place isn't shown as normal."
+                    : $"Some sources report now, but {quiet.Label} last read {quiet.Value} at {Time(quiet.ObservedAt!.Value)} and isn't current, so the place isn't shown as normal.";
             case PlaceState.Unavailable:
                 var last = place.Observations.Where(item => item.Quality != ObservationQuality.Current && item.Value is not null && item.ObservedAt.HasValue)
                     .OrderByDescending(item => item.ObservedAt).FirstOrDefault();
@@ -32,7 +36,7 @@ public static class PlaceExplanation
             case PlaceState.Working:
                 return "Lucia is reading this place's sources. Reading doesn't change anything here.";
             case PlaceState.Changed:
-                var latest = HomeAttention.LatestReadingAt(place);
+                var latest = PlaceCaption.WhatChangedAt(place);
                 var caption = PlaceCaption.WhatChanged(place);
                 return caption is null || latest is null
                     ? "A source reports a change. A change is a report, not proof that someone is there."

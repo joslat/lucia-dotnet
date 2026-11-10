@@ -30,8 +30,7 @@ public sealed partial class HomeScreen : UserControl
     public bool IsExpanded => Bounds.Width >= 900;
     /// <summary>Phone shows the place page whenever detail is open; tablet only after the side pane's Detail.</summary>
     public bool IsPageVisible => IsExpanded ? State.IsPageOpen : State.IsDetailOpen;
-    /// <summary>The place page's "Whole home story" link, for the shell to open Story filtered to that place.</summary>
-    /// <summary>Null opens the whole day; a place ID opens Story filtered to it.</summary>
+    /// <summary>For the shell to open Story on today: null for the whole home (Today so far, Whole home story), a place ID for Bloom's History.</summary>
     public event Action<string?>? StoryRequested;
 
     public HomeScreen() : this(new HomeViewModel(SampleHome.Create())) { }
@@ -49,7 +48,7 @@ public sealed partial class HomeScreen : UserControl
         page.BackRequested += () => { if (IsExpanded) { ClosePage(); } else { ReturnHome(); } };
         page.PinToggled += State.TogglePin;
         page.ActionsRequested += State.OpenActions;
-        page.StoryRequested += id => StoryRequested?.Invoke(id);
+        page.StoryRequested += () => StoryRequested?.Invoke(null);
         this.FindControl<TodaySoFar>("TodaySoFar")!.StoryRequested += () => StoryRequested?.Invoke(null);
         this.FindControl<PlaceDetail>("DesktopDetail")!.PageRequested += State.OpenPage;
         this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.OrderChanged += order => State.SetSectionOrder(order);
@@ -151,6 +150,13 @@ public sealed partial class HomeScreen : UserControl
         var popup = this.FindControl<Popup>("ActionPopup")!;
         this.FindControl<Border>("BloomShade")!.IsVisible = State.IsActionsOpen;
         if (!State.IsActionsOpen) { popup.IsOpen = false; }
+        if (State.IsActionsOpen && actionsWereOpen && homeChanged && popup.IsOpen)
+        {
+            // A layout change rebuilt the places; move Bloom to the new control for its place.
+            popup.PlacementTarget = IsPageVisible
+                ? this.FindControl<PlacePage>("PlacePage")!.GetPlaceAnchor()
+                : constellation.GetPlaceAnchor(State.SelectedPlace?.Id);
+        }
         if (State.IsActionsOpen && !actionsWereOpen)
         {
             Dispatcher.UIThread.Post(() =>
@@ -191,9 +197,8 @@ public sealed partial class HomeScreen : UserControl
         date.IsVisible = State.ReportTime is not null;
         date.Text = State.ReportTime is { } time ? time.UtcDateTime.ToString("dddd d MMM · HH:mm 'UTC'", CultureInfo.InvariantCulture) : null;
         var hasReports = !State.IsDemo && State.ReportTime is not null;
-        // Stale only when there are readings and none of them is current; a home with no bindings yet is not stale.
-        var readings = State.Home.Places.SelectMany(place => place.Observations).ToArray();
-        var live = hasReports && (readings.Length == 0 || readings.Any(item => item.IsCurrent));
+        // Stale only when sources are bound and none of their readings is current; a home with no bindings yet is not stale.
+        var live = hasReports && (State.Home.Bindings.Count == 0 || State.Home.Places.Any(place => place.Observations.Any(item => item.IsCurrent)));
         var label = this.FindControl<TextBlock>("HomeModeLabel")!;
         label.Text = State.IsDemo ? "Offline demo" : live ? "Live" : hasReports ? "Reports stale" : "Connected";
         label[!TextBlock.ForegroundProperty] = new DynamicResourceExtension(State.IsDemo ? "AccentBrush" : live ? "SageBrush" : "MutedBrush");
@@ -235,7 +240,7 @@ public sealed partial class HomeScreen : UserControl
             return;
         }
         // At large text on a narrow screen the chip moves under the name so the name can use the full width.
-        var stackBadge = Bounds.Width < 600 && name.FontSize > 32;
+        var stackBadge = stacked;
         Place(identity, 0, 0, stackBadge ? 2 : 1);
         Place(badge, stackBadge ? 1 : 0, stackBadge ? 0 : 1);
         badge.HorizontalAlignment = stackBadge ? Avalonia.Layout.HorizontalAlignment.Left : Avalonia.Layout.HorizontalAlignment.Right;

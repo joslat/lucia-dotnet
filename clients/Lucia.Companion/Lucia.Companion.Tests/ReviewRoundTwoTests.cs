@@ -96,7 +96,8 @@ public sealed class ReviewRoundTwoTests
     public void AllStaleReportsAreNotCalledLive()
     {
         var setup = new HomeTopology("home", "Our home",
-            [new("hall", "Hall", PlaceState.Unavailable, "Some configured reports are stale.", [new("Hall · Temperature", "20 °C", ObservationQuality.Stale, Noon.AddHours(-1))])], []);
+            [new("hall", "Hall", PlaceState.Unavailable, "Some configured reports are stale.", [new("Hall · Temperature", "20 °C", ObservationQuality.Stale, Noon.AddHours(-1))])], [],
+            [new ObservationBinding("hall", "sensor.hall", ObservationRole.Temperature, "hall")]);
         var state = new HomeViewModel(setup, isDemo: false);
         var view = new HomeScreen(state);
         var window = new Window { Width = 390, Height = 844, Content = view };

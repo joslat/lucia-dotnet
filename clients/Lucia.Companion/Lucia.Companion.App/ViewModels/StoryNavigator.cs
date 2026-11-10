@@ -18,7 +18,8 @@ public sealed class StoryNavigator : INotifyPropertyChanged
         ArgumentNullException.ThrowIfNull(dates);
         ArgumentNullException.ThrowIfNull(dayFor);
         if (dates.Count == 0 || !dates.Contains(today)) { throw new ArgumentException("Today must be one of the available dates.", nameof(today)); }
-        Dates = dates.Order().ToArray();
+        sortedDates = dates.Order().ToArray();
+        Dates = sortedDates;
         Today = today;
         source = dayFor;
         Date = today;
@@ -26,6 +27,7 @@ public sealed class StoryNavigator : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+    private readonly DateOnly[] sortedDates;
     public IReadOnlyList<DateOnly> Dates { get; }
     public DateOnly Today { get; }
     /// <summary>How many places need the person now; shown only with today, since it describes the present.</summary>
@@ -48,8 +50,8 @@ public sealed class StoryNavigator : INotifyPropertyChanged
         return new StoryWeekDay(date, label, day, intervals);
     }).ToArray();
 
-    public void Previous() { if (CanGoPrevious) { ShowDay(Dates[Dates.ToList().IndexOf(Date) - 1]); } }
-    public void Next() { if (CanGoNext) { ShowDay(Dates[Dates.ToList().IndexOf(Date) + 1]); } }
+    public void Previous() { if (CanGoPrevious) { ShowDay(sortedDates[Array.IndexOf(sortedDates, Date) - 1]); } }
+    public void Next() { if (CanGoNext) { ShowDay(sortedDates[Array.IndexOf(sortedDates, Date) + 1]); } }
 
     public void ShowDay(DateOnly date)
     {

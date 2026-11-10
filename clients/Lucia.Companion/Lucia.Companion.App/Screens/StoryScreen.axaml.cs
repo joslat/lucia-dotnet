@@ -138,10 +138,12 @@ public sealed partial class StoryScreen : UserControl
                 {
                     if (renderedWeek != (navigator.Date, State.SelectedPlaceId))
                     {
-                        this.FindControl<StoryWeek>("Week")!.SetWeek(navigator.Week, navigator.Date);
+                        var days = navigator.Week;
+                        this.FindControl<StoryWeek>("Week")!.SetWeek(days, navigator.Date);
+                        RefreshWeekStats(days);
                         renderedWeek = (navigator.Date, State.SelectedPlaceId);
                     }
-                    RefreshWeekStats(navigator.Week);
+                    this.FindControl<TextBlock>("StatsLine")!.IsVisible = IsExpanded;
                     this.FindControl<TextBlock>("DayLabel")!.Text =
                         $"{navigator.Dates[0]:dddd d} to {navigator.Dates[^1]:dddd d MMMM yyyy} · {State.Day.TimeZone.Id}";
                 }

@@ -19,7 +19,8 @@ public sealed partial class PlacePage : UserControl
     public event Action? BackRequested;
     public event Action? PinToggled;
     public event Action? ActionsRequested;
-    public event Action<string?>? StoryRequested;
+    /// <summary>"Whole home story": Story on today for every place.</summary>
+    public event Action? StoryRequested;
 
     public PlacePage()
     {
@@ -28,7 +29,7 @@ public sealed partial class PlacePage : UserControl
         this.FindControl<ToggleButton>("PinToggle")!.Click += (_, _) => PinToggled?.Invoke();
         this.FindControl<Button>("PageActionsButton")!.Click += (_, _) => ActionsRequested?.Invoke();
         // "Whole home story" means the whole day for every place; Bloom's History is the place-filtered path.
-        this.FindControl<Button>("OpenStory")!.Click += (_, _) => StoryRequested?.Invoke(null);
+        this.FindControl<Button>("OpenStory")!.Click += (_, _) => StoryRequested?.Invoke();
         var why = this.FindControl<ToggleButton>("WhyShown")!;
         why.IsCheckedChanged += (_, _) => this.FindControl<TextBlock>("WhyText")!.IsVisible = why.IsChecked == true;
     }
