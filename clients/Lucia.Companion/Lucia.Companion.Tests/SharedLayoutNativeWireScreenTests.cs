@@ -95,7 +95,7 @@ public sealed class SharedLayoutNativeWireScreenTests
 
     private static HomeEditorScreen OpenEditor(ConnectedHomeWorkspace workspace)
     {
-        HomeSharedLayoutScreenTests.Click(workspace.Shell, "BuildHomeButton");
+        ShellNavigationTests.OpenSetup(workspace.Shell);
         (TopLevel.GetTopLevel(workspace) as Window)?.UpdateLayout();
         return workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
     }

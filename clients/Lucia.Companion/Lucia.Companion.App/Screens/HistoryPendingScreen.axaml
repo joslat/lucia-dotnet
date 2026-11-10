@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Screens.HistoryPendingScreen" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: Say plainly that connected history is not available, instead of hiding Story or showing sample data.
+       OWN-WORLD: The shared 44-unit outline state used by connected recovery screens.
+       STORY: The person learns why Story is empty and where current reports are.
+       FORM: Connected-mode Story destination until household history is connected. -->
+  <ScrollViewer Name="HistoryPendingScroll" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="20,32" Spacing="20" MaxWidth="720" HorizontalAlignment="Center">
+      <Path Data="{x:Static c:NavigationIcons.Story}" Width="44" Height="44" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7" HorizontalAlignment="Left" />
+      <TextBlock Text="Story" Classes="title" />
+      <TextBlock Name="HistoryPendingHeading" Text="History isn't connected yet" Classes="section" TextWrapping="Wrap" Focusable="True" />
+      <TextBlock Text="Story shows how your day unfolded, from household history. This connection doesn't provide history yet. Nothing is shown here until it does." TextWrapping="Wrap" />
+      <TextBlock Text="Home and Lucia show current reports and requests." Classes="muted" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

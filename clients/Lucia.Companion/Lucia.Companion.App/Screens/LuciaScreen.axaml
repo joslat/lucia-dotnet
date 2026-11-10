@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Screens.LuciaScreen" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: What you asked Lucia, and how far each request has got, as Lucia reported it.
+       OWN-WORLD: The existing Lucia now controls on an Observatory panel; no new stage vocabulary.
+       STORY: Read your attributed requests and their reported phases; refresh or review the connection when access fails.
+       FIRST VIEWPORT: Title, one-line explanation, then the request list.
+       FORM: The Lucia destination of the navigation shell; the demo shows the labelled sample, connected mode the member's activity. -->
+  <ScrollViewer Name="LuciaScroll" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="16,20" Spacing="20" MaxWidth="760">
+      <StackPanel Spacing="6">
+        <TextBlock Text="Lucia" Classes="title" />
+        <TextBlock Text="Requests you made to Lucia and how far each one has got, as Lucia reported it." Classes="muted" />
+      </StackPanel>
+      <Border Classes="panel" Padding="16">
+        <StackPanel>
+          <c:LuciaNow Name="DemoActivity" />
+          <c:ConnectedLuciaNow Name="ConnectedActivity" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

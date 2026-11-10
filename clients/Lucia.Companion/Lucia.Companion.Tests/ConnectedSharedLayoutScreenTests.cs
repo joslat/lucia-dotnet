@@ -29,7 +29,7 @@ public sealed class ConnectedSharedLayoutScreenTests
         {
             await workspace.ResumeAsync();
             Assert.True(workspace.State.IsPinned("shared-porch"));
-            HomeSharedLayoutScreenTests.Click(workspace.Shell, "BuildHomeButton"); window.UpdateLayout();
+            ShellNavigationTests.OpenSetup(workspace.Shell); window.UpdateLayout();
             var editor = workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
             HomeSharedLayoutScreenTests.Click(editor, "ReviewSharedSetup"); window.UpdateLayout();
             var review = workspace.GetVisualDescendants().OfType<HomeSharedLayoutScreen>().Single();
@@ -57,7 +57,7 @@ public sealed class ConnectedSharedLayoutScreenTests
         var window = new Window { Width = 390, Height = 900, Content = workspace }; window.Show();
         try
         {
-            await workspace.ResumeAsync(); HomeSharedLayoutScreenTests.Click(workspace.Shell, "BuildHomeButton"); window.UpdateLayout();
+            await workspace.ResumeAsync(); ShellNavigationTests.OpenSetup(workspace.Shell); window.UpdateLayout();
             var editor = workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
             editor.FindControl<TextBox>("HomeNameInput")!.Text = "Keep my pending edit";
             HomeSharedLayoutScreenTests.Click(editor, "ReviewSharedSetup"); window.UpdateLayout();

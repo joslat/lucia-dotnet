@@ -24,6 +24,7 @@
           <SolidColorBrush x:Key="ProblemBrush">#d4756b</SolidColorBrush>
           <SolidColorBrush x:Key="GraphLineBrush">#3a3733</SolidColorBrush>
           <SolidColorBrush x:Key="SageBrush">#7dab8c</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentSoftBrush">#2b2213</SolidColorBrush>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="CanvasBrush">#f1f2ef</SolidColorBrush>
@@ -37,6 +38,7 @@
           <SolidColorBrush x:Key="ProblemBrush">#a13f3a</SolidColorBrush>
           <SolidColorBrush x:Key="GraphLineBrush">#c1c6bd</SolidColorBrush>
           <SolidColorBrush x:Key="SageBrush">#397151</SolidColorBrush>
+          <SolidColorBrush x:Key="AccentSoftBrush">#ebe6da</SolidColorBrush>
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
     </ResourceDictionary>

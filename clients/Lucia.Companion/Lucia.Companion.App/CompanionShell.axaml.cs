@@ -1,9 +1,7 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.Styling;
 using Lucia.Companion.App.Screens;
 using Lucia.Companion.App.Configuration;
 using Lucia.Companion.App.Controls;
@@ -13,24 +11,42 @@ using Lucia.Companion.Connection;
 
 namespace Lucia.Companion.App;
 
+/// <summary>
+/// The app frame: four destinations (Home, Story, Lucia, More), the local save status and the screen they show.
+/// Setup and save-conflict review are full-screen tasks, so the navigation steps aside while they are open.
+/// </summary>
 public sealed partial class CompanionShell : UserControl
 {
+    /// <summary>At this width the bottom bar becomes a left rail.</summary>
+    public const double RailWidthThreshold = 600;
+
     private readonly HomeScreen home;
     private readonly HomeProfileSession profileSession;
     private ControlWorkbench? workbench;
     private StoryScreen? story;
     private Core.HomeTopology? storyHome;
-    private readonly MenuItem controlLab = new() { Header = "Control lab" };
-    private readonly MenuItem customizeHome = new() { Header = "Customize Home" };
+    private MoreScreen? more;
+    private LuciaScreen? lucia;
+    private HistoryPendingScreen? historyPending;
+    private ConnectedActivityController? activity;
     private TopLevel? attachedTopLevel;
     private HomeCatalog? importCatalog;
     private bool refreshing;
     private readonly Func<Func<Core.HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public HomeProfileSession ProfileSession => profileSession;
+    public ShellNavigation Navigation => this.FindControl<ShellNavigation>("NavigationBar")!;
+    public object? CurrentScreen => Host.Content;
+    private ContentControl Host => this.FindControl<ContentControl>("ScreenHost")!;
     public event Action? ConnectionRequested;
     public event Action? RefreshRequested;
     public void RequestConnection() => ConnectionRequested?.Invoke();
-    public void BindActivity(ConnectedActivityController controller) => home.FindControl<ConnectedLuciaNow>("ConnectedLuciaNotice")!.SetController(controller, RequestConnection);
+
+    public void BindActivity(ConnectedActivityController controller)
+    {
+        activity = controller;
+        home.FindControl<ConnectedLuciaNow>("ConnectedLuciaNotice")!.SetController(controller, RequestConnection);
+        lucia?.SetController(controller, RequestConnection);
+    }
 
     public CompanionShell() : this(new HomeViewModel(SampleHome.Create(), SampleObservationSources.Create()), new LocalHomeStore(LocalHomeStore.DefaultPath)) { }
 
@@ -41,31 +57,12 @@ public sealed partial class CompanionShell : UserControl
         if (!state.IsDemo && connection is not null && identity is not null)
         { sharedLayoutFactory = draft => new(connection, identity, draft); }
         AvaloniaXamlLoader.Load(this);
-        this.FindControl<ContentControl>("ScreenHost")!.Content = home;
-        var appearance = this.FindControl<Button>("AppearanceButton")!;
-        var connectionItem = new MenuItem { Header = "Connection" };
-        connectionItem.Click += (_, _) => RequestConnection();
-        var menu = new List<MenuItem> { new MenuItem { Header = "Appearance", ItemsSource = new[]
-            {
-                ThemeItem("System", ThemeVariant.Default), ThemeItem("Light", ThemeVariant.Light), ThemeItem("Dark", ThemeVariant.Dark)
-            }}, customizeHome, connectionItem };
-        if (state.IsDemo) { menu.Add(controlLab); }
-        appearance.ContextMenu = new ContextMenu { ItemsSource = menu };
-        this.FindControl<Button>("StoryButton")!.IsVisible = state.IsDemo;
-        this.FindControl<Button>("RefreshHomeReports")!.IsVisible = !state.IsDemo;
-        this.FindControl<Button>("RefreshHomeReports")!.Click += (_, _) => RefreshRequested?.Invoke();
-        appearance.Click += (_, _) => appearance.ContextMenu.Open(appearance);
-        this.FindControl<Button>("BuildHomeButton")!.Click += (_, _) => OpenEditor();
+        Host.Content = home;
+        Navigation.DestinationRequested += Navigate;
         this.FindControl<Button>("RetrySaveButton")!.Click += (_, _) => profileSession.RetrySave();
         this.FindControl<Button>("ReviewSaveConflict")!.Click += async (_, _) => await OpenSaveConflictAsync();
-        controlLab.Click += (_, _) =>
-        {
-            this.FindControl<ContentControl>("ScreenHost")!.Content = workbench ??= new ControlWorkbench();
-            this.FindControl<Button>("StoryButton")!.Content = "Story";
-        };
-        customizeHome.Click += (_, _) => { ShowHome(); home.OpenCustomization(); };
-        this.FindControl<Button>("StoryButton")!.Click += (_, _) => SwitchStory();
         profileSession.Changed += RefreshStorageState;
+        SizeChanged += (_, _) => ArrangeNavigation();
         AttachedToVisualTree += async (_, _) =>
         {
             attachedTopLevel = TopLevel.GetTopLevel(this);
@@ -76,13 +73,33 @@ public sealed partial class CompanionShell : UserControl
         {
             if (attachedTopLevel is not null) { attachedTopLevel.BackRequested -= OnBackRequested; }
             attachedTopLevel = null;
-            appearance.ContextMenu.Close();
         };
         KeyDown += (_, args) =>
         {
             if (args.Key == Key.Escape && !args.Handled) { args.Handled = NavigateBack(); }
         };
+        ArrangeNavigation();
         RefreshStorageState();
+    }
+
+    public void Navigate(ShellDestination destination)
+    {
+        switch (destination)
+        {
+            case ShellDestination.Home: ShowHome(); return;
+            case ShellDestination.Story: ShowStory(); break;
+            case ShellDestination.Lucia: Host.Content = LuciaDestination(); break;
+            case ShellDestination.More: Host.Content = MoreDestination(); break;
+        }
+        Navigation.Select(destination);
+        RefreshStorageState();
+    }
+
+    private void ArrangeNavigation()
+    {
+        var rail = Bounds.Width >= RailWidthThreshold;
+        DockPanel.SetDock(Navigation, rail ? Dock.Left : Dock.Bottom);
+        Navigation.SetRail(rail);
     }
 
     private void OnBackRequested(object? sender, RoutedEventArgs args)
@@ -93,9 +110,10 @@ public sealed partial class CompanionShell : UserControl
 
     private bool NavigateBack()
     {
-        var content = this.FindControl<ContentControl>("ScreenHost")!.Content;
+        var content = Host.Content;
         if (content is HomeEditorScreen editor) { editor.RequestBack(); return true; }
         if (ReferenceEquals(content, home)) { return home.TryNavigateBack(); }
+        if (content is ControlWorkbench) { Navigate(ShellDestination.More); return true; }
         ShowHome();
         return true;
     }
@@ -112,11 +130,7 @@ public sealed partial class CompanionShell : UserControl
             profileSession.ApplySetup(updated, replaceUnreadableProfile: profileSession.HasUnreadableProfile);
             ShowHome();
         };
-        this.FindControl<ContentControl>("ScreenHost")!.Content = editor;
-        this.FindControl<Button>("BuildHomeButton")!.IsEnabled = false;
-        this.FindControl<Button>("StoryButton")!.IsEnabled = false;
-        controlLab.IsEnabled = false;
-        customizeHome.IsEnabled = false;
+        Host.Content = editor;
         RefreshStorageState();
     }
 
@@ -133,7 +147,7 @@ public sealed partial class CompanionShell : UserControl
         {
             if (await profileSession.ResolveConflictAsync(keepSessionChanges: false)) { ShowHome(); }
         };
-        this.FindControl<ContentControl>("ScreenHost")!.Content = review;
+        Host.Content = review;
         RefreshStorageState();
         await profileSession.ReviewConflictAsync();
         review.FindControl<TextBlock>("ReviewTitle")!.Focus();
@@ -141,33 +155,56 @@ public sealed partial class CompanionShell : UserControl
 
     private void ShowHome()
     {
-        this.FindControl<ContentControl>("ScreenHost")!.Content = home;
-        this.FindControl<Button>("BuildHomeButton")!.IsEnabled = true;
-        this.FindControl<Button>("StoryButton")!.IsEnabled = true;
-        this.FindControl<Button>("StoryButton")!.Content = "Story";
-        controlLab.IsEnabled = true;
-        customizeHome.IsEnabled = true;
+        Host.Content = home;
+        Navigation.Select(ShellDestination.Home);
         RefreshStorageState();
     }
 
-    private void SwitchStory()
+    private void ShowStory()
     {
-        if (!home.State.IsDemo) { return; }
-        var host = this.FindControl<ContentControl>("ScreenHost")!;
-        if (host.Content is StoryScreen) { ShowHome(); return; }
+        if (!home.State.IsDemo)
+        {
+            Host.Content = historyPending ??= new HistoryPendingScreen();
+            return;
+        }
         if (!ReferenceEquals(storyHome, home.State.Home))
         {
             storyHome = home.State.Home;
             story = new StoryScreen(new StoryViewModel(SampleStory.Create(storyHome)));
         }
-        host.Content = story;
-        this.FindControl<Button>("StoryButton")!.Content = "Home";
+        Host.Content = story;
+    }
+
+    private LuciaScreen LuciaDestination()
+    {
+        if (lucia is not null) { return lucia; }
+        lucia = new LuciaScreen(home.State.IsDemo);
+        if (activity is not null) { lucia.SetController(activity, RequestConnection); }
+        return lucia;
+    }
+
+    private MoreScreen MoreDestination()
+    {
+        if (more is not null) { return more; }
+        more = new MoreScreen(home.State.IsDemo);
+        more.CustomizeRequested += () => { ShowHome(); home.OpenCustomization(); };
+        more.SetupRequested += OpenEditor;
+        more.ConnectionRequested += RequestConnection;
+        more.RefreshRequested += () => RefreshRequested?.Invoke();
+        more.ControlLabRequested += () =>
+        {
+            Host.Content = workbench ??= new ControlWorkbench();
+            Navigation.Select(ShellDestination.More);
+            RefreshStorageState();
+        };
+        return more;
     }
 
     private void RefreshStorageState()
     {
-        var content = this.FindControl<ContentControl>("ScreenHost")!.Content;
+        var content = Host.Content;
         var reviewing = content is HomeSaveConflictScreen;
+        var editing = content is HomeEditorScreen;
         if (content is HomeSaveConflictScreen review)
         {
             review.Refresh(Core.HomeProfile.From(home.State.Home, home.State.PinnedPlaceIds, home.State.SectionOrder), profileSession);
@@ -176,27 +213,20 @@ public sealed partial class CompanionShell : UserControl
         this.FindControl<TextBlock>("StorageStatus")!.Text = profileSession.StatusText;
         this.FindControl<Button>("RetrySaveButton")!.IsVisible = profileSession.CanRetry;
         this.FindControl<Button>("ReviewSaveConflict")!.IsVisible = profileSession.HasConflict;
-        this.FindControl<Button>("ReviewSaveConflict")!.IsEnabled = content is not HomeEditorScreen && !profileSession.IsLoading;
-        this.FindControl<ContentControl>("ScreenHost")!.IsEnabled = !profileSession.IsLoading;
-        this.FindControl<Button>("BuildHomeButton")!.IsEnabled = !profileSession.IsLoading && !reviewing &&
-            (!profileSession.HasUnreadableProfile || profileSession.CanReplaceUnreadableProfile) && content is not HomeEditorScreen;
-        this.FindControl<Button>("StoryButton")!.IsEnabled = !profileSession.IsLoading && !reviewing && content is not HomeEditorScreen;
-        controlLab.IsEnabled = this.FindControl<Button>("StoryButton")!.IsEnabled;
-        customizeHome.IsEnabled = controlLab.IsEnabled;
-        this.FindControl<Button>("RefreshHomeReports")!.IsEnabled = !refreshing && !profileSession.IsLoading && content is not HomeEditorScreen && !reviewing;
+        this.FindControl<Button>("ReviewSaveConflict")!.IsEnabled = !editing && !profileSession.IsLoading;
+        Host.IsEnabled = !profileSession.IsLoading;
+        Navigation.IsVisible = !editing && !reviewing;
+        Navigation.IsEnabled = !profileSession.IsLoading;
+        more?.SetAvailability(
+            canCustomize: !profileSession.IsLoading,
+            canSetup: !profileSession.IsLoading && (!profileSession.HasUnreadableProfile || profileSession.CanReplaceUnreadableProfile),
+            canRefresh: !refreshing && !profileSession.IsLoading);
     }
 
     public void SetImportCatalog(HomeCatalog? catalog) => importCatalog = catalog;
     public void InvalidateSharedLayout()
     {
-        if (this.FindControl<ContentControl>("ScreenHost")!.Content is HomeEditorScreen editor) { editor.InvalidateSharedLayout(); }
+        if (Host.Content is HomeEditorScreen editor) { editor.InvalidateSharedLayout(); }
     }
     public void SetRefreshing(bool value) { refreshing = value; RefreshStorageState(); }
-
-    private static MenuItem ThemeItem(string label, ThemeVariant theme)
-    {
-        var item = new MenuItem { Header = label };
-        item.Click += (_, _) => Application.Current!.RequestedThemeVariant = theme;
-        return item;
-    }
 }

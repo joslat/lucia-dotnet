@@ -81,7 +81,7 @@ public sealed class ConnectedActivityWorkspaceTests
             await workspace.Shell.ProfileSession.InitializeAsync(TestContext.Current.CancellationToken);
             workspace.State.ReplaceHome(ConnectedHomeControllerTests.Setup(), notifyPreferences: false);
             await workspace.RefreshAsync(TestContext.Current.CancellationToken);
-            workspace.Shell.FindControl<Button>("BuildHomeButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            ShellNavigationTests.OpenSetup(workspace.Shell);
             window.UpdateLayout();
             var editor = workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
             var input = editor.FindControl<TextBox>("HomeNameInput")!;

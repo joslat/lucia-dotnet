@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Controls.ShellNavigation" AutomationProperties.LandmarkType="Navigation" AutomationProperties.Name="Main">
+  <Border Name="NavigationFrame" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource GraphLineBrush}">
+    <DockPanel>
+      <Border Name="LuciaMark" DockPanel.Dock="Top" Width="44" Height="44" CornerRadius="22" Margin="0,20,0,28" HorizontalAlignment="Center"
+              Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource GraphLineBrush}" BorderThickness="1" AutomationProperties.Name="Lucia">
+        <Path Data="{x:Static c:NavigationIcons.Lucia}" Width="24" Height="24" Stretch="None" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7"
+              HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <Grid Name="NavigationItems">
+        <Button Name="NavHome" Tag="Home" Classes="nav" Theme="{StaticResource NavigationButton}" AutomationProperties.Name="Home">
+          <StackPanel Spacing="4">
+            <Path Data="{x:Static c:NavigationIcons.Home}" />
+            <TextBlock Text="Home" />
+          </StackPanel>
+        </Button>
+        <Button Name="NavStory" Tag="Story" Classes="nav" Theme="{StaticResource NavigationButton}" AutomationProperties.Name="Story">
+          <StackPanel Spacing="4">
+            <Path Data="{x:Static c:NavigationIcons.Story}" />
+            <TextBlock Text="Story" />
+          </StackPanel>
+        </Button>
+        <Button Name="NavLucia" Tag="Lucia" Classes="nav" Theme="{StaticResource NavigationButton}" AutomationProperties.Name="Lucia">
+          <StackPanel Spacing="4">
+            <Path Data="{x:Static c:NavigationIcons.Lucia}" />
+            <TextBlock Text="Lucia" />
+          </StackPanel>
+        </Button>
+        <Button Name="NavMore" Tag="More" Classes="nav" Theme="{StaticResource NavigationButton}" AutomationProperties.Name="More">
+          <StackPanel Spacing="4">
+            <Path Data="{x:Static c:NavigationIcons.More}" />
+            <TextBlock Text="More" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </DockPanel>
+  </Border>
+</UserControl>

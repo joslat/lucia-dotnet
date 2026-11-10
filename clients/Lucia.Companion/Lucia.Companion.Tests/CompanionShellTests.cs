@@ -48,17 +48,16 @@ public sealed class CompanionShellTests
             NativeCapture.Save(window, $"app-bloom-{width}-{(dark ? "dark" : "light")}.png");
             state.CloseActions();
             state.CloseDetail();
-            shell.FindControl<Button>("BuildHomeButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            ShellNavigationTests.OpenSetup(shell);
             Dispatcher.UIThread.RunJobs();
             var editor = Assert.IsType<HomeEditorScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
             editor.FindControl<TextBox>("PlaceNameInput")!.Text = "Not saved";
             NativeCapture.Save(window, $"setup-{width}-{(dark ? "dark" : "light")}.png");
             editor.FindControl<Button>("CancelEdit")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.Equal("Living room", state.Home.Places[0].Name);
-            shell.FindControl<Button>("AppearanceButton")!.ContextMenu!.Items.OfType<MenuItem>()
-                .Single(item => Equals(item.Header, "Control lab")).RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+            ShellNavigationTests.OpenMore(shell).FindControl<Button>("OpenControlLab")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.IsType<ControlWorkbench>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
-            shell.FindControl<Button>("StoryButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            ShellNavigationTests.Navigate(shell, ShellDestination.Story);
             var story = Assert.IsType<StoryScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
             Dispatcher.UIThread.RunJobs();
             NativeCapture.Save(window, $"app-story-{width}-{(dark ? "dark" : "light")}.png");
@@ -69,7 +68,7 @@ public sealed class CompanionShellTests
             story.FindControl<ScrollViewer>("StoryScroll")!.Offset = new Vector(0, 1000);
             Dispatcher.UIThread.RunJobs();
             NativeCapture.Save(window, $"app-story-lanes-{width}-{(dark ? "dark" : "light")}.png");
-            shell.FindControl<Button>("StoryButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            ShellNavigationTests.Navigate(shell, ShellDestination.Home);
             Assert.IsType<HomeScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
         }
         finally { window.Close(); }

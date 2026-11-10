@@ -28,7 +28,7 @@ public sealed class ConnectedHomeScreenTests
             var workspace = root.GetVisualDescendants().OfType<ConnectedHomeWorkspace>().Single();
             Assert.False(workspace.State.IsDemo);
             Assert.Empty(workspace.State.Home.Places);
-            Click(workspace.Shell, "BuildHomeButton");
+            ShellNavigationTests.OpenSetup(workspace.Shell);
             window.UpdateLayout();
             var editor = workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
             Click(editor, "ImportPlaces");
@@ -39,7 +39,8 @@ public sealed class ConnectedHomeScreenTests
             window.UpdateLayout();
             Assert.Equal("Closed", Assert.Single(Assert.Single(workspace.State.Home.Places).Observations).CurrentText);
             Assert.DoesNotContain(workspace.GetVisualDescendants().OfType<TextBlock>().Where(text => text.IsEffectivelyVisible), text => text.Text?.Contains("Synthetic readings", StringComparison.Ordinal) == true);
-            Assert.False(workspace.Shell.FindControl<Button>("StoryButton")!.IsVisible);
+            ShellNavigationTests.Navigate(workspace.Shell, ShellDestination.Story);
+            Assert.IsType<HistoryPendingScreen>(workspace.Shell.CurrentScreen);
         }
         finally { window.Close(); }
     }
@@ -85,7 +86,7 @@ public sealed class ConnectedHomeScreenTests
             await root.PendingOperation;
             window.UpdateLayout();
             var workspace = root.GetVisualDescendants().OfType<ConnectedHomeWorkspace>().Single();
-            Click(workspace.Shell, "BuildHomeButton");
+            ShellNavigationTests.OpenSetup(workspace.Shell);
             window.UpdateLayout();
             var editor = workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
             editor.FindControl<TextBox>("HomeNameInput")!.Text = "Night house";

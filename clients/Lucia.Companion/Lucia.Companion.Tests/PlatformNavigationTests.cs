@@ -42,15 +42,16 @@ public sealed class PlatformNavigationTests
         try
         {
             first.Show();
-            Click(shell.FindControl<Button>("StoryButton")!);
+            ShellNavigationTests.Navigate(shell, ShellDestination.Story);
             Assert.True(Back(first));
             Assert.IsType<HomeScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
-            shell.FindControl<Button>("AppearanceButton")!.ContextMenu!.Items.OfType<MenuItem>()
-                .Single(item => Equals(item.Header, "Control lab")).RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+            Click(ShellNavigationTests.OpenMore(shell).FindControl<Button>("OpenControlLab")!);
             first.Content = null;
             second.Content = shell;
             second.Show();
             Assert.False(Back(first));
+            Assert.True(Back(second));
+            Assert.IsType<MoreScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
             Assert.True(Back(second));
             Assert.IsType<HomeScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
             Assert.False(Back(second));
@@ -67,7 +68,7 @@ public sealed class PlatformNavigationTests
         try
         {
             window.Show();
-            Click(shell.FindControl<Button>("BuildHomeButton")!);
+            ShellNavigationTests.OpenSetup(shell);
             var editor = Assert.IsType<HomeEditorScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
             editor.FindControl<TextBox>("PlaceNameInput")!.Text = "";
             Assert.True(Back(window));

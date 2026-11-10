@@ -73,7 +73,7 @@ public sealed class ConnectedHomeWireScreenTests
             var workspace = root.GetVisualDescendants().OfType<ConnectedHomeWorkspace>().Single();
             Assert.True(workspace.Controller.HasData, workspace.Controller.StatusText);
             Assert.Empty(workspace.State.Home.Places);
-            Click(workspace.Shell, "BuildHomeButton"); window.UpdateLayout();
+            ShellNavigationTests.OpenSetup(workspace.Shell); window.UpdateLayout();
             var editor = workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
             Click(editor, "ImportPlaces"); window.UpdateLayout();
             var import = workspace.GetVisualDescendants().OfType<HomeImportScreen>().Single();

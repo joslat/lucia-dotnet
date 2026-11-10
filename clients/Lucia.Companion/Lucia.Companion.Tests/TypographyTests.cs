@@ -30,7 +30,7 @@ public sealed class TypographyTests
             window.Show();
             CompanionTypography.Apply(size => size * scale);
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(16 * scale, shell.FindControl<Button>("StoryButton")!.FontSize);
+            Assert.Equal(16 * scale, shell.Navigation.ButtonFor(ShellDestination.Story).FontSize);
             Assert.Equal(13 * scale, shell.FindControl<TextBlock>("StorageStatus")!.FontSize);
             NativeCapture.Save(window, $"text-{width}-{scale:0.0}-{(dark ? "dark" : "light")}-home.png");
             state.SelectPlace("garden");
@@ -40,13 +40,17 @@ public sealed class TypographyTests
             Assert.True(home.FindControl<BloomActions>("PlaceActions")!.FindControl<Border>("LargeTextActions")!.IsVisible);
             NativeCapture.Save(window, $"text-{width}-{scale:0.0}-{(dark ? "dark" : "light")}-actions.png");
             state.CloseActions();
-            shell.FindControl<Button>("StoryButton")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            ShellNavigationTests.Navigate(shell, ShellDestination.Story);
             var story = Assert.IsType<StoryScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
             Dispatcher.UIThread.RunJobs();
             Assert.Equal(12 * scale, story.FindControl<TextBlock>("TopTime")!.FontSize);
             Assert.True(story.FindControl<TextBlock>("LargeSelectedTime")!.IsVisible);
             NativeCapture.Save(window, $"text-{width}-{scale:0.0}-{(dark ? "dark" : "light")}-story.png");
-            shell.FindControl<Button>("BuildHomeButton")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            var more = ShellNavigationTests.OpenMore(shell);
+            Assert.Equal(16 * scale, more.FindControl<RadioButton>("ThemeDark")!.FontSize);
+            Assert.Equal(13 * scale, shell.Navigation.ButtonFor(ShellDestination.More).GetVisualDescendants().OfType<TextBlock>().Single().FontSize);
+            NativeCapture.Save(window, $"text-{width}-{scale:0.0}-{(dark ? "dark" : "light")}-more.png");
+            ShellNavigationTests.OpenSetup(shell);
             var editor = Assert.IsType<HomeEditorScreen>(shell.FindControl<ContentControl>("ScreenHost")!.Content);
             editor.FindControl<TextBox>("PlaceNameInput")!.Text = "";
             window.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(TopLevel.BackRequestedEvent));

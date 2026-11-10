@@ -38,7 +38,7 @@ public sealed class ConnectedHomeRecoveryScreenTests
         {
             await workspace.RefreshAsync(TestContext.Current.CancellationToken);
             workspace.State.ReplaceHome(ConnectedHomeControllerTests.Setup());
-            Click(workspace.Shell, "BuildHomeButton"); window.UpdateLayout();
+            ShellNavigationTests.OpenSetup(workspace.Shell); window.UpdateLayout();
             var editor = workspace.GetVisualDescendants().OfType<HomeEditorScreen>().Single();
             editor.FindControl<TextBox>("HomeNameInput")!.Text = "Our unsaved home name";
             service.HomeUpdate = _ => throw new CompanionConnectionException(ConnectionFailure.Rejected, HttpStatusCode.ServiceUnavailable);

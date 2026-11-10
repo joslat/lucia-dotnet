@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lucia.Companion.App.Screens.MoreScreen" Background="{DynamicResource CanvasBrush}">
+  <!-- THESIS: Everything that isn't looking at the home, in one calm list.
+       OWN-WORLD: Observatory panels, Outfit headings, DM Sans rows; no new palette or motion.
+       STORY: Change appearance, reorder Home, set up places, manage the connection; the demo also offers the control lab.
+       FIRST VIEWPORT: Appearance and Your home on phone; all groups on tablet.
+       FORM: Grouped native rows replacing the old top Options and Setup buttons. -->
+  <ScrollViewer Name="MoreScroll" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="16,20" Spacing="20" MaxWidth="720">
+      <TextBlock Text="More" Classes="title" />
+      <Border Classes="panel">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Appearance" Classes="section" />
+          <WrapPanel ItemSpacing="16" LineSpacing="4">
+            <RadioButton Name="ThemeSystem" GroupName="Appearance" Content="System" MinHeight="48" />
+            <RadioButton Name="ThemeLight" GroupName="Appearance" Content="Light" MinHeight="48" />
+            <RadioButton Name="ThemeDark" GroupName="Appearance" Content="Dark" MinHeight="48" />
+          </WrapPanel>
+          <TextBlock Text="System follows your device's light or dark setting." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        </StackPanel>
+      </Border>
+      <Border Classes="panel">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Your home" Classes="section" />
+          <Button Name="CustomizeHome" Classes="theme row" AutomationProperties.Name="Customize Home">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Customize Home" TextWrapping="Wrap" />
+              <TextBlock Text="Choose the order of Home's sections." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            </StackPanel>
+          </Button>
+          <Button Name="OpenHomeSetup" Classes="theme row" AutomationProperties.Name="Home setup">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Home setup" TextWrapping="Wrap" />
+              <TextBlock Text="Places, icons, connections and the sources each place reads." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Border>
+      <Border Classes="panel">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Connection" Classes="section" />
+          <Button Name="OpenConnection" Classes="theme row" AutomationProperties.Name="Connection">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Connection" TextWrapping="Wrap" />
+              <TextBlock Name="ConnectionHint" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            </StackPanel>
+          </Button>
+          <Button Name="RefreshHomeReports" Classes="theme row" AutomationProperties.Name="Refresh reports">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Refresh reports" TextWrapping="Wrap" />
+              <TextBlock Text="Read Home reports again now instead of waiting for the next check." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Border>
+      <Border Name="DemoTools" Classes="panel">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Demo" Classes="section" />
+          <Button Name="OpenControlLab" Classes="theme row" AutomationProperties.Name="Control lab">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Control lab" TextWrapping="Wrap" />
+              <TextBlock Text="Every control with sample data, for checking the design." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
