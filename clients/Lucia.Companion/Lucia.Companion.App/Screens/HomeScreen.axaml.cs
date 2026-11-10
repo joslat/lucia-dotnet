@@ -42,7 +42,7 @@ public sealed partial class HomeScreen : UserControl
         AvaloniaXamlLoader.Load(this);
         var constellation = this.FindControl<HomeConstellation>("Constellation")!;
         constellation.PlaceInvoked += State.SelectPlace;
-        constellation.ActionsRequested += id => { State.SelectPlace(id); State.CloseDetail(); State.OpenActions(); };
+        constellation.ActionsRequested += State.OpenActionsFor;
         constellation.PinRequested += id => { State.SelectPlace(id); State.TogglePin(); };
         this.FindControl<AttentionList>("Attention")!.PlaceInvoked += State.SelectPlace;
         var page = this.FindControl<PlacePage>("PlacePage")!;
@@ -57,7 +57,7 @@ public sealed partial class HomeScreen : UserControl
 
         var actions = this.FindControl<BloomActions>("PlaceActions")!;
         actions.ActionRequested += action => Invoke(action, fromSlide: false);
-        constellation.HoldStarted += id => { State.SelectPlace(id); State.CloseDetail(); State.OpenActions(); };
+        constellation.HoldStarted += State.OpenActionsFor;
         constellation.HoldMoved += args =>
         {
             if (this.FindControl<Popup>("ActionPopup")!.IsOpen) { actions.Arm(actions.ActionAt(args.GetPosition(actions))); }
@@ -106,8 +106,9 @@ public sealed partial class HomeScreen : UserControl
         if (homeChanged)
         {
             this.FindControl<TextBlock>("HomeName")!.Text = State.Home.Name;
-            constellation.SetHome(State.Home);
+            // Record first: rebuilding can raise events that refresh again, which must not rebuild a second time.
             renderedHome = State.Home;
+            constellation.SetHome(State.Home);
             // Today so far needs history; only the demo has a (sample) day to show.
             this.FindControl<Border>("TodayCard")!.IsVisible = State.IsDemo;
             if (State.IsDemo) { this.FindControl<TodaySoFar>("TodaySoFar")!.SetDay(SampleStory.Day(State.Home, SampleStory.Today)); }
@@ -189,12 +190,15 @@ public sealed partial class HomeScreen : UserControl
         var date = this.FindControl<TextBlock>("HomeDate")!;
         date.IsVisible = State.ReportTime is not null;
         date.Text = State.ReportTime is { } time ? time.UtcDateTime.ToString("dddd d MMM · HH:mm 'UTC'", CultureInfo.InvariantCulture) : null;
-        var live = !State.IsDemo && State.ReportTime is not null;
+        var hasReports = !State.IsDemo && State.ReportTime is not null;
+        // Stale only when there are readings and none of them is current; a home with no bindings yet is not stale.
+        var readings = State.Home.Places.SelectMany(place => place.Observations).ToArray();
+        var live = hasReports && (readings.Length == 0 || readings.Any(item => item.IsCurrent));
         var label = this.FindControl<TextBlock>("HomeModeLabel")!;
-        label.Text = State.IsDemo ? "Offline demo" : live ? "Live" : "Connected";
+        label.Text = State.IsDemo ? "Offline demo" : live ? "Live" : hasReports ? "Reports stale" : "Connected";
         label[!TextBlock.ForegroundProperty] = new DynamicResourceExtension(State.IsDemo ? "AccentBrush" : live ? "SageBrush" : "MutedBrush");
         this.FindControl<Ellipse>("LiveDot")!.IsVisible = live;
-        AutomationProperties.SetName(this.FindControl<Border>("DemoBadge")!, State.IsDemo ? "Offline demo, synthetic readings" : live ? $"Live reports, read {date.Text}" : "Connected, no reports yet");
+        AutomationProperties.SetName(this.FindControl<Border>("DemoBadge")!, State.IsDemo ? "Offline demo, synthetic readings" : live ? $"Live reports, read {date.Text}" : hasReports ? $"Reports read {date.Text} are no longer current" : "Connected, no reports yet");
     }
 
     /// <summary>Phone stacks the header; tablet puts the date and name, a divider, the headline and the mode chip on one line.</summary>

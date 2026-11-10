@@ -19,7 +19,7 @@ public sealed partial class PlacePage : UserControl
     public event Action? BackRequested;
     public event Action? PinToggled;
     public event Action? ActionsRequested;
-    public event Action<string>? StoryRequested;
+    public event Action<string?>? StoryRequested;
 
     public PlacePage()
     {
@@ -27,7 +27,8 @@ public sealed partial class PlacePage : UserControl
         this.FindControl<Button>("BackToHome")!.Click += (_, _) => BackRequested?.Invoke();
         this.FindControl<ToggleButton>("PinToggle")!.Click += (_, _) => PinToggled?.Invoke();
         this.FindControl<Button>("PageActionsButton")!.Click += (_, _) => ActionsRequested?.Invoke();
-        this.FindControl<Button>("OpenStory")!.Click += (_, _) => { if (placeId is not null) { StoryRequested?.Invoke(placeId); } };
+        // "Whole home story" means the whole day for every place; Bloom's History is the place-filtered path.
+        this.FindControl<Button>("OpenStory")!.Click += (_, _) => StoryRequested?.Invoke(null);
         var why = this.FindControl<ToggleButton>("WhyShown")!;
         why.IsCheckedChanged += (_, _) => this.FindControl<TextBlock>("WhyText")!.IsVisible = why.IsChecked == true;
     }
@@ -100,7 +101,7 @@ public sealed partial class PlacePage : UserControl
         var dayStart = new DateTimeOffset(time.UtcDateTime.Date, TimeSpan.Zero);
         var title = item.Observation.Label;
         this.FindControl<TextBlock>("ChartTitle")!.Text = $"{title} today";
-        this.FindControl<TextBlock>("ChartCaption")!.Text = $"Sample history · last reading {item.Observation.Value} at {lastAt.UtcDateTime.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)} UTC";
+        this.FindControl<TextBlock>("ChartCaption")!.Text = $"Sample history · UTC day · last reading {item.Observation.Value} at {lastAt.UtcDateTime.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)} UTC";
         this.FindControl<ReadingChart>("TodayChart")!.SetSeries(SamplePlaceHistory.Series(title, item.Value, dayStart, lastAt),
             dayStart, dayStart.AddDays(1), time, item.Unit, title, item.Observation.Quality == ObservationQuality.Current);
     }

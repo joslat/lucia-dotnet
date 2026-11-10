@@ -21,13 +21,21 @@ public static class PlaceCaption
         return string.Join(" · ", chosen);
     }
 
+    /// <summary>For a changed place: its current contact and motion readings, which are what mark a place changed; otherwise its caption.</summary>
+    public static string? WhatChanged(Place place)
+    {
+        ArgumentNullException.ThrowIfNull(place);
+        var changes = place.Observations.Where(item => item.IsCurrent && item.Role is ObservationRole.Contact or ObservationRole.Motion).Take(2).Select(Phrase).ToArray();
+        return changes.Length > 0 ? string.Join(" · ", changes) : Caption(place);
+    }
+
     public static string? Status(Place place)
     {
         ArgumentNullException.ThrowIfNull(place);
         return place.State switch
         {
             PlaceState.Quiet => Caption(place) is null ? "Quiet" : null,
-            PlaceState.Changed => Caption(place) is { } caption ? $"Changed · {caption}" : "Changed",
+            PlaceState.Changed => WhatChanged(place) is { } changed ? $"Changed · {changed}" : "Changed",
             PlaceState.Working => "Lucia is checking",
             PlaceState.Waiting => "Waiting for you",
             PlaceState.Problem => "Reported problem",

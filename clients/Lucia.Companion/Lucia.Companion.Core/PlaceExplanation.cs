@@ -33,7 +33,7 @@ public static class PlaceExplanation
                 return "Lucia is reading this place's sources. Reading doesn't change anything here.";
             case PlaceState.Changed:
                 var latest = HomeAttention.LatestReadingAt(place);
-                var caption = PlaceCaption.Caption(place);
+                var caption = PlaceCaption.WhatChanged(place);
                 return caption is null || latest is null
                     ? "A source reports a change. A change is a report, not proof that someone is there."
                     : $"{caption}, reported at {Time(latest.Value)}. A change is a report, not proof that someone is there.";

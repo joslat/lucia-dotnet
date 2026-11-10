@@ -147,7 +147,7 @@ public sealed class PlacePageTests
     }
 
     [AvaloniaFact]
-    public void TheTimelineLinksToStoryFilteredToThePlace()
+    public void TheTimelineLinksToTheWholeHomeStory()
     {
         var state = new HomeViewModel(SampleHome.Create());
         var shell = new CompanionShell(state, store: null);
@@ -165,7 +165,8 @@ public sealed class PlacePageTests
             Assert.Contains("Saturday 24 October", page.FindControl<TextBlock>("TimelineCaption")!.Text, StringComparison.Ordinal);
             page.FindControl<Button>("OpenStory")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             var story = Assert.IsType<StoryScreen>(shell.CurrentScreen);
-            Assert.Equal("garden", story.State.SelectedPlaceId);
+            // "Whole home story" opens the whole day; Bloom's History is the place-filtered path.
+            Assert.Null(story.State.SelectedPlaceId);
             Assert.Equal(ShellDestination.Story, shell.Navigation.Selected);
         }
         finally { window.Close(); }

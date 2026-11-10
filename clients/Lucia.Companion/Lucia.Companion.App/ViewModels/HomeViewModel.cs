@@ -24,7 +24,7 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
     public IReadOnlyList<string> PinnedPlaceIds => Home.Places.Where(place => pinnedIds.Contains(place.Id)).Select(place => place.Id).ToArray();
     public IReadOnlyList<HomeSection> SectionOrder { get; private set; } = HomeSections.DefaultOrder;
     public IReadOnlyList<Place> AttentionPlaces => Home.Places
-        .Where(place => place.State is PlaceState.Problem or PlaceState.Waiting or PlaceState.Unavailable)
+        .Where(HomeAttention.NeedsYou)
         .OrderBy(place => place.State switch { PlaceState.Problem => 0, PlaceState.Waiting => 1, _ => 2 }).ToArray();
 
     public bool IsPinned(string placeId) => pinnedIds.Contains(placeId);
@@ -65,6 +65,17 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
     }
 
     public void CloseActions() { IsActionsOpen = false; Notify(); }
+
+    /// <summary>Selects a place and opens its actions without opening its detail, in one change.</summary>
+    public void OpenActionsFor(string id)
+    {
+        SelectedPlace = Home.Places.FirstOrDefault(candidate => candidate.Id == id)
+            ?? throw new ArgumentException("Select a place belonging to this home.", nameof(id));
+        IsDetailOpen = false;
+        IsPageOpen = false;
+        IsActionsOpen = true;
+        Notify();
+    }
     public void CloseDetail() { IsDetailOpen = false; IsPageOpen = false; IsActionsOpen = false; Notify(); }
     public void OpenPage() { if (SelectedPlace is null) { return; } IsDetailOpen = true; IsPageOpen = true; IsActionsOpen = false; Notify(); }
     public void ClosePage() { IsPageOpen = false; IsActionsOpen = false; Notify(); }
@@ -107,7 +118,7 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
         pinnedIds.RemoveWhere(id => !Home.Places.Any(place => place.Id == id));
         SelectedPlace = Home.Places.FirstOrDefault(place => place.Id == SelectedPlace?.Id);
         IsDetailOpen &= SelectedPlace is not null;
-        IsActionsOpen = false;
+        IsActionsOpen &= SelectedPlace is not null;
         Notify();
         if (notifyPreferences) { PreferencesChanged?.Invoke(); }
     }

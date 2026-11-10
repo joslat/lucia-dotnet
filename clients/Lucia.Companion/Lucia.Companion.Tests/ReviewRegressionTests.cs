@@ -85,8 +85,10 @@ public sealed class ReviewRegressionTests
             Assert.Contains("armed", history.Classes);
             Assert.True(constellation.IsHolding);
 
-            // A connected refresh replaces the home and rebuilds every place mid-gesture.
-            state.ReplaceHome(SampleHome.Create(), notifyPreferences: false);
+            // A refresh that changes the layout (here a place is removed) rebuilds the places mid-gesture.
+            var sample = SampleHome.Create();
+            state.ReplaceHome(new HomeTopology(sample.Id, sample.Name, sample.Places.Where(place => place.Id != "kitchen"),
+                sample.Connections.Where(edge => edge.FromPlaceId != "kitchen" && edge.ToPlaceId != "kitchen")), notifyPreferences: false);
             Dispatcher.UIThread.RunJobs();
             Assert.False(constellation.IsHolding);
             Assert.DoesNotContain("armed", history.Classes);

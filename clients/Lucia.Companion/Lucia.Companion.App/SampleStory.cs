@@ -21,7 +21,7 @@ public static class SampleStory
 
     public static StoryNavigator Navigator(HomeTopology home) => new(Dates, Today, date => Day(home, date))
     {
-        AttentionCount = home.Places.Count(place => place.State is PlaceState.Problem or PlaceState.Waiting or PlaceState.Unavailable),
+        AttentionCount = home.Places.Count(HomeAttention.NeedsYou),
     };
 
     public static StoryDay Day(HomeTopology home, DateOnly date)

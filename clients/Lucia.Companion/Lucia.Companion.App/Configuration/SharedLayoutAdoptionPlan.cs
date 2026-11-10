@@ -48,6 +48,7 @@ public sealed class SharedLayoutAdoptionPlan
         if (currentLayout.Revision != Revision || currentLayout.HasUnqualifiedBindings != HasUnqualifiedBindings
             || currentIdentity.Session.SessionId != sessionId || ConnectedProfileScope.FileName(currentIdentity) != profileScope
             || !Permitted(currentLayout, currentIdentity.Session) || !SameMetadata(current, baseline)
+            || !current.Places.Select(place => (place.Id, place.Zone)).SequenceEqual(baseline.Places.Select(place => (place.Id, place.Zone)))
             || !currentLayout.Places.SequenceEqual(reviewedPlaces) || !SameMetadata(Project(currentLayout), Preview))
         { throw new InvalidOperationException("The local setup, shared layout or connection changed. Review the latest versions before adopting."); }
         return Preview;

@@ -48,8 +48,8 @@ public sealed class StoryNavigator : INotifyPropertyChanged
         return new StoryWeekDay(date, label, day, intervals);
     }).ToArray();
 
-    public void Previous() { if (CanGoPrevious) { ShowDay(Date.AddDays(-1)); } }
-    public void Next() { if (CanGoNext) { ShowDay(Date.AddDays(1)); } }
+    public void Previous() { if (CanGoPrevious) { ShowDay(Dates[Dates.ToList().IndexOf(Date) - 1]); } }
+    public void Next() { if (CanGoNext) { ShowDay(Dates[Dates.ToList().IndexOf(Date) + 1]); } }
 
     public void ShowDay(DateOnly date)
     {

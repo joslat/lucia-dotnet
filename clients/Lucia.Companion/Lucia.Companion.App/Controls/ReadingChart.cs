@@ -46,7 +46,7 @@ public sealed class ReadingChart : Control
             var lowest = points.Min(point => point.Value);
             var highest = points.Max(point => point.Value);
             AutomationProperties.SetName(this, $"Sample chart of {title} today, from {Format(lowest)} to {Format(highest)} {unit}. " +
-                $"Last reading {Format(last.Value)} {unit} at {last.At.UtcDateTime:HH:mm} UTC." + (HasGap ? " No data after that." : string.Empty));
+                $"Last reading {Format(last.Value)} {unit} at {last.At.UtcDateTime.ToString("HH:mm", CultureInfo.InvariantCulture)} UTC." + (HasGap ? " No data after that." : string.Empty));
         }
         InvalidateVisual();
     }

@@ -34,6 +34,7 @@ public sealed partial class HomeConstellation : UserControl
     public bool IsHolding => gesture.State == HoldGestureState.Holding;
     private PlaceOrb? pressedOrb;
     private bool suppressClick;
+    private bool rebuilding;
 
     public HomeConstellation()
     {
@@ -49,7 +50,29 @@ public sealed partial class HomeConstellation : UserControl
 
     public void SetHome(HomeTopology home)
     {
+        if (rebuilding) { return; }
+        var order = DisplayOrder(home.Places).ToArray();
+        if (SameLayout(order))
+        {
+            // Connected refreshes replace the home with new readings every few seconds; keep the same orbs so presses,
+            // holds, focus and the Bloom anchor survive.
+            foreach (var place in home.Places)
+            {
+                var existing = orbs[place.Id];
+                existing.Apply(place, PlaceIcons.For(place.Icon));
+                existing.ShowSummary(PlaceCaption.Caption(place), PlaceCaption.Status(place), PlaceStateIcons.For(place.State), place.Reason);
+            }
+            this.FindControl<ConnectionLayer>("Links")!.SetConnections(home.Connections);
+            return;
+        }
         // Rebuilding removes the place being held, so its release would never arrive.
+        rebuilding = true;
+        try { Rebuild(home, order); }
+        finally { rebuilding = false; }
+    }
+
+    private void Rebuild(HomeTopology home, IReadOnlyList<(string? Label, Place? Place)> order)
+    {
         EndHold(cancelled: true);
         var map = this.FindControl<ConstellationPanel>("Map")!;
         map.Children.Clear();
@@ -57,7 +80,7 @@ public sealed partial class HomeConstellation : UserControl
         orderedOrbs.Clear();
         zoneLabels.Clear();
         this.FindControl<TextBlock>("EmptyText")!.IsVisible = home.Places.Count == 0;
-        foreach (var (zone, place) in DisplayOrder(home.Places))
+        foreach (var (zone, place) in order)
         {
             if (zone is not null)
             {
@@ -118,6 +141,15 @@ public sealed partial class HomeConstellation : UserControl
         foreach (var place in other) { yield return (null, place); }
     }
 
+    /// <summary>True when the places, their order and the zone labels are unchanged, so only readings and states differ.</summary>
+    private bool SameLayout(IReadOnlyList<(string? Label, Place? Place)> order)
+    {
+        var labels = order.Where(item => item.Label is not null).Select(item => item.Label!).ToArray();
+        var ids = order.Where(item => item.Place is not null).Select(item => item.Place!.Id).ToArray();
+        return orderedOrbs.Count > 0 && ids.SequenceEqual(orderedOrbs.Select(orb => (string)orb.Tag!))
+            && labels.SequenceEqual(zoneLabels.Select(label => label.Text ?? string.Empty));
+    }
+
     private void OnOrbPressed(object? sender, PointerPressedEventArgs args)
     {
         if (sender is not PlaceOrb orb || !args.GetCurrentPoint(orb).Properties.IsLeftButtonPressed) { return; }
@@ -134,7 +166,14 @@ public sealed partial class HomeConstellation : UserControl
 
     private void OnOrbMoved(object? sender, PointerEventArgs args)
     {
-        if (gesture.State == HoldGestureState.Holding) { HoldMoved?.Invoke(args); args.Handled = true; return; }
+        if (gesture.State == HoldGestureState.Holding)
+        {
+            // On touch, an ancestor scroll viewer would otherwise take the pointer mid-slide and cancel the hold.
+            args.PreventGestureRecognition();
+            HoldMoved?.Invoke(args);
+            args.Handled = true;
+            return;
+        }
         var point = args.GetPosition(this);
         if (gesture.State == HoldGestureState.Pending && !gesture.Move(point.X, point.Y)) { holdTimer.Stop(); }
     }

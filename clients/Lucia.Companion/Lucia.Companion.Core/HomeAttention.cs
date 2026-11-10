@@ -6,6 +6,13 @@ namespace Lucia.Companion.Core;
 /// </summary>
 public static class HomeAttention
 {
+    /// <summary>The one rule for "needs you": a reported problem, a request waiting for the person, or a source gone quiet.</summary>
+    public static bool NeedsYou(Place place)
+    {
+        ArgumentNullException.ThrowIfNull(place);
+        return place.State is PlaceState.Problem or PlaceState.Waiting or PlaceState.Unavailable;
+    }
+
     public static string Headline(int count) => count switch
     {
         <= 0 => "Nothing needs you",

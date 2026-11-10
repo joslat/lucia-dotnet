@@ -49,6 +49,17 @@ public sealed class PlaceOrb : Button
         ToolTip.SetTip(this, place.Reason);
     }
 
+    /// <summary>Updates the name, icon and state of an existing orb, so a refresh keeps focus, presses and holds.</summary>
+    public void Apply(Place place, Geometry icon)
+    {
+        ArgumentNullException.ThrowIfNull(place);
+        PlaceName = place.Name;
+        Icon = icon;
+        foreach (var state in Enum.GetValues<PlaceState>()) { Classes.Remove(state.ToString().ToLowerInvariant()); }
+        Classes.Add(place.State.ToString().ToLowerInvariant());
+        ToolTip.SetTip(this, place.Reason);
+    }
+
     /// <summary>Home's wording: one line under the name, the status when there is one, otherwise the reading summary. The accessible name reads both.</summary>
     public void ShowSummary(string? caption, string? status, Geometry? statusIcon, string reason)
     {
