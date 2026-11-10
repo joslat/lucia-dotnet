@@ -36,8 +36,16 @@ public sealed partial class App : Application
                 MinHeight = 500,
                 Content = CreateRoot()
             };
-            desktop.MainWindow.Deactivated += (_, _) => ((CompanionRoot)desktop.MainWindow.Content!).SuspendConnectionPolling();
-            desktop.MainWindow.Activated += async (_, _) => await ((CompanionRoot)desktop.MainWindow.Content!).VerifyForegroundAsync();
+            desktop.MainWindow.Deactivated += (_, _) =>
+            {
+                MotionSettings.Current.Pause();
+                ((CompanionRoot)desktop.MainWindow.Content!).SuspendConnectionPolling();
+            };
+            desktop.MainWindow.Activated += async (_, _) =>
+            {
+                MotionSettings.Current.Resume();
+                await ((CompanionRoot)desktop.MainWindow.Content!).VerifyForegroundAsync();
+            };
         }
         else if (ApplicationLifetime is IActivityApplicationLifetime activity)
         {

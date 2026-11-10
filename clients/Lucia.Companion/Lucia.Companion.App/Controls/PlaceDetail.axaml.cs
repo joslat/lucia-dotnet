@@ -12,6 +12,8 @@ public sealed partial class PlaceDetail : UserControl
     {
         AvaloniaXamlLoader.Load(this);
         this.FindControl<Button>("ActionsButton")!.Click += (_, _) => ActionsRequested?.Invoke();
+        ContextHelp.Set(this.FindControl<Button>("ActionsButton")!, "Open this place's named shortcuts for readings, Story and pinning.");
+        ContextHelp.Set(this.FindControl<Button>("OpenPlacePage")!, "Open this place's full page, including reading quality and explanations.");
         this.FindControl<Button>("OpenPlacePage")!.Click += (_, _) => PageRequested?.Invoke();
     }
 

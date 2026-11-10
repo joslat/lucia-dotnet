@@ -6,6 +6,10 @@ Native Avalonia client for the Constellation mobile/tablet design. Connection us
 
 More > Appearance > Reduce motion now survives app restarts on Windows and Android. It is a device preference shared by demo and connected modes, stored separately from home setup and protected sessions. The status below the checkbox reports save failures; the current choice still applies for the session. If the saved preference cannot be read, motion stays reduced until the person chooses a new setting. Background pauses are temporary. Appearance theme selection still lasts for the current process.
 
+Holding a place now shows a charge ring before Bloom unfolds its four actions from the centre. A pointer-opened radial menu folds after one idle second; holding, hovering an action, keyboard use and the large-text list keep choices available. Buttons have brief press feedback, centred content and desktop hand cursors. Relevant navigation, place, action and Story controls offer contextual help after a short hover. State colours settle smoothly; written data stays current. Story's dial and straight-track cursors share the same optional animation.
+
+Read [ARCHITECTURE.md](ARCHITECTURE.md) for project responsibilities, entry points, the design-to-control map and ownership of input, animation, persistence and service access. The shared UI is in `Lucia.Companion.App`; `Lucia.Companion.Desktop` and `Lucia.Companion.Android` are its platform launchers.
+
 ## Smallest shared architecture
 
 ```text

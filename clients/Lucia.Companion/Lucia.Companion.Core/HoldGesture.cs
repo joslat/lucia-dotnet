@@ -21,6 +21,13 @@ public sealed class HoldGesture
     }
 
     public HoldGestureState State { get; private set; }
+    /// <summary>Elapsed hold charge, independent of animation frames. Cancel and release return it to zero.</summary>
+    public double Progress(TimeSpan at) => State switch
+    {
+        HoldGestureState.Pending => holdTime == TimeSpan.Zero ? 1 : Math.Clamp((at - pressedAt).TotalMilliseconds / holdTime.TotalMilliseconds, 0, 1),
+        HoldGestureState.Holding => 1,
+        _ => 0,
+    };
 
     public void Press(double x, double y, TimeSpan at)
     {

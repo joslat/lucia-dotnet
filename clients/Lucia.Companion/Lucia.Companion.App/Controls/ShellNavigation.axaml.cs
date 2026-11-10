@@ -26,6 +26,13 @@ public sealed partial class ShellNavigation : UserControl
         {
             var destination = Order[index];
             var button = ButtonFor(destination);
+            ContextHelp.Set(button, destination switch
+            {
+                ShellDestination.Home => "Your places, current readings and things that need you.",
+                ShellDestination.Story => "Explore the sample day and week. Connected history is not available yet.",
+                ShellDestination.Lucia => "See reported requests and their current status.",
+                _ => "Appearance, motion, Home setup and connection.",
+            });
             AutomationProperties.SetPositionInSet(button, index + 1);
             AutomationProperties.SetSizeOfSet(button, Order.Length);
             button.Click += (_, _) => DestinationRequested?.Invoke(destination);

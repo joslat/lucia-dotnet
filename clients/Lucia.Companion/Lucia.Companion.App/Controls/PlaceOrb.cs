@@ -16,6 +16,8 @@ public sealed class PlaceOrb : Button
     public static readonly StyledProperty<Geometry?> IconProperty = AvaloniaProperty.Register<PlaceOrb, Geometry?>(nameof(Icon));
     public static readonly StyledProperty<bool> IsSelectedProperty = AvaloniaProperty.Register<PlaceOrb, bool>(nameof(IsSelected));
     public static readonly StyledProperty<bool> IsPinnedProperty = AvaloniaProperty.Register<PlaceOrb, bool>(nameof(IsPinned));
+    public static readonly StyledProperty<double> HoldProgressProperty = AvaloniaProperty.Register<PlaceOrb, double>(nameof(HoldProgress));
+    public double HoldProgress { get => GetValue(HoldProgressProperty); set => SetValue(HoldProgressProperty, value); }
 
     public string PlaceName { get => GetValue(PlaceNameProperty); set => SetValue(PlaceNameProperty, value); }
     /// <summary>The written state. Null hides the line, for a quiet place whose caption already says what is going on.</summary>
@@ -46,7 +48,7 @@ public sealed class PlaceOrb : Button
         Icon = icon;
         Classes.Add(place.State.ToString().ToLowerInvariant());
         SetValue(AutomationProperties.NameProperty, $"{place.Name}. {StatusText}. {place.Reason}");
-        ToolTip.SetTip(this, place.Reason);
+        ContextHelp.Set(this, $"{place.Reason} Tap for readings; hold for place actions. The context menu offers the same actions.");
     }
 
     /// <summary>Updates the name, icon and state of an existing orb, so a refresh keeps focus, presses and holds.</summary>
@@ -55,9 +57,8 @@ public sealed class PlaceOrb : Button
         ArgumentNullException.ThrowIfNull(place);
         PlaceName = place.Name;
         Icon = icon;
-        foreach (var state in Enum.GetValues<PlaceState>()) { Classes.Remove(state.ToString().ToLowerInvariant()); }
-        Classes.Add(place.State.ToString().ToLowerInvariant());
-        ToolTip.SetTip(this, place.Reason);
+        foreach (var state in Enum.GetValues<PlaceState>()) { Classes.Set(state.ToString().ToLowerInvariant(), state == place.State); }
+        ContextHelp.Set(this, $"{place.Reason} Tap for readings; hold for place actions. The context menu offers the same actions.");
     }
 
     /// <summary>Home's wording: one line under the name, the status when there is one, otherwise the reading summary. The accessible name reads both.</summary>

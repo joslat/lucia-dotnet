@@ -28,6 +28,9 @@ public sealed partial class PlacePage : UserControl
         this.FindControl<Button>("BackToHome")!.Click += (_, _) => BackRequested?.Invoke();
         this.FindControl<ToggleButton>("PinToggle")!.Click += (_, _) => PinToggled?.Invoke();
         this.FindControl<Button>("PageActionsButton")!.Click += (_, _) => ActionsRequested?.Invoke();
+        ContextHelp.Set(this.FindControl<Button>("PageActionsButton")!, "Open place actions: Open, History, Pin and Close. Holding a place on Home opens the same menu.");
+        ContextHelp.Set(this.FindControl<ToggleButton>("PinToggle")!, "Pin or unpin this place on this device.");
+        ContextHelp.Set(this.FindControl<ToggleButton>("WhyShown")!, "Explain which source reports support this place's current status.");
         // "Whole home story" means the whole day for every place; Bloom's History is the place-filtered path.
         this.FindControl<Button>("OpenStory")!.Click += (_, _) => StoryRequested?.Invoke();
         var why = this.FindControl<ToggleButton>("WhyShown")!;

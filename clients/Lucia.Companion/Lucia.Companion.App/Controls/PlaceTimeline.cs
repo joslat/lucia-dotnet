@@ -18,6 +18,7 @@ public sealed class PlaceTimeline : UserControl
     {
         State = state;
         track = new TimelineTrackLayer { State = state, PlaceId = place.Id };
+        track.RefreshSelection(animate: false);
         track.TimeInvoked += state.SelectFraction;
         var title = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
         var icon = new Avalonia.Controls.Shapes.Path { Data = PlaceIcons.For(place.Icon), Width = 20, Height = 20, Stretch = Stretch.Uniform, StrokeThickness = 1.7 };
@@ -57,5 +58,5 @@ public sealed class PlaceTimeline : UserControl
         Content = stack;
     }
 
-    public void RefreshSelection() => track.InvalidateVisual();
+    public void RefreshSelection(bool animate = false) => track.RefreshSelection(animate);
 }

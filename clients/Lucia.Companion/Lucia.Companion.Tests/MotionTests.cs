@@ -3,6 +3,7 @@ using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Lucia.Companion.App;
 using Lucia.Companion.App.Controls;
 using Lucia.Companion.App.Screens;
@@ -118,8 +119,12 @@ public sealed class MotionTests
             motion.ReduceMotion = false;
             Dispatcher.UIThread.RunJobs();
             Assert.NotNull(orbit.Transitions);
+            var tracks = view.GetVisualDescendants().OfType<Control>().Where(item => item.GetType().Name == "TimelineTrackLayer").ToArray();
+            Assert.NotEmpty(tracks);
+            Assert.All(tracks, track => Assert.Contains(track.Transitions!, transition => transition is DoubleTransition { Property.Name: "CursorFraction", Duration.TotalMilliseconds: 280 }));
             view.FindControl<CheckBox>("AnimateSelection")!.IsChecked = false;
             Assert.Null(orbit.Transitions);
+            Assert.All(tracks, track => Assert.Null(track.Transitions));
         }
         finally { motion.ReduceMotion = true; window.Close(); }
     }
@@ -128,9 +133,23 @@ public sealed class MotionTests
     public void BackgroundingTheAppPausesMotion()
     {
         var app = Assert.IsType<Lucia.Companion.App.App>(Application.Current);
-        app.SuspendConnectionPolling();
-        Assert.True(MotionSettings.Current.IsPaused);
-        app.VerifyConnectionForeground();
-        Assert.False(MotionSettings.Current.IsPaused);
+        var shell = new CompanionShell(new HomeViewModel(SampleHome.Create()), store: null);
+        var window = new Window { Content = shell };
+        var motion = MotionSettings.Current;
+        try
+        {
+            motion.ReduceMotion = false;
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            var button = shell.Navigation.ButtonFor(ShellDestination.More);
+            Assert.NotNull(button.Transitions);
+            app.SuspendConnectionPolling();
+            Assert.True(motion.IsPaused);
+            Assert.Null(button.Transitions);
+            app.VerifyConnectionForeground();
+            Assert.False(motion.IsPaused);
+            Assert.NotNull(button.Transitions);
+        }
+        finally { motion.ReduceMotion = true; motion.Resume(); window.Close(); }
     }
 }

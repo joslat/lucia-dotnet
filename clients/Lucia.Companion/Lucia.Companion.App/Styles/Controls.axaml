@@ -9,13 +9,16 @@
       <Setter Property="MinWidth" Value="100" />
       <Setter Property="MinHeight" Value="126" />
       <Setter Property="Padding" Value="10" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
       <Setter Property="Template">
         <ControlTemplate>
           <Border Name="FocusBorder" CornerRadius="12" BorderThickness="2" BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
-            <StackPanel Spacing="6" HorizontalAlignment="Center">
+            <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
               <Grid Name="Orb" Width="72" Height="72">
                   <Ellipse Name="StateRing" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2" />
                   <Ellipse Name="SelectionRing" Margin="-6" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1" StrokeDashArray="2,4" IsVisible="{TemplateBinding IsSelected}" />
+                  <c:HoldCharge Width="92" Height="92" Margin="-10" IsHitTestVisible="False" Progress="{TemplateBinding HoldProgress}" />
                   <Path Width="28" Height="28" Stretch="Uniform" Data="{TemplateBinding Icon}"
                       Stroke="{TemplateBinding Foreground}" StrokeThickness="1.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
                   <Path IsVisible="{TemplateBinding IsPinned}" Width="12" Height="12" Margin="0,2,2,0" HorizontalAlignment="Right" VerticalAlignment="Top"
@@ -45,7 +48,7 @@
       <Style Selector="^.problem"><Setter Property="Foreground" Value="{DynamicResource ProblemBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource ProblemBrush}" /></Style>
       <Style Selector="^:selected /template/ Border#FocusBorder"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
       <Style Selector="^:focus-visible /template/ Border#FocusBorder"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /></Style>
-      <Style Selector="^:pressed /template/ Grid#Orb"><Setter Property="Opacity" Value="0.7" /></Style>
+      <Style Selector="^:pressed /template/ Grid#Orb"><Setter Property="Opacity" Value="0.88" /></Style>
       <Style Selector="^:disabled"><Setter Property="Opacity" Value="0.5" /></Style>
       <Style Selector="^.constellation.quiet /template/ Ellipse#StateRing"><Setter Property="Fill" Value="Transparent" /><Setter Property="Stroke" Value="Transparent" /></Style>
       <Style Selector="^.constellation.unavailable /template/ Ellipse#StateRing"><Setter Property="Fill" Value="Transparent" /><Setter Property="StrokeThickness" Value="1" /><Setter Property="StrokeDashArray" Value="2,4" /></Style>
@@ -54,9 +57,10 @@
     </ControlTheme>
     <ControlTheme x:Key="{x:Type c:BloomActionButton}" TargetType="c:BloomActionButton">
       <Setter Property="Width" Value="88" /><Setter Property="Height" Value="94" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" /><Setter Property="VerticalContentAlignment" Value="Center" /><Setter Property="Padding" Value="4" />
       <Setter Property="Template">
         <ControlTemplate>
-          <StackPanel Spacing="5" HorizontalAlignment="Center">
+          <StackPanel Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}">
             <Border Name="ActionCircle" Width="48" Height="48" CornerRadius="24" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" BoxShadow="0 4 14 0 #40000000">
               <Path Data="{TemplateBinding Icon}" Width="21" Height="21" Stretch="Uniform" Stroke="{DynamicResource TextBrush}" StrokeThickness="1.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
@@ -69,7 +73,7 @@
       <Style Selector="^:pointerover /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
       <Style Selector="^:focus-visible /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /><Setter Property="BorderThickness" Value="3" /></Style>
       <Style Selector="^.armed /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /><Setter Property="BorderThickness" Value="3" /><Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" /></Style>
-      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
+      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.88" /></Style>
     </ControlTheme>
     <ControlTheme x:Key="NavigationButton" TargetType="Button">
       <Setter Property="FontFamily" Value="{DynamicResource BodyFont}" />
@@ -94,7 +98,7 @@
       <Style Selector="^.selected.rail"><Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" /></Style>
       <Style Selector="^:pointerover:not(.selected)"><Setter Property="Background" Value="{DynamicResource ControlBrush}" /></Style>
       <Style Selector="^:focus-visible /template/ Border#NavigationItemFrame"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /></Style>
-      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
+      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.88" /></Style>
       <Style Selector="^:disabled"><Setter Property="Opacity" Value="0.5" /></Style>
     </ControlTheme>
     <ControlTheme x:Key="SegmentButton" TargetType="RadioButton">
@@ -125,10 +129,11 @@
       <Setter Property="Padding" Value="10" />
       <Setter Property="HorizontalAlignment" Value="Stretch" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
       <Setter Property="Template">
         <ControlTemplate>
           <Border Name="RowFrame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="14" Padding="{TemplateBinding Padding}">
-            <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+            <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
           </Border>
         </ControlTemplate>
       </Setter>
@@ -138,9 +143,16 @@
       <Style Selector="^.lead.unavailable"><Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" /></Style>
       <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource ControlBrush}" /></Style>
       <Style Selector="^:focus-visible /template/ Border#RowFrame"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /><Setter Property="BorderThickness" Value="2" /></Style>
-      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
+      <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.88" /></Style>
     </ControlTheme>
   </Styles.Resources>
+  <Style Selector=":is(Button)">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="c:InteractionFeedback.Enabled" Value="True" />
+  </Style>
+  <Style Selector=":is(Button):disabled"><Setter Property="Cursor" Value="Arrow" /></Style>
+  <Style Selector="ToolTip"><Setter Property="MaxWidth" Value="340" /><Setter Property="Padding" Value="12" /><Setter Property="Background" Value="{DynamicResource PanelBrush}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" /><Setter Property="BorderThickness" Value="1" /></Style>
   <Style Selector="TemplatedControl"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /></Style>
   <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>
   <Style Selector="TextBlock.title"><Setter Property="FontFamily" Value="{DynamicResource DisplayFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize34}" /><Setter Property="FontWeight" Value="Medium" /></Style>

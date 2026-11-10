@@ -26,6 +26,7 @@ public sealed partial class HomeScreen : UserControl
     private (bool Expanded, bool StackBadge)? headerLayout;
     private bool actionsWereOpen;
     private bool detailWasOpen;
+    private bool pointerInput;
     public HomeViewModel State { get; }
     public bool IsExpanded => Bounds.Width >= 900;
     /// <summary>Phone shows the place page whenever detail is open; tablet only after the side pane's Detail.</summary>
@@ -56,14 +57,15 @@ public sealed partial class HomeScreen : UserControl
 
         var actions = this.FindControl<BloomActions>("PlaceActions")!;
         actions.ActionRequested += action => Invoke(action, fromSlide: false);
-        constellation.HoldStarted += State.OpenActionsFor;
+        constellation.HoldStarted += id => { pointerInput = true; actions.SetHoldActive(true); State.OpenActionsFor(id); };
         constellation.HoldMoved += args =>
         {
             if (this.FindControl<Popup>("ActionPopup")!.IsOpen) { actions.Arm(actions.ActionAt(args.GetPosition(actions))); }
         };
-        constellation.HoldCancelled += () => actions.Arm(null);
+        constellation.HoldCancelled += () => { actions.SetHoldActive(false); actions.Arm(null); };
         constellation.HoldReleased += args =>
         {
+            actions.SetHoldActive(false);
             actions.Arm(null);
             if (!State.IsActionsOpen) { return; }
             var point = args.GetPosition(actions);
@@ -82,6 +84,7 @@ public sealed partial class HomeScreen : UserControl
             if (change.Property == TextBlock.FontSizeProperty) { Refresh(); }
         };
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
+        AddHandler(PointerPressedEvent, (_, _) => pointerInput = true, RoutingStrategies.Tunnel, handledEventsToo: true);
         if (State.SelectedPlace is null && State.Home.Places.Count > 0)
         {
             State.SelectPlace((State.AttentionPlaces.FirstOrDefault() ?? State.Home.Places[0]).Id);
@@ -148,8 +151,17 @@ public sealed partial class HomeScreen : UserControl
         this.FindControl<ScrollViewer>("DetailScroll")!.IsVisible = pageOpen;
         this.FindControl<Grid>("HomeContext")!.IsVisible = !pageOpen;
         var popup = this.FindControl<Popup>("ActionPopup")!;
-        this.FindControl<Border>("BloomShade")!.IsVisible = State.IsActionsOpen;
-        if (!State.IsActionsOpen) { popup.IsOpen = false; }
+        var actions = this.FindControl<BloomActions>("PlaceActions")!;
+        this.FindControl<Border>("BloomShade")!.IsVisible = State.IsActionsOpen || popup.IsOpen;
+        if (!State.IsActionsOpen && popup.IsOpen && !actions.IsClosing)
+        {
+            actions.PlayClosing(MotionSettings.Current.IsEnabled, () =>
+            {
+                if (State.IsActionsOpen) { return; }
+                popup.IsOpen = false;
+                this.FindControl<Border>("BloomShade")!.IsVisible = false;
+            });
+        }
         if (State.IsActionsOpen && actionsWereOpen && homeChanged && popup.IsOpen)
         {
             // A layout change rebuilt the places; move Bloom to the new control for its place.
@@ -168,7 +180,8 @@ public sealed partial class HomeScreen : UserControl
                         : constellation.GetPlaceAnchor(State.SelectedPlace?.Id);
                     if (popup.PlacementTarget is not null && TopLevel.GetTopLevel(this) is not null)
                     {
-                        this.FindControl<BloomActions>("PlaceActions")!.PlayOpening(MotionSettings.Current.IsEnabled);
+                        actions.BeginSession(pointerInput, constellation.IsHolding);
+                        actions.PlayOpening(MotionSettings.Current.IsEnabled);
                         popup.IsOpen = true;
                     }
                 }
@@ -290,6 +303,7 @@ public sealed partial class HomeScreen : UserControl
 
     private void OnKeyDown(object? sender, KeyEventArgs args)
     {
+        pointerInput = false;
         if (args.Key != Key.Escape) { return; }
         args.Handled = TryNavigateBack();
     }

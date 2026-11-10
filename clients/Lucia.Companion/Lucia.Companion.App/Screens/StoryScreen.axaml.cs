@@ -185,7 +185,8 @@ public sealed partial class StoryScreen : UserControl
                 this.FindControl<TextBlock>(name)!.Text = State.Day.TimeLabel(State.Day.InstantAt(fraction))[..5];
             }
             var orbit = this.FindControl<StoryOrbit>("Orbit")!;
-            orbit.SetState(State, this.FindControl<CheckBox>("AnimateSelection")!.IsChecked == true && MotionSettings.Current.IsEnabled);
+            var animateSelection = this.FindControl<CheckBox>("AnimateSelection")!.IsChecked == true && MotionSettings.Current.IsEnabled;
+            orbit.SetState(State, animateSelection);
             var ringPlaces = State.VisiblePlaces.Take(6).ToArray();
             this.FindControl<TextBlock>("RingOrder")!.Text = ringPlaces.Length == 0 ? "No places configured." :
                 $"Outer to inner: {string.Join(", ", ringPlaces.Select(place => place.Name))}. Showing {ringPlaces.Length} of {State.VisiblePlaces.Count} places.";
@@ -203,7 +204,7 @@ public sealed partial class StoryScreen : UserControl
                 renderedFilter = State.SelectedPlaceId;
                 hasTimelines = true;
             }
-            foreach (var timeline in this.FindControl<StackPanel>("Timelines")!.Children.OfType<PlaceTimeline>()) { timeline.RefreshSelection(); }
+            foreach (var timeline in this.FindControl<StackPanel>("Timelines")!.Children.OfType<PlaceTimeline>()) { timeline.RefreshSelection(animateSelection); }
             this.FindControl<TextBlock>("SelectedReadout")!.Text = State.SelectedPlaceId is { } id
                 ? $"{time}. " + string.Join(" · ", Enum.GetValues<StoryKind>().Select(kind =>
                 {

@@ -6,6 +6,8 @@ Updated 10 November 2026, end of the app-only track. Read "Direction update, 10 
 
 **What is next.**
 
+Interaction follow-up F04 is implemented on 10 November. The hold charges visibly, Bloom unfolds and folds from the centre with interruptible easing, and pointer inactivity dismisses it without timing out keyboard, held, hovered-action or large-text choices. Shared button feedback, alignment, hand cursors, contextual help and synchronized Story cursors are in place. Full native regression passes 653/656 with three existing opt-in wire skips. Android builds with 0 warnings and 0 errors. Read [ARCHITECTURE.md](ARCHITECTURE.md) for the code map and [DESIGN.md](DESIGN.md) for the motion contract. Target-hardware timing and accessibility remain unqualified.
+
 The app-only Reduce motion follow-up is implemented on 10 November. Desktop and Android load the saved device preference before constructing the app; More reports storage failures. Twelve new cases cover restart, unreadable data, failed-save retry, temporary background pause and phone/tablet light/dark rendering. The full native suite passes 636 of 639 cases, with the same three opt-in wire skips. Android builds with 0 warnings and 0 errors. The Windows helper and Android build require the normal user environment rather than the restricted agent sandbox. Real-device qualification remains pending.
 
 - Without v2: a demo-mode check on a real Android phone (Q01), which is the only way to qualify touch hold-and-slide, predictive Back, large text, safe areas and motion. iOS needs a Mac with Xcode and an Apple developer account and has no project yet.

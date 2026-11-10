@@ -1,5 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
+using Avalonia.Input;
 using Avalonia.Media;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.Core;
@@ -9,13 +12,20 @@ namespace Lucia.Companion.App.Controls;
 /// <summary>Four distinct evidence tracks. Gaps in one track cannot borrow coverage from another.</summary>
 internal sealed class TimelineTrackLayer : Control
 {
+    public static readonly StyledProperty<double> CursorFractionProperty = AvaloniaProperty.Register<TimelineTrackLayer, double>(nameof(CursorFraction));
+    public double CursorFraction { get => GetValue(CursorFractionProperty); set => SetValue(CursorFractionProperty, value); }
+    private bool? animating;
     public StoryViewModel? State { get; set; }
     public string PlaceId { get; set; } = "";
     public event Action<double>? TimeInvoked;
+    static TimelineTrackLayer() => AffectsRender<TimelineTrackLayer>(CursorFractionProperty);
 
     public TimelineTrackLayer()
     {
         Height = 64;
+        Cursor = new Cursor(StandardCursorType.Hand);
+        ContextHelp.Set(this, "Select a time on these report tracks, or use the time slider and named reports. Gaps mean no supplied data.");
+        DetachedFromVisualTree += (_, _) => { Transitions = null; animating = null; };
         ActualThemeVariantChanged += (_, _) => InvalidateVisual();
         PointerPressed += (_, args) =>
         {
@@ -25,6 +35,19 @@ internal sealed class TimelineTrackLayer : Control
                 args.Handled = true;
             }
         };
+    }
+
+    public void RefreshSelection(bool animate)
+    {
+        if (State is null) { return; }
+        if (animating is null) { CursorFraction = State.CursorFraction; }
+        if (animating != animate)
+        {
+            Transitions = animate ? [new DoubleTransition { Property = CursorFractionProperty, Duration = TimeSpan.FromMilliseconds(280), Easing = new CubicEaseOut() }] : null;
+            animating = animate;
+        }
+        CursorFraction = State.CursorFraction;
+        InvalidateVisual();
     }
 
     public override void Render(DrawingContext context)
@@ -61,7 +84,7 @@ internal sealed class TimelineTrackLayer : Control
             }
             context.DrawLine(new Pen(StoryDrawing.Brush(this, "AccentBrush"), 2), new Point(from, 0), new Point(from, 60));
         }
-        var cursor = 2 + state.CursorFraction * width;
+        var cursor = 2 + CursorFraction * width;
         context.DrawLine(new Pen(StoryDrawing.Brush(this, "TextBrush"), 1.5), new Point(cursor, 0), new Point(cursor, 60));
     }
 }

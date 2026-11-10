@@ -8,6 +8,22 @@ public sealed class HoldGestureTests
     private static readonly TimeSpan Hold = TimeSpan.FromMilliseconds(450);
 
     [Fact]
+    public void ChargeTracksThePendingHoldAndClearsWhenScrollingCancelsIt()
+    {
+        var gesture = new HoldGesture(Hold, slop: 10);
+        gesture.Press(0, 0, TimeSpan.Zero);
+        Assert.Equal(0.5, gesture.Progress(TimeSpan.FromMilliseconds(225)), precision: 3);
+        Assert.Equal(0, gesture.Progress(TimeSpan.FromMilliseconds(-1)));
+        gesture.Move(20, 0);
+        Assert.Equal(0, gesture.Progress(Hold));
+        gesture.Press(0, 0, TimeSpan.Zero);
+        gesture.Tick(Hold);
+        Assert.Equal(1, gesture.Progress(Hold));
+        gesture.Release();
+        Assert.Equal(0, gesture.Progress(Hold));
+    }
+
+    [Fact]
     public void HoldingLongEnoughWithoutMovingStartsTheGesture()
     {
         var gesture = new HoldGesture(Hold, slop: 10);

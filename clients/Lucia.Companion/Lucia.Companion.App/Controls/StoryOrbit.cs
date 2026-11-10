@@ -29,6 +29,9 @@ public sealed class StoryOrbit : Control
     {
         MinWidth = 240;
         MinHeight = 240;
+        Cursor = new Cursor(StandardCursorType.Hand);
+        ContextHelp.Set(this, "Select time on the dial, or use the time slider, named chapters and reports. Each ring follows one place.");
+        DetachedFromVisualTree += (_, _) => { Transitions = null; animate = false; };
         ActualThemeVariantChanged += (_, _) => InvalidateVisual();
         SetValue(AutomationProperties.NameProperty, "StoryOrbit. Use the time slider or named chapters to select time.");
     }

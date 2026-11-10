@@ -43,10 +43,12 @@ public sealed partial class HomeConstellation : UserControl
         this.FindControl<ConstellationPanel>("Map")!.AnchorsChanged += this.FindControl<ConnectionLayer>("Links")!.SetAnchors;
         holdTimer.Tick += (_, _) =>
         {
-            holdTimer.Stop();
-            if (gesture.Tick(clock.Elapsed)) { BeginHold(); }
-            else if (gesture.State == HoldGestureState.Pending) { holdTimer.Interval = TimeSpan.FromMilliseconds(16); holdTimer.Start(); }
+            if (gesture.Tick(clock.Elapsed)) { holdTimer.Stop(); BeginHold(); }
+            else if (gesture.State == HoldGestureState.Pending) { UpdateCharge(); }
+            else { holdTimer.Stop(); }
         };
+        AttachedToVisualTree += (_, _) => MotionSettings.Current.Changed += MotionChanged;
+        DetachedFromVisualTree += (_, _) => { MotionSettings.Current.Changed -= MotionChanged; EndHold(cancelled: true); };
     }
 
     public void SetHome(HomeTopology home)
@@ -163,7 +165,8 @@ public sealed partial class HomeConstellation : UserControl
         gesture = new HoldGesture(HoldDelay < TimeSpan.Zero ? TimeSpan.Zero : HoldDelay, slop: 10);
         gesture.Press(point.X, point.Y, clock.Elapsed);
         if (gesture.Tick(clock.Elapsed)) { BeginHold(); return; }
-        holdTimer.Interval = HoldDelay;
+        UpdateCharge();
+        holdTimer.Interval = TimeSpan.FromMilliseconds(16);
         holdTimer.Start();
     }
 
@@ -178,12 +181,17 @@ public sealed partial class HomeConstellation : UserControl
             return;
         }
         var point = args.GetPosition(this);
-        if (gesture.State == HoldGestureState.Pending && !gesture.Move(point.X, point.Y)) { holdTimer.Stop(); }
+        if (gesture.State == HoldGestureState.Pending && !gesture.Move(point.X, point.Y))
+        {
+            holdTimer.Stop();
+            if (pressedOrb is not null) { pressedOrb.HoldProgress = 0; }
+        }
     }
 
     private void OnOrbReleased(object? sender, PointerReleasedEventArgs args)
     {
         holdTimer.Stop();
+        if (pressedOrb is not null) { pressedOrb.HoldProgress = 0; }
         pressedOrb = null;
         if (gesture.Release() != HoldGestureState.Holding) { return; }
         // The orb raises Click after this release only if the pointer is still over it; clear the suppression after that.
@@ -194,6 +202,7 @@ public sealed partial class HomeConstellation : UserControl
     private void BeginHold()
     {
         if (pressedOrb?.Tag is not string id) { gesture.Release(); return; }
+        pressedOrb.HoldProgress = 0;
         suppressClick = true;
         HoldStarted?.Invoke(id);
     }
@@ -201,12 +210,25 @@ public sealed partial class HomeConstellation : UserControl
     private void EndHold(bool cancelled)
     {
         holdTimer.Stop();
+        if (pressedOrb is not null) { pressedOrb.HoldProgress = 0; }
         pressedOrb = null;
         var wasHolding = gesture.Release() == HoldGestureState.Holding;
         if (!wasHolding) { suppressClick = false; return; }
         // A release may still reach the orb after a lost capture; keep it from also counting as a tap until then.
         Dispatcher.UIThread.Post(() => suppressClick = false, DispatcherPriority.Input);
         if (cancelled) { HoldCancelled?.Invoke(); }
+    }
+
+    private void UpdateCharge()
+    {
+        if (pressedOrb is null || gesture.State != HoldGestureState.Pending) { return; }
+        pressedOrb.HoldProgress = MotionSettings.Current.IsEnabled ? gesture.Progress(clock.Elapsed) : 1;
+    }
+
+    private void MotionChanged()
+    {
+        if (MotionSettings.Current.IsPaused) { EndHold(cancelled: true); }
+        else { UpdateCharge(); }
     }
 
     public void UpdateSelection(string? selectedId, Func<string, bool> isPinned)
