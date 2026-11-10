@@ -19,6 +19,7 @@
           <TextBlock Text="System follows your device's light or dark setting." Classes="muted" FontSize="{DynamicResource TextSize13}" />
           <CheckBox Name="ReduceMotion" Content="Reduce motion" MinHeight="48" />
           <TextBlock Text="Screens switch, Bloom opens and Story's time hand moves without animation." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+          <TextBlock Name="MotionStorageStatus" Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
         </StackPanel>
       </Border>
       <Border Classes="panel">

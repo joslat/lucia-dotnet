@@ -9,6 +9,7 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        App.MotionSettings.UseLocalPreferences();
         if (OperatingSystem.IsWindows()) { App.App.ConnectionFactory = CreateWindowsConnection; }
         AppBuilder.Configure<App.App>().UsePlatformDetect().LogToTrace().StartWithClassicDesktopLifetime(args);
     }

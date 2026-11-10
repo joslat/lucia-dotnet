@@ -6,6 +6,8 @@ Updated 10 November 2026, end of the app-only track. Read "Direction update, 10 
 
 **What is next.**
 
+The app-only Reduce motion follow-up is implemented on 10 November. Desktop and Android load the saved device preference before constructing the app; More reports storage failures. Twelve new cases cover restart, unreadable data, failed-save retry, temporary background pause and phone/tablet light/dark rendering. The full native suite passes 636 of 639 cases, with the same three opt-in wire skips. Android builds with 0 warnings and 0 errors. The Windows helper and Android build require the normal user environment rather than the restricted agent sandbox. Real-device qualification remains pending.
+
 - Without v2: a demo-mode check on a real Android phone (Q01), which is the only way to qualify touch hold-and-slide, predictive Back, large text, safe areas and motion. iOS needs a Mac with Xcode and an Apple developer account and has no project yet.
 - Waits for the upstream v2 branch (`feat/personal-assistant-harness-api`, identity and the `/api/me` app API): porting pairing, sessions and reads onto v2; W4 Story on real history (T02–T05); Bloom's Ask Lucia and richer Lucia stages; the V05 Engine room.
 - Do not change server code, pairing, sessions, grants or migrations until v2 settles, and do not build on v2 yet.

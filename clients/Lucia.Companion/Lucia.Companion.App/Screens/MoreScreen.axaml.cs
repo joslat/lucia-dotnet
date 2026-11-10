@@ -9,6 +9,7 @@ namespace Lucia.Companion.App.Screens;
 public sealed partial class MoreScreen : UserControl
 {
     private bool syncingTheme;
+    private readonly MotionSettings motion;
 
     public event Action? CustomizeRequested;
     public event Action? SetupRequested;
@@ -18,8 +19,9 @@ public sealed partial class MoreScreen : UserControl
 
     public MoreScreen() : this(isDemo: true) { }
 
-    public MoreScreen(bool isDemo)
+    public MoreScreen(bool isDemo, MotionSettings? motion = null)
     {
+        this.motion = motion ?? MotionSettings.Current;
         AvaloniaXamlLoader.Load(this);
         this.FindControl<Border>("DemoTools")!.IsVisible = isDemo;
         this.FindControl<Button>("RefreshHomeReports")!.IsVisible = !isDemo;
@@ -39,8 +41,9 @@ public sealed partial class MoreScreen : UserControl
             };
         }
         var reduce = this.FindControl<CheckBox>("ReduceMotion")!;
-        reduce.IsCheckedChanged += (_, _) => { if (!syncingTheme) { MotionSettings.Current.ReduceMotion = reduce.IsChecked == true; } };
-        AttachedToVisualTree += (_, _) => SyncTheme();
+        reduce.IsCheckedChanged += (_, _) => { if (!syncingTheme) { this.motion.ReduceMotion = reduce.IsChecked == true; } };
+        AttachedToVisualTree += (_, _) => { this.motion.Changed += SyncTheme; SyncTheme(); };
+        DetachedFromVisualTree += (_, _) => this.motion.Changed -= SyncTheme;
         SyncTheme();
     }
 
@@ -61,7 +64,8 @@ public sealed partial class MoreScreen : UserControl
             this.FindControl<RadioButton>("ThemeSystem")!.IsChecked = current == ThemeVariant.Default;
             this.FindControl<RadioButton>("ThemeLight")!.IsChecked = current == ThemeVariant.Light;
             this.FindControl<RadioButton>("ThemeDark")!.IsChecked = current == ThemeVariant.Dark;
-            this.FindControl<CheckBox>("ReduceMotion")!.IsChecked = MotionSettings.Current.ReduceMotion;
+            this.FindControl<CheckBox>("ReduceMotion")!.IsChecked = motion.ReduceMotion;
+            this.FindControl<TextBlock>("MotionStorageStatus")!.Text = motion.StorageStatus;
         }
         finally { syncingTheme = false; }
     }
