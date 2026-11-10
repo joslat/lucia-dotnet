@@ -1,6 +1,12 @@
 # Start here: companion handoff
 
-Updated 25 October 2026. Work stopped at the user's request for a session handoff. The full application is not complete. Do not restart autonomous work until the user resumes it.
+Updated 10 November 2026. The user resumed work on the **app-only track**. Read "Direction update, 10 November 2026" in [BUILD-PLAN.md](BUILD-PLAN.md) first; it supersedes the W4 instructions below.
+
+- The upstream v2 branch (`feat/personal-assistant-harness-api`) will provide identity and the app API (`/api/me`). Do not change server code, pairing, sessions, grants or migrations until it settles.
+- Work in this order: V01 inventory, V00 navigation shell, Home completion, V02 Bloom gestures, Story UI and motion on labelled sample data.
+- Building needs .NET SDK 10.0.403 (master's `global.json`) and the Android workload.
+
+The 25 October handoff below remains the record of the server-side history prerequisite.
 
 ## Read first
 
