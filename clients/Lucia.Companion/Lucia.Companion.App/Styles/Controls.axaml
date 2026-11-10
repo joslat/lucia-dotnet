@@ -68,6 +68,7 @@
       </Setter>
       <Style Selector="^:pointerover /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
       <Style Selector="^:focus-visible /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource TextBrush}" /><Setter Property="BorderThickness" Value="3" /></Style>
+      <Style Selector="^.armed /template/ Border#ActionCircle"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /><Setter Property="BorderThickness" Value="3" /><Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" /></Style>
       <Style Selector="^:pressed"><Setter Property="Opacity" Value="0.7" /></Style>
     </ControlTheme>
     <ControlTheme x:Key="NavigationButton" TargetType="Button">
@@ -139,6 +140,7 @@
   <Style Selector="ToggleButton.pin"><Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" /><Setter Property="CornerRadius" Value="24" /><Setter Property="Padding" Value="0" /><Setter Property="HorizontalContentAlignment" Value="Center" /><Setter Property="VerticalContentAlignment" Value="Center" /><Setter Property="Background" Value="{DynamicResource ControlBrush}" /><Setter Property="Foreground" Value="{DynamicResource MutedBrush}" /></Style>
   <Style Selector="ToggleButton.pin:checked"><Setter Property="Foreground" Value="{DynamicResource AccentBrush}" /></Style>
   <Style Selector="ToggleButton.pin:checked /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Style>
+  <Style Selector="Button.theme.armed"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" /><Setter Property="BorderThickness" Value="2" /></Style>
   <Style Selector="Button.row"><Setter Property="HorizontalAlignment" Value="Stretch" /><Setter Property="HorizontalContentAlignment" Value="Left" /><Setter Property="Padding" Value="14,10" /></Style>
   <Style Selector="Button.nav Path"><Setter Property="Width" Value="24" /><Setter Property="Height" Value="24" /><Setter Property="Stretch" Value="None" /><Setter Property="StrokeThickness" Value="1.7" /><Setter Property="HorizontalAlignment" Value="Center" /><Setter Property="Stroke" Value="{Binding $parent[Button].Foreground}" /></Style>
   <Style Selector="Button.nav TextBlock"><Setter Property="FontSize" Value="{DynamicResource TextSize13}" /><Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" /><Setter Property="TextAlignment" Value="Center" /><Setter Property="TextWrapping" Value="Wrap" /></Style>

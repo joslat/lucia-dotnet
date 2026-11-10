@@ -53,9 +53,20 @@ public sealed partial class HomeScreen : UserControl
         this.FindControl<PlaceDetail>("DesktopDetail")!.ActionsRequested += State.OpenActions;
 
         var actions = this.FindControl<BloomActions>("PlaceActions")!;
-        actions.PinRequested += State.TogglePin;
-        actions.CloseRequested += CloseActions;
-        actions.ReadingsRequested += () => { State.CloseActions(); if (State.SelectedPlace is { } selected) { State.SelectPlace(selected.Id); } };
+        actions.ActionRequested += action => Invoke(action, fromSlide: false);
+        constellation.HoldStarted += id => { State.SelectPlace(id); State.CloseDetail(); State.OpenActions(); };
+        constellation.HoldMoved += args =>
+        {
+            if (this.FindControl<Popup>("ActionPopup")!.IsOpen) { actions.Arm(actions.ActionAt(args.GetPosition(actions))); }
+        };
+        constellation.HoldReleased += args =>
+        {
+            actions.Arm(null);
+            if (!State.IsActionsOpen) { return; }
+            var point = args.GetPosition(actions);
+            if (actions.ActionAt(point) is { } action) { Invoke(action, fromSlide: true); }
+            else if (actions.IsOutside(point)) { CloseActions(); }
+        };
         var popup = this.FindControl<Popup>("ActionPopup")!;
         popup.Opened += (_, _) => Dispatcher.UIThread.Post(actions.FocusFirstAction, DispatcherPriority.Loaded);
         popup.Closed += (_, _) => { if (State.IsActionsOpen) { CloseActions(); } };
@@ -271,6 +282,30 @@ public sealed partial class HomeScreen : UserControl
         var customize = this.FindControl<Expander>("CustomizeHome")!;
         if (customize.IsExpanded) { customize.IsExpanded = false; customize.Focus(); return true; }
         return false;
+    }
+
+    /// <summary>Runs a Bloom action. Pin from a button keeps Bloom open to show the new label; every slide closes it.</summary>
+    private void Invoke(BloomAction action, bool fromSlide)
+    {
+        if (State.SelectedPlace is not { } place) { return; }
+        switch (action)
+        {
+            case BloomAction.Open:
+                State.CloseActions();
+                State.OpenPage();
+                break;
+            case BloomAction.History:
+                State.CloseActions();
+                StoryRequested?.Invoke(place.Id);
+                break;
+            case BloomAction.Pin:
+                State.TogglePin();
+                if (fromSlide) { CloseActions(); }
+                break;
+            default:
+                CloseActions();
+                break;
+        }
     }
 
     private void CloseActions()
