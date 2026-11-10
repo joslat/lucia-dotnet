@@ -89,6 +89,9 @@ public sealed partial class StoryScreen : UserControl
             : $"{requests.Length} Lucia request{(requests.Length == 1 ? string.Empty : "s")} in this day, {(State.SelectedPlaceId is null ? "from any place" : "for this place")}.";
     }
 
+    /// <summary>Moves to today's day view when this Story can navigate dates.</summary>
+    public void ShowToday() => navigator?.ShowDay(navigator.Today);
+
     private void StateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args) => Refresh();
 
     private void NavigatorChanged()

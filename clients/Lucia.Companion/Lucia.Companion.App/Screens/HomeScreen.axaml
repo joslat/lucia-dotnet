@@ -40,6 +40,9 @@
             <c:HomeConstellation Name="Constellation" />
           </StackPanel>
         </Border>
+        <Border Name="TodayCard" Classes="panel" Padding="16">
+          <c:TodaySoFar Name="TodaySoFar" />
+        </Border>
         <Border Name="LuciaCard" Classes="panel" Padding="12">
           <StackPanel Spacing="8">
             <c:LuciaNow Name="DemoLuciaNow" />

@@ -30,7 +30,8 @@ public sealed partial class HomeScreen : UserControl
     /// <summary>Phone shows the place page whenever detail is open; tablet only after the side pane's Detail.</summary>
     public bool IsPageVisible => IsExpanded ? State.IsPageOpen : State.IsDetailOpen;
     /// <summary>The place page's "Whole home story" link, for the shell to open Story filtered to that place.</summary>
-    public event Action<string>? StoryRequested;
+    /// <summary>Null opens the whole day; a place ID opens Story filtered to it.</summary>
+    public event Action<string?>? StoryRequested;
 
     public HomeScreen() : this(new HomeViewModel(SampleHome.Create())) { }
 
@@ -48,6 +49,7 @@ public sealed partial class HomeScreen : UserControl
         page.PinToggled += State.TogglePin;
         page.ActionsRequested += State.OpenActions;
         page.StoryRequested += id => StoryRequested?.Invoke(id);
+        this.FindControl<TodaySoFar>("TodaySoFar")!.StoryRequested += () => StoryRequested?.Invoke(null);
         this.FindControl<PlaceDetail>("DesktopDetail")!.PageRequested += State.OpenPage;
         this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.OrderChanged += order => State.SetSectionOrder(order);
         this.FindControl<PlaceDetail>("DesktopDetail")!.ActionsRequested += State.OpenActions;
@@ -104,6 +106,9 @@ public sealed partial class HomeScreen : UserControl
             this.FindControl<TextBlock>("HomeName")!.Text = State.Home.Name;
             constellation.SetHome(State.Home);
             renderedHome = State.Home;
+            // Today so far needs history; only the demo has a (sample) day to show.
+            this.FindControl<Border>("TodayCard")!.IsVisible = State.IsDemo;
+            if (State.IsDemo) { this.FindControl<TodaySoFar>("TodaySoFar")!.SetDay(SampleStory.Day(State.Home, SampleStory.Today)); }
         }
         if (homeChanged || renderedReportTime != State.ReportTime)
         {
@@ -252,8 +257,11 @@ public sealed partial class HomeScreen : UserControl
         // Keep the home graph wide even when another section is promoted above it.
         var places = this.FindControl<Border>("PlacesCard")!;
         var secondaryMain = ReferenceEquals(sections[0], places) ? sections[2] : places;
-        Control[] mainOrder = IsExpanded ? [sections[0], secondaryMain] : sections;
-        Control[] sideOrder = IsExpanded ? [sections.Single(section => !mainOrder.Contains(section)), detail] : [detail];
+        var today = this.FindControl<Border>("TodayCard")!;
+        // Phone: Today so far follows Your places. Tablet: it sits in the side column under the side section, as in the artboard.
+        Control[] mainOrder = IsExpanded ? [sections[0], secondaryMain]
+            : sections.SelectMany(section => ReferenceEquals(section, places) ? new Control[] { section, today } : [section]).ToArray();
+        Control[] sideOrder = IsExpanded ? [sections.Single(section => !mainOrder.Contains(section)), today, detail] : [detail];
         if (main.Children.SequenceEqual(mainOrder) && side.Children.SequenceEqual(sideOrder)) { return; }
         main.Children.Clear();
         side.Children.Clear();

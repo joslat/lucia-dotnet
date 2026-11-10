@@ -176,11 +176,16 @@ public sealed partial class CompanionShell : UserControl
         Host.Content = story;
     }
 
-    /// <summary>Opens Story filtered to one place. Connected Story has no history yet, so it shows that state instead.</summary>
-    public void OpenStoryFor(string placeId)
+    /// <summary>
+    /// Opens Story on today, filtered to one place or, with null, the whole home. Connected Story has no history yet,
+    /// so it shows that state instead.
+    /// </summary>
+    public void OpenStoryFor(string? placeId)
     {
         Navigate(ShellDestination.Story);
-        if (Host.Content is StoryScreen screen && screen.State.Day.Places.Any(place => place.Id == placeId)) { screen.State.SelectPlace(placeId); }
+        if (Host.Content is not StoryScreen screen) { return; }
+        screen.ShowToday();
+        if (placeId is null || screen.State.Day.Places.Any(place => place.Id == placeId)) { screen.State.SelectPlace(placeId); }
     }
 
     private LuciaScreen LuciaDestination()

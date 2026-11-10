@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Controls.TodaySoFar">
+  <!-- Today's reports on one 24-hour line, the rest of the day hatched, and a way into Story. Demo only, from the sample day. -->
+  <StackPanel Spacing="8">
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+      <TextBlock Text="Today so far" Classes="section" VerticalAlignment="Center" TextWrapping="Wrap" />
+      <Button Name="OpenTodayStory" Grid.Column="1" Classes="link" AutomationProperties.Name="Open today's story">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <TextBlock Text="Open story" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <Path Data="M9,6 L15,12 9,18" Width="24" Height="24" Stretch="None" StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round" Stroke="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+    </Grid>
+    <c:WeekDayLane Name="TodayLane" Height="24" />
+    <Grid ColumnDefinitions="*,*,*,*,Auto">
+      <TextBlock Text="00" Classes="muted" FontSize="{DynamicResource TextSize12}" />
+      <TextBlock Grid.Column="1" Text="06" Classes="muted" FontSize="{DynamicResource TextSize12}" />
+      <TextBlock Grid.Column="2" Text="12" Classes="muted" FontSize="{DynamicResource TextSize12}" />
+      <TextBlock Grid.Column="3" Text="18" Classes="muted" FontSize="{DynamicResource TextSize12}" />
+      <TextBlock Grid.Column="4" Text="24" Classes="muted" FontSize="{DynamicResource TextSize12}" />
+    </Grid>
+    <TextBlock Name="TodayCaption" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+  </StackPanel>
+</UserControl>

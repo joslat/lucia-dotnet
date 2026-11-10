@@ -44,7 +44,9 @@ public sealed class HomeCustomizeTests
             Assert.Equal("LuciaCard", main.Children[0].Name);
             Assert.Equal("PlacesCard", main.Children[1].Name);
             if (width >= 900) { Assert.Equal("AttentionCard", side.Children[0].Name); }
-            Assert.Equal(width >= 900 ? 2 : 3, main.Children.Count);
+            // Phone: the three sections plus the demo's Today so far strip, which always follows Your places.
+            Assert.Equal(width >= 900 ? 2 : 4, main.Children.Count);
+            if (width < 900) { Assert.Equal("TodayCard", main.Children[2].Name); }
             Dispatcher.UIThread.RunJobs();
             var focused = order.FindControl<Button>("MoveLuciaNowLater")!;
             var position = focused.TranslatePoint(new Point(0, focused.Bounds.Height), window);
