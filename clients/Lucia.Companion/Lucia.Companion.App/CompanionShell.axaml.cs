@@ -232,6 +232,7 @@ public sealed partial class CompanionShell : UserControl
         }
         this.FindControl<StackPanel>("StorageFooter")!.IsVisible = !reviewing;
         this.FindControl<TextBlock>("StorageStatus")!.Text = profileSession.StatusText;
+        this.FindControl<OperationProgress>("LocalProfileOperationProgress")!.IsBusy = profileSession.IsLoading && !reviewing;
         this.FindControl<Button>("RetrySaveButton")!.IsVisible = profileSession.CanRetry;
         this.FindControl<Button>("ReviewSaveConflict")!.IsVisible = profileSession.HasConflict;
         this.FindControl<Button>("ReviewSaveConflict")!.IsEnabled = !editing && !profileSession.IsLoading;

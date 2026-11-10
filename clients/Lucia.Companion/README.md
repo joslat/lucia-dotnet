@@ -10,6 +10,8 @@ Holding a place now shows a charge ring before Bloom unfolds its four actions fr
 
 Read [ARCHITECTURE.md](ARCHITECTURE.md) for project responsibilities, entry points, the design-to-control map and ownership of input, animation, persistence and service access. The shared UI is in `Lucia.Companion.App`; `Lucia.Companion.Desktop` and `Lucia.Companion.Android` are its platform launchers.
 
+[UI-UX-PLAN.md](UI-UX-PLAN.md) formalizes the screen hierarchy, loading/ready/empty/stale/recovery states and motion contract. Its app-only presentation baseline is implemented. Matching reading rows stay in place and show new values immediately with a brief update emphasis. Actual async work drives shared progress feedback; reduced motion uses static dots. Connection stages, verified Home readiness and place-page opening have one short position settle that ordinary refreshes do not replay. Charts retain truthful values, gaps and sample labels throughout.
+
 ## Smallest shared architecture
 
 ```text

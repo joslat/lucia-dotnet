@@ -89,6 +89,7 @@ public sealed partial class ConnectionScreen : UserControl
         displayedStage = State.Stage;
         displayedBusy = State.IsBusy;
         this.FindControl<TextBlock>("StatusNotice")!.Text = State.StatusText;
+        this.FindControl<Controls.OperationProgress>("ConnectionOperationProgress")!.IsBusy = State.IsBusy;
         var status = this.FindControl<TextBlock>("StatusNotice")!;
         status.Bind(TextBlock.ForegroundProperty, status.GetResourceObservable(State.IsProblem ? "ProblemBrush" : "MutedBrush"));
         this.FindControl<TextBlock>("ConnectionTitle")!.Text = State.IsConnected ? "Your Lucia connection" : "Connect to Lucia";

@@ -30,8 +30,7 @@ public sealed partial class PlaceDetail : UserControl
             ? "No physical connections configured. This is valid."
             : $"Connected to {string.Join(", ", neighbors)}.";
         var observations = this.FindControl<StackPanel>("Observations")!;
-        observations.Children.Clear();
-        foreach (var observation in place.Observations) { observations.Children.Add(new ObservationRow(observation)); }
+        ObservationRows.Update(observations, place, home);
         var empty = this.FindControl<TextBlock>("EmptyText")!;
         empty.IsVisible = place.Observations.Count == 0;
         empty.Text = ObservationBinding.MissingReadingsReason(home.Bindings.Any(binding => binding.PlaceId == place.Id));

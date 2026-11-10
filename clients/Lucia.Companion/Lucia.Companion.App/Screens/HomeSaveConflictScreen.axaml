@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
              x:Class="Lucia.Companion.App.Screens.HomeSaveConflictScreen" Background="{DynamicResource CanvasBrush}">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="16" Spacing="24" MaxWidth="760" HorizontalAlignment="Stretch">
@@ -6,6 +6,7 @@
         <TextBlock Name="ReviewTitle" Text="Choose which setup to keep" Classes="title" TextWrapping="Wrap" Focusable="True" />
         <TextBlock Text="The saved setup changed outside this session. Automatic saving has stopped. Compare the versions below before choosing. There is no automatic merge." Classes="muted" />
         <TextBlock Name="ReviewStatus" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
+        <c:OperationProgress Name="ConflictOperationProgress" />
         <Button Name="BackWithoutChoosing" Classes="theme" HorizontalAlignment="Left" AutomationProperties.Name="Back without choosing, keep both versions">
           <TextBlock Text="Back without choosing" TextWrapping="Wrap" />
         </Button>

@@ -1,6 +1,6 @@
 # Companion client architecture
 
-Updated 10 November 2026. This describes the implemented native clients. [DESIGN.md](DESIGN.md) owns appearance and interaction rules; [BUILD-PLAN.md](BUILD-PLAN.md) owns delivery status. The native client is separate from the React management dashboard in `lucia-dashboard`.
+Updated 11 November 2026. This describes the implemented native clients. [UI-UX-PLAN.md](UI-UX-PLAN.md) owns the screen/state inventory and refinement sequence, [DESIGN.md](DESIGN.md) owns appearance and interaction rules, and [BUILD-PLAN.md](BUILD-PLAN.md) owns wider delivery status. The native client is separate from the React management dashboard in `lucia-dashboard`.
 
 ## Projects and entry points
 
@@ -51,6 +51,10 @@ Paths below are relative to `Lucia.Companion.App/`.
 | Story dial, chapters and tracks | `Screens/StoryScreen.axaml`, `Controls/StoryOrbit.cs`, `ChapterList.cs`, `PlaceTimeline.cs`, `TimelineTrackLayer.cs` | Shared selected instant and filter, native text/buttons beside drawing |
 | Shared button feedback | `Controls/InteractionFeedback.cs` | Mouse hover, press compression, finite colour transitions and lifecycle cleanup |
 | Contextual help | `Controls/ContextHelp.cs` | Delayed wrapping tooltips with matching accessible help |
+| Reading continuity and update feedback | `Controls/ObservationRows.cs`, `ObservationRow.axaml.cs` | Retain unique rows within exact place/binding scope, update real text immediately and apply one finite emphasis |
+| Actual operation progress | `Controls/OperationProgress.cs` | Native indeterminate activity only while the owning controller/session is busy; static dots for reduced motion |
+| View/stage arrival | `Controls/SurfaceEntrance.cs` | One finite position settle on approved presentation boundaries; no replay on ordinary data refresh |
+| Presentation visibility | `Controls/PresentationVisibility.cs` | Observe the owner and its ancestors so hidden, detached or backgrounded presentation stops |
 | Colour, type and control templates | `App.axaml`, `Styles/Controls.axaml`, `Assets/Fonts/` | Observatory light/dark semantic roles, local Outfit/DM Sans and consistent native targets |
 
 Story, charts and Today so far are labelled sample data in the demo. Connected historical Story and Engine room remain incomplete. Appearance does not establish data capability or authorization.
@@ -66,6 +70,12 @@ The pure `HoldGesture` distinguishes a quick tap, pending hold, scroll cancellat
 `MotionSettings` combines the saved device preference with a temporary background pause. Windows and Android restore the preference before constructing controls. Under reduced motion, controls settle immediately and a pending hold shows a static indication. All new transitions and timers stop on detach or backgrounding. The only frame timer is the active pending hold. No polling timer drives decorative motion.
 
 The Story dial and straight-track cursors use the same 280 ms selection transition and the same Animate the time hand setting. Selection labels and source timestamps update immediately. Colour interpolation and cursor travel never alter observations, fabricate a lifecycle stage or infer occupancy.
+
+Reading rows are retained by unique label/role only inside an unchanged place and exact ordered binding scope. The current observation model lacks a per-reading source ID, so ambiguous duplicate labels and changed provenance start fresh. Removed readings leave immediately. `ObservationRow.Update` writes the complete new value, quality and timing first, then allows a 360 ms soft background emphasis for a meaningful value/quality change. It never interpolates numeric data, hides the new words, replays on a timestamp-only update or queues old changes.
+
+`OperationProgress` reads no services and owns no progress clock. Views feed their existing busy flags for Connection, Home, activity, shared review, local-profile loading and conflict review. The native progress bar is indeterminate, with no percentage text. Three static dots replace it under reduced motion. `PresentationVisibility` observes ancestor visibility and stops activity immediately when the containing view is hidden.
+
+`SurfaceEntrance` is enabled only on transform-free presentation containers for Connection stages, verified Home readiness and the place page. It keeps text fully visible while translating four logical units to rest over 220 ms. Data refresh, keyboard focus and preference changes do not replay it. Existing shell navigation owns the other screen transitions. Charts render their actual evidence and unknown coverage immediately, with no invented intermediate readings or simulated loading for absent history.
 
 ## Persistence and service boundary
 

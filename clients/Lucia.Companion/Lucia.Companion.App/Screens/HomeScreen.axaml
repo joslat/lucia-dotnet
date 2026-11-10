@@ -66,7 +66,7 @@
       </Expander>
       </StackPanel>
     </ScrollViewer>
-    <ScrollViewer Name="DetailScroll" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer Name="DetailScroll" Classes="arrival" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
       <c:PlacePage Name="PlacePage" />
     </ScrollViewer>
     <Border Name="BloomShade" Grid.RowSpan="2" Background="#80000000" IsVisible="False" IsHitTestVisible="False" />

@@ -92,6 +92,7 @@ public sealed partial class ConnectedHomeWorkspace : UserControl, IDisposable
         this.FindControl<ContentControl>("ConnectedShellHost")!.IsVisible = Controller.HasData;
         this.FindControl<ScrollViewer>("HomeReadState")!.IsVisible = !Controller.HasData;
         this.FindControl<TextBlock>("HomeReadStatus")!.Text = Controller.StatusText;
+        this.FindControl<Controls.OperationProgress>("HomeOperationProgress")!.IsBusy = Controller.IsBusy;
         this.FindControl<Button>("RetryHomeReports")!.IsEnabled = Controller.CanRefresh;
         Shell.SetImportCatalog(Controller.Catalog); Shell.SetRefreshing(Controller.IsBusy);
         if (!Controller.HasData) { Shell.InvalidateSharedLayout(); }

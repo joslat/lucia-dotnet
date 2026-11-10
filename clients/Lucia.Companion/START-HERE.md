@@ -1,10 +1,12 @@
 # Start here: companion handoff
 
-Updated 10 November 2026, end of the app-only track. Read "Direction update, 10 November 2026" in [BUILD-PLAN.md](BUILD-PLAN.md) first; it supersedes the W4 instructions below. The owner keeps a private plan and a live status tracker outside this repository; if they disagree with these files, they win.
+Updated 11 November 2026. Read the current UI/UX refinement section and "Direction update, 10 November 2026" in [BUILD-PLAN.md](BUILD-PLAN.md) first; they supersede the old W4 continuation instructions below. The owner keeps a private plan and a live status tracker outside this repository; if they disagree with these files, they win.
 
 **Where it stands.** The W5 app-only track is done: V00 navigation (phone bottom bar, tablet rail), V06 Home header and Needs you, V07 place captions and zones, V08 place page, V02 Bloom actions with hold-slide-release, V09 Story Day/Week and dates, V10 Story now/future and Lucia lane, V11 Today so far and V03 motion with Reduce motion. Three review rounds followed and their fixes are in. History-backed views run on clearly labelled sample data in the demo only; connected mode never falls back to samples. At head the full native suite passes (3 opt-in wire tests skipped) and the Android project builds with 0 warnings and 0 errors.
 
 **What is next.**
+
+The broad presentation replan is now [UI-UX-PLAN.md](UI-UX-PLAN.md), with a complete current screen/state inventory, component hierarchy and motion contract. Its app-only baseline is implemented: reading rows retain identity and update exact words immediately with finite emphasis, actual pending work drives shared indeterminate/static progress, and approved view/stage arrivals settle once without refresh replay. Full native regression passes 677/680 with three existing wire skips and 24 new cases. Android builds with zero warnings/errors; phone/tablet light/dark normal/enlarged-text captures and the local HTML record are checked. Hardware and server-dependent gates remain separate.
 
 Interaction follow-up F04 is implemented on 10 November. The hold charges visibly, Bloom unfolds and folds from the centre with interruptible easing, and pointer inactivity dismisses it without timing out keyboard, held, hovered-action or large-text choices. Shared button feedback, alignment, hand cursors, contextual help and synchronized Story cursors are in place. Full native regression passes 653/656 with three existing opt-in wire skips. Android builds with 0 warnings and 0 errors. Read [ARCHITECTURE.md](ARCHITECTURE.md) for the code map and [DESIGN.md](DESIGN.md) for the motion contract. Target-hardware timing and accessibility remain unqualified.
 

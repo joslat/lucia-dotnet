@@ -323,6 +323,16 @@ A pointer-opened radial Bloom folds after one idle second. Holding or hovering a
 Story's dial hand and straight-track cursors share a 280 millisecond CubicEaseOut selection transition. The Animate the time hand checkbox turns both off. MotionSettings combines Reduce motion in More with a temporary background pause. Windows and Android restore the saved preference before constructing the app. More reports failed saves, and an unreadable saved preference reduces motion for the session without overwriting it. Background pause is never saved. Reduced motion snaps every new effect to its final state; detachment and backgrounding stop transitions and presentation timers. Reports, chapters, input and time selection do not depend on animation.
 
 
+## Presentation states
+
+[UI-UX-PLAN.md](UI-UX-PLAN.md) records the complete current screen/state inventory and buildup hierarchy. Approved first-appearance boundaries keep all text visible while settling four logical units over 220 milliseconds with CubicEaseOut. These are Connection stage groups, verified Home becoming ready and the place page opening. Ordinary data refresh and preference changes do not replay the arrival, and shell navigation retains its existing transition without another per-destination reveal.
+
+Within the same place and exact source-binding scope, unique observation label/role rows update in place. Values, quality, last-known text and timestamps change immediately. A meaningful value or quality change may fade a soft AccentSoftBrush background emphasis from 70% to zero over 360 milliseconds with CubicEaseOut. First binding, ambiguous duplicates, changed source scope, identical values and timestamp-only refreshes do not start it. New changes replace an active emphasis without queueing prior updates. Text never counts through intermediate numbers or fades out before the new value appears.
+
+Actual controller/session work may show a native indeterminate progress bar beside its written status. This is the only continuously animated loading feedback; it runs only while work is pending and has no percentage or invented stage. Reduced motion uses three static authored dots. Completion, failure, hidden ancestors, detachment and background pause stop it. Local editing, sample date changes and an unavailable history service receive no manufactured loader.
+
+Charts and tracks draw their actual axes, evidence and unknown coverage immediately. A containing page may arrive once, but missing data is never filled for an animation. Updated numeric series are not interpolated into invented readings. Reduced motion makes the new presentation immediate; all effects stop when their actual presentation is hidden or detached.
+
 ## Shapes
 
 The signature shape is a circle with a centered household outline icon. Its diameter and radius come from the place-orb component and orb radius tokens. The icon is 28 units square, drawn with a 1.7-unit stroke from authored 24-unit path geometry.

@@ -152,6 +152,7 @@
     <Setter Property="c:InteractionFeedback.Enabled" Value="True" />
   </Style>
   <Style Selector=":is(Button):disabled"><Setter Property="Cursor" Value="Arrow" /></Style>
+  <Style Selector=":is(Control).arrival"><Setter Property="c:SurfaceEntrance.Enabled" Value="True" /></Style>
   <Style Selector="ToolTip"><Setter Property="MaxWidth" Value="340" /><Setter Property="Padding" Value="12" /><Setter Property="Background" Value="{DynamicResource PanelBrush}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" /><Setter Property="BorderThickness" Value="1" /></Style>
   <Style Selector="TemplatedControl"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /></Style>
   <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource BodyFont}" /><Setter Property="FontSize" Value="{DynamicResource TextSize16}" /><Setter Property="Foreground" Value="{DynamicResource TextBrush}" /></Style>

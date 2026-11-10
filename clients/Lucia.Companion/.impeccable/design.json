@@ -408,6 +408,21 @@
         "name": "story-hand-and-track-duration",
         "value": "280ms",
         "purpose": "Shared native DoubleTransition with CubicEaseOut for the dial and straight-track selection cursors. One setting disables both."
+      },
+      {
+        "name": "surface-arrival",
+        "value": "220ms / 4 logical units",
+        "purpose": "CubicEaseOut position settle only at approved view/stage boundaries. Text remains fully visible. Refresh and preference changes do not replay it."
+      },
+      {
+        "name": "reading-update-emphasis",
+        "value": "360ms / opacity 0.7 to 0",
+        "purpose": "CubicEaseOut soft background on a retained reading row for a meaningful value/quality change. Exact text updates immediately. Timestamp-only or ambiguous-source refreshes do not start it."
+      },
+      {
+        "name": "actual-operation-progress",
+        "value": "native indeterminate / static dots",
+        "purpose": "Only an actual controller/session busy flag allows loading feedback. No percentage. Reduced motion, hidden ancestors, detach and background stop indeterminate animation."
       }
     ],
     "breakpoints": [
@@ -493,6 +508,13 @@
       "architecture": "../ARCHITECTURE.md",
       "reducedMotion": "Immediate final states; static hold indication; no interpolation or travel.",
       "lifecycle": "Presentation timers and transitions stop on detach/background. No ambient loop or inferred household event."
+    },
+    "presentationReview": {
+      "reviewedOn": "2026-11-11",
+      "plan": "../UI-UX-PLAN.md",
+      "scope": "Current screen/state hierarchy and app-only presentation baseline. Existing HTML specimens remain static illustrations.",
+      "readingIdentity": "Unique label/role inside unchanged place and exact ordered bindings; ambiguous duplicates or changed source scope start fresh.",
+      "drawing": "Actual evidence, axes, gaps and future render immediately; no invented intermediate values."
     }
   },
   "components": [
@@ -524,7 +546,7 @@
       "name": "PlaceDetail and ObservationRow",
       "kind": "card",
       "refersTo": "detail-panel-light",
-      "description": "Illustrative representation of the selected-place readings card, its qualified ObservationRows, icon anchor, Place actions entry point and named neighbors. Native Home keeps this alongside the graph at 900 units and above; below that it uses a separate detail view with Back and focus restoration. Unknown is distinct from a retained last-known value; the native accessible row name includes quality and time. The preview button does not open native Bloom. For an empty place, native PlaceDetail uses home.Bindings to distinguish Observation bindings configured. No readings available. from No observation bindings configured for this place. The same helper updates unobserved Unavailable editor places and restored new-place reasons without inventing a value or health. The second static card below illustrates a bound empty place. This static specimen uses demo observations. Connected Home reuses the same controls with qualified source reports, Reported timestamps and exact SourcePlaceId provenance; missing or moved sources never become current through a saved binding.",
+      "description": "Illustrative representation of the selected-place readings card, its qualified ObservationRows, icon anchor, Place actions entry point and named neighbors. Native Home keeps this alongside the graph at 900 units and above; below that it uses a separate detail view with Back and focus restoration. Unknown is distinct from a retained last-known value; the native accessible row name includes quality and time. The preview button does not open native Bloom. For an empty place, native PlaceDetail uses home.Bindings to distinguish Observation bindings configured. No readings available. from No observation bindings configured for this place. The same helper updates unobserved Unavailable editor places and restored new-place reasons without inventing a value or health. The second static card below illustrates a bound empty place. This static specimen uses demo observations. Connected Home reuses the same controls with qualified source reports, Reported timestamps and exact SourcePlaceId provenance; missing or moved sources never become current through a saved binding. Native presentation now retains uniquely identified rows within the same place/binding scope, with a finite 360ms background emphasis for a real value/quality change. Exact values and quality update immediately; timestamp-only refreshes stay quiet.",
       "html": "<section class=\"ds-detail\"><div class=\"ds-detail-heading\"><span class=\"ds-detail-anchor\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12,21 L12,11 M12,15 C3,15 3,5 3,5 C12,5 12,12 12,12 M12,12 C12,3 21,3 21,3 C21,12 12,12 12,12\"/></svg></span><h2>Garden</h2></div><p class=\"ds-detail-reason\">Changed. A contact reading changed in this sample.</p><button class=\"ds-detail-actions\">Place actions</button><p class=\"ds-detail-connections\">Connected to Porch.</p><div class=\"ds-detail-row\"><div class=\"ds-detail-reading\"><span>Gate contact</span><strong>Open</strong></div><span class=\"ds-detail-time\">Observed 2026-10-24 12:00 UTC</span></div><div class=\"ds-detail-row\"><div class=\"ds-detail-reading\"><span>Soil moisture</span><strong>Unknown</strong></div><span class=\"ds-detail-time\">Observation time unknown</span></div></section><section class=\"ds-detail ds-detail-empty-example\"><div class=\"ds-detail-heading\"><span class=\"ds-detail-anchor\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12,21 L12,11 M12,15 C3,15 3,5 3,5 C12,5 12,12 12,12 M12,12 C12,3 21,3 21,3 C21,12 12,12 12,12\"/></svg></span><h2>Greenhouse</h2></div><p class=\"ds-detail-reason\">Unavailable. Observation bindings configured. No readings available.</p><button class=\"ds-detail-actions\">Place actions</button><p class=\"ds-detail-connections\">No physical connections configured. This is valid.</p><p class=\"ds-detail-empty\">Observation bindings configured. No readings available.</p></section>",
       "css": ".ds-detail { background:#ffffff; color:#292e29; border:1px solid #c1c6bd; border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px; font:16px 'DM Sans',sans-serif; } .ds-detail-heading { display:grid; grid-template-columns:56px 1fr; gap:12px; align-items:center; } .ds-detail-anchor { width:54px; height:54px; border:1px solid #c1c6bd; border-radius:28px; background:#f5f6f3; display:flex; align-items:center; justify-content:center; } .ds-detail-anchor .ds-icon { width:26px; height:26px; } .ds-detail-heading h2 { margin:0; font:24px Outfit,sans-serif; } .ds-detail-reason,.ds-detail-connections { margin:0; color:#626861; } .ds-detail-connections { font-size:13px; } .ds-detail-actions { align-self:start; min-height:48px; font:16px 'DM Sans',sans-serif; color:#292e29; background:#f5f6f3; } .ds-detail-actions:hover { cursor:pointer; } .ds-detail-actions:focus-visible { outline:auto; } .ds-detail-row { padding:14px 0; border-bottom:1px solid #626861; display:flex; flex-direction:column; gap:5px; } .ds-detail-reading { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; } .ds-detail-reading strong { max-width:150px; font-weight:600; } .ds-detail-time { color:#626861; font-size:13px; } .ds-icon { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.7; } @media(prefers-color-scheme:dark) { .ds-detail { background:#171512; color:#ddd8d1; border-color:#3a3733; } .ds-detail-anchor { background:#1a1816; border-color:#3a3733; } .ds-detail-reason,.ds-detail-connections,.ds-detail-time { color:#b0aaa3; } .ds-detail-actions { color:#ddd8d1; background:#1a1816; } .ds-detail-row { border-color:#918b84; } } .ds-detail-empty-example { margin-top:16px; } .ds-detail-empty { margin:0; white-space:normal; overflow-wrap:anywhere; color:#626861; } @media(prefers-color-scheme:dark) { .ds-detail-empty { color:#b0aaa3; } }"
     },

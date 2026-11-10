@@ -15,6 +15,7 @@ public sealed partial class HomeSaveConflictScreen : UserControl
         this.FindControl<TextBlock>("SessionSummary")!.Text = Summary(current);
         this.FindControl<TextBlock>("SessionDetails")!.Text = Details(current);
         this.FindControl<TextBlock>("ReviewStatus")!.Text = session.StatusText;
+        this.FindControl<Controls.OperationProgress>("ConflictOperationProgress")!.IsBusy = session.IsLoading;
         var saved = session.ConflictSnapshot;
         this.FindControl<TextBlock>("SavedSummary")!.Text = saved is null ? "No saved version available for review. Read it again before choosing."
             : saved.Profile is { } profile ? Summary(profile) + (profile.HomeId != current.HomeId

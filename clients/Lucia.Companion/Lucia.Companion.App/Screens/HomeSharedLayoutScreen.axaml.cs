@@ -54,6 +54,7 @@ public sealed partial class HomeSharedLayoutScreen : UserControl, IDisposable
         }
         else { this.FindControl<HomeLayoutSummary>("SharedLayoutSummary")!.Content = null; }
         this.FindControl<TextBlock>("SharedReviewStatus")!.Text = Controller.StatusText;
+        this.FindControl<OperationProgress>("SharedOperationProgress")!.IsBusy = Controller.IsBusy;
         this.FindControl<Button>("ReadSharedSetup")!.IsEnabled = Controller.CanRead;
         this.FindControl<Button>("AddSharedSetupToDraft")!.IsEnabled = plan is not null && !Controller.IsBusy;
         this.FindControl<Button>("SharedConnection")!.IsVisible = Controller.RequiresConnectionReview;

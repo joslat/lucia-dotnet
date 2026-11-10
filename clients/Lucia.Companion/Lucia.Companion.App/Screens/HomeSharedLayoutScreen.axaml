@@ -6,6 +6,7 @@
       <TextBlock Name="SharedReviewTitle" Text="Shared home setup" Classes="title" TextWrapping="Wrap" Focusable="True" />
       <TextBlock Text="Compare the owner's permitted setup with this draft. No readings, device actions or access grants are changed." Classes="muted" />
       <TextBlock Name="SharedReviewStatus" TextWrapping="Wrap" Focusable="True" AutomationProperties.LiveSetting="Polite" />
+      <c:OperationProgress Name="SharedOperationProgress" />
       <Grid Name="SharedComparison" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="20" RowSpacing="20">
         <Border Name="LocalAlternative" Classes="panel">
           <StackPanel Spacing="12"><TextBlock Text="This setup draft" FontWeight="SemiBold" TextWrapping="Wrap" /><c:HomeLayoutSummary Name="LocalLayoutSummary" /></StackPanel>

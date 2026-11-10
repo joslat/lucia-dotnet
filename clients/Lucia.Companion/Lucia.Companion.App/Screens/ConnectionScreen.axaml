@@ -16,7 +16,8 @@
       <Border Name="ConnectionPanel" Grid.Row="1" Classes="panel">
         <StackPanel Spacing="20">
           <TextBlock Name="StatusNotice" TextWrapping="Wrap" Focusable="True" AutomationProperties.LiveSetting="Polite" />
-          <StackPanel Name="HostForm" Spacing="12">
+          <c:OperationProgress Name="ConnectionOperationProgress" />
+          <StackPanel Name="HostForm" Classes="arrival" Spacing="12">
             <TextBlock Text="Lucia host" />
             <TextBox Name="HostAddress" MaxLength="512" AutomationProperties.Name="Lucia HTTPS host" AutomationProperties.HelpText="An HTTPS host only, with no path, query or embedded key." />
             <TextBlock Text="For example, https://lucia.example" Classes="muted" FontSize="{DynamicResource TextSize13}" />
@@ -24,7 +25,7 @@
             <TextBox Name="DeviceName" MaxLength="80" AutomationProperties.Name="Name shown to the home owner" />
             <Button Name="StartConnection" Classes="theme" HorizontalAlignment="Left" BorderBrush="{DynamicResource AccentBrush}"><TextBlock Text="Request approval code" TextWrapping="Wrap" /></Button>
           </StackPanel>
-          <StackPanel Name="ApprovalPrompt" IsVisible="False" Spacing="12">
+          <StackPanel Name="ApprovalPrompt" Classes="arrival" IsVisible="False" Spacing="12">
             <TextBlock Text="Approve this device" Classes="section" TextWrapping="Wrap" />
             <TextBlock Name="ApprovalCode" Focusable="True" FontFamily="{DynamicResource DisplayFont}" FontSize="{DynamicResource TextSize34}" TextWrapping="Wrap" FontWeight="SemiBold" AutomationProperties.Name="Owner approval code" />
             <StackPanel Spacing="4">
@@ -41,7 +42,7 @@
               <Button Name="ChangeHost" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Use another host" TextWrapping="Wrap" /></Button>
             </WrapPanel>
           </StackPanel>
-          <StackPanel Name="VerifiedConnection" IsVisible="False" Spacing="12">
+          <StackPanel Name="VerifiedConnection" Classes="arrival" IsVisible="False" Spacing="12">
             <TextBlock Name="VerifiedTitle" Focusable="True" Text="Connection verified" Classes="section" TextWrapping="Wrap" Foreground="{DynamicResource SageBrush}" />
             <TextBlock Name="SessionSummary" TextWrapping="Wrap" />
             <Expander Name="ApprovedAccess" Header="Approved access" HorizontalAlignment="Stretch">
@@ -50,12 +51,12 @@
             <Button Name="OpenConnectedHome" Classes="theme" HorizontalAlignment="Left" BorderBrush="{DynamicResource AccentBrush}"><TextBlock Text="Open your home" TextWrapping="Wrap" /></Button>
             <TextBlock Text="Home opens with authorized source reports and local setup. Story and Engine are not connected yet. No sample readings will be substituted for your home." Classes="muted" />
           </StackPanel>
-          <WrapPanel Name="RecoveryActions" IsVisible="False">
+          <WrapPanel Name="RecoveryActions" Classes="arrival" IsVisible="False">
             <Button Name="RetryConnection" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Retry saved connection" TextWrapping="Wrap" /></Button>
             <Button Name="AskForget" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Forget local connection" TextWrapping="Wrap" /></Button>
           </WrapPanel>
           <Button Name="AskDisconnect" IsVisible="False" Classes="theme" HorizontalAlignment="Left"><TextBlock Text="Disconnect this device" TextWrapping="Wrap" /></Button>
-          <StackPanel Name="RemovalConfirmation" IsVisible="False" Spacing="12">
+          <StackPanel Name="RemovalConfirmation" Classes="arrival" IsVisible="False" Spacing="12">
             <Separator />
             <TextBlock Name="RemovalQuestion" TextWrapping="Wrap" />
             <WrapPanel>

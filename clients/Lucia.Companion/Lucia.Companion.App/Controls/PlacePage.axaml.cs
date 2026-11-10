@@ -73,8 +73,7 @@ public sealed partial class PlacePage : UserControl
 
         this.FindControl<TextBlock>("ReadingsTitle")!.Text = $"{place.Name} now";
         var observations = this.FindControl<StackPanel>("PageObservations")!;
-        observations.Children.Clear();
-        foreach (var observation in place.Observations) { observations.Children.Add(new ObservationRow(observation)); }
+        ObservationRows.Update(observations, place, home);
         var empty = this.FindControl<TextBlock>("PageEmptyText")!;
         empty.IsVisible = place.Observations.Count == 0;
         empty.Text = ObservationBinding.MissingReadingsReason(home.Bindings.Any(binding => binding.PlaceId == place.Id));

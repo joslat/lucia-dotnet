@@ -7,7 +7,8 @@
        FORM: Local Operate extension, phone stack and tablet Home composition unchanged.
        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
   <Grid>
-    <ContentControl Name="ConnectedShellHost" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+    <ContentControl Name="ConnectedShellHost" Classes="arrival" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+    <c:OperationProgress Name="HomeOperationProgress" VerticalAlignment="Top" Margin="20,8" ZIndex="1" />
     <ScrollViewer Name="HomeReadState" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Margin="20,32" Spacing="20" MaxWidth="720" HorizontalAlignment="Center">
         <Path Data="{x:Static c:PlaceIcons.Home}" Width="44" Height="44" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7" HorizontalAlignment="Left" />

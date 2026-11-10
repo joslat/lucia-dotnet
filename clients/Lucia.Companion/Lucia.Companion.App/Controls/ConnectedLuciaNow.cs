@@ -24,6 +24,7 @@ public sealed class ConnectedLuciaNow : UserControl
     private readonly TextBlock refreshCaption = new() { Text = "Refresh activity", TextWrapping = TextWrapping.Wrap };
     private int additionalCount;
     private readonly Dictionary<string, LuciaStagePath> rows = new(StringComparer.Ordinal);
+    private readonly OperationProgress progress = new() { Name = "ActivityOperationProgress" };
     private ConnectedActivityController? controller;
     private Action? openConnection;
     private bool attached;
@@ -36,7 +37,7 @@ public sealed class ConnectedLuciaNow : UserControl
         SizeChanged += (_, _) => { refresh.MaxWidth = connection.MaxWidth = Math.Max(0, Bounds.Width); };
         var content = new StackPanel { Spacing = 10 };
         content.Children.Add(new TextBlock { Text = "Lucia now", Classes = { "section" } });
-        content.Children.Add(status); content.Children.Add(primary); content.Children.Add(more); content.Children.Add(coverage);
+        content.Children.Add(status); content.Children.Add(progress); content.Children.Add(primary); content.Children.Add(more); content.Children.Add(coverage);
         var actions = new WrapPanel { Orientation = Orientation.Horizontal, ItemSpacing = 8, LineSpacing = 8 };
         actions.Children.Add(refresh); actions.Children.Add(connection); content.Children.Add(actions);
         Content = content;
@@ -68,6 +69,7 @@ public sealed class ConnectedLuciaNow : UserControl
     private void RenderState()
     {
         var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
+        progress.IsBusy = controller?.IsBusy == true;
         var focusedRequest = focused is not null && (ReferenceEquals(focused, more) || more.IsVisualAncestorOf(focused)
             || primary.IsVisualAncestorOf(focused));
         if (controller is null)
