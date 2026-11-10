@@ -14,7 +14,7 @@ public sealed class HomeEditorViewModel
     public IReadOnlyList<ObservationBinding> Bindings => draft.Bindings;
     public string HomeName => draft.Name;
     public bool HasChanges => draft.Name != original.Name ||
-        !draft.Places.Select(place => (place.Id, place.Name, place.Icon)).SequenceEqual(original.Places.Select(place => (place.Id, place.Name, place.Icon))) ||
+        !draft.Places.Select(place => (place.Id, place.Name, place.Icon, place.Zone)).SequenceEqual(original.Places.Select(place => (place.Id, place.Name, place.Icon, place.Zone))) ||
         !draft.Connections.Select(EdgeKey).ToHashSet().SetEquals(original.Connections.Select(EdgeKey)) ||
         !draft.Bindings.ToHashSet().SetEquals(original.Bindings);
 
@@ -31,11 +31,11 @@ public sealed class HomeEditorViewModel
         return id;
     }
 
-    public void UpdatePlace(string id, string name, PlaceIcon icon)
+    public void UpdatePlace(string id, string name, PlaceIcon icon, PlaceZone? zone = null)
     {
         RequirePlace(id);
         var validName = ValidateName(name);
-        Replace(Places.Select(place => place.Id == id ? place with { Name = validName, Icon = icon } : place), Connections);
+        Replace(Places.Select(place => place.Id == id ? place with { Name = validName, Icon = icon, Zone = zone } : place), Connections);
     }
 
     public void SetHomeName(string name) => draft = new(draft.Id, ValidateName(name), Places, Connections, Bindings);

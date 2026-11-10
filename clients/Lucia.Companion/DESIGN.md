@@ -210,7 +210,7 @@ Warm amber marks attention and selection. Blue marks work in progress, muted red
 
 Each theme maps the same native resource keys to its own values. The sidecar records these bindings. These are discrete semantic pairs, not a native tonal scale. The sidecar's eight-step OKLCH ramps are generated preview aids, not colors used by the app.
 
-**The Written State Rule.** Every place color has a visible state label. Color alone cannot distinguish Quiet from Unavailable or Changed from Waiting.
+**The Written State Rule.** Every place color has a visible state label. Color alone cannot distinguish Quiet from Unavailable or Changed from Waiting. On Home, a quiet place's label is its reading summary ("Lights off · 21.4 °C", or "Quiet" when there is nothing current to summarise); every other state shows its status instead: "Changed · Gate open", "Lucia is checking", "Waiting for you", "Reported problem", "Some data unavailable" or "No data since 10:00". Statuses other than Changed carry a 14-unit icon inline (Lucia sparkle, speech bubble, fault triangle, question mark). The accessible name reads the summary and the status. Only current readings are summarised.
 
 ## Typography
 
@@ -260,9 +260,13 @@ Connected Home uses this same layout with the Live or Connected chip and a repor
 
 Setup changes at its own Bounds.Width of 800 units. Expanded setup uses two equal columns, a place list on the left and the selected place's form on the right. Compact setup replaces the list with a place chooser and stacks the form below it. The header and forms share one scrolling region; Save and Cancel or the discard question sit outside it. These are control-width thresholds, not physical device categories or browser viewport breakpoints.
 
-The Home constellation keeps the supplied place order. Its panel starts with a 108-unit slot, multiplies that slot by the largest orb FontSize divided by its normal size of 16, and divides available width by the resulting slot width to derive column count. Larger text increases slot width and can reduce the column count. The cap remains three columns below 800 units of panel width and four above it. Child width can grow to 152 times that text ratio. The panel measures each row from the tallest child, with a minimum row height of 148 units. Up to six places use fixed varied offsets. Larger homes continue in stable rows with alternating vertical offsets. No physics, animation, automatic sorting by state or inferred room position affects placement.
+The Home constellation keeps the supplied place order. Its panel starts with a 108-unit slot, multiplies that slot by the largest orb FontSize divided by its normal size of 16, and divides available width by the resulting slot width to derive column count. Larger text increases slot width and can reduce the column count. The cap remains three columns below 800 units of panel width and four above it. Child width can grow to 152 times that text ratio. The panel measures each row from the tallest child, with a minimum row height of 148 units. Up to six places use fixed varied offsets. Larger homes continue in stable rows with alternating vertical offsets. Each place is measured at the width it is arranged at, so its text wraps rather than being cut off. No physics, animation, automatic sorting by state or inferred room position affects placement.
 
-**The Stable Home Rule.** Preserve explicit room order through selection, pinning and state display. Place reordering belongs to setup's Move earlier and Move later controls. Customize changes section order independently of room order.
+A place can have an optional local zone (Inside, Outside or Own building), chosen in setup. When any place has a zone, Home groups places by zone in the order each zone's first place appears, keeping setup order within a zone; places without a zone follow under "Other places". Each zone has a SemiBold TextSize13 MutedBrush label above its first place. A zone continues on the current row when all its places fit there, otherwise it starts a new row, and every row then reserves a label band. A home without zones lays out exactly as before. Zones are saved in the local setup (older files load without them), shown in save-conflict review, kept for matching place IDs when shared setup is adopted, and never inferred from readings.
+
+On wide layouts the Your places title and its hint share one line; they wrap onto two lines on phone.
+
+**The Stable Home Rule.** Preserve explicit room order through selection, pinning and state display. Place reordering belongs to setup's Move earlier and Move later controls; grouping belongs to the zones the person sets. Customize changes section order independently of room order.
 
 ### Place import
 
@@ -296,7 +300,7 @@ The workbench remains a vertically scrolling stack with horizontal scrolling dis
 
 Workbench theme buttons and place controls sit in horizontal WrapPanels. They wrap when available width runs out without width breakpoints. This workbench arrangement is separate from Home's measured constellation panel and responsive screen composition.
 
-A PlaceOrb has minimum bounds of 100 by 126 units, with 10 units of padding and a 6-unit gap between its circular icon, name and state. Names wrap within a maximum width of 132 units. The orb may grow when its text needs more space.
+A PlaceOrb has minimum bounds of 100 by 126 units, with 10 units of padding and a 6-unit gap between its circular icon, name and its one TextSize13 line (the reading summary in MutedBrush, or the status in its state colour). Names wrap within a maximum width of 132 units. The orb may grow when its text needs more space.
 
 An ObservationRow has two columns, a flexible label and an auto-sized value, separated by 12 units. Its value wraps within a maximum width of 150 units. A 5-unit gap separates row content and supporting text. Vertical row padding is 14 units. Frontmatter translates native Thickness `0,14` to CSS padding order for interchange.
 

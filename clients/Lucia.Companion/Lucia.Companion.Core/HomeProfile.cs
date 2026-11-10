@@ -9,7 +9,7 @@ public sealed record HomeProfile(int SchemaVersion, string HomeId, string HomeNa
     public IReadOnlyList<ObservationBinding>? Bindings { get; init; }
 
     public static HomeProfile From(HomeTopology home, IReadOnlyList<string> pinnedIds, IReadOnlyList<HomeSection>? sectionOrder = null) => new(1, home.Id, home.Name,
-        home.Places.Select(place => new PlaceSetting(place.Id, place.Name, place.Icon)).ToArray(), home.Connections.ToArray(), pinnedIds.ToArray())
+        home.Places.Select(place => new PlaceSetting(place.Id, place.Name, place.Icon) { Zone = place.Zone }).ToArray(), home.Connections.ToArray(), pinnedIds.ToArray())
         { SectionOrder = sectionOrder is null ? null : HomeSections.ValidateOrder(sectionOrder), Bindings = home.Bindings.ToArray() };
 
     public void Validate()
@@ -46,8 +46,8 @@ public sealed record HomeProfile(int SchemaVersion, string HomeId, string HomeNa
             ArgumentNullException.ThrowIfNull(setting);
             var observed = observedPlaces.FirstOrDefault(place => place.Id == setting.Id);
             return observed is not null
-                ? observed with { Name = setting.Name, Icon = setting.Icon }
+                ? observed with { Name = setting.Name, Icon = setting.Icon, Zone = setting.Zone }
                 : new Place(setting.Id, setting.Name, PlaceState.Unavailable,
-                    ObservationBinding.MissingReadingsReason(Bindings?.Any(binding => binding.PlaceId == setting.Id) == true), []) { Icon = setting.Icon };
+                    ObservationBinding.MissingReadingsReason(Bindings?.Any(binding => binding.PlaceId == setting.Id) == true), []) { Icon = setting.Icon, Zone = setting.Zone };
         }), Connections, Bindings);
 }

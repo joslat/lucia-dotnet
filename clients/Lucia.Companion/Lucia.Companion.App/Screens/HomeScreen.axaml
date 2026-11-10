@@ -9,7 +9,7 @@
   <ScrollViewer Name="ContextScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
   <Grid Name="HomeRoot" RowDefinitions="Auto,*" Margin="16">
     <!-- Phone: name and chip, then date, headline and subline stacked. Tablet: date and name, a divider, the headline beside them, the chip at the end. -->
-    <Grid Name="HomeContext" Margin="4,0,4,16" ColumnSpacing="10" RowSpacing="10">
+    <Grid Name="HomeContext" Margin="4,0,4,12" ColumnSpacing="10" RowSpacing="10">
       <StackPanel Name="HomeIdentity" Spacing="2" VerticalAlignment="Center">
         <TextBlock Name="HomeName" Classes="section" TextWrapping="Wrap" />
       </StackPanel>
@@ -33,8 +33,10 @@
         <StackPanel Name="MainPanel" Spacing="16">
         <Border Name="PlacesCard" Classes="panel" Padding="12">
           <StackPanel Spacing="10">
-            <TextBlock Text="Your places" Classes="section" />
-            <TextBlock Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            <WrapPanel Name="PlacesHeading" ItemSpacing="14" LineSpacing="2">
+              <TextBlock Text="Your places" Classes="section" />
+              <TextBlock Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="{DynamicResource TextSize13}" VerticalAlignment="Center" />
+            </WrapPanel>
             <c:HomeConstellation Name="Constellation" />
           </StackPanel>
         </Border>

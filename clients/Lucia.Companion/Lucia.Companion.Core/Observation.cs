@@ -26,6 +26,8 @@ public sealed record Observation
     public ObservationQuality Quality { get; }
     public DateTimeOffset? ObservedAt { get; }
     public ObservationTimeBasis TimeBasis { get; }
+    /// <summary>The bound source role, when known. Used to word captions; never changes the value or its quality.</summary>
+    public ObservationRole? Role { get; init; }
     private bool IsCurrent => Quality == ObservationQuality.Current && Value is not null && ObservedAt.HasValue;
     public string CurrentText => IsCurrent ? Value! : Quality switch
     {

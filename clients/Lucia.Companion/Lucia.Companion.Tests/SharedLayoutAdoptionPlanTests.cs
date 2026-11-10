@@ -155,12 +155,12 @@ public sealed class SharedLayoutAdoptionPlanTests
             [new("Temperature", "19 C", ObservationQuality.Current, DateTimeOffset.UtcNow)])], [],
         [new("local-porch", "sensor.porch_temperature", ObservationRole.Temperature, "porch")]);
 
-    private static SharedHomeLayout Layout(string? revision = null, string name = "Shared home", bool unqualified = true, string placeName = "Owner porch") =>
+    internal static SharedHomeLayout Layout(string? revision = null, string name = "Shared home", bool unqualified = true, string placeName = "Owner porch") =>
         new("home-a", "member-a", revision ?? new string('A', 64), DateTimeOffset.UtcNow, name, unqualified,
             [new("shared-porch", placeName, PlaceIcon.Door, "porch"), new("shared-garden", "Garden", PlaceIcon.Garden, "garden")],
             [new("shared-porch", "shared-garden")], [new("shared-porch", "porch", "sensor.porch_temperature", ObservationRole.Temperature)]);
 
-    private static ConnectionSession Identity(string? defect = null) => new(new Uri(defect == "endpoint" ? "https://other.invalid/" : "https://localhost/"),
+    internal static ConnectionSession Identity(string? defect = null) => new(new Uri(defect == "endpoint" ? "https://other.invalid/" : "https://localhost/"),
         new DeviceSession(new string(defect == "session" ? 'b' : 'a', 32), "Phone", DateTimeOffset.UtcNow.AddDays(1),
             defect == "home" ? "other-home" : "home-a", defect == "member" ? "other-member" : "member-a",
             [new("porch", defect == "empty-fields" ? [] : [defect == "hidden-field" ? ObservationRole.Contact : ObservationRole.Temperature]),

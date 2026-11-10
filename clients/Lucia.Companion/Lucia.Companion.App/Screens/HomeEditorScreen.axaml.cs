@@ -44,6 +44,7 @@ public sealed partial class HomeEditorScreen : UserControl
         };
         this.FindControl<TextBox>("HomeNameInput")!.Text = home.Name;
         this.FindControl<ComboBox>("IconInput")!.ItemsSource = Enum.GetValues<PlaceIcon>();
+        this.FindControl<ComboBox>("ZoneInput")!.ItemsSource = PlaceZones.Choices;
         this.FindControl<ListBox>("PlacesList")!.SelectionChanged += (_, _) => SelectFromList();
         this.FindControl<ComboBox>("PlaceChooser")!.SelectionChanged += (_, _) =>
             SelectId((this.FindControl<ComboBox>("PlaceChooser")!.SelectedItem as ComboBoxItem)?.Tag as string);
@@ -164,7 +165,8 @@ public sealed partial class HomeEditorScreen : UserControl
         var place = draft.Places.FirstOrDefault(place => place.Id == selectedId);
         if (place is null) { return false; }
         if (this.FindControl<TextBox>("PlaceNameInput")!.Text != place.Name ||
-            !Equals(this.FindControl<ComboBox>("IconInput")!.SelectedItem, place.Icon)) { return true; }
+            !Equals(this.FindControl<ComboBox>("IconInput")!.SelectedItem, place.Icon) ||
+            PlaceZones.FromChoice(this.FindControl<ComboBox>("ZoneInput")!.SelectedIndex) != place.Zone) { return true; }
         var neighbors = draft.Connections.Where(edge => edge.FromPlaceId == place.Id || edge.ToPlaceId == place.Id)
             .Select(edge => edge.FromPlaceId == place.Id ? edge.ToPlaceId : edge.FromPlaceId).ToHashSet(StringComparer.Ordinal);
         return !neighbors.SetEquals(this.FindControl<StackPanel>("ConnectionsList")!.Children.OfType<CheckBox>()
@@ -234,6 +236,7 @@ public sealed partial class HomeEditorScreen : UserControl
         if (place is null) { return; }
         this.FindControl<TextBox>("PlaceNameInput")!.Text = place.Name;
         this.FindControl<ComboBox>("IconInput")!.SelectedItem = place.Icon;
+        this.FindControl<ComboBox>("ZoneInput")!.SelectedIndex = PlaceZones.ChoiceIndex(place.Zone);
         var neighborIds = draft.Connections.Where(edge => edge.FromPlaceId == id || edge.ToPlaceId == id)
             .Select(edge => edge.FromPlaceId == id ? edge.ToPlaceId : edge.FromPlaceId).ToHashSet(StringComparer.Ordinal);
         var connections = this.FindControl<StackPanel>("ConnectionsList")!;
@@ -267,7 +270,7 @@ public sealed partial class HomeEditorScreen : UserControl
         return RunEdit(() =>
         {
             var icon = this.FindControl<ComboBox>("IconInput")!.SelectedItem is PlaceIcon selected ? selected : PlaceIcon.Home;
-            draft.UpdatePlace(selectedId, name, icon);
+            draft.UpdatePlace(selectedId, name, icon, PlaceZones.FromChoice(this.FindControl<ComboBox>("ZoneInput")!.SelectedIndex));
             draft.SetConnections(selectedId, this.FindControl<StackPanel>("ConnectionsList")!.Children.OfType<CheckBox>()
                 .Where(check => check.IsChecked == true).Select(check => (string)check.Tag!));
         });

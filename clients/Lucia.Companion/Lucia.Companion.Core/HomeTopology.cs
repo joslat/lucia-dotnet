@@ -16,9 +16,9 @@ public sealed class HomeTopology
             ArgumentException.ThrowIfNullOrWhiteSpace(place.Id);
             ArgumentException.ThrowIfNullOrWhiteSpace(place.Name);
             ArgumentNullException.ThrowIfNull(place.Observations);
-            if (!Enum.IsDefined(place.State) || !Enum.IsDefined(place.Icon))
+            if (!Enum.IsDefined(place.State) || !Enum.IsDefined(place.Icon) || place.Zone is { } zone && !Enum.IsDefined(zone))
             {
-                throw new ArgumentException("A place has an unsupported state or icon.", nameof(places));
+                throw new ArgumentException("A place has an unsupported state, icon or zone.", nameof(places));
             }
 
             return place with { Observations = Array.AsReadOnly(place.Observations.ToArray()) };

@@ -15,7 +15,7 @@ public sealed class LocalHomeStore(string path)
         WriteIndented = true,
         MaxDepth = 32,
         Converters = { new JsonStringEnumConverter<PlaceIcon>(allowIntegerValues: false), new JsonStringEnumConverter<HomeSection>(allowIntegerValues: false),
-            new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false) }
+            new JsonStringEnumConverter<ObservationRole>(allowIntegerValues: false), new JsonStringEnumConverter<PlaceZone>(allowIntegerValues: false) }
     };
     private readonly string filePath = Path.GetFullPath(path);
 

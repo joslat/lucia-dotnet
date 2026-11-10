@@ -43,7 +43,7 @@ public sealed partial class HomeSaveConflictScreen : UserControl
             .Select(id => profile.Places.Single(candidate => candidate.Id == id).Name).ToArray();
         var bindings = (profile.Bindings ?? []).Where(binding => binding.PlaceId == place.Id)
             .Select(binding => $"{binding.Role}: {binding.SourceId}").ToArray();
-        return $"{place.Name} [{place.Id}]\nIcon: {place.Icon}\nConnects to: {(neighbors.Length == 0 ? "None" : string.Join(", ", neighbors))}\n"
+        return $"{place.Name} [{place.Id}]\nIcon: {place.Icon}\nZone: {PlaceZones.Label(place.Zone)}\nConnects to: {(neighbors.Length == 0 ? "None" : string.Join(", ", neighbors))}\n"
             + $"Bindings: {(bindings.Length == 0 ? "None" : string.Join("; ", bindings))}";
     }));
 }

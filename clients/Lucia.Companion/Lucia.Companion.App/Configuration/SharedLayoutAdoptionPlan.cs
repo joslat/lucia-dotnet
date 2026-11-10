@@ -35,7 +35,7 @@ public sealed class SharedLayoutAdoptionPlan
         ArgumentNullException.ThrowIfNull(identity);
         if (original.Id != layout.HomeId || !Permitted(layout, identity.Session))
         { throw new ArgumentException("Review shared metadata belonging to this authorized home and member."); }
-        var preview = Project(layout);
+        var preview = KeepLocalZones(Project(layout), original);
         HomeProfile.From(preview, []).Validate();
         return new(original, preview, layout, identity);
     }
@@ -58,6 +58,11 @@ public sealed class SharedLayoutAdoptionPlan
             ObservationBinding.MissingReadingsReason(layout.Bindings.Any(binding => binding.PlaceId == place.Id)), []) { Icon = place.Icon }),
         layout.Connections.Select(edge => new PlaceConnection(edge.FromPlaceId, edge.ToPlaceId)),
         layout.Bindings.Select(binding => new ObservationBinding(binding.PlaceId, binding.SourceId, binding.Field, binding.SourcePlaceId)));
+
+    /// <summary>Zones are local presentation, like pins: a matching place ID keeps the zone the person chose.</summary>
+    private static HomeTopology KeepLocalZones(HomeTopology preview, HomeTopology original) => new(preview.Id, preview.Name,
+        preview.Places.Select(place => place with { Zone = original.Places.FirstOrDefault(local => local.Id == place.Id)?.Zone }),
+        preview.Connections, preview.Bindings);
 
     private static bool Permitted(SharedHomeLayout layout, DeviceSession identity) => layout.HomeId == identity.HomeId && layout.MemberId == identity.MemberId
         && layout.Places.All(place => identity.Places.Any(allowed => allowed.PlaceId == place.SourcePlaceId && allowed.Fields.Count > 0))

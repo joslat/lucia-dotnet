@@ -31,6 +31,9 @@
             <TextBox Name="PlaceNameInput" MaxLength="{x:Static core:HomeProfile.MaximumNameLength}" AutomationProperties.Name="Place name" />
             <TextBlock Text="Icon" />
             <ComboBox Name="IconInput" HorizontalAlignment="Stretch" AutomationProperties.Name="Place icon" MinHeight="48" />
+            <TextBlock Text="Zone" />
+            <TextBlock Text="Optional. Groups places on Home: inside, outside or in their own building." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            <ComboBox Name="ZoneInput" HorizontalAlignment="Stretch" AutomationProperties.Name="Place zone" MinHeight="48" />
             <TextBlock Text="Connects to" />
             <TextBlock Text="Optional. Select physical neighbors, not sensor owners." Classes="muted" FontSize="{DynamicResource TextSize13}" />
             <StackPanel Name="ConnectionsList" Spacing="6" />

@@ -28,13 +28,13 @@ public static class ConnectedHomeProjection
                 if (binding.SourcePlaceId is null || !reports.TryGetValue((binding.SourceId, binding.Role), out var report) || report.PlaceId != binding.SourcePlaceId)
                 {
                     needsReview = true;
-                    observations.Add(new(binding.Role.ToString(), null, ObservationQuality.Unavailable, null, ObservationTimeBasis.Reported));
+                    observations.Add(new(binding.Role.ToString(), null, ObservationQuality.Unavailable, null, ObservationTimeBasis.Reported) { Role = binding.Role });
                     continue;
                 }
                 var quality = report.Reading.Quality;
                 if (quality == ObservationQuality.Current && (snapshot.CapturedAt - report.Reading.ReportedAt!.Value).TotalSeconds + elapsedSinceFetch.TotalSeconds > snapshot.MaximumObservationAgeSeconds)
                 { quality = ObservationQuality.Stale; }
-                var observation = new Observation($"{report.Name} · {binding.Role}", Value(report.Reading), quality, report.Reading.ReportedAt, ObservationTimeBasis.Reported);
+                var observation = new Observation($"{report.Name} · {binding.Role}", Value(report.Reading), quality, report.Reading.ReportedAt, ObservationTimeBasis.Reported) { Role = binding.Role };
                 observations.Add(observation);
                 evidence.Add((binding.Role, report.Reading.IsActive, observation));
             }
