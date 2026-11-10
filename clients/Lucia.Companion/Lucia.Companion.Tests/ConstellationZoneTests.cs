@@ -43,7 +43,7 @@ public sealed class ConstellationZoneTests
             Assert.Equal("Waiting for you", orbs["porch"].StatusText);
             Assert.Equal("Changed · Gate open", orbs["garden"].StatusText);
             Assert.Null(orbs["bedroom"].Caption);
-            Assert.Equal("No data since 10:00", orbs["bedroom"].StatusText);
+            Assert.Equal("No data since 10:00 UTC", orbs["bedroom"].StatusText);
             Assert.Equal("Lucia is checking", orbs["kitchen"].StatusText);
             Assert.Equal("Porch. Front door closed. Waiting for you. A sample request is waiting for a response.", orbs["porch"].GetValue(AutomationProperties.NameProperty));
             foreach (var label in constellation.ZoneLabels)

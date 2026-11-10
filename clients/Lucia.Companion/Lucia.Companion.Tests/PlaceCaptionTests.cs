@@ -44,7 +44,7 @@ public sealed class PlaceCaptionTests
     {
         var silent = Place(PlaceState.Unavailable, Reading("Temperature", "19.2 °C", ObservationRole.Temperature, ObservationQuality.Unavailable, Noon.AddHours(-2)));
         Assert.Null(PlaceCaption.Caption(silent));
-        Assert.Equal("No data since 10:00", PlaceCaption.Status(silent));
+        Assert.Equal("No data since 10:00 UTC", PlaceCaption.Status(silent));
         Assert.Equal("No data", PlaceCaption.Status(Place(PlaceState.Unavailable)));
     }
 

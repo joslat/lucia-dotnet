@@ -28,7 +28,8 @@ public sealed record Observation
     public ObservationTimeBasis TimeBasis { get; }
     /// <summary>The bound source role, when known. Used to word captions; never changes the value or its quality.</summary>
     public ObservationRole? Role { get; init; }
-    private bool IsCurrent => Quality == ObservationQuality.Current && Value is not null && ObservedAt.HasValue;
+    /// <summary>A current value with a time: the only kind of reading that may be shown as "now".</summary>
+    public bool IsCurrent => Quality == ObservationQuality.Current && Value is not null && ObservedAt.HasValue;
     public string CurrentText => IsCurrent ? Value! : Quality switch
     {
         ObservationQuality.Stale => "Stale",

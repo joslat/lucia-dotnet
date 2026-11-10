@@ -23,6 +23,7 @@ public sealed partial class HomeScreen : UserControl
     private Place? renderedPlace;
     private DateTimeOffset? renderedReportTime;
     private DateTimeOffset? renderedPageReportTime;
+    private (bool Expanded, bool StackBadge)? headerLayout;
     private bool actionsWereOpen;
     private bool detailWasOpen;
     public HomeViewModel State { get; }
@@ -61,6 +62,7 @@ public sealed partial class HomeScreen : UserControl
         {
             if (this.FindControl<Popup>("ActionPopup")!.IsOpen) { actions.Arm(actions.ActionAt(args.GetPosition(actions))); }
         };
+        constellation.HoldCancelled += () => actions.Arm(null);
         constellation.HoldReleased += args =>
         {
             actions.Arm(null);
@@ -182,7 +184,8 @@ public sealed partial class HomeScreen : UserControl
     {
         var attention = State.AttentionPlaces;
         this.FindControl<TextBlock>("AttentionHeadline")!.Text = HomeAttention.Headline(attention.Count);
-        this.FindControl<TextBlock>("AttentionSummary")!.Text = HomeAttention.Subline(attention.FirstOrDefault()?.Name, attention.Count, State.Home.Places.Count, State.IsDemo);
+        this.FindControl<TextBlock>("AttentionSummary")!.Text = HomeAttention.Subline(attention.FirstOrDefault()?.Name, attention.Count, State.Home.Places.Count, State.IsDemo,
+            State.Home.Places.Count(place => place.State == PlaceState.Quiet));
         var date = this.FindControl<TextBlock>("HomeDate")!;
         date.IsVisible = State.ReportTime is not null;
         date.Text = State.ReportTime is { } time ? time.UtcDateTime.ToString("dddd d MMM · HH:mm 'UTC'", CultureInfo.InvariantCulture) : null;
@@ -207,6 +210,9 @@ public sealed partial class HomeScreen : UserControl
         var divider = this.FindControl<Border>("HeaderDivider")!;
         var title = this.FindControl<TextBlock>("AttentionHeadline")!;
         var expanded = IsExpanded;
+        var stacked = !expanded && Bounds.Width < 600 && name.FontSize > 32;
+        if (headerLayout == (expanded, stacked)) { return; }
+        headerLayout = (expanded, stacked);
         var dateHome = expanded ? identity : headline;
         if (!ReferenceEquals(date.Parent, dateHome))
         {

@@ -13,22 +13,30 @@ public static class HomeAttention
         _ => $"{count} things need you",
     };
 
-    public static string Subline(string? firstPlaceName, int attentionCount, int placeCount, bool isDemo)
+    /// <param name="quietCount">Places that are quiet. Only these have "nothing to report"; changed or working places do report something.</param>
+    public static string Subline(string? firstPlaceName, int attentionCount, int placeCount, bool isDemo, int? quietCount = null)
     {
         if (placeCount <= 0) { return "No places are set up yet."; }
         if (attentionCount <= 0 || firstPlaceName is null)
         {
-            return isDemo
+            if (!isDemo) { return "Your configured reports flag nothing. That isn't a safety or presence check."; }
+            var reporting = placeCount - Math.Clamp(quietCount ?? placeCount, 0, placeCount);
+            return reporting == 0
                 ? $"None of the {placeCount} places in this sample has anything to report."
-                : "Your configured reports flag nothing. That isn't a safety or presence check.";
+                : $"Nothing in this sample needs you. {reporting} of {placeCount} places report changes or activity.";
         }
         var others = placeCount - attentionCount;
-        return others switch
+        var quiet = Math.Clamp(quietCount ?? others, 0, Math.Max(0, others));
+        if (others <= 0) { return $"{firstPlaceName} first."; }
+        if (quiet == others)
         {
-            <= 0 => $"{firstPlaceName} first.",
-            1 => $"{firstPlaceName} first. The other place has nothing to report.",
-            _ => $"{firstPlaceName} first. The other {others} places have nothing to report.",
-        };
+            return others == 1 ? $"{firstPlaceName} first. The other place has nothing to report." : $"{firstPlaceName} first. The other {others} places have nothing to report.";
+        }
+        if (quiet == 0)
+        {
+            return others == 1 ? $"{firstPlaceName} first. The other place reports a change or activity." : $"{firstPlaceName} first. The other {others} places report changes or activity.";
+        }
+        return $"{firstPlaceName} first. {quiet} of the other {others} places {(quiet == 1 ? "has" : "have")} nothing to report.";
     }
 
     public static string KindLabel(PlaceState state) => state switch

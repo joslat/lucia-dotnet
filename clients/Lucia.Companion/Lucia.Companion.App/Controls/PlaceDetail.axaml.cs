@@ -23,10 +23,8 @@ public sealed partial class PlaceDetail : UserControl
         status.Text = PlaceStateBrushes.StatusLabel(place);
         status[!TextBlock.ForegroundProperty] = new Avalonia.Markup.Xaml.MarkupExtensions.DynamicResourceExtension(PlaceStateBrushes.Key(place.State));
         this.FindControl<TextBlock>("Reason")!.Text = place.Reason;
-        var neighborIds = home.Connections.Where(edge => edge.FromPlaceId == place.Id || edge.ToPlaceId == place.Id)
-            .Select(edge => edge.FromPlaceId == place.Id ? edge.ToPlaceId : edge.FromPlaceId).ToHashSet(StringComparer.Ordinal);
-        var neighbors = home.Places.Where(candidate => neighborIds.Contains(candidate.Id)).Select(candidate => candidate.Name).ToArray();
-        this.FindControl<TextBlock>("Connections")!.Text = neighbors.Length == 0
+        var neighbors = home.NeighbourNames(place.Id);
+        this.FindControl<TextBlock>("Connections")!.Text = neighbors.Count == 0
             ? "No physical connections configured. This is valid."
             : $"Connected to {string.Join(", ", neighbors)}.";
         var observations = this.FindControl<StackPanel>("Observations")!;

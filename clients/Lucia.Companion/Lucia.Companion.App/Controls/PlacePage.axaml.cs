@@ -55,22 +55,15 @@ public sealed partial class PlacePage : UserControl
         chipText.Text = PlaceStateBrushes.StatusLabel(place);
         chipText[!TextBlock.ForegroundProperty] = new DynamicResourceExtension(brush);
         var chipIcon = this.FindControl<Path>("StatusChipIcon")!;
-        chipIcon.Data = place.State switch
-        {
-            PlaceState.Problem or PlaceState.Waiting or PlaceState.Unavailable => AttentionIcons.For(place.State),
-            PlaceState.Working => NavigationIcons.Lucia,
-            _ => null,
-        };
+        chipIcon.Data = PlaceStateIcons.For(place.State);
         chipIcon[!Shape.StrokeProperty] = new DynamicResourceExtension(brush);
         this.FindControl<Viewbox>("StatusChipIconBox")!.IsVisible = chipIcon.Data is not null;
 
         this.FindControl<TextBlock>("ExplanationTitle")!.Text = place.Reason;
         this.FindControl<TextBlock>("ExplanationBody")!.Text = PlaceExplanation.Body(place);
         this.FindControl<TextBlock>("WhyText")!.Text = PlaceExplanation.WhyShown(place.State);
-        var neighborIds = home.Connections.Where(edge => edge.FromPlaceId == place.Id || edge.ToPlaceId == place.Id)
-            .Select(edge => edge.FromPlaceId == place.Id ? edge.ToPlaceId : edge.FromPlaceId).ToHashSet(StringComparer.Ordinal);
-        var neighbors = home.Places.Where(candidate => neighborIds.Contains(candidate.Id)).Select(candidate => candidate.Name).ToArray();
-        this.FindControl<TextBlock>("PageConnections")!.Text = neighbors.Length == 0
+        var neighbors = home.NeighbourNames(place.Id);
+        this.FindControl<TextBlock>("PageConnections")!.Text = neighbors.Count == 0
             ? "No physical connections configured. This is valid." : $"Connected to {string.Join(", ", neighbors)}.";
 
         this.FindControl<TextBlock>("ReadingsTitle")!.Text = $"{place.Name} now";

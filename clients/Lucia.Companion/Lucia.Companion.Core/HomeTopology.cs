@@ -69,5 +69,13 @@ public sealed class HomeTopology
     public string Name { get; }
     public IReadOnlyList<Place> Places { get; }
     public IReadOnlyList<PlaceConnection> Connections { get; }
+
+    /// <summary>Names of the places physically connected to one place, in setup order.</summary>
+    public IReadOnlyList<string> NeighbourNames(string placeId)
+    {
+        var ids = Connections.Where(edge => edge.FromPlaceId == placeId || edge.ToPlaceId == placeId)
+            .Select(edge => edge.FromPlaceId == placeId ? edge.ToPlaceId : edge.FromPlaceId).ToHashSet(StringComparer.Ordinal);
+        return Places.Where(candidate => ids.Contains(candidate.Id)).Select(candidate => candidate.Name).ToArray();
+    }
     public IReadOnlyList<ObservationBinding> Bindings { get; }
 }

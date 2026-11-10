@@ -15,6 +15,7 @@ public sealed partial class StoryScreen : UserControl
     private string? renderedFilter;
     private bool hasTimelines;
     private readonly StoryNavigator? navigator;
+    private (DateOnly Date, string? Place)? renderedWeek;
 
     /// <summary>The day currently shown. With a navigator this changes as the person moves between days.</summary>
     public StoryViewModel State { get; private set; }
@@ -64,6 +65,16 @@ public sealed partial class StoryScreen : UserControl
             if (change.Property == TextBlock.FontSizeProperty) { Refresh(); }
         };
         Refresh();
+    }
+
+    /// <summary>The wide-layout summary for Week: totals across the days shown, with no attention count, which belongs to today.</summary>
+    private void RefreshWeekStats(IReadOnlyList<StoryWeekDay> week)
+    {
+        var recorded = week.Sum(day => day.ReportCount);
+        var requests = week.Sum(day => day.Intervals.Count(interval => interval.Kind == StoryKind.Lucia && interval.Quality == StoryQuality.Recorded));
+        var stats = this.FindControl<TextBlock>("StatsLine")!;
+        stats.Text = $"{(recorded == 1 ? "1 report" : $"{recorded} reports")} · {(requests == 1 ? "1 Lucia request" : $"{requests} Lucia requests")} this week";
+        stats.IsVisible = IsExpanded;
     }
 
     /// <summary>The wide-layout summary: reports and Lucia requests in this day, and, for today only, how many places need you now.</summary>
@@ -122,9 +133,15 @@ public sealed partial class StoryScreen : UserControl
                 this.FindControl<Button>("NextDate")!.IsEnabled = navigator.CanGoNext;
                 this.FindControl<RadioButton>("DayMode")!.IsChecked = !week;
                 this.FindControl<RadioButton>("WeekMode")!.IsChecked = week;
+                if (!week) { renderedWeek = null; }
                 if (week)
                 {
-                    this.FindControl<StoryWeek>("Week")!.SetWeek(navigator.Week, navigator.Date);
+                    if (renderedWeek != (navigator.Date, State.SelectedPlaceId))
+                    {
+                        this.FindControl<StoryWeek>("Week")!.SetWeek(navigator.Week, navigator.Date);
+                        renderedWeek = (navigator.Date, State.SelectedPlaceId);
+                    }
+                    RefreshWeekStats(navigator.Week);
                     this.FindControl<TextBlock>("DayLabel")!.Text =
                         $"{navigator.Dates[0]:dddd d} to {navigator.Dates[^1]:dddd d MMMM yyyy} · {State.Day.TimeZone.Id}";
                 }

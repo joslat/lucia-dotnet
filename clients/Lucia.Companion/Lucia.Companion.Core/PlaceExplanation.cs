@@ -11,9 +11,11 @@ public static class PlaceExplanation
     public static string Body(Place place)
     {
         ArgumentNullException.ThrowIfNull(place);
-        var current = place.Observations.Where(item => item.Quality == ObservationQuality.Current && item.Value is not null && item.ObservedAt.HasValue).ToArray();
+        var current = place.Observations.Where(item => item.IsCurrent).ToArray();
         switch (place.State)
         {
+            case PlaceState.Unavailable when current.Length > 0:
+                return "Some sources report now, but at least one is missing, stale or unavailable, so the place isn't shown as normal.";
             case PlaceState.Unavailable:
                 var last = place.Observations.Where(item => item.Quality != ObservationQuality.Current && item.Value is not null && item.ObservedAt.HasValue)
                     .OrderByDescending(item => item.ObservedAt).FirstOrDefault();

@@ -59,7 +59,7 @@ public sealed class AttentionList : UserControl
             Width = 20, Height = 20,
             Child = new Path
             {
-                Data = AttentionIcons.For(place.State), Width = 24, Height = 24, Stretch = Stretch.None, StrokeThickness = 1.7,
+                Data = PlaceStateIcons.For(place.State), Width = 24, Height = 24, Stretch = Stretch.None, StrokeThickness = 1.7,
                 StrokeLineCap = PenLineCap.Round, StrokeJoin = PenLineJoin.Round, [!Shape.StrokeProperty] = new DynamicResourceExtension(brush),
             },
         });

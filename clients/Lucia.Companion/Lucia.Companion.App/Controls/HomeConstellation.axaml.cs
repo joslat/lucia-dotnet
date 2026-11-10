@@ -24,10 +24,14 @@ public sealed partial class HomeConstellation : UserControl
     public event Action<string>? HoldStarted;
     public event Action<PointerEventArgs>? HoldMoved;
     public event Action<PointerReleasedEventArgs>? HoldReleased;
+    /// <summary>A hold ended without a release on the place: capture was lost or the places were rebuilt.</summary>
+    public event Action? HoldCancelled;
     /// <summary>How long a press must last before it opens Bloom. Shorter presses stay taps.</summary>
     public TimeSpan HoldDelay { get; set; } = TimeSpan.FromMilliseconds(450);
-    private readonly HoldGesture gesture = new(TimeSpan.Zero, slop: 10);
+    private HoldGesture gesture = new(TimeSpan.FromMilliseconds(450), slop: 10);
     private readonly DispatcherTimer holdTimer = new();
+    private readonly System.Diagnostics.Stopwatch clock = System.Diagnostics.Stopwatch.StartNew();
+    public bool IsHolding => gesture.State == HoldGestureState.Holding;
     private PlaceOrb? pressedOrb;
     private bool suppressClick;
 
@@ -35,11 +39,18 @@ public sealed partial class HomeConstellation : UserControl
     {
         AvaloniaXamlLoader.Load(this);
         this.FindControl<ConstellationPanel>("Map")!.AnchorsChanged += this.FindControl<ConnectionLayer>("Links")!.SetAnchors;
-        holdTimer.Tick += (_, _) => { holdTimer.Stop(); if (gesture.Tick(TimeSpan.MaxValue)) { BeginHold(); } };
+        holdTimer.Tick += (_, _) =>
+        {
+            holdTimer.Stop();
+            if (gesture.Tick(clock.Elapsed)) { BeginHold(); }
+            else if (gesture.State == HoldGestureState.Pending) { holdTimer.Interval = TimeSpan.FromMilliseconds(16); holdTimer.Start(); }
+        };
     }
 
     public void SetHome(HomeTopology home)
     {
+        // Rebuilding removes the place being held, so its release would never arrive.
+        EndHold(cancelled: true);
         var map = this.FindControl<ConstellationPanel>("Map")!;
         map.Children.Clear();
         orbs.Clear();
@@ -57,7 +68,9 @@ public sealed partial class HomeConstellation : UserControl
             if (place is null) { continue; }
             var orb = new PlaceOrb(place, PlaceIcons.For(place.Icon)) { Tag = place.Id };
             orb.Classes.Add("constellation");
-            orb.ShowSummary(PlaceCaption.Caption(place), PlaceCaption.Status(place), StatusIcon(place.State), place.Reason);
+            orb.ShowSummary(PlaceCaption.Caption(place), PlaceCaption.Status(place), PlaceStateIcons.For(place.State), place.Reason);
+            // The hold-and-slide gesture owns long presses; touch holds must not also open the context menu.
+            orb.SetValue(InputElement.IsHoldingEnabledProperty, false);
             orb.Click += (_, _) =>
             {
                 // A hold already opened Bloom; the release that ends it is not also a tap.
@@ -67,7 +80,7 @@ public sealed partial class HomeConstellation : UserControl
             orb.AddHandler(PointerPressedEvent, OnOrbPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
             orb.AddHandler(PointerMovedEvent, OnOrbMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
             orb.AddHandler(PointerReleasedEvent, OnOrbReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
-            orb.AddHandler(PointerCaptureLostEvent, (_, _) => { if (gesture.State == HoldGestureState.Pending) { CancelHold(); } }, RoutingStrategies.Direct);
+            orb.AddHandler(PointerCaptureLostEvent, (_, _) => EndHold(cancelled: true), RoutingStrategies.Direct);
             var readings = new MenuItem { Header = "View readings" };
             readings.Click += (_, _) => PlaceInvoked?.Invoke(place.Id);
             var actions = new MenuItem { Header = "Place actions" };
@@ -105,24 +118,16 @@ public sealed partial class HomeConstellation : UserControl
         foreach (var place in other) { yield return (null, place); }
     }
 
-    private static Avalonia.Media.Geometry? StatusIcon(PlaceState state) => state switch
-    {
-        PlaceState.Working => NavigationIcons.Lucia,
-        PlaceState.Waiting => AttentionIcons.Choice,
-        PlaceState.Problem => AttentionIcons.Fault,
-        PlaceState.Unavailable => AttentionIcons.Silent,
-        _ => null,
-    };
-
     private void OnOrbPressed(object? sender, PointerPressedEventArgs args)
     {
         if (sender is not PlaceOrb orb || !args.GetCurrentPoint(orb).Properties.IsLeftButtonPressed) { return; }
-        CancelHold();
+        EndHold(cancelled: true);
         pressedOrb = orb;
         suppressClick = false;
         var point = args.GetPosition(this);
-        gesture.Press(point.X, point.Y, TimeSpan.Zero);
-        if (HoldDelay <= TimeSpan.Zero) { if (gesture.Tick(TimeSpan.Zero)) { BeginHold(); } return; }
+        gesture = new HoldGesture(HoldDelay < TimeSpan.Zero ? TimeSpan.Zero : HoldDelay, slop: 10);
+        gesture.Press(point.X, point.Y, clock.Elapsed);
+        if (gesture.Tick(clock.Elapsed)) { BeginHold(); return; }
         holdTimer.Interval = HoldDelay;
         holdTimer.Start();
     }
@@ -137,8 +142,10 @@ public sealed partial class HomeConstellation : UserControl
     private void OnOrbReleased(object? sender, PointerReleasedEventArgs args)
     {
         holdTimer.Stop();
-        if (gesture.Release() != HoldGestureState.Holding) { return; }
         pressedOrb = null;
+        if (gesture.Release() != HoldGestureState.Holding) { return; }
+        // The orb raises Click after this release only if the pointer is still over it; clear the suppression after that.
+        Dispatcher.UIThread.Post(() => suppressClick = false, DispatcherPriority.Input);
         HoldReleased?.Invoke(args);
     }
 
@@ -149,11 +156,12 @@ public sealed partial class HomeConstellation : UserControl
         HoldStarted?.Invoke(id);
     }
 
-    private void CancelHold()
+    private void EndHold(bool cancelled)
     {
         holdTimer.Stop();
-        gesture.Release();
         pressedOrb = null;
+        suppressClick = false;
+        if (gesture.Release() == HoldGestureState.Holding && cancelled) { HoldCancelled?.Invoke(); }
     }
 
     public void UpdateSelection(string? selectedId, Func<string, bool> isPinned)

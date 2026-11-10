@@ -15,7 +15,7 @@ public static class PlaceCaption
     public static string? Caption(Place place)
     {
         ArgumentNullException.ThrowIfNull(place);
-        var current = place.Observations.Where(IsCurrent).ToArray();
+        var current = place.Observations.Where(item => item.IsCurrent).ToArray();
         if (current.Length == 0) { return null; }
         var chosen = current.OrderBy(item => Array.IndexOf(Preference, item.Role)).Take(2).Select(Phrase);
         return string.Join(" · ", chosen);
@@ -31,14 +31,12 @@ public static class PlaceCaption
             PlaceState.Working => "Lucia is checking",
             PlaceState.Waiting => "Waiting for you",
             PlaceState.Problem => "Reported problem",
-            PlaceState.Unavailable when place.Observations.Any(IsCurrent) => "Some data unavailable",
+            PlaceState.Unavailable when place.Observations.Any(item => item.IsCurrent) => "Some data unavailable",
             PlaceState.Unavailable => HomeAttention.LatestReadingAt(place) is { } last
-                ? $"No data since {last.UtcDateTime.ToString("HH:mm", CultureInfo.InvariantCulture)}" : "No data",
+                ? $"No data since {last.UtcDateTime.ToString("HH:mm", CultureInfo.InvariantCulture)} UTC" : "No data",
             _ => place.State.ToString(),
         };
     }
-
-    private static bool IsCurrent(Observation item) => item.Quality == ObservationQuality.Current && item.Value is not null && item.ObservedAt.HasValue;
 
     private static string Phrase(Observation item)
     {
