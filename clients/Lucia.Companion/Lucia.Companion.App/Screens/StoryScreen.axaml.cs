@@ -11,25 +11,52 @@ namespace Lucia.Companion.App.Screens;
 public sealed partial class StoryScreen : UserControl
 {
     private bool refreshing;
+    private bool attached;
     private string? renderedFilter;
     private bool hasTimelines;
-    public StoryViewModel State { get; }
+    private readonly StoryNavigator? navigator;
+
+    /// <summary>The day currently shown. With a navigator this changes as the person moves between days.</summary>
+    public StoryViewModel State { get; private set; }
     public bool IsExpanded => Bounds.Width >= 900;
 
     public StoryScreen() : this(new StoryViewModel(SampleStory.Create(SampleHome.Create()))) { }
-    public StoryScreen(StoryViewModel state)
+
+    /// <summary>A single day with no date navigation.</summary>
+    public StoryScreen(StoryViewModel state) : this(state, null) { }
+
+    /// <summary>Story with Day/Week and previous/next dates.</summary>
+    public StoryScreen(StoryNavigator navigator) : this(navigator.Day, navigator) { }
+
+    private StoryScreen(StoryViewModel state, StoryNavigator? navigator)
     {
         State = state;
+        this.navigator = navigator;
         AvaloniaXamlLoader.Load(this);
-        this.FindControl<TextBlock>("DayLabel")!.Text = $"{state.Day.Date:dddd d MMMM yyyy} · {state.Day.TimeZone.Id} · {(state.Day.End - state.Day.Start).TotalHours:0}-hour day";
-        this.FindControl<StoryOrbit>("Orbit")!.TimeInvoked += state.SelectFraction;
+        this.FindControl<StoryOrbit>("Orbit")!.TimeInvoked += fraction => State.SelectFraction(fraction);
         this.FindControl<Slider>("TimeScrubber")!.PropertyChanged += (_, change) =>
         {
-            if (!refreshing && change.Property == Slider.ValueProperty) { state.SelectFraction((double)change.NewValue!); }
+            if (!refreshing && change.Property == Slider.ValueProperty) { State.SelectFraction((double)change.NewValue!); }
         };
         this.FindControl<CheckBox>("AnimateSelection")!.IsCheckedChanged += (_, _) => Refresh();
-        AttachedToVisualTree += (_, _) => { state.PropertyChanged += StateChanged; Refresh(); };
-        DetachedFromVisualTree += (_, _) => state.PropertyChanged -= StateChanged;
+        this.FindControl<StackPanel>("StoryNavigation")!.IsVisible = navigator is not null;
+        if (navigator is not null)
+        {
+            this.FindControl<Button>("PreviousDate")!.Click += (_, _) => navigator.Previous();
+            this.FindControl<Button>("NextDate")!.Click += (_, _) => navigator.Next();
+            this.FindControl<RadioButton>("DayMode")!.IsCheckedChanged += (sender, _) =>
+            {
+                if (!refreshing && sender is RadioButton { IsChecked: true }) { navigator.SetMode(StoryMode.Day); }
+            };
+            this.FindControl<RadioButton>("WeekMode")!.IsCheckedChanged += (sender, _) =>
+            {
+                if (!refreshing && sender is RadioButton { IsChecked: true }) { navigator.SetMode(StoryMode.Week); }
+            };
+            this.FindControl<StoryWeek>("Week")!.DayRequested += navigator.ShowDay;
+            navigator.PropertyChanged += (_, _) => NavigatorChanged();
+        }
+        AttachedToVisualTree += (_, _) => { attached = true; State.PropertyChanged += StateChanged; Refresh(); };
+        DetachedFromVisualTree += (_, _) => { attached = false; State.PropertyChanged -= StateChanged; };
         SizeChanged += (_, _) => Refresh();
         this.FindControl<TextBlock>("CenterTime")!.PropertyChanged += (_, change) =>
         {
@@ -40,12 +67,47 @@ public sealed partial class StoryScreen : UserControl
 
     private void StateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args) => Refresh();
 
+    private void NavigatorChanged()
+    {
+        if (navigator is null) { return; }
+        if (!ReferenceEquals(State, navigator.Day))
+        {
+            if (attached) { State.PropertyChanged -= StateChanged; }
+            State = navigator.Day;
+            if (attached) { State.PropertyChanged += StateChanged; }
+            hasTimelines = false;
+        }
+        Refresh();
+    }
+
     private void Refresh()
     {
         if (refreshing) { return; }
         refreshing = true;
         try
         {
+            this.FindControl<TextBlock>("DayLabel")!.Text = $"{State.Day.Date:dddd d MMMM yyyy} · {State.Day.TimeZone.Id} · {(State.Day.End - State.Day.Start).TotalHours:0}-hour day";
+            var week = navigator?.Mode == StoryMode.Week;
+            if (navigator is not null)
+            {
+                this.FindControl<TextBlock>("DateLabel")!.Text = navigator.DateLabel;
+                this.FindControl<Button>("PreviousDate")!.IsEnabled = navigator.CanGoPrevious;
+                this.FindControl<Button>("NextDate")!.IsEnabled = navigator.CanGoNext;
+                this.FindControl<RadioButton>("DayMode")!.IsChecked = !week;
+                this.FindControl<RadioButton>("WeekMode")!.IsChecked = week;
+                if (week)
+                {
+                    this.FindControl<StoryWeek>("Week")!.SetWeek(navigator.Week, navigator.Date);
+                    this.FindControl<TextBlock>("DayLabel")!.Text =
+                        $"{navigator.Dates[0]:dddd d} to {navigator.Dates[^1]:dddd d MMMM yyyy} · {State.Day.TimeZone.Id}";
+                }
+            }
+            this.FindControl<StoryWeek>("Week")!.IsVisible = week;
+            this.FindControl<Grid>("StoryGrid")!.IsVisible = !week;
+            this.FindControl<StackPanel>("DayDetails")!.IsVisible = !week;
+            this.FindControl<PlaceFilterBar>("PlaceFilters")!.SetState(State);
+            if (week) { return; }
+
             var grid = this.FindControl<Grid>("StoryGrid")!;
             grid.ColumnDefinitions[0].Width = IsExpanded ? new GridLength(420) : GridLength.Star;
             grid.ColumnDefinitions[1].Width = IsExpanded ? GridLength.Star : new GridLength(0);
@@ -79,7 +141,6 @@ public sealed partial class StoryScreen : UserControl
             scrubber.SmallChange = 60 / (State.Day.End - State.Day.Start).TotalSeconds;
             scrubber.LargeChange = 3600 / (State.Day.End - State.Day.Start).TotalSeconds;
             scrubber.SetValue(AutomationProperties.HelpTextProperty, $"Selected {time}. Arrow keys move one elapsed minute. Page keys move one elapsed hour.");
-            this.FindControl<PlaceFilterBar>("PlaceFilters")!.SetState(State);
             this.FindControl<ChapterList>("Chapters")!.SetState(State);
             if (!hasTimelines || renderedFilter != State.SelectedPlaceId)
             {

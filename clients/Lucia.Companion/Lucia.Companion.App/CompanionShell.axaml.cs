@@ -171,7 +171,7 @@ public sealed partial class CompanionShell : UserControl
         if (!ReferenceEquals(storyHome, home.State.Home))
         {
             storyHome = home.State.Home;
-            story = new StoryScreen(new StoryViewModel(SampleStory.Create(storyHome)));
+            story = new StoryScreen(SampleStory.Navigator(storyHome));
         }
         Host.Content = story;
     }

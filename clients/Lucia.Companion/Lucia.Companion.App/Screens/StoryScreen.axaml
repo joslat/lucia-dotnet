@@ -14,6 +14,23 @@
         <TextBlock Name="DayLabel" Classes="muted" FontSize="{DynamicResource TextSize14}" />
         <TextBlock Text="Sample history. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
       </StackPanel>
+      <StackPanel Name="StoryNavigation" Spacing="10" IsVisible="False">
+        <Border Classes="segments" HorizontalAlignment="Left">
+          <StackPanel Orientation="Horizontal">
+            <RadioButton Name="DayMode" GroupName="StoryMode" Content="Day" Classes="segment" Theme="{StaticResource SegmentButton}" IsChecked="True" />
+            <RadioButton Name="WeekMode" GroupName="StoryMode" Content="Week" Classes="segment" Theme="{StaticResource SegmentButton}" />
+          </StackPanel>
+        </Border>
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" MaxWidth="460" HorizontalAlignment="Stretch">
+          <Button Name="PreviousDate" Classes="round" AutomationProperties.Name="Previous day">
+            <Path Data="M15,6 L9,12 15,18" Width="24" Height="24" Stretch="None" StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round" Stroke="{Binding $parent[Button].Foreground}" />
+          </Button>
+          <TextBlock Name="DateLabel" Grid.Column="1" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          <Button Name="NextDate" Grid.Column="2" Classes="round" AutomationProperties.Name="Next day">
+            <Path Data="M9,6 L15,12 9,18" Width="24" Height="24" Stretch="None" StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round" Stroke="{Binding $parent[Button].Foreground}" />
+          </Button>
+        </Grid>
+      </StackPanel>
       <c:PlaceFilterBar Name="PlaceFilters" />
       <Grid Name="StoryGrid" ColumnDefinitions="*,0" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="20">
         <StackPanel Name="OrbitPanel" Spacing="8">
@@ -42,6 +59,8 @@
           <TextBlock Text="Authored sample chapters, linked to the reports below." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         </StackPanel>
       </Grid>
+      <c:StoryWeek Name="Week" IsVisible="False" />
+      <StackPanel Name="DayDetails" Spacing="20">
       <Border Height="1" Background="{DynamicResource GraphLineBrush}" />
       <StackPanel Spacing="10">
         <TextBlock Text="Place by place" Classes="section" />
@@ -50,6 +69,7 @@
         <StackPanel Name="Timelines" Spacing="24" />
         <TextBlock Text="Missing reports never mean off, closed or unoccupied. Motion markers are one-minute report buckets, not presence intervals. Grouping uses this demo's current place setup; historical binding policy is not implemented." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         <CheckBox Name="AnimateSelection" Content="Animate the time hand" IsChecked="True" MinHeight="48" />
+      </StackPanel>
       </StackPanel>
     </StackPanel>
   </ScrollViewer>

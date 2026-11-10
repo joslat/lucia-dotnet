@@ -117,7 +117,7 @@ public sealed partial class PlacePage : UserControl
         var card = this.FindControl<Border>("TimelineCard")!;
         card.IsVisible = isDemo;
         if (!isDemo) { return; }
-        var day = SampleStory.Create(home);
+        var day = SampleStory.Day(home, SampleStory.Today);
         this.FindControl<TextBlock>("TimelineTitle")!.Text = $"{place.Name} in the sample story";
         this.FindControl<TextBlock>("TimelineCaption")!.Text = $"Sample story day · {day.Date.ToString("dddd d MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture)} · {day.TimeZone.Id}";
         var entries = this.FindControl<StackPanel>("TimelineEntries")!;

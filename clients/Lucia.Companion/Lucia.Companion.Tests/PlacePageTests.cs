@@ -160,8 +160,9 @@ public sealed class PlacePageTests
             Dispatcher.UIThread.RunJobs();
             var page = home.FindControl<PlacePage>("PlacePage")!;
             var entries = page.FindControl<StackPanel>("TimelineEntries")!.Children.OfType<TextBlock>().Select(text => text.Text ?? string.Empty).ToArray();
-            Assert.Equal(["12:10–12:16 · Gate reported open", "19:00–20:00 · Last-known gate closed, not a current report", "20:00–23:59 · Contact source unavailable"], entries);
-            Assert.Contains("Friday 23 October", page.FindControl<TextBlock>("TimelineCaption")!.Text, StringComparison.Ordinal);
+            // Today's sample day stops at the sample clock (14:00 in Zurich), so only the midday gate report is in it.
+            Assert.Equal(["12:20–12:26 · Gate reported open"], entries);
+            Assert.Contains("Saturday 24 October", page.FindControl<TextBlock>("TimelineCaption")!.Text, StringComparison.Ordinal);
             page.FindControl<Button>("OpenStory")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             var story = Assert.IsType<StoryScreen>(shell.CurrentScreen);
             Assert.Equal("garden", story.State.SelectedPlaceId);
