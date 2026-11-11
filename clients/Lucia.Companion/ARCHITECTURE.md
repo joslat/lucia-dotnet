@@ -119,3 +119,6 @@ Choose Explore the demo for the sample Home and Story. Native tests can capture 
 The shell delays only a newly queued save-only notice by 150 ms. A continuous queue shares one monotonic deadline; added writes do not restart it. Existing recovery and loading stay immediate, including Retry. Completion cancels the reveal without imposing a minimum wait. Hidden, detached and paused views stop the timer, and return checks actual elapsed work before showing progress.
 
 Persistent local-save problems show a concise summary and a named Details toggle. The complete session explanation remains in accessible help and a bounded native scroll area. Recovery actions use natural widths in a WrapPanel, retaining complete labels at doubled text. Back closes Details before changing routes. Review setup enters the existing guarded unreadable-file editor and never writes on entry.
+
+
+`HomeViewModel.ReplaceHome` retains the selected place by ID and keeps its detail/page/actions open only while that place remains. Removing it clears all three presentation flags. Story's visible interaction hint follows the actual Day/Week mode and supplements native slider, named row and chapter input.

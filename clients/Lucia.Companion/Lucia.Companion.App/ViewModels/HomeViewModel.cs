@@ -118,6 +118,7 @@ public sealed class HomeViewModel(HomeTopology home, IEnumerable<ObservationSour
         pinnedIds.RemoveWhere(id => !Home.Places.Any(place => place.Id == id));
         SelectedPlace = Home.Places.FirstOrDefault(place => place.Id == SelectedPlace?.Id);
         IsDetailOpen &= SelectedPlace is not null;
+        IsPageOpen &= SelectedPlace is not null;
         IsActionsOpen &= SelectedPlace is not null;
         Notify();
         if (notifyPreferences) { PreferencesChanged?.Invoke(); }

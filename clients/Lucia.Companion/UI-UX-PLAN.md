@@ -107,3 +107,8 @@ Implementation references: [Avalonia control transitions](https://docs.avaloniau
 
 
 Cycle 4 completes UX10's compact-window and feedback-timing corrections. Naturally measured rail height decides the fallback, including live enlarged text. A continuous save queue has one 150 ms notice deadline, while recovery/loading remain immediate. Details discloses complete storage context and actions wrap at natural widths. Native verification passes 771/774 with 3 existing opt-in skips and 17 new cases. The confirmed mean is 9.07; UX07 and the 9.5 goal remain active.
+
+
+Cycle 5 completes UX11. Story exposes mode-specific guidance without hover, and setup removal cannot leave an invalid selected-place page open. Keeping the selected place preserves its open page. Ten test-first cases cover both outcomes and native Day/Week input at normal/doubled text. Native verification passes 781/784 with 3 existing opt-in skips. The confirmed mean is 9.07; the 9.5 goal remains active.
+
+UX12 remains pending after installed review: removal confirmation must name the selected place, reveal its question and choices above the fixed command bar, and focus the safe Keep place action. Keep and Back return visible focus to Remove place; confirmation returns it to the remaining-place selector or Add place. Guard deferred moves against dismissal, changed selection, imports, detach, navigation and intervening user focus. After removal of Home's selected place, reveal an overview heading or empty-setup action; retain current page/scroll continuity when the place survives. Regressions must activate disclosure at the viewport bottom without test-side scrolling of the newly revealed choices.

@@ -660,3 +660,10 @@ Navigation fits height as well as width. The shell uses the rail only if its nat
 A newly queued save gets 150 ms to finish before save-only global progress appears. Continuing work still shows actual progress; errors, loading and an already visible retry stay immediate. Completion has no artificial delay. A concise storage warning leaves room for the current task. Details shows the complete explanation, and the existing recovery actions wrap without clipped labels at enlarged text. Review setup keeps unreadable-file replacement safeguards.
 
 The expanded compact-window review exposed navigation and recovery defects beyond the earlier coverage. Its initial mean was 8.88; the confirmed mean is 9.07 after fixes. The same six dimensions remain fixed, including lower usability/accessibility judgments than cycle 3 and stronger bounded motion evidence from the actual recorded sequence. The target remains open. Native verification passes 771/774 with 3 existing opt-in skips and 17 new cases. Physical qualification is deferred.
+
+
+## Quality cycle 5, 11 November 2026
+
+Story displays brief interaction guidance above its visualization. Day names the dial and slider; Week tells the user that selecting a day opens its story. It uses mapped TextSize13 and wraps at enlarged text. Removing a selected place through setup returns Home to the overview; keeping the place preserves its page. The one-second Bloom idle-fold contract stays intact.
+
+Independent review confirms 9.07 on the fixed six dimensions. All 781 native cases pass, with 3 existing opt-in skips and 10 new cases. The current installed APK walkthrough supplements this with actual demo input; physical touch, TalkBack speech and hardware frame timing remain deferred. The 9.5 target stays active.

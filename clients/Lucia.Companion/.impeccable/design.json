@@ -527,7 +527,7 @@
       "actionHierarchy": "Home leads with the actual highest-priority reason. Idle storage guidance is local; pending saves and recovery stay global.",
       "nativeAccent": "Fluent native selections share Light #8c5b0f and Dark #e2a84b with approved semantic accent brushes.",
       "limits": "Native input/render evidence does not qualify physical-device motion, screen-reader behavior or frame time.",
-      "cycle": 4,
+      "cycle": 5,
       "continuity": "Place-page entry starts at its own top; Back restores overview offset and a valid visible invoker with guarded deferred focus.",
       "switching": "Owned native opacity transitions settle synchronously when stopped; a previous cancellation cannot hide a newer destination.",
       "systemMotion": "Android reads and observes the current animator duration scale independently of the saved user preference.",
@@ -537,7 +537,11 @@
       "responsiveText": "Week text is measured; lanes stack where needed, ruler ticks stay separated and the rail grows for one-line labels without shrinking text.",
       "compactNavigation": "Use the rail only when naturally measured height fits; live text reflow retains original navigation actions and focus.",
       "noticeTiming": "One 150 ms deadline per continuous save queue; loading and recovery are immediate; hidden, detached and paused views stop the reveal timer.",
-      "recovery": "Concise warning, complete named Details and naturally wrapping actions; Back closes details; guarded Review setup preserves unreadable-file safeguards."
+      "recovery": "Concise warning, complete named Details and naturally wrapping actions; Back closes details; guarded Review setup preserves unreadable-file safeguards.",
+      "interactionGuidance": "Visible mode-specific Day/Week instructions precede the visualization and wrap with mapped text.",
+      "removedSelection": "Replacement clears full-page, detail and action flags if the selected place disappears; a surviving selection retains its page.",
+      "initialSourceCaptureMean": 9.12,
+      "pendingRuntimeFindings": "UX12: reveal removal confirmation and safe focus; anchor overview after removed selection while retaining surviving-place continuity."
     }
   },
   "components": [

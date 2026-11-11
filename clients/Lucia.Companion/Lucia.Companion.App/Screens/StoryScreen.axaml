@@ -33,6 +33,7 @@
         </Grid>
       </StackPanel>
       <c:PlaceFilterBar Name="PlaceFilters" />
+      <TextBlock Name="StoryInteractionHint" Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
       <Grid Name="StoryGrid" ColumnDefinitions="*,0" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="20">
         <StackPanel Name="OrbitPanel" Spacing="8">
           <Grid Name="DialFrame" Width="340" Height="340" HorizontalAlignment="Center">

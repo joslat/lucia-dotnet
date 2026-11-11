@@ -129,6 +129,9 @@ public sealed partial class StoryScreen : UserControl
             this.FindControl<TextBlock>("DayLabel")!.Text = $"{State.Day.Date:dddd d MMMM yyyy} · {State.Day.TimeZone.Id} · {(State.Day.End - State.Day.Start).TotalHours:0}-hour day";
             var week = navigator?.Mode == StoryMode.Week;
             this.FindControl<TextBlock>("StoryTitle")!.Text = week ? "The story of your week" : "The story of your day";
+            this.FindControl<TextBlock>("StoryInteractionHint")!.Text = week
+                ? "Select a day to open its story."
+                : "Select a time on the dial, or use the time slider below.";
             if (navigator is not null)
             {
                 this.FindControl<TextBlock>("DateLabel")!.Text = navigator.DateLabel;
