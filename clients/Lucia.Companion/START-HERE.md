@@ -6,9 +6,9 @@ Updated 11 November 2026. Read the current UI/UX refinement section and "Directi
 
 **What is next.**
 
-The active [UI/UX quality goal](UI-UX-QUALITY.md) targets a 9.5/10 mean on six fixed dimensions. Cycle 7 delivers UX13, complete place hit targets and deliberate Bloom slide selection. The installed confirmation mean is 9.13; keep the goal active. UX14 will retain selected-place context and chooser access in lower setup. The owner requested simulation and deferred physical checks.
+The active [UI/UX quality goal](UI-UX-QUALITY.md) targets a 9.5/10 mean on six fixed dimensions. Cycle 8 delivers UX14: a bounded places list on expanded layouts and a persistent chooser on compact layouts. Lower fields keep their editing context. Native 853/856, 3 existing skips, 37 new cases; installed APK confirmation. Mean 9.22, fixed 9.5 target active. UX15 will reveal today's header and the active place on explicit History entry. Reveal changed filters horizontally, preserve ordinary Story-tab reading position and retain native focus, enlarged text and All places. The owner requested simulation and deferred physical checks.
 
-Current native verification passes 816/819, with 3 existing opt-in wire skips and 15 new cases. Real Windows pointer, delayed hover help and Tab/Space/Escape checks now supplement the installed Android confirmation. The private cycle-7 ledger records source, test-first failures, exact APK and restored synthetic profile. Earlier checkpoints remain historical evidence.
+Current native verification passes 853/856, with 3 existing opt-in wire skips and 37 new cases. Lower-form switching, rejected input, popup selection, responsive focus, empty setup, 200-character names and IME-reduced space pass. Installed Android checks supplement native input. Actual Windows evidence remains the cycle-7 checkpoint.
 
 The next assessment should exercise pending-operation feedback, navigation/value-change motion and compact-window journeys, then fix observed problems under the same scorecard. Cycle 3's design and technical confirmation findings are resolved. Do not repeat completed findings or manufacture the remaining score.
 
@@ -97,4 +97,4 @@ Private design exports, analysis, screenshots and TRX files remain outside this 
 
 No real household access, physical controls, secrets, paid/cloud resources, model downloads, messages to people or release publication are authorized. Use synthetic data and isolated loopback hosts. Only the dedicated test emulator may be used for a bounded check; shut it down afterward. Real device, TalkBack, safe-area, installed successful networking/lifecycle, performance and Mac/Xcode/iOS/signing/distribution gates remain genuinely open. The legacy offline heartbeat stays paused.
 
-UX12 and UX13 are delivered. UX14 is next: keep selected-place identity and the existing chooser available while editing lower bindings, preserving draft validation and safe focus. Mean 9.13; physical accessibility and frame timing remain deferred and the 9.5 target stays active.
+UX12, UX13 and UX14 are delivered. UX15 will reveal today's header and the active place on explicit History entry. Reveal changed filters horizontally, preserve ordinary Story-tab reading position and retain native focus, enlarged text and All places. Mean 9.22; physical accessibility and frame timing remain deferred and the fixed 9.5 goal stays active.

@@ -2,6 +2,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using Avalonia;
+using Avalonia.VisualTree;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.App.Controls;
 using Lucia.Companion.Core;
@@ -16,7 +18,10 @@ public sealed partial class HomeEditorScreen : UserControl
     private readonly IReadOnlyList<ObservationSource> sources;
     private string? selectedId;
     private bool filling;
-    private int removalFocusVersion;
+    private int editorFocusVersion;
+    private int queuedEditorFocusVersion = -1;
+    private bool? expandedLayout;
+    private bool adapting;
     private readonly Func<Func<HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public event Action<HomeTopology>? SaveRequested;
     public event Action? CancelRequested;
@@ -50,12 +55,15 @@ public sealed partial class HomeEditorScreen : UserControl
         this.FindControl<ListBox>("PlacesList")!.SelectionChanged += (_, _) => SelectFromList();
         this.FindControl<ComboBox>("PlaceChooser")!.SelectionChanged += (_, _) =>
             SelectId((this.FindControl<ComboBox>("PlaceChooser")!.SelectedItem as ComboBoxItem)?.Tag as string);
+        this.FindControl<ComboBox>("PlaceChooser")!.DropDownClosed += (_, _) => InvalidateMeasure();
         this.FindControl<Button>("AddPlace")!.Click += (_, _) =>
         {
             if (!TryApplyCurrent()) { return; }
             RunEdit(() => RebuildList(draft.AddPlace("New place", PlaceIcon.Home)));
             this.FindControl<TextBox>("PlaceNameInput")!.Focus();
             this.FindControl<TextBox>("PlaceNameInput")!.SelectAll();
+            var input = this.FindControl<TextBox>("PlaceNameInput")!;
+            QueueEditorFocus(input, input, questionVisible: false);
         };
         this.FindControl<Button>("MoveEarlier")!.Click += (_, _) => Move(-1);
         this.FindControl<Button>("MoveLater")!.Click += (_, _) => Move(1);
@@ -68,7 +76,7 @@ public sealed partial class HomeEditorScreen : UserControl
             var target = selectedId is null ? this.FindControl<Button>("AddPlace")!
                 : this.FindControl<ComboBox>("PlaceChooser")!.IsVisible ? (Control)this.FindControl<ComboBox>("PlaceChooser")!
                 : (Control)this.FindControl<ListBox>("PlacesList")!.SelectedItem!;
-            QueueRemovalFocus(target, target, questionVisible: false);
+            QueueEditorFocus(target, target, questionVisible: false);
         };
         this.FindControl<Button>("SaveHome")!.Click += (_, _) =>
         {
@@ -76,17 +84,16 @@ public sealed partial class HomeEditorScreen : UserControl
             RunEdit(() =>
             {
                 draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty);
-                removalFocusVersion++;
+                editorFocusVersion++;
                 SaveRequested?.Invoke(draft.Build());
             });
         };
-        this.FindControl<Button>("CancelEdit")!.Click += (_, _) => { removalFocusVersion++; CancelRequested?.Invoke(); };
+        this.FindControl<Button>("CancelEdit")!.Click += (_, _) => { editorFocusVersion++; CancelRequested?.Invoke(); };
         this.FindControl<Button>("StayInSetup")!.Click += (_, _) => ShowDiscardQuestion(false);
-        this.FindControl<Button>("DiscardEdits")!.Click += (_, _) => { removalFocusVersion++; CancelRequested?.Invoke(); };
+        this.FindControl<Button>("DiscardEdits")!.Click += (_, _) => { editorFocusVersion++; CancelRequested?.Invoke(); };
         KeyDown += (_, args) => { if (args.Key == Key.Escape) { RequestBack(); args.Handled = true; } };
-        SizeChanged += (_, _) => Adapt();
-        DetachedFromVisualTree += (_, _) => { removalFocusVersion++; InvalidateSharedLayout(); };
-        _ = new PresentationVisibility(this, () => { if (!IsEffectivelyVisible) { removalFocusVersion++; } });
+        DetachedFromVisualTree += (_, _) => { editorFocusVersion++; InvalidateSharedLayout(); };
+        _ = new PresentationVisibility(this, () => { if (!IsEffectivelyVisible) { editorFocusVersion++; } });
         RebuildList(draft.Places.FirstOrDefault()?.Id);
     }
 
@@ -102,7 +109,7 @@ public sealed partial class HomeEditorScreen : UserControl
         }
         if (this.FindControl<Border>("DiscardConfirmation")!.IsVisible) { ShowDiscardQuestion(false); return; }
         if (HasPendingChanges()) { ShowDiscardQuestion(true); }
-        else { removalFocusVersion++; CancelRequested?.Invoke(); }
+        else { editorFocusVersion++; CancelRequested?.Invoke(); }
     }
 
     public void InvalidateSharedLayout()
@@ -118,35 +125,42 @@ public sealed partial class HomeEditorScreen : UserControl
         this.FindControl<TextBlock>("RemovalQuestion")!.Text =
             $"Remove {place.Name}, its connections and observation bindings from the draft? Save setup applies the change.";
         question.IsVisible = true;
-        QueueRemovalFocus(this.FindControl<Button>("KeepPlace")!, question, questionVisible: true);
+        QueueEditorFocus(this.FindControl<Button>("KeepPlace")!, question, questionVisible: true);
     }
 
     private void DismissRemovalQuestion()
     {
         this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible = false;
         var remove = this.FindControl<Button>("RemovePlace")!;
-        QueueRemovalFocus(remove, remove, questionVisible: false);
+        QueueEditorFocus(remove, remove, questionVisible: false);
     }
 
-    private void QueueRemovalFocus(Control target, Control reveal, bool questionVisible)
+    private void QueueEditorFocus(Control target, Control reveal, bool questionVisible, Control? nativeSelectionOwner = null)
     {
-        var version = ++removalFocusVersion;
+        var version = ++editorFocusVersion;
+        queuedEditorFocusVersion = version;
         var placeId = selectedId;
         var expectedFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
         Dispatcher.UIThread.Post(() =>
         {
-            if (version != removalFocusVersion || TopLevel.GetTopLevel(this) is not { } top
-                || !IsEffectivelyVisible || selectedId != placeId
-                || this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible != questionVisible
-                || this.FindControl<ContentControl>("ImportHost")!.IsVisible
-                || this.FindControl<Border>("DiscardConfirmation")!.IsVisible
-                || !target.IsEffectivelyVisible || !target.IsEffectivelyEnabled) { return; }
-            var current = top.FocusManager?.GetFocusedElement();
-            if (!ReferenceEquals(current, expectedFocus) && !ReferenceEquals(current, target)
-                && current is Control { IsEffectivelyVisible: true, IsEffectivelyEnabled: true }) { return; }
-            reveal.BringIntoView();
-            target.Focus();
-            target.BringIntoView();
+            try
+            {
+                if (version != editorFocusVersion || TopLevel.GetTopLevel(this) is not { } top
+                    || !IsEffectivelyVisible || selectedId != placeId
+                    || this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible != questionVisible
+                    || this.FindControl<ContentControl>("ImportHost")!.IsVisible
+                    || this.FindControl<Border>("DiscardConfirmation")!.IsVisible
+                    || !target.IsEffectivelyVisible || !target.IsEffectivelyEnabled) { return; }
+                var current = top.FocusManager?.GetFocusedElement();
+                if (!ReferenceEquals(current, expectedFocus) && !ReferenceEquals(current, target)
+                    && current is Control { IsEffectivelyVisible: true, IsEffectivelyEnabled: true } focused
+                    && !(nativeSelectionOwner is not null && (ReferenceEquals(focused, nativeSelectionOwner)
+                        || nativeSelectionOwner.IsVisualAncestorOf(focused)))) { return; }
+                reveal.BringIntoView();
+                target.Focus();
+                target.BringIntoView();
+            }
+            finally { if (queuedEditorFocusVersion == version) { queuedEditorFocusVersion = -1; } }
         }, DispatcherPriority.Loaded);
     }
 
@@ -166,7 +180,7 @@ public sealed partial class HomeEditorScreen : UserControl
             this.FindControl<TextBlock>("ImportDraftStatus")!.IsVisible = true;
             CloseImport();
         };
-        this.FindControl<ScrollViewer>("EditorScroll")!.IsVisible = false;
+        this.FindControl<Grid>("EditorGrid")!.IsVisible = false;
         this.FindControl<StackPanel>("EditorCommands")!.IsVisible = false;
         var host = this.FindControl<ContentControl>("ImportHost")!;
         host.Content = review; host.IsVisible = true;
@@ -175,7 +189,7 @@ public sealed partial class HomeEditorScreen : UserControl
     private void OpenImport(HomeCatalog catalog)
     {
         if (!TryApplyCurrent() || !RunEdit(() => draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty))) { return; }
-        removalFocusVersion++;
+        editorFocusVersion++;
         this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible = false;
         var import = new HomeImportScreen(draft.Build(), catalog);
         import.CancelRequested += CloseImport;
@@ -191,7 +205,7 @@ public sealed partial class HomeEditorScreen : UserControl
             }
             catch (InvalidOperationException) { CloseImport(); ShowError("The draft changed. Open import and review the additions again."); }
         };
-        this.FindControl<ScrollViewer>("EditorScroll")!.IsVisible = false;
+        this.FindControl<Grid>("EditorGrid")!.IsVisible = false;
         this.FindControl<StackPanel>("EditorCommands")!.IsVisible = false;
         var host = this.FindControl<ContentControl>("ImportHost")!;
         host.Content = import; host.IsVisible = true;
@@ -203,7 +217,7 @@ public sealed partial class HomeEditorScreen : UserControl
         var wasShared = host.Content is HomeSharedLayoutScreen;
         if (host.Content is HomeSharedLayoutScreen shared) { shared.Dispose(); }
         host.IsVisible = false; host.Content = null;
-        this.FindControl<ScrollViewer>("EditorScroll")!.IsVisible = true;
+        this.FindControl<Grid>("EditorGrid")!.IsVisible = true;
         this.FindControl<StackPanel>("EditorCommands")!.IsVisible = true;
         this.FindControl<Button>(wasShared ? "ReviewSharedSetup" : "ImportPlaces")!.Focus();
     }
@@ -248,7 +262,11 @@ public sealed partial class HomeEditorScreen : UserControl
     {
         if (filling) { return; }
         if (nextId is null || nextId == selectedId) { return; }
-        if (!TryApplyCurrent())
+        var listOwner = this.FindControl<ListBox>("PlacesList")!;
+        var chooserOwner = this.FindControl<ComboBox>("PlaceChooser")!;
+        var nativeSelectionOwner = listOwner.IsKeyboardFocusWithin ? (Control)listOwner
+            : chooserOwner.IsKeyboardFocusWithin || chooserOwner.IsDropDownOpen ? chooserOwner : null;
+        if (!TryApplyCurrent(nativeSelectionOwner))
         {
             filling = true;
             var list = this.FindControl<ListBox>("PlacesList")!;
@@ -256,9 +274,15 @@ public sealed partial class HomeEditorScreen : UserControl
             var chooser = this.FindControl<ComboBox>("PlaceChooser")!;
             chooser.SelectedItem = chooser.Items.OfType<ComboBoxItem>().FirstOrDefault(item => Equals(item.Tag, selectedId));
             filling = false;
+            chooser.IsDropDownOpen = false;
             return;
         }
-        RebuildList(nextId);
+        // Keep native item identity and keyboard focus when only the selected place changes.
+        foreach (var item in this.FindControl<ListBox>("PlacesList")!.Items.OfType<ListBoxItem>())
+        { item.Content = draft.Places.First(place => place.Id == (string)item.Tag!).Name; }
+        foreach (var item in this.FindControl<ComboBox>("PlaceChooser")!.Items.OfType<ComboBoxItem>())
+        { item.Content = draft.Places.First(place => place.Id == (string)item.Tag!).Name; }
+        FillSelection(nextId);
     }
 
     private void RebuildList(string? id)
@@ -267,18 +291,29 @@ public sealed partial class HomeEditorScreen : UserControl
         var list = this.FindControl<ListBox>("PlacesList")!;
         var items = draft.Places.Select(place => new ListBoxItem { Content = place.Name, Tag = place.Id, MinHeight = 48 }).ToArray();
         list.ItemsSource = items;
-        list.SelectedItem = items.FirstOrDefault(item => Equals(item.Tag, id));
         var chooser = this.FindControl<ComboBox>("PlaceChooser")!;
         var choices = draft.Places.Select(place => new ComboBoxItem { Content = place.Name, Tag = place.Id }).ToArray();
         chooser.ItemsSource = choices;
-        chooser.SelectedItem = choices.FirstOrDefault(item => Equals(item.Tag, id));
+        filling = false;
+        FillSelection(id);
+    }
+
+    private void FillSelection(string? id)
+    {
+        filling = true;
+        var list = this.FindControl<ListBox>("PlacesList")!;
+        list.SelectedItem = list.Items.OfType<ListBoxItem>().FirstOrDefault(item => Equals(item.Tag, id));
+        var chooser = this.FindControl<ComboBox>("PlaceChooser")!;
+        chooser.SelectedItem = chooser.Items.OfType<ComboBoxItem>().FirstOrDefault(item => Equals(item.Tag, id));
         filling = false;
         Populate(id);
+        if (list.SelectedItem is { } selected) { list.ScrollIntoView(selected); }
+        InvalidateMeasure();
     }
 
     private void Populate(string? id)
     {
-        removalFocusVersion++;
+        editorFocusVersion++;
         selectedId = id;
         var place = draft.Places.FirstOrDefault(candidate => candidate.Id == id);
         this.FindControl<Border>("PlaceFormCard")!.IsVisible = place is not null;
@@ -307,36 +342,57 @@ public sealed partial class HomeEditorScreen : UserControl
         if (selectedId is not null) { this.FindControl<SourceBindingPicker>("BindingPicker")!.SetContext(selectedId, sources, draft.Bindings); }
     }
 
-    private bool TryApplyCurrent()
+    private bool TryApplyCurrent(Control? nativeSelectionOwner = null)
     {
         if (selectedId is null) { return true; }
         var name = this.FindControl<TextBox>("PlaceNameInput")!.Text;
         if (string.IsNullOrWhiteSpace(name))
         {
-            ShowError("Enter a place name before saving or choosing another place.");
+            ShowPlaceError("Enter a place name.");
+            RevealInvalidPlace(nativeSelectionOwner);
             return false;
         }
 
-        return RunEdit(() =>
+        var applied = RunEdit(() =>
         {
             var icon = this.FindControl<ComboBox>("IconInput")!.SelectedItem is PlaceIcon selected ? selected : PlaceIcon.Home;
             draft.UpdatePlace(selectedId, name, icon, PlaceZones.FromChoice(this.FindControl<ComboBox>("ZoneInput")!.SelectedIndex));
             draft.SetConnections(selectedId, this.FindControl<StackPanel>("ConnectionsList")!.Children.OfType<CheckBox>()
                 .Where(check => check.IsChecked == true).Select(check => (string)check.Tag!));
-        });
+        }, ShowPlaceError);
+        if (!applied) { RevealInvalidPlace(nativeSelectionOwner); }
+        return applied;
     }
+
+    private void RevealInvalidPlace(Control? nativeSelectionOwner) => QueueEditorFocus(this.FindControl<TextBox>("PlaceNameInput")!,
+        this.FindControl<TextBlock>("ErrorText")!, this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible, nativeSelectionOwner);
 
     private bool RunEdit(Action action, Action<string>? reportError = null)
     {
-        try { action(); this.FindControl<TextBlock>("ErrorText")!.IsVisible = false; return true; }
+        try
+        {
+            action();
+            this.FindControl<TextBlock>("ErrorText")!.IsVisible = false;
+            this.FindControl<TextBlock>("HomeErrorText")!.IsVisible = false;
+            return true;
+        }
         catch (ArgumentException error) { (reportError ?? ShowError)(error.Message.Split(Environment.NewLine)[0]); return false; }
     }
 
     private void ShowError(string message)
     {
+        var error = this.FindControl<TextBlock>("HomeErrorText")!;
+        error.Text = message;
+        error.IsVisible = true;
+        error.BringIntoView();
+    }
+
+    private void ShowPlaceError(string message)
+    {
         var error = this.FindControl<TextBlock>("ErrorText")!;
         error.Text = message;
         error.IsVisible = true;
+        error.BringIntoView();
     }
 
     private void Move(int direction)
@@ -345,16 +401,70 @@ public sealed partial class HomeEditorScreen : UserControl
         RunEdit(() => { draft.MovePlace(selectedId, direction); RebuildList(selectedId); });
     }
 
-    private void Adapt()
+    protected override Size MeasureOverride(Size availableSize)
     {
-        var expanded = Bounds.Width >= 800;
-        var grid = this.FindControl<Grid>("EditorGrid")!;
-        grid.ColumnDefinitions[1].Width = expanded ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
-        grid.ColumnSpacing = expanded ? 16 : 0;
-        this.FindControl<ListBox>("PlacesList")!.IsVisible = expanded;
-        this.FindControl<ComboBox>("PlaceChooser")!.IsVisible = !expanded;
-        var form = this.FindControl<Border>("PlaceFormCard")!;
-        Grid.SetColumn(form, expanded ? 1 : 0);
-        Grid.SetRow(form, expanded ? 0 : 1);
+        Adapt(availableSize);
+        return base.MeasureOverride(availableSize);
+    }
+
+    private void Adapt(Size availableSize)
+    {
+        if (adapting || availableSize.Width <= 0 || availableSize.Height <= 0) { return; }
+        adapting = true;
+        try
+        {
+            const double columnGap = 16;
+            var layout = (Grid)Content!;
+            var grid = this.FindControl<Grid>("EditorGrid")!;
+            var card = this.FindControl<Border>("PlaceListCard")!;
+            var master = (Grid)card.Child!;
+            var header = this.FindControl<StackPanel>("MasterHeader")!;
+            var management = this.FindControl<StackPanel>("PlaceManagement")!;
+            var contentWidth = Math.Max(0, availableSize.Width - layout.Margin.Left - layout.Margin.Right);
+            var masterWidth = Math.Max(0, (contentWidth - columnGap) / 3
+                - card.Padding.Left - card.Padding.Right - card.BorderThickness.Left - card.BorderThickness.Right);
+            header.Measure(new Size(masterWidth, double.PositiveInfinity));
+            management.Measure(new Size(masterWidth, double.PositiveInfinity));
+            var commands = this.FindControl<StackPanel>("EditorCommands")!;
+            commands.Measure(new Size(contentWidth, double.PositiveInfinity));
+            var bodyHeight = availableSize.Height - commands.DesiredSize.Height - layout.Margin.Top - layout.Margin.Bottom - layout.RowSpacing;
+            var list = this.FindControl<ListBox>("PlacesList")!;
+            var requiredHeight = header.DesiredSize.Height + management.DesiredSize.Height + list.MinHeight + master.RowSpacing * 2
+                + card.Padding.Top + card.Padding.Bottom + card.BorderThickness.Top + card.BorderThickness.Bottom;
+            var chooser = this.FindControl<ComboBox>("PlaceChooser")!;
+            // Finishing the current chooser interaction takes precedence over gaining room after the IME closes.
+            var expanded = availableSize.Width >= 800 && bodyHeight >= requiredHeight
+                && !(expandedLayout == false && chooser.IsDropDownOpen);
+            var focusQueued = queuedEditorFocusVersion == editorFocusVersion;
+            var transferFocus = !focusQueued && expandedLayout != expanded && (list.IsKeyboardFocusWithin || chooser.IsKeyboardFocusWithin);
+            // Capture focus before hiding or detaching the old host clears the native focus manager.
+            var managementFocus = !focusQueued && expandedLayout != expanded && management.IsKeyboardFocusWithin
+                ? TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control : null;
+            grid.ColumnDefinitions[0].Width = expanded ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+            grid.ColumnSpacing = expanded ? columnGap : 0;
+            card.IsVisible = expanded;
+            list.IsVisible = expanded;
+            chooser.IsVisible = !expanded && draft.Places.Count > 0;
+            this.FindControl<StackPanel>("CompactPlaceContext")!.IsVisible = chooser.IsVisible;
+            var masterHost = this.FindControl<ContentControl>("MasterManagementHost")!;
+            var compactHost = this.FindControl<ContentControl>("CompactManagementHost")!;
+            var activeHost = expanded ? masterHost : compactHost;
+            if (!ReferenceEquals(activeHost.Content, management))
+            {
+                masterHost.Content = null; compactHost.Content = null;
+                activeHost.Content = management;
+            }
+            expandedLayout = expanded;
+            if (managementFocus is not null)
+            {
+                QueueEditorFocus(managementFocus, managementFocus, this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible);
+            }
+            else if (transferFocus && selectedId is not null)
+            {
+                var target = expanded ? (Control)list.SelectedItem! : chooser;
+                QueueEditorFocus(target, target, this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible);
+            }
+        }
+        finally { adapting = false; }
     }
 }

@@ -1,34 +1,49 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls" xmlns:core="using:Lucia.Companion.Core"
              x:Class="Lucia.Companion.App.Screens.HomeEditorScreen" Background="{DynamicResource CanvasBrush}">
   <Grid RowDefinitions="*,Auto" Margin="16" RowSpacing="16">
-    <ScrollViewer Name="EditorScroll" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Spacing="16">
-    <StackPanel Spacing="8">
-      <TextBlock Text="Build your home" Classes="title" TextWrapping="Wrap" />
-      <TextBlock Text="Names, icons and physical connections. Local setup only, no device control." Classes="muted" />
-      <TextBlock Name="DraftSaveNotice" Text="This is a draft. Choose Save setup to apply it." Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
-      <TextBlock Name="ReplacementWarning" IsVisible="False" Text="The saved setup could not be read. Saving replaces that file. Cancel leaves it untouched." TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
-      <TextBlock Name="ErrorText" IsVisible="False" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
-    </StackPanel>
-      <Grid Name="EditorGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
-        <Border Name="PlaceListCard" Classes="panel">
+    <Grid Name="EditorGrid" ColumnDefinitions="*,2*" RowDefinitions="Auto,*" ColumnSpacing="16">
+      <Border Name="PlaceListCard" Classes="panel" Grid.RowSpan="2">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+          <StackPanel Name="MasterHeader" Spacing="8">
+            <TextBlock Text="Your places" Classes="section" />
+            <TextBlock Text="The saved order keeps your home stable." Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
+          </StackPanel>
+          <ListBox Name="PlacesList" Grid.Row="1" MinHeight="96" AutomationProperties.Name="Choose a place to edit" />
+          <ContentControl Name="MasterManagementHost" Grid.Row="2" HorizontalContentAlignment="Stretch">
+            <StackPanel Name="PlaceManagement" Spacing="12">
+              <Button Name="AddPlace" Content="Add place" Classes="theme" HorizontalAlignment="Left" />
+              <Button Name="ImportPlaces" Classes="theme" HorizontalAlignment="Left" IsVisible="False"><TextBlock Text="Import authorized places" TextWrapping="Wrap" /></Button>
+              <Button Name="ReviewSharedSetup" Classes="theme" HorizontalAlignment="Left" IsVisible="False"><TextBlock Text="Review shared setup" TextWrapping="Wrap" /></Button>
+              <TextBlock Name="ImportDraftStatus" IsVisible="False" Text="Places added to this draft. Review their setup, then Save setup to keep them." Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+          </ContentControl>
+        </Grid>
+      </Border>
+      <StackPanel Name="CompactPlaceContext" Grid.Column="1" Spacing="4" Margin="0,0,0,12">
+        <TextBlock Text="Editing place" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <ComboBox Name="PlaceChooser" HorizontalAlignment="Stretch" AutomationProperties.Name="Choose a place to edit" MinHeight="48" />
+      </StackPanel>
+      <ScrollViewer Name="EditorScroll" Grid.Column="1" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="16">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Build your home" Classes="title" TextWrapping="Wrap" />
+          <TextBlock Text="Names, icons and physical connections. Local setup only, no device control." Classes="muted" />
+          <TextBlock Name="DraftSaveNotice" Text="This is a draft. Choose Save setup to apply it." Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
+          <TextBlock Name="ReplacementWarning" IsVisible="False" Text="The saved setup could not be read. Saving replaces that file. Cancel leaves it untouched." TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
+        </StackPanel>
+        <Border Classes="panel">
           <StackPanel Spacing="12">
             <TextBlock Text="Home name" />
             <TextBox Name="HomeNameInput" MaxLength="{x:Static core:HomeProfile.MaximumNameLength}" AutomationProperties.Name="Home name" />
-            <TextBlock Text="Your places" Classes="section" />
-            <TextBlock Text="The saved order keeps your home stable." Classes="muted" FontSize="{DynamicResource TextSize13}" />
-            <ListBox Name="PlacesList" MaxHeight="280" AutomationProperties.Name="Choose a place to edit" />
-            <ComboBox Name="PlaceChooser" HorizontalAlignment="Stretch" AutomationProperties.Name="Choose a place to edit" MinHeight="48" />
-            <Button Name="AddPlace" Content="Add place" Classes="theme" HorizontalAlignment="Left" />
-            <Button Name="ImportPlaces" Classes="theme" HorizontalAlignment="Left" IsVisible="False"><TextBlock Text="Import authorized places" TextWrapping="Wrap" /></Button>
-            <Button Name="ReviewSharedSetup" Classes="theme" HorizontalAlignment="Left" IsVisible="False"><TextBlock Text="Review shared setup" TextWrapping="Wrap" /></Button>
-            <TextBlock Name="ImportDraftStatus" IsVisible="False" Text="Places added to this draft. Review their setup, then Save setup to keep them." Classes="muted" AutomationProperties.LiveSetting="Polite" />
+            <ContentControl Name="CompactManagementHost" HorizontalContentAlignment="Stretch" />
           </StackPanel>
         </Border>
-        <Border Name="PlaceFormCard" Classes="panel" Grid.Column="1">
+        <TextBlock Name="HomeErrorText" IsVisible="False" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" AutomationProperties.LiveSetting="Polite" Margin="20,0" />
+        <Border Name="PlaceFormCard" Classes="panel">
           <StackPanel Spacing="12">
             <TextBlock Text="Place setup" Classes="section" />
             <TextBlock Text="Place name" />
+            <TextBlock Name="ErrorText" IsVisible="False" TextWrapping="Wrap" FontSize="{DynamicResource TextSize13}" Foreground="{DynamicResource ProblemBrush}" AutomationProperties.LiveSetting="Polite" />
             <TextBox Name="PlaceNameInput" MaxLength="{x:Static core:HomeProfile.MaximumNameLength}" AutomationProperties.Name="Place name" />
             <TextBlock Text="Icon" />
             <ComboBox Name="IconInput" HorizontalAlignment="Stretch" AutomationProperties.Name="Place icon" MinHeight="48" />
@@ -54,9 +69,9 @@
             </StackPanel>
           </StackPanel>
         </Border>
-      </Grid>
-    </StackPanel>
-    </ScrollViewer>
+      </StackPanel>
+      </ScrollViewer>
+    </Grid>
     <StackPanel Name="EditorCommands" Grid.Row="1" Spacing="8">
       <Border Name="DiscardConfirmation" IsVisible="False" Classes="panel" Padding="12">
         <StackPanel Spacing="8">

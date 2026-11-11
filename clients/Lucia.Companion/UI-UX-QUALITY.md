@@ -6,15 +6,15 @@ Updated 11 November 2026. The owner requested autonomous improvement, dynamic ve
 
 These are reviewer judgments, supported by evidence, rather than benchmark measurements. Keep the same six dimensions and equal weighting between reviews. Do not add a high-scoring dimension to raise the mean, treat a passing test count as a design score, or round a result below 9.5 up to the target.
 
-| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Cycle 7 | Evidence and remaining limit |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | Measured height keeps compact navigation reachable; concise recovery retains task space |
-| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | 9.3 | Visible mode-specific Story guidance and valid page state after setup removal |
-| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | 9.4 | Full place target, safe stationary release and deliberate named actions confirmed; lower setup context remains next |
-| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | 9.0 | Approved visible hold guidance restored; native Constellation palette, type and authored controls retained |
-| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
-| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | 9.1 | Guarded focus, wrapped mapped text and named native controls; TalkBack speech remains deferred |
-| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **9.13** | **Target not achieved** |
+| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Cycle 7 | Cycle 8 | Evidence and remaining limit |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.2 | Bounded expanded editing avoids the blank master column; compact context stays visible |
+| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | 9.3 | 9.4 | Lower-form selection retains valid edits and reveals rejected input; active Story filter context is next |
+| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | 9.4 | 9.5 | Stable setup context, retained draft edits and adjacent errors; explicit History orientation remains next |
+| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | 9.0 | 9.0 | Approved visible hold guidance restored; native Constellation palette, type and authored controls retained |
+| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
+| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | 9.1 | 9.2 | Native selection and management focus survive reflow; enlarged names and keyboard-reduced viewports verified |
+| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **9.13** | **9.22** | **Target not achieved** |
 
 The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Cycle 3 initially scored 8.95; its confirmation review scored 9.05 after enlarged Week and rail defects were corrected. Test counts do not automatically earn points. A subsequent review must justify any increase.
 
@@ -111,3 +111,15 @@ Test-first failures cover four dead hit areas, two stationary-release cases and 
 Actual Windows checks use a fresh window after intervening owner input. A gap click selects Living room, delayed Story help appears, Tab reaches Week, Space switches mode and Escape returns Home. Earlier owner clicks are excluded from the automated pass record. Cursor styling remains a source/native assertion; the pointer marker is not a measurement of Windows cursor shape.
 
 Independent source/capture and installed confirmation retain UI 9.0, UX 9.3, usability 9.4, fidelity 9.0, motion 9.0 and accessibility 9.1, mean 9.13. The visible approved instruction raises fidelity; test counts add no points. UX14 will retain selected-place context and chooser access during lower setup. The 9.5 target stays active. Physical touch, TalkBack speech and hardware frame timing remain owner-deferred.
+
+## Cycle 8 and persistent editing context
+
+UX14 retains the selected place beside lower bindings. Expanded layouts bound the existing master list; compact layouts retain the chooser above the form. Home metadata stays available with no places. Current native measurement includes header/actions, actual spacing, padding and the list minimum. Valid selection retains native item identity and draft edits. Invalid input restores both selectors, closes an open popup and reveals the error and focused field.
+
+The first context run records 16 failures and one pass before layout changes. An initial LayoutUpdated implementation caused repeated measurement and was replaced by MeasureOverride. Two reviewer-led regressions reproduced four focus failures. Capturing management focus before reparenting and accounting for the chooser's native focus restoration resolve them. Final native verification passes 853/856 with 3 existing opt-in skips and 37 new cases. No test was removed. Existing removal checks now inspect the selector's actual scroll ancestors because it deliberately lives outside the form scroller.
+
+The first installed walkthrough found another P2: dismissing the IME expanded the tablet layout before the compact chooser could finish its popup selection. Two new red cases reproduce that sequence. The chooser now remains compact until its popup closes, then normal measurement resumes. Versioned pending focus prevents reflow from superseding validation. Valid/invalid selection and four interrupted dismissal/focus scenarios pass in the final suite. Preliminary build/captures remain separate from the final installed confirmation.
+
+The next installed geometry check caught the distant place-error message above the tablet's short IME viewport. Two native red cases reproduce the clipping. Place errors now sit directly beside the input with mapped type and concise wording, while separate home errors remain outside the optional place form. Both widths show the complete error and input above the keyboard, and empty-home validation remains visible. Earlier APK observations and failed qualification stay in their own ledgers.
+
+Long accepted names, normal/doubled text, light/dark, compact height, empty setup, keyboard, IME space and stale-focus guards pass. Android builds with zero warnings/errors; installed checks and exact restored synthetic profile are recorded locally. The cycle-7 Windows input record remains historical proof for that build. The independent installed mean is 9.22. Test counts earn no design credit, motion and fidelity do not rise from this layout change, and the 9.5 target remains active. UX15 will reveal today's header and the active place on explicit History entry. Reveal changed filters horizontally, preserve ordinary Story-tab reading position and retain native focus, enlarged text and All places. No physical touch, spoken TalkBack or hardware frame-time claim is added.

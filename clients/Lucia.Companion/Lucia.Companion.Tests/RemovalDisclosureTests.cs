@@ -5,6 +5,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Lucia.Companion.App;
 using Lucia.Companion.App.Screens;
 using Lucia.Companion.Core;
@@ -75,7 +76,10 @@ public sealed class RemovalDisclosureTests
             var confirm = editor.FindControl<Button>("ConfirmRemove")!;
             confirm.Focus(); Activate(window);
             var target = window.FocusManager!.GetFocusedElement() as Control;
-            Assert.NotNull(target); AssertInside(target, editor.FindControl<ScrollViewer>("EditorScroll")!);
+            Assert.NotNull(target);
+            var point = target.TranslatePoint(default, window)!.Value;
+            Assert.True(point.Y >= -.1 && point.Y + target.Bounds.Height <= window.Bounds.Height + .1);
+            foreach (var viewport in target.GetVisualAncestors().OfType<ScrollViewer>()) { AssertInside(target, viewport); }
             if (lastPlace) { Assert.Same(editor.FindControl<Button>("AddPlace"), target); }
             else if (width < 800) { Assert.Same(editor.FindControl<ComboBox>("PlaceChooser"), target); }
             else { Assert.IsType<ListBoxItem>(target); }

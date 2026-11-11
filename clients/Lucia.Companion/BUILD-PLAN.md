@@ -2,13 +2,13 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. The current installed review mean is 9.13; the target remains open.
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. The current installed review mean is 9.22; the target remains open.
 
-Cycles 1 through 6 deliver continuity, recovery, interrupted motion, Android policy/IME, enlarged layouts, truthful save feedback, Story guidance and visible setup choices. Cycle 7 restores hold discovery, completes place hit targets and protects stationary release. Final native verification passes 816/819 with 3 existing skips and 15 new cases. Android and actual Windows checks are recorded in the private ledger.
+Cycle 8 delivers UX14: a bounded places list on expanded layouts and a persistent chooser on compact layouts. Lower fields keep their editing context. Native 853/856, 3 existing skips, 37 new cases; installed APK confirmation. Mean 9.22, fixed 9.5 target active.
 
 The owner has no physical device available and requested simulation. Continue app-only runtime interaction assessment now; hardware touch, TalkBack, predictive Back and frame timing remain deferred gates. The server/v2 hold remains in force. No review score or passing test count completes the full application or authorizes server changes.
 
-UX12 and UX13 are delivered. UX14 is the next app-only batch: persistent selected-place identity and existing chooser access while editing lower setup. Retain valid draft changes, reject invalid selection changes with a visible error, and preserve removal, keyboard and IME behavior. The 450 ms hold and one-second pointer-idle Bloom contract remain.
+UX12, UX13 and UX14 are delivered. UX15 will reveal today's header and the active place on explicit History entry. Reveal changed filters horizontally, preserve ordinary Story-tab reading position and retain native focus, enlarged text and All places.
 
 ## UI and UX refinement, 11 November 2026
 
