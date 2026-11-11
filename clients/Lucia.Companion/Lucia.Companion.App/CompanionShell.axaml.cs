@@ -1,7 +1,12 @@
+using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Lucia.Companion.App.Screens;
 using Lucia.Companion.App.Configuration;
@@ -18,7 +23,7 @@ namespace Lucia.Companion.App;
 /// </summary>
 public sealed partial class CompanionShell : UserControl
 {
-    /// <summary>At this width the bottom bar becomes a left rail.</summary>
+    /// <summary>Minimum width for considering a rail; its measured height must also fit.</summary>
     public const double RailWidthThreshold = 600;
 
     private readonly HomeScreen home;
@@ -35,6 +40,12 @@ public sealed partial class CompanionShell : UserControl
     private bool refreshing;
     private Control? setupInvoker;
     private long observedConfirmation;
+    private bool navigationLayoutQueued;
+    private static readonly TimeSpan SaveNoticeDelay = TimeSpan.FromMilliseconds(150);
+    private readonly DispatcherTimer saveNoticeTimer = new();
+    private readonly System.Diagnostics.Stopwatch saveNoticeClock = new();
+    private bool wasSaving;
+    private bool saveNoticeReady;
     private readonly CompanionCrossFade pageTransition = new(TimeSpan.FromMilliseconds(180));
     private readonly Func<Func<Core.HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public HomeProfileSession ProfileSession => profileSession;
@@ -63,12 +74,18 @@ public sealed partial class CompanionShell : UserControl
         AvaloniaXamlLoader.Load(this);
         Host.Content = home;
         Navigation.DestinationRequested += Navigate;
+        Navigation.TextMetricsChanged += RequestNavigationLayout;
+        Navigation.PropertyChanged += (_, args) => { if (args.Property == IsVisibleProperty) { RequestNavigationLayout(); } };
         home.StoryRequested += OpenStoryFor;
         home.SetupRequested += OpenEditor;
         this.FindControl<Button>("RetrySaveButton")!.Click += (_, _) => profileSession.RetrySave();
         this.FindControl<Button>("ReviewSaveConflict")!.Click += async (_, _) => await OpenSaveConflictAsync();
+        this.FindControl<Button>("ReviewLocalSetup")!.Click += (_, _) => OpenEditor();
+        this.FindControl<ToggleButton>("StorageDetailsToggle")!.IsCheckedChanged += (_, _) =>
+            SetStorageDetails(this.FindControl<ToggleButton>("StorageDetailsToggle")!.IsChecked == true);
+        saveNoticeTimer.Tick += (_, _) => RefreshStorageState();
         profileSession.Changed += RefreshStorageState;
-        SizeChanged += (_, _) => ArrangeNavigation();
+        SizeChanged += (_, _) => { ArrangeNavigation(); RefreshStorageState(); };
         ApplyMotion();
         AttachedToVisualTree += async (_, _) =>
         {
@@ -76,6 +93,7 @@ public sealed partial class CompanionShell : UserControl
             if (attachedTopLevel is not null) { attachedTopLevel.BackRequested += OnBackRequested; }
             MotionSettings.Current.Changed += ApplyMotion;
             ApplyMotion();
+            ArrangeNavigation();
             await profileSession.InitializeAsync();
         };
         DetachedFromVisualTree += (_, _) =>
@@ -84,6 +102,7 @@ public sealed partial class CompanionShell : UserControl
             attachedTopLevel = null;
             MotionSettings.Current.Changed -= ApplyMotion;
             pageTransition.Stop();
+            saveNoticeTimer.Stop();
         };
         KeyDown += (_, args) =>
         {
@@ -91,10 +110,12 @@ public sealed partial class CompanionShell : UserControl
         };
         ArrangeNavigation();
         RefreshStorageState();
+        _ = new PresentationVisibility(this, () => { RefreshStorageState(); RequestNavigationLayout(); });
     }
 
     public void Navigate(ShellDestination destination)
     {
+        SetStorageDetails(false);
         home.SetSaveFeedback(null);
         switch (destination)
         {
@@ -112,11 +133,30 @@ public sealed partial class CompanionShell : UserControl
     {
         if (!MotionSettings.Current.IsEnabled) { pageTransition.Stop(); }
         ((TransitioningContentControl)Host).PageTransition = MotionSettings.Current.IsEnabled ? pageTransition : null;
+        RefreshStorageState();
+    }
+
+    private void RequestNavigationLayout()
+    {
+        if (navigationLayoutQueued) { return; }
+        navigationLayoutQueued = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            navigationLayoutQueued = false;
+            if (TopLevel.GetTopLevel(this) is not null && IsEffectivelyVisible) { ArrangeNavigation(); }
+        }, DispatcherPriority.Loaded);
     }
 
     private void ArrangeNavigation()
     {
+        if (!Navigation.IsVisible) { return; }
         var rail = Bounds.Width >= RailWidthThreshold;
+        if (rail)
+        {
+            Navigation.SetRail(true);
+            Navigation.Measure(new Size(Bounds.Width, double.PositiveInfinity));
+            rail = Navigation.DesiredSize.Height <= Bounds.Height;
+        }
         DockPanel.SetDock(Navigation, rail ? Dock.Left : Dock.Bottom);
         Navigation.SetRail(rail);
     }
@@ -129,6 +169,7 @@ public sealed partial class CompanionShell : UserControl
 
     private bool NavigateBack()
     {
+        if (this.FindControl<ToggleButton>("StorageDetailsToggle")!.IsChecked == true) { SetStorageDetails(false); return true; }
         var content = Host.Content;
         if (content is HomeEditorScreen editor) { editor.RequestBack(); return true; }
         if (ReferenceEquals(content, home)) { return home.TryNavigateBack(); }
@@ -140,6 +181,7 @@ public sealed partial class CompanionShell : UserControl
     private void OpenEditor()
     {
         if (profileSession.HasUnreadableProfile && !profileSession.CanReplaceUnreadableProfile) { return; }
+        SetStorageDetails(false);
         setupInvoker = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
         var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog, importCatalog, sharedLayoutFactory);
         editor.ConnectionRequested += RequestConnection;
@@ -184,6 +226,7 @@ public sealed partial class CompanionShell : UserControl
 
     private void ShowHome()
     {
+        SetStorageDetails(false);
         home.SetSaveFeedback(null);
         var returningFromSetup = Host.Content is HomeEditorScreen;
         Host.Content = home;
@@ -265,13 +308,27 @@ public sealed partial class CompanionShell : UserControl
         var footer = this.FindControl<StackPanel>("StorageFooter")!;
         var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
         var footerHadFocus = focused is not null && footer.IsVisualAncestorOf(focused);
-        footer.IsVisible = !reviewing && profileSession.RequiresGlobalNotice;
-        this.FindControl<TextBlock>("StorageStatus")!.Text = profileSession.StatusText;
+        var warning = profileSession.CanRetry || profileSession.HasConflict || profileSession.HasUnreadableProfile;
+        this.FindControl<WrapPanel>("StorageActions")!.IsVisible = warning;
+        var immediate = profileSession.IsLoading || warning;
+        UpdateSaveNotice(immediate, footer.IsVisible);
+        footer.IsVisible = !reviewing && (immediate || profileSession.IsSaving && saveNoticeReady);
+        var status = this.FindControl<TextBlock>("StorageStatus")!;
+        status.Text = StorageSummary();
+        status[!TextBlock.ForegroundProperty] = new DynamicResourceExtension(warning ? "ProblemBrush" : "MutedBrush");
+        AutomationProperties.SetHelpText(status, warning ? profileSession.StatusText : null);
+        this.FindControl<TextBlock>("StorageDetailsText")!.Text = profileSession.StatusText;
+        var details = this.FindControl<ToggleButton>("StorageDetailsToggle")!;
+        details.IsVisible = footer.IsVisible && warning && !profileSession.IsLoading && !profileSession.IsSaving;
+        if (!details.IsVisible) { SetStorageDetails(false); }
+        this.FindControl<ScrollViewer>("StorageDetailsScroll")!.MaxHeight = Math.Max(56, Math.Min(160, Bounds.Height * .25));
         this.FindControl<OperationProgress>("LocalProfileOperationProgress")!.IsBusy = (profileSession.IsLoading || profileSession.IsSaving) && !reviewing;
         this.FindControl<Button>("RetrySaveButton")!.IsVisible = profileSession.CanRetry;
         this.FindControl<Button>("RetrySaveButton")!.IsEnabled = !profileSession.IsLoading && !profileSession.IsSaving;
         this.FindControl<Button>("ReviewSaveConflict")!.IsVisible = profileSession.HasConflict;
         this.FindControl<Button>("ReviewSaveConflict")!.IsEnabled = !editing && !profileSession.IsLoading && !profileSession.IsSaving;
+        this.FindControl<Button>("ReviewLocalSetup")!.IsVisible = profileSession.CanReplaceUnreadableProfile;
+        this.FindControl<Button>("ReviewLocalSetup")!.IsEnabled = !editing && !profileSession.IsLoading && !profileSession.IsSaving;
         Host.IsEnabled = !profileSession.IsLoading;
         Navigation.IsVisible = !editing && !reviewing;
         Navigation.IsEnabled = !profileSession.IsLoading;
@@ -293,6 +350,53 @@ public sealed partial class CompanionShell : UserControl
             canCustomize: !profileSession.IsLoading,
             canSetup: !profileSession.IsLoading && (!profileSession.HasUnreadableProfile || profileSession.CanReplaceUnreadableProfile),
             canRefresh: !refreshing && !profileSession.IsLoading);
+    }
+
+    private string StorageSummary()
+    {
+        if (profileSession.IsLoading) { return profileSession.StatusText; }
+        if (profileSession.CanRetry) { return "Couldn't save. Changes still work in this session."; }
+        if (profileSession.HasConflict) { return "Save conflict. Changes still work in this session."; }
+        if (profileSession.HasUnreadableProfile)
+        {
+            return profileSession.CanReplaceUnreadableProfile
+                ? "Saved setup couldn't be read. Saving is off."
+                : "Saved setup is unavailable. Saving is off.";
+        }
+        return profileSession.StatusText;
+    }
+
+    private void UpdateSaveNotice(bool immediate, bool alreadyVisible)
+    {
+        saveNoticeTimer.Stop();
+        if (!profileSession.IsSaving)
+        {
+            wasSaving = false; saveNoticeReady = false; saveNoticeClock.Reset(); return;
+        }
+        if (!wasSaving)
+        {
+            wasSaving = true; saveNoticeClock.Restart(); saveNoticeReady = immediate || alreadyVisible;
+        }
+        if (immediate) { saveNoticeReady = true; }
+        if (saveNoticeReady || TopLevel.GetTopLevel(this) is null || !IsEffectivelyVisible || MotionSettings.Current.IsPaused) { return; }
+        var remaining = SaveNoticeDelay - saveNoticeClock.Elapsed;
+        if (remaining <= TimeSpan.Zero) { saveNoticeReady = true; return; }
+        saveNoticeTimer.Interval = remaining;
+        saveNoticeTimer.Start();
+    }
+
+    private void SetStorageDetails(bool show)
+    {
+        var scroll = this.FindControl<ScrollViewer>("StorageDetailsScroll")!;
+        var toggle = this.FindControl<ToggleButton>("StorageDetailsToggle")!;
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
+        var detailsHadFocus = focused is not null && scroll.IsVisualAncestorOf(focused);
+        show &= toggle.IsVisible;
+        scroll.IsVisible = show;
+        toggle.Content = show ? "Hide details" : "Details";
+        AutomationProperties.SetName(toggle, show ? "Hide local save details" : "Show local save details");
+        toggle.IsChecked = show;
+        if (!show && detailsHadFocus && toggle.IsEffectivelyVisible) { toggle.Focus(); }
     }
 
     public void SetImportCatalog(HomeCatalog? catalog) => importCatalog = catalog;

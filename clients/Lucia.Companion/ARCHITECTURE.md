@@ -35,7 +35,7 @@ Desktop and Android use the same screens and user controls. They do not render t
 
 The root wraps its content in `Controls/InputPaneViewport.cs`. It observes the top level's input pane, reserves only the docked keyboard area that overlaps the existing safe-area viewport, and brings the unchanged focused field into view after layout. Detach removes the observer, clears the inset and invalidates deferred focus work. Status bars and navigation bars remain under Avalonia's existing safe-area handling.
 
-`CompanionShell` owns the four destinations, local save status and full-screen setup/conflict workflows. `ShellNavigation` changes from a bottom bar to a rail at 600 logical units. The rail has an 88-unit minimum and grows through native label measurement; bottom navigation retains its wrapping rules. `HomeScreen` adapts its overview/detail composition at 900 units. Story has its own width and text-size adaptations. Available space and text size decide layouts rather than a phone/tablet device-name check.
+`CompanionShell` owns the four destinations, local save status and full-screen setup/conflict workflows. `ShellNavigation` considers a rail at 600 logical units and uses it only when its naturally measured height fits. Compact windows fall back to the same bottom-bar actions. Live text changes coalesce a layout check without replacing buttons or moving focus. The rail has an 88-unit minimum and grows through native label measurement; bottom navigation retains its wrapping rules. `HomeScreen` adapts its overview/detail composition at 900 units. Story has its own width and text-size adaptations. Available space and text size decide layouts rather than a phone/tablet device-name check.
 
 `HomeViewModel` owns selection, open detail/actions, pins and section order. Immutable incoming data updates existing place controls when layout identity is unchanged, preserving focus and an active hold. `HomeProfileSession` coordinates checked profile persistence. Controls request changes; they do not obtain household credentials or issue physical commands.
 
@@ -114,3 +114,8 @@ dotnet build clients/Lucia.Companion/Lucia.Companion.Android -p:AndroidSdkDirect
 ```
 
 Choose Explore the demo for the sample Home and Story. Native tests can capture phone/tablet light/dark frames through `LUCIA_COMPANION_CAPTURE_DIR`. Headless interaction and rendered-frame checks establish bounded desktop/native behavior. Android hardware frame time, touch feel, TalkBack, safe areas, predictive Back, installed connection recovery and iOS still require their own qualification.
+
+
+The shell delays only a newly queued save-only notice by 150 ms. A continuous queue shares one monotonic deadline; added writes do not restart it. Existing recovery and loading stay immediate, including Retry. Completion cancels the reveal without imposing a minimum wait. Hidden, detached and paused views stop the timer, and return checks actual elapsed work before showing progress.
+
+Persistent local-save problems show a concise summary and a named Details toggle. The complete session explanation remains in accessible help and a bounded native scroll area. Recovery actions use natural widths in a WrapPanel, retaining complete labels at doubled text. Back closes Details before changing routes. Review setup enters the existing guarded unreadable-file editor and never writes on entry.

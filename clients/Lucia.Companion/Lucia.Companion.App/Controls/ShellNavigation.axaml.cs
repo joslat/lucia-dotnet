@@ -19,6 +19,7 @@ public sealed partial class ShellNavigation : UserControl
     public ShellDestination Selected { get; private set; } = ShellDestination.Home;
     public bool IsRail { get; private set; }
     public event Action<ShellDestination>? DestinationRequested;
+    public event Action? TextMetricsChanged;
 
     public ShellNavigation()
     {
@@ -27,6 +28,14 @@ public sealed partial class ShellNavigation : UserControl
         {
             var destination = Order[index];
             var button = ButtonFor(destination);
+            foreach (var label in ((StackPanel)button.Content!).Children.OfType<TextBlock>())
+            {
+                label.PropertyChanged += (_, args) =>
+                {
+                    if (args.Property == TextBlock.FontSizeProperty || args.Property == TextBlock.FontFamilyProperty)
+                    { TextMetricsChanged?.Invoke(); }
+                };
+            }
             ContextHelp.Set(button, destination switch
             {
                 ShellDestination.Home => "Your places, current readings and things that need you.",

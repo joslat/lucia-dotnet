@@ -6,15 +6,15 @@ Updated 11 November 2026. The owner requested autonomous improvement, dynamic ve
 
 These are reviewer judgments, supported by evidence, rather than benchmark measurements. Keep the same six dimensions and equal weighting between reviews. Do not add a high-scoring dimension to raise the mean, treat a passing test count as a design score, or round a result below 9.5 up to the target.
 
-| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Evidence and remaining limit |
-|---|---:|---:|---:|---:|---|
-| UI design | 8.4 | 8.7 | 8.7 | 9.0 | Clearer Home reason, contextual storage and readable enlarged Week/rail |
-| UX | 8.0 | 8.8 | 9.0 | 9.2 | Local confirmations, global recovery and explicit setup drafts; navigation does not replay old success |
-| Usability | 8.1 | 9.0 | 9.2 | 9.4 | Queued saves, retry focus, conflict choices and live text reflow retain working actions |
-| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | Constellation, saved order, type and semantic brushes remain; rail grows through native measurement |
-| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | Prior interruption and motion-policy evidence remains; cycle 3 supplies no new frame-pacing qualification |
-| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | Written selected day, correct mode title, whole report words, separated ruler ticks and enlarged rail labels; TalkBack remains deferred |
-| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **Target not achieved** |
+| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Evidence and remaining limit |
+|---|---:|---:|---:|---:|---:|---|
+| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | Measured height keeps compact navigation reachable; concise recovery retains task space |
+| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | Quick saves do not flash a footer; ongoing work and recovery remain truthful and available |
+| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | Broader compact coverage exposed prior rail clipping; fallback and full recovery labels are verified |
+| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | Existing native controls, Constellation layout, palette and mapped type remain |
+| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
+| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | Complete doubled-text recovery labels and reachable compact navigation; TalkBack speech remains deferred |
+| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **Target not achieved** |
 
 The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Cycle 3 initially scored 8.95; its confirmation review scored 9.05 after enlarged Week and rail defects were corrected. Test counts do not automatically earn points. A subsequent review must justify any increase.
 
@@ -75,3 +75,11 @@ The design confirmation resolved its two material findings, and the technical co
 Continue app-only runtime assessment against the same scorecard, including pending-operation feedback, navigation/value-change motion and compact-window journeys. The cycle-2 findings and cycle-3 confirmation fixes are implemented. Further changes should address observed problems, not add decoration to chase a number. Physical touch, TalkBack, broader safe areas, predictive Back and hardware frame timing remain owner-deferred. Keep the 9.5 goal active until evidence supports it.
 
 Connected history, richer service stages, Engine room and the v2 identity port remain separately gated. This quality goal does not authorize changing those dependencies.
+
+## Cycle 4 and compact interaction journeys
+
+Short windows and doubled text exposed an unreachable rail destination, save-only footer flashes and oversized recovery paragraphs. The initial expanded review scored 8.88. Measured-height fallback retains all four native navigation actions; live text reflow retains identity and focus. A newly queued save-only notice waits 150 ms using the continuous queue's elapsed time. Added writes do not reset the deadline. Errors and existing retry notices remain immediate; hidden, detached and paused views stop the reveal timer.
+
+Recovery uses a concise warning with complete named Details. Native recovery actions wrap at natural widths. A second test-first batch caught labels clipped by the wider Hide details action, then verified full text in collapsed and expanded states. Back closes Details before routing. Review setup preserves the unreadable file on entry and keeps the existing explicit replacement warning.
+
+All 771 native cases pass, with 3 existing opt-in skips and 17 new cases. Independent source/capture confirmation found no remaining concrete P0/P1/P2 in this batch. The confirmed mean is 9.07. Expanded coverage changes usability and accessibility judgments; test counts do not raise scores. Motion credit reflects the actual finite recorded sequence, without a hardware smoothness claim. The 9.5 goal stays active and physical checks remain deferred at the owner's request.

@@ -33,6 +33,7 @@ public sealed class StorageFeedbackTests
             {
                 state.SelectPlace("garden"); state.TogglePin();
                 ShellNavigationTests.Navigate(shell, ShellDestination.Story);
+                await Task.Delay(220, TestContext.Current.CancellationToken); Dispatcher.UIThread.RunJobs();
                 Assert.True(shell.FindControl<StackPanel>("StorageFooter")!.IsVisible);
                 Assert.True(shell.FindControl<OperationProgress>("LocalProfileOperationProgress")!.IsBusy);
                 Assert.True(shell.FindControl<ContentControl>("ScreenHost")!.IsEnabled);

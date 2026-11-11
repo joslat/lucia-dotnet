@@ -104,3 +104,6 @@ Cycle 3 clarifies Home and Day/Week wording, makes local save feedback follow ma
 Any future new control must state its data truth, identity key, empty/error/recovery behavior, input equivalents, motion trigger and stop conditions. Loading, rendering and source updates are separate events; an attractive transition must not blur those distinctions.
 
 Implementation references: [Avalonia control transitions](https://docs.avaloniaui.net/docs/graphics-animation/control-transitions) and [indeterminate progress](https://docs.avaloniaui.net/controls/feedback/progressbar).
+
+
+Cycle 4 completes UX10's compact-window and feedback-timing corrections. Naturally measured rail height decides the fallback, including live enlarged text. A continuous save queue has one 150 ms notice deadline, while recovery/loading remain immediate. Details discloses complete storage context and actions wrap at natural widths. Native verification passes 771/774 with 3 existing opt-in skips and 17 new cases. The confirmed mean is 9.07; UX07 and the 9.5 goal remain active.

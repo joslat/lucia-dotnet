@@ -651,3 +651,12 @@ Keep the same Constellation world. Home uses the leading report's actual reason.
 Week's title follows its active mode and the selected day is written in the accessible action name. Text measurement now determines date/count columns. Narrow or enlarged rows place the report lane below their header; ruler density follows available space. Rail labels remain whole and the rail grows from its original minimum. Live reflow retains focused native actions and all mapped text sizes.
 
 The confirmation review resolved enlarged Week/rail findings and scored 9.05 on the same six dimensions. Native verification passes 754/757 with 3 existing opt-in skips and 20 new cases. These results do not qualify physical touch, TalkBack speech, hardware frame time or the full application.
+
+
+## Quality cycle 4, 11 November 2026
+
+Navigation fits height as well as width. The shell uses the rail only if its natural measured height fits; otherwise all four native actions use the bottom bar. Text changes retain the same buttons and keyboard focus.
+
+A newly queued save gets 150 ms to finish before save-only global progress appears. Continuing work still shows actual progress; errors, loading and an already visible retry stay immediate. Completion has no artificial delay. A concise storage warning leaves room for the current task. Details shows the complete explanation, and the existing recovery actions wrap without clipped labels at enlarged text. Review setup keeps unreadable-file replacement safeguards.
+
+The expanded compact-window review exposed navigation and recovery defects beyond the earlier coverage. Its initial mean was 8.88; the confirmed mean is 9.07 after fixes. The same six dimensions remain fixed, including lower usability/accessibility judgments than cycle 3 and stronger bounded motion evidence from the actual recorded sequence. The target remains open. Native verification passes 771/774 with 3 existing opt-in skips and 17 new cases. Physical qualification is deferred.

@@ -6,10 +6,17 @@
     <StackPanel Name="StorageFooter" DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">
       <TextBlock Name="StorageStatus" Classes="muted" FontSize="{DynamicResource TextSize13}" Focusable="True" AutomationProperties.LiveSetting="Polite" />
       <c:OperationProgress Name="LocalProfileOperationProgress" />
-      <Button Name="RetrySaveButton" Content="Retry save" Classes="theme" IsVisible="False" HorizontalAlignment="Left" />
-      <Button Name="ReviewSaveConflict" Classes="theme" IsVisible="False" HorizontalAlignment="Left" AutomationProperties.Name="Review save conflict, both versions are preserved">
-        <TextBlock Text="Review save conflict" TextWrapping="Wrap" />
-      </Button>
+      <WrapPanel Name="StorageActions" ItemSpacing="8" LineSpacing="8">
+        <Button Name="RetrySaveButton" Content="Retry save" Classes="theme" IsVisible="False" HorizontalAlignment="Left" />
+        <Button Name="ReviewSaveConflict" Classes="theme" IsVisible="False" HorizontalAlignment="Left" AutomationProperties.Name="Review save conflict, both versions are preserved">
+          <TextBlock Text="Review conflict" TextWrapping="Wrap" />
+        </Button>
+        <Button Name="ReviewLocalSetup" Content="Review setup" Classes="theme" IsVisible="False" HorizontalAlignment="Left" AutomationProperties.Name="Review unreadable local setup before choosing replacement" />
+        <ToggleButton Name="StorageDetailsToggle" Content="Details" FontSize="{DynamicResource TextSize13}" Classes="theme" IsVisible="False" AutomationProperties.Name="Show local save details" />
+      </WrapPanel>
+      <ScrollViewer Name="StorageDetailsScroll" IsVisible="False" HorizontalScrollBarVisibility="Disabled" MaxHeight="160" AutomationProperties.Name="Local save details">
+        <TextBlock Name="StorageDetailsText" Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" Focusable="True" />
+      </ScrollViewer>
     </StackPanel>
     <TransitioningContentControl Name="ScreenHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
   </DockPanel>
