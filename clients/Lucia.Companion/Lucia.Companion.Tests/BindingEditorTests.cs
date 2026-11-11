@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia;
+using Avalonia.VisualTree;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -155,6 +156,7 @@ public sealed class BindingEditorTests
                 Assert.DoesNotContain("No observation bindings", place.Reason);
                 detail.SetPlace(place, home);
                 Assert.Equal("Observation bindings configured. No readings available.", detail.FindControl<TextBlock>("EmptyText")!.Text);
+                Assert.Single(detail.GetVisualDescendants().OfType<TextBlock>(), text => text.IsEffectivelyVisible && text.Text == "Observation bindings configured. No readings available.");
             }
             NativeCapture.Save(window, "bound-empty-place.png");
         }

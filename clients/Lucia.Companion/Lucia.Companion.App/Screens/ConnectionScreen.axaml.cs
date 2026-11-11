@@ -121,6 +121,11 @@ public sealed partial class ConnectionScreen : UserControl
         this.FindControl<WrapPanel>("RecoveryActions")!.IsVisible = State.Stage == ConnectionViewStage.Recovery;
         this.FindControl<Button>("RetryConnection")!.IsEnabled = !State.IsBusy;
         this.FindControl<Button>("AskForget")!.IsEnabled = State.CanForget;
+        this.FindControl<Button>("AskForget")!.IsVisible = State.Stage == ConnectionViewStage.Recovery;
+        this.FindControl<TextBlock>("ForgetExplanation")!.IsVisible = State.Stage == ConnectionViewStage.Recovery;
+        var options = this.FindControl<Expander>("ConnectionOptions")!;
+        options.IsVisible = State.IsConnected || State.HasSavedConnection || State.Stage == ConnectionViewStage.Recovery;
+        if (stageChanged) { options.IsExpanded = false; }
         this.FindControl<Button>("AskDisconnect")!.IsVisible = State.IsConnected || State.HasSavedConnection;
         this.FindControl<Button>("AskDisconnect")!.IsEnabled = !State.IsBusy;
         this.FindControl<Button>("KeepConnection")!.IsEnabled = !State.IsBusy;

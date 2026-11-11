@@ -52,10 +52,17 @@
             <TextBlock Text="Home opens with authorized source reports and local setup. Story and Engine are not connected yet. No sample readings will be substituted for your home." Classes="muted" />
           </StackPanel>
           <WrapPanel Name="RecoveryActions" Classes="arrival" IsVisible="False">
-            <Button Name="RetryConnection" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Retry saved connection" TextWrapping="Wrap" /></Button>
-            <Button Name="AskForget" Classes="theme" Margin="0,0,8,8"><TextBlock Text="Forget local connection" TextWrapping="Wrap" /></Button>
+            <Button Name="RetryConnection" Classes="theme" Margin="0,0,8,8" BorderBrush="{DynamicResource AccentBrush}"><TextBlock Text="Retry saved connection" FontWeight="SemiBold" TextWrapping="Wrap" /></Button>
           </WrapPanel>
-          <Button Name="AskDisconnect" IsVisible="False" Classes="theme" HorizontalAlignment="Left"><TextBlock Text="Disconnect this device" TextWrapping="Wrap" /></Button>
+          <Expander Name="ConnectionOptions" Header="Connection options" HorizontalAlignment="Stretch" IsVisible="False">
+            <StackPanel Spacing="10" Margin="0,12,0,0" IsVisible="{Binding IsExpanded, ElementName=ConnectionOptions}">
+              <TextBlock Text="Retry keeps your saved connection. Use these options when you want to remove it." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+              <Button Name="AskForget" Classes="theme" HorizontalAlignment="Left"><TextBlock Text="Forget local connection" TextWrapping="Wrap" /></Button>
+              <TextBlock Name="ForgetExplanation" Text="Forgets this device's saved connection only. Host access is not revoked." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+              <Button Name="AskDisconnect" IsVisible="False" Classes="theme" HorizontalAlignment="Left"><TextBlock Text="Disconnect this device" TextWrapping="Wrap" /></Button>
+              <TextBlock Text="Removes local credentials and asks Lucia to revoke this session. If offline, only local removal can be confirmed." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+            </StackPanel>
+          </Expander>
           <StackPanel Name="RemovalConfirmation" Classes="arrival" IsVisible="False" Spacing="12">
             <Separator />
             <TextBlock Name="RemovalQuestion" TextWrapping="Wrap" />

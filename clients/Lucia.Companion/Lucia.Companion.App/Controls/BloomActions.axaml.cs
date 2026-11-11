@@ -34,6 +34,7 @@ public sealed partial class BloomActions : UserControl
     private bool pointerOnAction;
     private bool sessionActive;
     private int motionVersion;
+    private int textAdaptVersion;
     private Action? closeCompleted;
     public bool IsClosing { get; private set; }
     public TimeSpan IdleDelay { get; set; } = TimeSpan.FromSeconds(1);
@@ -143,10 +144,31 @@ public sealed partial class BloomActions : UserControl
 
     private void AdaptText()
     {
+        var version = ++textAdaptVersion;
+        var scope = TopLevel.GetTopLevel(this);
+        var focused = scope?.FocusManager?.GetFocusedElement();
+        Button? counterpart = null;
+        foreach (var (_, radial, list) in Buttons)
+        {
+            var radialButton = this.FindControl<Button>(radial)!;
+            var listButton = this.FindControl<Button>(list)!;
+            if (ReferenceEquals(focused, radialButton) || ReferenceEquals(focused, listButton)) { counterpart = IsLargeText ? listButton : radialButton; break; }
+        }
         this.FindControl<Grid>("RadialLayout")!.IsVisible = !IsLargeText;
         var fallback = this.FindControl<Border>("LargeTextActions")!;
         fallback.IsVisible = IsLargeText;
         fallback.MaxHeight = Math.Max(120, (TopLevel.GetTopLevel(this)?.Bounds.Height ?? 464) - 64);
+        if (counterpart is not null)
+        {
+            // New list controls need their first layout before accepting focus. Do not reclaim focus if the user moved elsewhere.
+            Dispatcher.UIThread.Post(() =>
+            {
+                var current = scope?.FocusManager?.GetFocusedElement();
+                if (version == textAdaptVersion && ReferenceEquals(scope, TopLevel.GetTopLevel(this)) && IsEffectivelyVisible && counterpart.IsEffectivelyVisible
+                    && (current is null || ReferenceEquals(current, focused) || ReferenceEquals(current, counterpart)))
+                { counterpart.Focus(); counterpart.BringIntoView(); }
+            }, DispatcherPriority.Loaded);
+        }
         ScheduleIdle();
     }
 

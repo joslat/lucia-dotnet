@@ -1,5 +1,13 @@
 # Approved build sequence
 
+## Quality goal, 11 November 2026
+
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes the six scoring dimensions and records the independent reviews. The first cycle raises the mean from 8.13 to 8.67; the goal remains active and the target is not achieved.
+
+Cycle 1 implements attention continuity and direct review, guided empty-home setup, retry-first connection recovery, Story date/report correctness, live Bloom focus adaptation, hidden-input cancellation and consistent native accents/targets. Final native regression, Android build and capture confirmation are recorded in the continuation handoff. Further score increases require evidence, including device motion/accessibility checks. The server/v2 hold remains unchanged.
+
+Verification: 712 native cases pass, 3 existing wire skips, 35 new cases; Android zero warnings/errors. Eight additional final Tab/viewport checks confirm the setup route across phone/tablet, themes and text sizes. Native captures and offline report are checked. This completes cycle 1 implementation, not the 9.5 scoring goal.
+
 ## UI and UX refinement, 11 November 2026
 
 [UI-UX-PLAN.md](UI-UX-PLAN.md) formalizes the current screen/state inventory, view/control hierarchy, loading and drawing policy, value updates and motion acceptance. It extends the app-only track after F04 and keeps the server/v2 hold below intact.

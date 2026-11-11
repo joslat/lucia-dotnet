@@ -18,6 +18,7 @@ public sealed class InteractionFeedback : AvaloniaObject
     public static readonly AttachedProperty<bool> EnabledProperty = AvaloniaProperty.RegisterAttached<InteractionFeedback, Button, bool>("Enabled");
     private static readonly ConditionalWeakTable<Button, InteractionFeedback> Instances = new();
     private readonly Button button;
+    private readonly PresentationVisibility visibility;
     private bool attached;
     private bool mouseOver;
 
@@ -40,6 +41,7 @@ public sealed class InteractionFeedback : AvaloniaObject
         button.PointerExited += PointerExited;
         button.PropertyChanged += ButtonPropertyChanged;
         if (TopLevel.GetTopLevel(button) is not null) { Attach(); }
+        visibility = new PresentationVisibility(button, ApplyMotion);
     }
 
     private void Attached(object? sender, VisualTreeAttachmentEventArgs args) => Attach();
@@ -65,7 +67,12 @@ public sealed class InteractionFeedback : AvaloniaObject
 
     private void ApplyMotion()
     {
-        var animate = attached && MotionSettings.Current.IsEnabled;
+        var animate = attached && button.IsEffectivelyVisible && MotionSettings.Current.IsEnabled;
+        if (!attached || !button.IsEffectivelyVisible)
+        {
+            mouseOver = false;
+            button.Classes.Remove("mouse-over");
+        }
         // Remove active transitions first so reducing motion immediately settles any interpolation in flight.
         button.Transitions = null;
         button.RenderTransformOrigin = new RelativePoint(.5, .5, RelativeUnit.Relative);
@@ -125,7 +132,7 @@ public sealed class InteractionFeedback : AvaloniaObject
 
     private void UpdateTransform()
     {
-        var scale = !attached || !MotionSettings.Current.IsEnabled || !button.IsEffectivelyEnabled ? "1"
+        var scale = !attached || !button.IsEffectivelyVisible || !MotionSettings.Current.IsEnabled || !button.IsEffectivelyEnabled ? "1"
             : button.IsPressed ? "0.975"
             : mouseOver && button is PlaceOrb or BloomActionButton ? "1.02" : "1";
         button.RenderTransform = TransformOperations.Parse($"scale({scale})");
@@ -140,5 +147,6 @@ public sealed class InteractionFeedback : AvaloniaObject
         button.PointerEntered -= PointerEntered;
         button.PointerExited -= PointerExited;
         button.PropertyChanged -= ButtonPropertyChanged;
+        visibility.Dispose();
     }
 }

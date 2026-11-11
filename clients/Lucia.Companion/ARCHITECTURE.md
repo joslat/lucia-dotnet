@@ -46,7 +46,7 @@ Paths below are relative to `Lucia.Companion.App/`.
 | Place constellation and connections | `Controls/HomeConstellation.axaml.cs`, `ConstellationPanel.cs`, `ConnectionLayer.cs` | Stable place order, configured edges, input gesture coordination |
 | Place orb, state, selection and charge | `Controls/PlaceOrb.cs`, `HoldCharge.cs`, `Styles/Controls.axaml` | Native button semantics, written state, semantic brushes and a decorative hold arc |
 | Contextual Bloom | `Controls/BloomActions.axaml`, `BloomActions.axaml.cs`, `BloomActionButton.cs` | Named actions, radial/list presentation, unfold/fold and protected idle dismissal |
-| Needs you | `Controls/AttentionList.cs` | Evidence-based attention rows with readable explanations |
+| Needs you | `Controls/AttentionList.cs`, `AttentionPlaceRow.cs` | Retained place actions, current explanations, press/focus continuity and deliberate removal fallback |
 | Place detail/page | `Controls/PlaceDetail.axaml`, `PlacePage.axaml` | Shared observations and explanation, compact page or expanded side pane |
 | Story dial, chapters and tracks | `Screens/StoryScreen.axaml`, `Controls/StoryOrbit.cs`, `ChapterList.cs`, `PlaceTimeline.cs`, `TimelineTrackLayer.cs` | Shared selected instant and filter, native text/buttons beside drawing |
 | Shared button feedback | `Controls/InteractionFeedback.cs` | Mouse hover, press compression, finite colour transitions and lifecycle cleanup |
@@ -60,6 +60,10 @@ Paths below are relative to `Lucia.Companion.App/`.
 Story, charts and Today so far are labelled sample data in the demo. Connected historical Story and Engine room remain incomplete. Appearance does not establish data capability or authorization.
 
 ## Input and motion
+
+Home exposes a direct Review reports shortcut and an empty-home setup route through the existing shell editor flow. Setup entry focuses the home-name field; returning restores the visible invoker or Home navigation. Connection removal remains behind an explicit disclosure and the existing confirmation. Collapsed options are excluded from visibility and focus immediately.
+
+Story chapters cache against the actual view model as well as chapter/filter identity. Date navigation therefore cannot retain handlers for the previous day. Timelines are cached within one immutable day model and reconciled by place ID; a report remains attached when selecting it narrows the filter. Bloom maps focus between equivalent radial/list actions after text adaptation, with version and intervening-focus guards. Effective hiding cancels pending holds and closes overlays immediately.
 
 The pure `HoldGesture` distinguishes a quick tap, pending hold, scroll cancellation and a completed hold. `HomeConstellation` supplies elapsed time and pointer events, draws charge only while pending, and suppresses the tap after a hold. `HomeScreen` owns the popup's anchor, selected-place actions and focus return. The same actions remain reachable through named buttons and the native context menu.
 

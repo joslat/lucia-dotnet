@@ -14,6 +14,7 @@ public sealed partial class StoryScreen : UserControl
     private bool attached;
     private string? renderedFilter;
     private bool hasTimelines;
+    private readonly Dictionary<string, PlaceTimeline> timelineCache = new(StringComparer.Ordinal);
     private readonly StoryNavigator? navigator;
     private (DateOnly Date, string? Place)? renderedWeek;
 
@@ -114,6 +115,7 @@ public sealed partial class StoryScreen : UserControl
             State = navigator.Day;
             if (attached) { State.PropertyChanged += StateChanged; }
             hasTimelines = false;
+            timelineCache.Clear();
         }
         Refresh();
     }
@@ -199,8 +201,18 @@ public sealed partial class StoryScreen : UserControl
             if (!hasTimelines || renderedFilter != State.SelectedPlaceId)
             {
                 var timelines = this.FindControl<StackPanel>("Timelines")!;
-                timelines.Children.Clear();
-                foreach (var place in State.VisiblePlaces) { timelines.Children.Add(new PlaceTimeline(State, place)); }
+                var next = State.VisiblePlaces.Select(place =>
+                {
+                    if (!timelineCache.TryGetValue(place.Id, out var timeline)) { timelineCache[place.Id] = timeline = new PlaceTimeline(State, place); }
+                    return timeline;
+                }).ToArray();
+                foreach (var obsolete in timelines.Children.Where(item => !next.Contains(item)).ToArray()) { timelines.Children.Remove(obsolete); }
+                for (var index = 0; index < next.Length; index++)
+                {
+                    var current = timelines.Children.IndexOf(next[index]);
+                    if (current < 0) { timelines.Children.Insert(index, next[index]); }
+                    else if (current != index) { timelines.Children.Move(current, index); }
+                }
                 renderedFilter = State.SelectedPlaceId;
                 hasTimelines = true;
             }

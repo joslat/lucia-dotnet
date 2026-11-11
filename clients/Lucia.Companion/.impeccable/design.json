@@ -515,6 +515,18 @@
       "scope": "Current screen/state hierarchy and app-only presentation baseline. Existing HTML specimens remain static illustrations.",
       "readingIdentity": "Unique label/role inside unchanged place and exact ordered bindings; ambiguous duplicates or changed source scope start fresh.",
       "drawing": "Actual evidence, axes, gaps and future render immediately; no invented intermediate values."
+    },
+    "qualityReview": {
+      "reviewedOn": "2026-11-11",
+      "scorecard": "../UI-UX-QUALITY.md",
+      "targetMean": 9.5,
+      "baselineMean": 8.13,
+      "reviewMean": 8.67,
+      "status": "Active; target not achieved",
+      "controlContinuity": "Retained attention actions and day-scoped Story timelines; live Bloom action focus; hidden holds and overlays cancel.",
+      "actionHierarchy": "Direct report review, guided empty setup and retry-first recovery with disclosed removal.",
+      "nativeAccent": "Fluent native selections share Light #8c5b0f and Dark #e2a84b with approved semantic accent brushes.",
+      "limits": "Native input/render evidence does not qualify physical-device motion, screen-reader behavior or frame time."
     }
   },
   "components": [

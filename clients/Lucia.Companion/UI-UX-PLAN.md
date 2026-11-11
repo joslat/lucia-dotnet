@@ -93,6 +93,8 @@ These are implementation deliveries, not new server features. Existing working c
 
 ## Qualification and deferred decisions
 
+The owner renewed the app-only improvement goal on 11 November with a 9.5/10 mean target. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) owns the fixed scorecard, review trend and next qualification needs. Cycle 1 retains attention actions across report changes, adds direct attention/setup routes, clarifies recovery, fixes Story model/focus continuity and hardens hidden controls. Its implementation does not complete the scoring goal.
+
 Real-device touch feel, screen-reader behavior, safe areas, predictive Back, process death and measured frame time remain W6/Q gates. Headless frames and input establish bounded native behavior, not physical-device qualification.
 
 Connected historical Story/Week, richer conversation stages, Engine room and the member API port remain gated on v2 and their existing owner decisions. Local-time presentation remains an owner decision. The plan does not introduce an iOS launcher or claim iOS qualification.

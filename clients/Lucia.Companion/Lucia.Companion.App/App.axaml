@@ -44,7 +44,12 @@
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
-    <FluentTheme />
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Light" Accent="#8c5b0f" />
+        <ColorPaletteResources x:Key="Dark" Accent="#e2a84b" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
     <StyleInclude Source="avares://Lucia.Companion.App/Styles/Controls.axaml" />
   </Application.Styles>
 </Application>

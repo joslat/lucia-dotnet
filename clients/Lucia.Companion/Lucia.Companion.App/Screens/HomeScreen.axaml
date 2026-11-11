@@ -16,8 +16,16 @@
       <Border Name="HeaderDivider" Width="1" Margin="14,4" Background="{DynamicResource GraphLineBrush}" IsVisible="False" />
       <StackPanel Name="HeadlineBlock" Spacing="4">
         <TextBlock Name="HomeDate" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <Grid Name="HeadlineContent" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*" RowSpacing="4" ColumnSpacing="12">
         <TextBlock Name="AttentionHeadline" FontFamily="{DynamicResource DisplayFont}" FontWeight="Medium" TextWrapping="Wrap" />
-        <TextBlock Name="AttentionSummary" Classes="muted" FontSize="{DynamicResource TextSize14}" TextWrapping="Wrap" />
+        <TextBlock Name="AttentionSummary" Grid.Row="1" Classes="muted" FontSize="{DynamicResource TextSize14}" TextWrapping="Wrap" />
+        <Button Name="ReviewAttention" Grid.Row="2" Classes="link" HorizontalAlignment="Left" Padding="0,4" MinHeight="48">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock Text="Review reports" Foreground="{DynamicResource AccentBrush}" FontSize="{DynamicResource TextSize14}" VerticalAlignment="Center" />
+            <Path Data="M6,9 L12,15 18,9" Width="24" Height="24" Stretch="None" StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round" Stroke="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        </Grid>
       </StackPanel>
       <Border Name="DemoBadge" Background="{DynamicResource ControlBrush}" CornerRadius="16" Padding="12,8" VerticalAlignment="Top" HorizontalAlignment="Right">
         <StackPanel Orientation="Horizontal" Spacing="7">
@@ -35,9 +43,10 @@
           <StackPanel Spacing="10">
             <WrapPanel Name="PlacesHeading" ItemSpacing="14" LineSpacing="2">
               <TextBlock Text="Your places" Classes="section" />
-              <TextBlock Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="{DynamicResource TextSize13}" VerticalAlignment="Center" />
+              <TextBlock Name="PlacesInstruction" Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="{DynamicResource TextSize13}" VerticalAlignment="Center" />
             </WrapPanel>
             <c:HomeConstellation Name="Constellation" />
+            <Button Name="OpenEmptySetup" Content="Set up places" Classes="theme" HorizontalAlignment="Left" IsVisible="False" AutomationProperties.Name="Set up places in this home" />
           </StackPanel>
         </Border>
         <Border Name="TodayCard" Classes="panel" Padding="16">

@@ -43,16 +43,19 @@ public sealed partial class HomeConstellation : UserControl
         this.FindControl<ConstellationPanel>("Map")!.AnchorsChanged += this.FindControl<ConnectionLayer>("Links")!.SetAnchors;
         holdTimer.Tick += (_, _) =>
         {
+            if (!IsEffectivelyVisible) { EndHold(cancelled: true); return; }
             if (gesture.Tick(clock.Elapsed)) { holdTimer.Stop(); BeginHold(); }
             else if (gesture.State == HoldGestureState.Pending) { UpdateCharge(); }
             else { holdTimer.Stop(); }
         };
         AttachedToVisualTree += (_, _) => MotionSettings.Current.Changed += MotionChanged;
         DetachedFromVisualTree += (_, _) => { MotionSettings.Current.Changed -= MotionChanged; EndHold(cancelled: true); };
+        _ = new PresentationVisibility(this, () => { if (!IsEffectivelyVisible) { EndHold(cancelled: true); } });
     }
 
     public void SetHome(HomeTopology home)
     {
+        this.FindControl<TextBlock>("ConnectionGuide")!.IsVisible = home.Places.Count > 0;
         if (rebuilding) { pendingHome = home; return; }
         var order = DisplayOrder(home.Places).ToArray();
         if (SameLayout(order))
@@ -157,7 +160,7 @@ public sealed partial class HomeConstellation : UserControl
 
     private void OnOrbPressed(object? sender, PointerPressedEventArgs args)
     {
-        if (sender is not PlaceOrb orb || !args.GetCurrentPoint(orb).Properties.IsLeftButtonPressed) { return; }
+        if (!IsEffectivelyVisible || sender is not PlaceOrb orb || !args.GetCurrentPoint(orb).Properties.IsLeftButtonPressed) { return; }
         EndHold(cancelled: true);
         pressedOrb = orb;
         suppressClick = false;

@@ -165,6 +165,8 @@ public sealed class ConnectionScreenTests
             Assert.True(screen.FindControl<TextBlock>("GrantDetails")!.IsEffectivelyVisible);
             NativeCapture.Save(window, "connect-keyboard-expanded-grants.png");
             var disconnect = screen.FindControl<Button>("AskDisconnect")!;
+            screen.FindControl<Expander>("ConnectionOptions")!.IsExpanded = true;
+            window.UpdateLayout();
             disconnect.Focus();
             disconnect.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.Equal(screen.FindControl<Button>("KeepConnection"), window.FocusManager.GetFocusedElement());
@@ -177,6 +179,8 @@ public sealed class ConnectionScreenTests
             service.Restore = () => throw new CompanionConnectionException(ConnectionFailure.Transport);
             await state.InitializeAsync(TestContext.Current.CancellationToken);
             var forget = screen.FindControl<Button>("AskForget")!;
+            screen.FindControl<Expander>("ConnectionOptions")!.IsExpanded = true;
+            window.UpdateLayout();
             forget.Focus();
             forget.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             screen.FindControl<Button>("ConfirmRemoval")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));

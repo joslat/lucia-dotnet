@@ -32,6 +32,7 @@ public sealed partial class CompanionShell : UserControl
     private TopLevel? attachedTopLevel;
     private HomeCatalog? importCatalog;
     private bool refreshing;
+    private Control? setupInvoker;
     private readonly Func<Func<Core.HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public HomeProfileSession ProfileSession => profileSession;
     public ShellNavigation Navigation => this.FindControl<ShellNavigation>("NavigationBar")!;
@@ -60,6 +61,7 @@ public sealed partial class CompanionShell : UserControl
         Host.Content = home;
         Navigation.DestinationRequested += Navigate;
         home.StoryRequested += OpenStoryFor;
+        home.SetupRequested += OpenEditor;
         this.FindControl<Button>("RetrySaveButton")!.Click += (_, _) => profileSession.RetrySave();
         this.FindControl<Button>("ReviewSaveConflict")!.Click += async (_, _) => await OpenSaveConflictAsync();
         profileSession.Changed += RefreshStorageState;
@@ -130,6 +132,7 @@ public sealed partial class CompanionShell : UserControl
     private void OpenEditor()
     {
         if (profileSession.HasUnreadableProfile && !profileSession.CanReplaceUnreadableProfile) { return; }
+        setupInvoker = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
         var editor = new HomeEditorScreen(home.State.Home, home.State.SourceCatalog, importCatalog, sharedLayoutFactory);
         editor.ConnectionRequested += RequestConnection;
         if (profileSession.HasUnreadableProfile) { editor.WarnAboutReplacement(); }
@@ -141,6 +144,10 @@ public sealed partial class CompanionShell : UserControl
         };
         Host.Content = editor;
         RefreshStorageState();
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            if (ReferenceEquals(Host.Content, editor) && editor.IsEffectivelyVisible) { editor.FindControl<TextBox>("HomeNameInput")!.Focus(); }
+        }, Avalonia.Threading.DispatcherPriority.Loaded);
     }
 
     private async Task OpenSaveConflictAsync()
@@ -164,9 +171,20 @@ public sealed partial class CompanionShell : UserControl
 
     private void ShowHome()
     {
+        var returningFromSetup = Host.Content is HomeEditorScreen;
         Host.Content = home;
         Navigation.Select(ShellDestination.Home);
         RefreshStorageState();
+        if (returningFromSetup)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                if (!ReferenceEquals(Host.Content, home)) { return; }
+                if (setupInvoker is { IsEffectivelyVisible: true, IsEffectivelyEnabled: true }) { setupInvoker.Focus(); }
+                else { Navigation.ButtonFor(ShellDestination.Home).Focus(); }
+                setupInvoker = null;
+            }, Avalonia.Threading.DispatcherPriority.Loaded);
+        }
     }
 
     private void ShowStory()
@@ -239,6 +257,7 @@ public sealed partial class CompanionShell : UserControl
         Host.IsEnabled = !profileSession.IsLoading;
         Navigation.IsVisible = !editing && !reviewing;
         Navigation.IsEnabled = !profileSession.IsLoading;
+        home.SetSetupAvailable(!profileSession.IsLoading && (!profileSession.HasUnreadableProfile || profileSession.CanReplaceUnreadableProfile));
         more?.SetAvailability(
             canCustomize: !profileSession.IsLoading,
             canSetup: !profileSession.IsLoading && (!profileSession.HasUnreadableProfile || profileSession.CanReplaceUnreadableProfile),

@@ -23,7 +23,7 @@ public sealed partial class HomeScreen : UserControl
     private Place? renderedPlace;
     private DateTimeOffset? renderedReportTime;
     private DateTimeOffset? renderedPageReportTime;
-    private (bool Expanded, bool StackBadge)? headerLayout;
+    private (bool Expanded, bool StackBadge, bool InlineReview)? headerLayout;
     private bool actionsWereOpen;
     private bool detailWasOpen;
     private bool pointerInput;
@@ -33,6 +33,8 @@ public sealed partial class HomeScreen : UserControl
     public bool IsPageVisible => IsExpanded ? State.IsPageOpen : State.IsDetailOpen;
     /// <summary>For the shell to open Story on today: null for the whole home (Today so far, Whole home story), a place ID for Bloom's History.</summary>
     public event Action<string?>? StoryRequested;
+    public event Action? SetupRequested;
+    public void SetSetupAvailable(bool available) => this.FindControl<Button>("OpenEmptySetup")!.IsEnabled = available;
 
     public HomeScreen() : this(new HomeViewModel(SampleHome.Create())) { }
 
@@ -45,6 +47,13 @@ public sealed partial class HomeScreen : UserControl
         constellation.ActionsRequested += State.OpenActionsFor;
         constellation.PinRequested += id => { State.SelectPlace(id); State.TogglePin(); };
         this.FindControl<AttentionList>("Attention")!.PlaceInvoked += State.SelectPlace;
+        this.FindControl<Button>("OpenEmptySetup")!.Click += (_, _) => SetupRequested?.Invoke();
+        this.FindControl<Button>("ReviewAttention")!.Click += (_, _) =>
+        {
+            var list = this.FindControl<AttentionList>("Attention")!;
+            if (list.Rows.FirstOrDefault() is { } first) { first.BringIntoView(); first.Focus(); }
+        };
+        ContextHelp.Set(this.FindControl<Button>("ReviewAttention")!, "Go to Needs you and review the reports, most urgent first.");
         var page = this.FindControl<PlacePage>("PlacePage")!;
         page.BackRequested += () => { if (IsExpanded) { ClosePage(); } else { ReturnHome(); } };
         page.PinToggled += State.TogglePin;
@@ -75,6 +84,13 @@ public sealed partial class HomeScreen : UserControl
         var popup = this.FindControl<Popup>("ActionPopup")!;
         popup.Opened += (_, _) => Dispatcher.UIThread.Post(actions.FocusFirstAction, DispatcherPriority.Loaded);
         popup.Closed += (_, _) => { if (State.IsActionsOpen) { CloseActions(); } };
+        _ = new PresentationVisibility(this, () =>
+        {
+            if (IsEffectivelyVisible) { return; }
+            if (State.IsActionsOpen) { State.CloseActions(); }
+            popup.IsOpen = false;
+            this.FindControl<Border>("BloomShade")!.IsVisible = false;
+        });
 
         AttachedToVisualTree += (_, _) => { State.PropertyChanged += StateChanged; Refresh(); };
         DetachedFromVisualTree += (_, _) => { State.PropertyChanged -= StateChanged; popup.IsOpen = false; };
@@ -111,6 +127,8 @@ public sealed partial class HomeScreen : UserControl
             // Record first: rebuilding can raise events that refresh again, which must not rebuild a second time.
             renderedHome = State.Home;
             constellation.SetHome(State.Home);
+            this.FindControl<Button>("OpenEmptySetup")!.IsVisible = State.Home.Places.Count == 0;
+            this.FindControl<TextBlock>("PlacesInstruction")!.IsVisible = State.Home.Places.Count > 0;
             // Today so far needs history; only the demo has a (sample) day to show.
             this.FindControl<Border>("TodayCard")!.IsVisible = State.IsDemo;
             if (State.IsDemo) { this.FindControl<TodaySoFar>("TodaySoFar")!.SetDay(SampleStory.Day(State.Home, SampleStory.Today)); }
@@ -178,7 +196,7 @@ public sealed partial class HomeScreen : UserControl
                     popup.PlacementTarget = IsPageVisible
                         ? this.FindControl<PlacePage>("PlacePage")!.GetPlaceAnchor()
                         : constellation.GetPlaceAnchor(State.SelectedPlace?.Id);
-                    if (popup.PlacementTarget is not null && TopLevel.GetTopLevel(this) is not null)
+                    if (IsEffectivelyVisible && popup.PlacementTarget is not null && TopLevel.GetTopLevel(this) is not null)
                     {
                         actions.BeginSession(pointerInput, constellation.IsHolding);
                         actions.PlayOpening(MotionSettings.Current.IsEnabled);
@@ -203,7 +221,10 @@ public sealed partial class HomeScreen : UserControl
     private void RefreshHeader()
     {
         var attention = State.AttentionPlaces;
-        this.FindControl<TextBlock>("AttentionHeadline")!.Text = HomeAttention.Headline(attention.Count);
+        this.FindControl<TextBlock>("AttentionHeadline")!.Text = State.Home.Places.Count == 0 ? "Set up your home" : HomeAttention.Headline(attention.Count);
+        var review = this.FindControl<Button>("ReviewAttention")!;
+        review.IsVisible = attention.Count > 0;
+        AutomationProperties.SetName(review, $"Review Needs you, {attention.Count} {(attention.Count == 1 ? "place" : "places")}");
         this.FindControl<TextBlock>("AttentionSummary")!.Text = HomeAttention.Subline(attention.FirstOrDefault()?.Name, attention.Count, State.Home.Places.Count, State.IsDemo,
             State.Home.Places.Count(place => place.State == PlaceState.Quiet));
         var date = this.FindControl<TextBlock>("HomeDate")!;
@@ -233,8 +254,16 @@ public sealed partial class HomeScreen : UserControl
         var title = this.FindControl<TextBlock>("AttentionHeadline")!;
         var expanded = IsExpanded;
         var stacked = !expanded && Bounds.Width < 600 && name.FontSize > 32;
-        if (headerLayout == (expanded, stacked)) { return; }
-        headerLayout = (expanded, stacked);
+        var inlineReview = expanded && name.FontSize <= 32;
+        if (headerLayout == (expanded, stacked, inlineReview)) { return; }
+        headerLayout = (expanded, stacked, inlineReview);
+        var headlineContent = this.FindControl<Grid>("HeadlineContent")!;
+        headlineContent.ColumnDefinitions = new ColumnDefinitions(inlineReview ? "*,Auto" : "*");
+        headlineContent.RowDefinitions = new RowDefinitions(inlineReview ? "Auto,Auto" : "Auto,Auto,Auto");
+        var review = this.FindControl<Button>("ReviewAttention")!;
+        Grid.SetRow(review, inlineReview ? 0 : 2);
+        Grid.SetColumn(review, inlineReview ? 1 : 0);
+        Grid.SetRowSpan(review, inlineReview ? 2 : 1);
         var dateHome = expanded ? identity : headline;
         if (!ReferenceEquals(date.Parent, dateHome))
         {

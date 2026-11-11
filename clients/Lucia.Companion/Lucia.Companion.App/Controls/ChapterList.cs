@@ -12,14 +12,16 @@ namespace Lucia.Companion.App.Controls;
 public sealed class ChapterList : UserControl
 {
     private string renderedKey = "";
+    private StoryViewModel? renderedState;
     private readonly StackPanel chapters = new() { Spacing = 8 };
     public ChapterList() => Content = chapters;
 
     public void SetState(StoryViewModel state)
     {
         var key = state.SelectedPlaceId + ":" + string.Join("|", state.VisibleChapters.Select(chapter => chapter.Id));
-        if (renderedKey != key || chapters.Children.Count == 0)
+        if (!ReferenceEquals(renderedState, state) || renderedKey != key || chapters.Children.Count == 0)
         {
+            renderedState = state;
             renderedKey = key;
             chapters.Children.Clear();
             if (state.VisibleChapters.Count == 0)

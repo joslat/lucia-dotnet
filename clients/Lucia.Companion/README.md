@@ -1,6 +1,6 @@
 # Lucia Companion (experimental)
 
-For the current implementation boundary and continuation tasks, read [START-HERE.md](START-HERE.md) and [BUILD-PLAN.md](BUILD-PLAN.md). Updated 10 November 2026. The app-only design track is delivered; server work waits for the upstream v2 member API. Installed-device qualification and the full application remain unfinished.
+For the current implementation boundary and continuation tasks, read [START-HERE.md](START-HERE.md) and [BUILD-PLAN.md](BUILD-PLAN.md). Updated 11 November 2026. The app-only design baseline is delivered; the iterative UI/UX quality goal is active. Server work waits for the upstream v2 member API. Installed-device qualification and the full application remain unfinished.
 
 Native Avalonia client for the Constellation mobile/tablet design. Connection uses HTTPS with protected storage on Windows and Android; owners approve exact read grants in the dashboard. Connected Home reads authorized source reports, imports selected places through a reviewed draft, and saves local configuration. Owners configure shared presentation in the dashboard; native clients review their permitted view, recheck it and deliberately adopt it into local setup. Lucia now shows attributed requests, reported lifecycle, bounded topics and qualified current target areas. Home/setup and Story Day/Week also remain available as an explicitly selected synthetic demo. Production Story/Week, Engine room and release qualification are unfinished. The companion itself issues no model calls or physical actions. Phone uses a bottom navigation bar and tablet a left rail with Home, Story, Lucia and More. The demo control workbench is under More, then Control lab.
 
@@ -11,6 +11,8 @@ Holding a place now shows a charge ring before Bloom unfolds its four actions fr
 Read [ARCHITECTURE.md](ARCHITECTURE.md) for project responsibilities, entry points, the design-to-control map and ownership of input, animation, persistence and service access. The shared UI is in `Lucia.Companion.App`; `Lucia.Companion.Desktop` and `Lucia.Companion.Android` are its platform launchers.
 
 [UI-UX-PLAN.md](UI-UX-PLAN.md) formalizes the screen hierarchy, loading/ready/empty/stale/recovery states and motion contract. Its app-only presentation baseline is implemented. Matching reading rows stay in place and show new values immediately with a brief update emphasis. Actual async work drives shared progress feedback; reduced motion uses static dots. Connection stages, verified Home readiness and place-page opening have one short position settle that ordinary refreshes do not replay. Charts retain truthful values, gaps and sample labels throughout.
+
+[UI-UX-QUALITY.md](UI-UX-QUALITY.md) records the active 9.5/10 quality target and the independent review trend. Attention buttons now survive healthy report updates, Review reports reaches Needs you directly, and empty Home opens the existing setup flow. Recovery leads with retry and discloses removal choices. Story chapters use the visible day's model; report selection and live Bloom text changes retain focus. Native appearance controls share the approved accent.
 
 ## Smallest shared architecture
 
