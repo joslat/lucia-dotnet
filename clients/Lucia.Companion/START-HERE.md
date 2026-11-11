@@ -22,7 +22,7 @@ The app-only Reduce motion follow-up is implemented on 10 November. Desktop and 
 - Waits for the upstream v2 branch (`feat/personal-assistant-harness-api`, identity and the `/api/me` app API): porting pairing, sessions and reads onto v2; W4 Story on real history (T02–T05); Bloom's Ask Lucia and richer Lucia stages; the V05 Engine room.
 - Do not change server code, pairing, sessions, grants or migrations until v2 settles, and do not build on v2 yet.
 
-**Working setup.** .NET SDK 10.0.403 (master's `global.json`) and the Android workload. Run builds and tests one at a time on low-memory machines. Test-first, one class per file, and the impeccable skill before any UI change (see `AGENTS.md`).
+**Working setup.** The desktop demo needs .NET SDK 10.0.403 or a compatible later SDK allowed by `global.json`. Android builds additionally need the Android workload, SDK and JDK. Run builds and tests one at a time on low-memory machines. Test-first, one class per file, and the impeccable skill before any UI change (see `AGENTS.md`). For a backend-free preview, run `dotnet run --project clients/Lucia.Companion/Lucia.Companion.Desktop` from the repository root and choose Explore the demo. First-time package restore may need internet access.
 
 The 25 October handoff below remains the record of the server-side history prerequisite.
 

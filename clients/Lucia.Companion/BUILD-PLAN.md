@@ -4,11 +4,11 @@
 
 The owner requested iterative UI/UX improvement and dynamic verification against six fixed axes. Cycle 12 corrects Android accessible text replacement and real input focus. Native verification passes 907/910 with 3 existing opt-in skips. Installed Android passes 31 editing checks plus native validation, busy-status and Bloom focus checks. The fixed six-axis reviewed mean is 9.50/10. The app-only quality target is achieved. Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
 
-Cycle 11 adds the requested soft panel assembly and repairs native busy/validation semantics. The full native suite passes 907/910 with 3 existing skips and 10 new cases. Installed Android verifies focused error descriptions, retained validation, nonnumeric busy status and integrated motion/lifecycle behavior. Reviewed mean 9.38; the fixed 9.5 goal remains active.
+The previous cycle 11 checkpoint added soft panel assembly and repaired native busy/validation semantics. Its reviewed mean was 9.38. Cycle 12 above is the current checkpoint and completes the adopted app-only quality target.
 
 The owner has no physical device available and requested simulation. Continue app-only runtime interaction assessment now; hardware touch, TalkBack, predictive Back and frame timing remain deferred gates. The server/v2 hold remains in force. No review score or passing test count completes the full application or authorizes server changes.
 
-UX12 through UX18 are delivered in the reviewed app-only scope. UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
+UX12 through UX19 are delivered in the reviewed app-only scope, including native text replacement and input focus. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
 
 ## UI and UX refinement, 11 November 2026
 

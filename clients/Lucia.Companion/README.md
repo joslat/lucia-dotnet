@@ -1,6 +1,6 @@
 # Lucia Companion (experimental)
 
-For the current implementation boundary and continuation tasks, read [START-HERE.md](START-HERE.md) and [BUILD-PLAN.md](BUILD-PLAN.md). Updated 11 November 2026. The app-only design baseline is delivered; the iterative UI/UX quality goal is active. Server work waits for the upstream v2 member API. Installed-device qualification and the full application remain unfinished.
+For the current implementation boundary and continuation tasks, read [START-HERE.md](START-HERE.md) and [BUILD-PLAN.md](BUILD-PLAN.md). Updated 11 November 2026. The app-only UI/UX refinement is complete in the reviewed scope. Server work waits for the upstream v2 member API. Installed-device qualification and the full application remain unfinished.
 
 Native Avalonia client for the Constellation mobile/tablet design. Connection uses HTTPS with protected storage on Windows and Android; owners approve exact read grants in the dashboard. Connected Home reads authorized source reports, imports selected places through a reviewed draft, and saves local configuration. Owners configure shared presentation in the dashboard; native clients review their permitted view, recheck it and deliberately adopt it into local setup. Lucia now shows attributed requests, reported lifecycle, bounded topics and qualified current target areas. Home/setup and Story Day/Week also remain available as an explicitly selected synthetic demo. Production Story/Week, Engine room and release qualification are unfinished. The companion itself issues no model calls or physical actions. Phone uses a bottom navigation bar and tablet a left rail with Home, Story, Lucia and More. The demo control workbench is under More, then Control lab.
 
@@ -12,7 +12,7 @@ Read [ARCHITECTURE.md](ARCHITECTURE.md) for project responsibilities, entry poin
 
 [UI-UX-PLAN.md](UI-UX-PLAN.md) formalizes the screen hierarchy, loading/ready/empty/stale/recovery states and motion contract. Its app-only presentation baseline is implemented. Matching reading rows stay in place and show new values immediately with a brief update emphasis. Actual async work drives shared progress feedback; reduced motion uses static dots. Connection stages, verified Home readiness and place-page opening have one short position settle that ordinary refreshes do not replay. Charts retain truthful values, gaps and sample labels throughout.
 
-[UI-UX-QUALITY.md](UI-UX-QUALITY.md) records the active 9.5/10 quality target and the independent review trend. Attention buttons now survive healthy report updates, Review reports reaches Needs you directly, and empty Home opens the existing setup flow. Recovery leads with retry and discloses removal choices. Story chapters use the visible day's model; report selection and live Bloom text changes retain focus. Native appearance controls share the approved accent. Place-page Back restores the overview scroll position and invoker; disabling motion settles an active screen fade immediately. A keyboard-aware root viewport keeps setup commands above the IME. Android native context requests cannot stack a second menu during a Bloom hold.
+[UI-UX-QUALITY.md](UI-UX-QUALITY.md) records the adopted 9.5/10 app-only assessment, both independent ratings and the review trend. Attention buttons now survive healthy report updates, Review reports reaches Needs you directly, and empty Home opens the existing setup flow. Recovery leads with retry and discloses removal choices. Story chapters use the visible day's model; report selection and live Bloom text changes retain focus. Native appearance controls share the approved accent. Place-page Back restores the overview scroll position and invoker; disabling motion settles an active screen fade immediately. A keyboard-aware root viewport keeps setup commands above the IME. Android native context requests cannot stack a second menu during a Bloom hold.
 
 The owner deferred physical checks and requested simulation. Cycle 12 corrects Android accessible text replacement and real input focus. Native verification passes 907/910 with 3 existing opt-in skips. Installed Android passes 31 editing checks plus native validation, busy-status and Bloom focus checks. The fixed six-axis reviewed mean is 9.50/10. The app-only quality target is achieved. Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
 
@@ -33,13 +33,15 @@ Phone and tablet share state and controls. Layout follows available width, inclu
 
 ## Run and verify
 
-From the repository root, with .NET 10:
+From the repository root, with .NET SDK 10.0.403 or a compatible later SDK allowed by `global.json`:
 
 ```powershell
 dotnet run --project clients/Lucia.Companion/Lucia.Companion.Desktop
 dotnet test clients/Lucia.Companion/Lucia.Companion.Tests
 dotnet build clients/Lucia.Companion/Lucia.Companion.slnx
 ```
+
+For a quick preview, run only the first command and choose **Explore the demo** on the opening screen. This uses built-in synthetic data and needs no Lucia backend, Home Assistant instance, pairing or model. The desktop demo needs no Android workload or Xcode. The first build may download NuGet packages; after restoring dependencies, `dotnet run --no-restore --project clients/Lucia.Companion/Lucia.Companion.Desktop` runs the demo without a restore step.
 
 Choose Explore the demo explicitly to open sample observations. Click/tap an orb or use Tab and Enter/Space to select them. Phone opens the place's full page; tablet keeps details beside the graph, with Detail opening the same page. The demo page adds a labelled sample chart and the place's sample story entries. Place actions, or holding a place, opens named Bloom shortcuts: Open (the place page), History (Story filtered to the place), Pin and Close. While holding, slide to an action and release; slide out to cancel. Context menus offer the same actions. The bottom bar on phone, or the left rail on tablet, switches between Home, Story, Lucia and More. More offers Appearance (System, Light and Dark), Customize Home, Home setup, Connection and the Control lab. All demo readings and task stages are synthetic. More, then Connection returns to connection management without discarding the demo session.
 
