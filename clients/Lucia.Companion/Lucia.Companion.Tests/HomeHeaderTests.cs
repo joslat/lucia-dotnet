@@ -39,6 +39,7 @@ public sealed class HomeHeaderTests
             Assert.Equal("Offline demo", home.FindControl<TextBlock>("HomeModeLabel")!.Text);
             Assert.False(home.FindControl<Control>("LiveDot")!.IsVisible);
             Assert.Contains("Synthetic", home.FindControl<TextBlock>("SourceNotice")!.Text, StringComparison.Ordinal);
+            Assert.Contains("Hold", home.FindControl<TextBlock>("PlacesInstruction")!.Text, StringComparison.OrdinalIgnoreCase);
             var name = home.FindControl<TextBlock>("HomeName")!;
             var headline = home.FindControl<TextBlock>("AttentionHeadline")!;
             var namePoint = name.TranslatePoint(default, home)!.Value;

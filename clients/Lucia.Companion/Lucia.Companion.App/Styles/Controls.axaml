@@ -13,7 +13,7 @@
       <Setter Property="HorizontalContentAlignment" Value="Center" />
       <Setter Property="Template">
         <ControlTemplate>
-          <Border Name="FocusBorder" CornerRadius="12" BorderThickness="2" BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
+          <Border Name="FocusBorder" Background="Transparent" CornerRadius="12" BorderThickness="2" BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
             <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
               <Grid Name="Orb" Width="72" Height="72">
                   <Ellipse Name="StateRing" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2" />

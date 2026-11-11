@@ -23,7 +23,8 @@ public sealed partial class HomeConstellation : UserControl
     /// <summary>A place was held long enough to open Bloom; the pointer is still down and may slide to an action.</summary>
     public event Action<string>? HoldStarted;
     public event Action<PointerEventArgs>? HoldMoved;
-    public event Action<PointerReleasedEventArgs>? HoldReleased;
+    /// <summary>The release and whether it moved beyond the press-origin tolerance, so opening under a finger is not a choice.</summary>
+    public event Action<PointerReleasedEventArgs, bool>? HoldReleased;
     /// <summary>A hold ended without a release on the place: capture was lost or the places were rebuilt.</summary>
     public event Action? HoldCancelled;
     /// <summary>How long a press must last before it opens Bloom. Shorter presses stay taps.</summary>
@@ -32,7 +33,9 @@ public sealed partial class HomeConstellation : UserControl
     private readonly DispatcherTimer holdTimer = new();
     private readonly System.Diagnostics.Stopwatch clock = System.Diagnostics.Stopwatch.StartNew();
     public bool IsHolding => gesture.State == HoldGestureState.Holding;
+    public bool IsSliding => gesture.IsSliding;
     private PlaceOrb? pressedOrb;
+    private TopLevel? gestureRoot;
     private bool suppressClick;
     private bool rebuilding;
     private HomeTopology? pendingHome;
@@ -167,10 +170,13 @@ public sealed partial class HomeConstellation : UserControl
     private void OnOrbPressed(object? sender, PointerPressedEventArgs args)
     {
         if (!IsEffectivelyVisible || sender is not PlaceOrb orb || !args.GetCurrentPoint(orb).Properties.IsLeftButtonPressed) { return; }
+        var root = TopLevel.GetTopLevel(this);
+        if (root is null) { return; }
         EndHold(cancelled: true);
+        gestureRoot = root;
         pressedOrb = orb;
         suppressClick = false;
-        var point = args.GetPosition(this);
+        var point = args.GetPosition(root);
         gesture = new HoldGesture(HoldDelay < TimeSpan.Zero ? TimeSpan.Zero : HoldDelay, slop: 10);
         gesture.Press(point.X, point.Y, clock.Elapsed);
         if (gesture.Tick(clock.Elapsed)) { BeginHold(); return; }
@@ -181,15 +187,19 @@ public sealed partial class HomeConstellation : UserControl
 
     private void OnOrbMoved(object? sender, PointerEventArgs args)
     {
+        if (gesture.State == HoldGestureState.Idle) { return; }
+        if (gestureRoot is null || !ReferenceEquals(gestureRoot, TopLevel.GetTopLevel(this))) { EndHold(cancelled: true); return; }
         if (gesture.State == HoldGestureState.Holding)
         {
+            var position = args.GetPosition(gestureRoot);
+            gesture.Move(position.X, position.Y);
             // On touch, an ancestor scroll viewer would otherwise take the pointer mid-slide and cancel the hold.
             args.PreventGestureRecognition();
             HoldMoved?.Invoke(args);
             args.Handled = true;
             return;
         }
-        var point = args.GetPosition(this);
+        var point = args.GetPosition(gestureRoot);
         if (gesture.State == HoldGestureState.Pending && !gesture.Move(point.X, point.Y))
         {
             holdTimer.Stop();
@@ -199,18 +209,26 @@ public sealed partial class HomeConstellation : UserControl
 
     private void OnOrbReleased(object? sender, PointerReleasedEventArgs args)
     {
+        if (gestureRoot is not null && !ReferenceEquals(gestureRoot, TopLevel.GetTopLevel(this))) { EndHold(cancelled: true); return; }
         holdTimer.Stop();
         if (pressedOrb is not null) { pressedOrb.HoldProgress = 0; }
         pressedOrb = null;
+        if (gestureRoot is not null)
+        {
+            var position = args.GetPosition(gestureRoot);
+            gesture.Move(position.X, position.Y);
+        }
+        var wasSliding = gesture.IsSliding;
+        gestureRoot = null;
         if (gesture.Release() != HoldGestureState.Holding) { return; }
         // The orb raises Click after this release only if the pointer is still over it; clear the suppression after that.
         Dispatcher.UIThread.Post(() => suppressClick = false, DispatcherPriority.Input);
-        HoldReleased?.Invoke(args);
+        HoldReleased?.Invoke(args, wasSliding);
     }
 
     private void BeginHold()
     {
-        if (pressedOrb?.Tag is not string id) { gesture.Release(); return; }
+        if (pressedOrb?.Tag is not string id) { gesture.Release(); gestureRoot = null; return; }
         pressedOrb.HoldProgress = 0;
         suppressClick = true;
         HoldStarted?.Invoke(id);
@@ -221,6 +239,7 @@ public sealed partial class HomeConstellation : UserControl
         holdTimer.Stop();
         if (pressedOrb is not null) { pressedOrb.HoldProgress = 0; }
         pressedOrb = null;
+        gestureRoot = null;
         var wasHolding = gesture.Release() == HoldGestureState.Holding;
         if (!wasHolding) { suppressClick = false; return; }
         // A release may still reach the orb after a lost capture; keep it from also counting as a tap until then.

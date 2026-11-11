@@ -674,3 +674,10 @@ Independent review confirms 9.07 on the fixed six dimensions. All 781 native cas
 Removal names the selected place and reveals its question and both choices above the fixed editor commands. Keep place receives safe initial focus. Keep/Back return to the visible initiating action; confirmation returns to the remaining-place selector or Add place. Selected-place removal returns Home to an explicit overview heading or empty setup action; surviving-place continuity remains.
 
 Twenty new cases cover the actual disclosure boundary, draft-only behavior, last place, deferred interruptions, overview anchors and a nonzero retained reading offset. Full native verification passes 801/804 with 3 existing opt-in skips. Android builds with zero warnings/errors and the actual APK confirms the changed flow. Independent installed review mean 9.12; the fixed 9.5 goal remains active. UX13 restores the approved on-screen hold guidance. Simulation does not qualify physical touch, TalkBack speech or hardware frame timing.
+
+
+## Quality cycle 7, 11 November 2026
+
+Your places restores the approved instruction, "Tap for readings. Hold for actions." Empty Home omits it. The full place target accepts input. The enlarged action list stays open on a stationary lift; a deliberate slide may invoke its named destination, and returning to the origin cancels slide intent. Stable window coordinates prevent a layout shift from becoming false movement. Existing charge, unfold/fold timing, named equivalents and idle protection remain.
+
+Fifteen new native cases cover gaps, padding, normal/doubled text, stationary lift, deliberate slide, return to origin and layout movement. Full verification passes 816/819 with 3 existing opt-in skips. Android builds with zero warnings/errors; the installed APK confirms hold, release and deliberate named actions. Actual Windows input checks gap-click selection, delayed Story help and Day/Week keyboard navigation. The confirmed mean is 9.13. UX14 will preserve selected-place context while editing lower setup. Physical touch, TalkBack speech and hardware frame timing remain deferred.

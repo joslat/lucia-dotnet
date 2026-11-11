@@ -21,6 +21,8 @@ public sealed class HoldGesture
     }
 
     public HoldGestureState State { get; private set; }
+    /// <summary>A held pointer is beyond the press-origin tolerance. Returning to that origin cancels slide selection.</summary>
+    public bool IsSliding { get; private set; }
     /// <summary>Elapsed hold charge, independent of animation frames. Cancel and release return it to zero.</summary>
     public double Progress(TimeSpan at) => State switch
     {
@@ -33,13 +35,16 @@ public sealed class HoldGesture
     {
         (startX, startY, pressedAt) = (x, y, at);
         State = HoldGestureState.Pending;
+        IsSliding = false;
     }
 
     /// <summary>Returns false when the movement cancelled a pending hold.</summary>
     public bool Move(double x, double y)
     {
-        if (State != HoldGestureState.Pending) { return State == HoldGestureState.Holding; }
-        if (Math.Sqrt(Math.Pow(x - startX, 2) + Math.Pow(y - startY, 2)) <= slop) { return true; }
+        var distance = (x - startX) * (x - startX) + (y - startY) * (y - startY);
+        if (State == HoldGestureState.Holding) { IsSliding = distance > slop * slop; return true; }
+        if (State != HoldGestureState.Pending) { return false; }
+        if (distance <= slop * slop) { return true; }
         State = HoldGestureState.Idle;
         return false;
     }
@@ -57,6 +62,7 @@ public sealed class HoldGesture
     {
         var ended = State;
         State = HoldGestureState.Idle;
+        IsSliding = false;
         return ended;
     }
 }

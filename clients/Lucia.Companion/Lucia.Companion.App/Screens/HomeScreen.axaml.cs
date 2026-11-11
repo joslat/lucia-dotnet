@@ -83,14 +83,14 @@ public sealed partial class HomeScreen : UserControl
         constellation.HoldStarted += id => { RememberPlaceInvoker(id); pointerInput = true; actions.SetHoldActive(true); State.OpenActionsFor(id); };
         constellation.HoldMoved += args =>
         {
-            if (this.FindControl<Popup>("ActionPopup")!.IsOpen) { actions.Arm(actions.ActionAt(args.GetPosition(actions))); }
+            if (this.FindControl<Popup>("ActionPopup")!.IsOpen) { actions.Arm(constellation.IsSliding ? actions.ActionAt(args.GetPosition(actions)) : null); }
         };
         constellation.HoldCancelled += () => { actions.SetHoldActive(false); actions.Arm(null); };
-        constellation.HoldReleased += args =>
+        constellation.HoldReleased += (args, wasSliding) =>
         {
             actions.SetHoldActive(false);
             actions.Arm(null);
-            if (!State.IsActionsOpen) { return; }
+            if (!State.IsActionsOpen || !wasSliding) { return; }
             var point = args.GetPosition(actions);
             if (actions.ActionAt(point) is { } action) { Invoke(action, fromSlide: true); }
             else if (actions.IsOutside(point)) { CloseActions(); }

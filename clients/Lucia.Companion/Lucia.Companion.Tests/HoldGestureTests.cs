@@ -8,6 +8,28 @@ public sealed class HoldGestureTests
     private static readonly TimeSpan Hold = TimeSpan.FromMilliseconds(450);
 
     [Fact]
+    public void SlideSelectionRequiresLeavingThePressToleranceAndCancelsOnReturn()
+    {
+        var gesture = new HoldGesture(Hold, slop: 10);
+        gesture.Press(100, 100, TimeSpan.Zero); gesture.Move(106, 106);
+        Assert.False(gesture.IsSliding); gesture.Tick(Hold);
+        gesture.Move(107, 107); Assert.False(gesture.IsSliding);
+        gesture.Move(111, 100); Assert.True(gesture.IsSliding);
+        gesture.Move(100, 100); Assert.False(gesture.IsSliding);
+        Assert.Equal(HoldGestureState.Holding, gesture.Release()); Assert.False(gesture.IsSliding);
+    }
+
+    [Fact]
+    public void ANewPressAndCanceledPendingMovementDoNotCarrySlideSelection()
+    {
+        var gesture = new HoldGesture(Hold, slop: 10);
+        gesture.Press(0, 0, TimeSpan.Zero); gesture.Tick(Hold); gesture.Move(50, 0);
+        Assert.True(gesture.IsSliding); gesture.Release(); Assert.False(gesture.IsSliding);
+        gesture.Press(0, 0, TimeSpan.Zero); gesture.Move(50, 0);
+        Assert.Equal(HoldGestureState.Idle, gesture.State); Assert.False(gesture.IsSliding);
+    }
+
+    [Fact]
     public void ChargeTracksThePendingHoldAndClearsWhenScrollingCancelsIt()
     {
         var gesture = new HoldGesture(Hold, slop: 10);

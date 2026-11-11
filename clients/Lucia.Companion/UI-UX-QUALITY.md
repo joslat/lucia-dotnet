@@ -6,15 +6,15 @@ Updated 11 November 2026. The owner requested autonomous improvement, dynamic ve
 
 These are reviewer judgments, supported by evidence, rather than benchmark measurements. Keep the same six dimensions and equal weighting between reviews. Do not add a high-scoring dimension to raise the mean, treat a passing test count as a design score, or round a result below 9.5 up to the target.
 
-| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Evidence and remaining limit |
-|---|---:|---:|---:|---:|---:|---:|---:|---|
-| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | Measured height keeps compact navigation reachable; concise recovery retains task space |
-| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | Visible mode-specific Story guidance and valid page state after setup removal |
-| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | Complete named disclosure, visible safe actions and valid Home return; surviving reading offset retained |
-| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | Existing native controls, Constellation layout, palette and mapped type remain |
-| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
-| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | Guarded focus, wrapped mapped text and named native controls; TalkBack speech remains deferred |
-| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **Target not achieved** |
+| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Cycle 7 | Evidence and remaining limit |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | Measured height keeps compact navigation reachable; concise recovery retains task space |
+| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | 9.3 | Visible mode-specific Story guidance and valid page state after setup removal |
+| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | 9.4 | Full place target, safe stationary release and deliberate named actions confirmed; lower setup context remains next |
+| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | 9.0 | Approved visible hold guidance restored; native Constellation palette, type and authored controls retained |
+| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
+| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | 9.1 | Guarded focus, wrapped mapped text and named native controls; TalkBack speech remains deferred |
+| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **9.13** | **Target not achieved** |
 
 The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Cycle 3 initially scored 8.95; its confirmation review scored 9.05 after enlarged Week and rail defects were corrected. Test counts do not automatically earn points. A subsequent review must justify any increase.
 
@@ -28,7 +28,7 @@ Dynamic verification covers real headless native input and rendered frames. It i
 
 Cycle-1 final verification passed 712 native cases with 3 existing opt-in wire skips and no failures, including 35 new cases. Android builds with zero warnings/errors. A further eight-case check uses actual Tab navigation to reach setup and verifies its target is in view on phone/tablet, both themes and normal/doubled text. The combined native capture review confirmed the final empty/setup, recovery and accent states. The initial full run found a tablet viewport regression from the new shortcut; placing it beside the headline fixed the regression without weakening that check.
 
-The 16.7 ms frame budget at 60 Hz remains a measurement target. Headless execution does not establish hardware latency, GPU frame pacing or Android touch capture. The Windows automation helper was unavailable; no desktop window was driven through it. Native screenshots are native renders, not physical-device evidence.
+The 16.7 ms frame budget at 60 Hz remains a measurement target. Headless execution does not establish hardware latency, GPU frame pacing or Android touch capture. At that checkpoint the Windows automation helper was unavailable. Cycle 7 later records actual Windows input checks. Native screenshots are native renders, not physical-device evidence.
 
 ## Cycle 2 and Android simulation
 
@@ -101,3 +101,13 @@ UX12 resolves the installed disclosure and return-context findings. The editor r
 When setup removes Home's selected place, the shell requests an explicit overview heading or empty setup anchor. A surviving place retains its page and reading offset. Twenty new cases cover viewport-bottom input, both widths/text sizes, Keep/Back, last place, draft-only behavior and interrupted deferred work. The initial full run found that the new continuity fixture did not actually overflow; its shortened viewport now requires a nonzero reading offset. Final native verification passes 801/804 with 3 existing opt-in skips. Android builds without warnings/errors and installed confirmation is retained in the local ledger.
 
 The independent installed review mean is 9.12; test counts earn no credit. UX13 is a separate design-discovery improvement: restore the approved hold instruction beside Your places. The 9.5 target remains active. Physical touch, TalkBack speech and hardware frame timing remain deferred at the owner's request.
+
+## Cycle 7 and first-use hold actions
+
+UX13 restores "Tap for readings. Hold for actions." Tests and installed first-use input exposed dead spacing/padding inside place targets and accidental action selection on a stationary lift. A transparent template backdrop fixes the hit area. Slide intent now requires movement beyond the existing tolerance and clears on return to origin. All gesture samples use the captured TopLevel, so reflow cannot create false intent. A root change cancels. The current 450 ms hold, one-second pointer-idle fold and protected large-text/keyboard reading remain.
+
+Test-first failures cover four dead hit areas, two stationary-release cases and a layout-shift case. Fifteen new cases bring the final suite to 816/819 with 3 existing opt-in skips. Android builds with zero warnings/errors. The final APK at doubled system text opens the menu at the observed stationary center, leaves it open after lift, opens Living room on deliberate input and exposes the same actions through Place actions. The exact synthetic profile and settings are restored. The popup appears twice under hierarchy ancestors; the evidence helper now accepts only identical full-attribute duplicates. This helper correction is separate from the product fixes.
+
+Actual Windows checks use a fresh window after intervening owner input. A gap click selects Living room, delayed Story help appears, Tab reaches Week, Space switches mode and Escape returns Home. Earlier owner clicks are excluded from the automated pass record. Cursor styling remains a source/native assertion; the pointer marker is not a measurement of Windows cursor shape.
+
+Independent source/capture and installed confirmation retain UI 9.0, UX 9.3, usability 9.4, fidelity 9.0, motion 9.0 and accessibility 9.1, mean 9.13. The visible approved instruction raises fidelity; test counts add no points. UX14 will retain selected-place context and chooser access during lower setup. The 9.5 target stays active. Physical touch, TalkBack speech and hardware frame timing remain owner-deferred.

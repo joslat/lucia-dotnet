@@ -46,7 +46,7 @@
           <StackPanel Spacing="10">
             <WrapPanel Name="PlacesHeading" ItemSpacing="14" LineSpacing="2">
               <TextBlock Name="PlacesTitle" Text="Your places" Classes="section" Focusable="True" />
-              <TextBlock Name="PlacesInstruction" Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="{DynamicResource TextSize13}" VerticalAlignment="Center" />
+              <TextBlock Name="PlacesInstruction" Text="Tap for readings. Hold for actions." Classes="muted" FontSize="{DynamicResource TextSize13}" VerticalAlignment="Center" />
             </WrapPanel>
             <c:HomeConstellation Name="Constellation" />
             <Button Name="OpenEmptySetup" Content="Set up places" Classes="theme" HorizontalAlignment="Left" IsVisible="False" AutomationProperties.Name="Set up places in this home" />

@@ -6,9 +6,9 @@ Updated 11 November 2026. Read the current UI/UX refinement section and "Directi
 
 **What is next.**
 
-The active [UI/UX quality goal](UI-UX-QUALITY.md) targets a 9.5/10 mean on six fixed dimensions. Cycle 6 completes UX12: visible named removal choices, guarded focus handoffs and a clear overview anchor after selected-place removal. The installed confirmation mean is 9.12; keep the goal active. UX13 will restore the approved hold instruction beside Your places. The owner requested simulation and deferred physical checks.
+The active [UI/UX quality goal](UI-UX-QUALITY.md) targets a 9.5/10 mean on six fixed dimensions. Cycle 7 delivers UX13, complete place hit targets and deliberate Bloom slide selection. The installed confirmation mean is 9.13; keep the goal active. UX14 will retain selected-place context and chooser access in lower setup. The owner requested simulation and deferred physical checks.
 
-Current native verification passes 801/804, with 3 existing opt-in wire skips and 20 new cases. Android and installed results are in the private cycle-6 ledger. The suite requires a nonzero retained reading offset; disclosure checks never scroll the newly revealed choices from test code. Earlier checkpoints remain historical evidence.
+Current native verification passes 816/819, with 3 existing opt-in wire skips and 15 new cases. Real Windows pointer, delayed hover help and Tab/Space/Escape checks now supplement the installed Android confirmation. The private cycle-7 ledger records source, test-first failures, exact APK and restored synthetic profile. Earlier checkpoints remain historical evidence.
 
 The next assessment should exercise pending-operation feedback, navigation/value-change motion and compact-window journeys, then fix observed problems under the same scorecard. Cycle 3's design and technical confirmation findings are resolved. Do not repeat completed findings or manufacture the remaining score.
 
@@ -97,4 +97,4 @@ Private design exports, analysis, screenshots and TRX files remain outside this 
 
 No real household access, physical controls, secrets, paid/cloud resources, model downloads, messages to people or release publication are authorized. Use synthetic data and isolated loopback hosts. Only the dedicated test emulator may be used for a bounded check; shut it down afterward. Real device, TalkBack, safe-area, installed successful networking/lifecycle, performance and Mac/Xcode/iOS/signing/distribution gates remain genuinely open. The legacy offline heartbeat stays paused.
 
-UX12 is delivered and confirmed in native input and the installed emulator. UX13 restores the approved Home hold guidance without changing the interaction contract. Mean 9.12; physical accessibility and frame timing remain deferred and the 9.5 target stays active.
+UX12 and UX13 are delivered. UX14 is next: keep selected-place identity and the existing chooser available while editing lower bindings, preserving draft validation and safe focus. Mean 9.13; physical accessibility and frame timing remain deferred and the 9.5 target stays active.

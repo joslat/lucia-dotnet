@@ -99,6 +99,7 @@ public sealed class HomeScreenTests
             Dispatcher.UIThread.RunJobs();
             var orbs = view.GetVisualDescendants().OfType<PlaceOrb>().ToArray();
             Assert.Equal(count, orbs.Length);
+            Assert.Equal(count > 0, view.FindControl<TextBlock>("PlacesInstruction")!.IsVisible);
             Assert.All(orbs, orb => Assert.True(double.IsFinite(orb.Bounds.Y) && orb.Bounds.Height >= 48));
             var sorted = orbs.OrderBy(orb => orb.Bounds.Y).ThenBy(orb => orb.Bounds.X).ToArray();
             Assert.Equal(count, sorted.Select(orb => orb.Bounds.Position).Distinct().Count());
