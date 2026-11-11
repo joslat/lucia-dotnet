@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
@@ -16,6 +17,24 @@ namespace Lucia.Companion.Tests;
 public sealed class ShellNavigationTests
 {
     private static readonly ShellDestination[] Order = [ShellDestination.Home, ShellDestination.Story, ShellDestination.Lucia, ShellDestination.More];
+
+    [AvaloniaTheory]
+    [InlineData(ShellDestination.Home)]
+    [InlineData(ShellDestination.Story)]
+    [InlineData(ShellDestination.Lucia)]
+    [InlineData(ShellDestination.More)]
+    public void TheCurrentDestinationIsIdentifiedInItsPortableAccessibleName(ShellDestination selected)
+    {
+        var navigation = new ShellNavigation();
+        navigation.Select(selected);
+        foreach (var destination in Order)
+        {
+            var button = navigation.ButtonFor(destination);
+            var peer = ControlAutomationPeer.CreatePeerForElement(button)!;
+            Assert.Equal(destination == selected ? $"{destination}, current page" : destination.ToString(), peer.GetName());
+            Assert.Equal(destination.ToString(), ((StackPanel)button.Content!).Children.OfType<TextBlock>().Single().Text);
+        }
+    }
 
     [AvaloniaTheory]
     [InlineData(390, 844, false)]

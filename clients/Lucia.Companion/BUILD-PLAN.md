@@ -2,13 +2,13 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. Current installed review mean 9.23; the target remains open.
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. Current reviewed mean 9.17; the target remains open.
 
-Cycle 9 delivers UX15: explicit History entry reveals today and the active place; ordinary Story-tab return preserves reading position. Day/Week totals follow the selected place, with present Home attention explicitly qualified. Native 877/880, 3 existing skips and 24 new cases; installed APK confirmed. Mean 9.23, fixed 9.5 target active.
+Cycle 10 removes truncated attention causes, keeps focus across Home reflow, reflows the enlarged Today heading and identifies the current destination in its accessible name. Native 897/900, 3 existing skips and 20 new cases; the complete-unfold capture supplement also passes. Matched UI/fidelity review scores 9.5/9.5. The fixed six-axis mean is 9.17; the 9.5 goal remains active.
 
 The owner has no physical device available and requested simulation. Continue app-only runtime interaction assessment now; hardware touch, TalkBack, predictive Back and frame timing remain deferred gates. The server/v2 hold remains in force. No review score or passing test count completes the full application or authorizes server changes.
 
-UX12 through UX15 are delivered. UX16 will compare current primary screens with their approved references, inspect finer current motion frames and assess accessibility identity, focus, selection descriptions and error announcements. Use evidence to justify further changes and scores; accepted truth/adaptive choices are not fidelity defects.
+UX12 through UX15 are delivered. Cycle 10 records UX16 comparison, motion samples and native accessibility observations. UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
 
 ## UI and UX refinement, 11 November 2026
 

@@ -135,3 +135,15 @@ UX15 will reveal today's header and the active place on explicit History entry. 
 Cycle 9 delivers UX15: explicit History entry reveals today and the active place; ordinary Story-tab return preserves reading position. Day/Week totals follow the selected place, with present Home attention explicitly qualified. Native 877/880, 3 existing skips and 24 new cases; installed APK confirmed. Mean 9.23, fixed 9.5 target active. Eight initial entry/filter failures and two lifecycle failures were reproduced before their fixes. The scope review then found whole-home totals presented beside an empty place history; test-first checks now require filtered report/request totals and explicit current Home attention. The key-helper diagnostic proves that the raw headless helper drains Loaded before delivering F1, so the pending-boundary test uses a synchronous routed key event and makes that narrower claim.
 
 UX16 will compare current primary screens with their approved references, inspect finer current motion frames and assess accessibility identity, focus, selection descriptions and error announcements. Use evidence to justify further changes and scores; accepted truth/adaptive choices are not fidelity defects. Produce a matched current-build inventory for Home, place, Bloom, Story and More across normal/enlarged and compact/expanded layouts. Record every reference adaptation and any actual discrepancy. Capture enough intermediate frames to inspect entry, reversal, value emphasis and interruption. For accessibility, distinguish repeated XML paths from distinct native nodes, verify focus/selection and error events, and qualify traversal separately from node presence. Preserve the fixed scorecard. Physical touch comfort, hardware timing and human first-use understanding remain separate limits.
+
+<!-- cycle10-checkpoint:start -->
+
+## UX16 observations and UX17 next
+
+Cycle 10 removes truncated attention causes, keeps focus across Home reflow, reflows the enlarged Today heading and identifies the current destination in its accessible name. Native 897/900, 3 existing skips and 20 new cases; the complete-unfold capture supplement also passes. Matched UI/fidelity review scores 9.5/9.5. The fixed six-axis mean is 9.17; the 9.5 goal remains active.
+
+Installed Debug instrumentation confirms one native Bloom identity per action, all four accessibility-focus actions and matching event sources, and portable current-page wording. It also confirms two P2 gaps: indeterminate progress exposes a 0?100 child range; the visible validation explanation has no native error relationship or field description. Content-change events are observed, without a spoken-delivery claim. Direct evidence corrects the earlier accessibility estimate to8.0. The complete probe succeeds and temporary service state/profile are restored.
+
+UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
+
+<!-- cycle10-checkpoint:end -->

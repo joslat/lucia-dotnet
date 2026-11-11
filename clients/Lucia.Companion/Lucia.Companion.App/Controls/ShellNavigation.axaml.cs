@@ -62,6 +62,8 @@ public sealed partial class ShellNavigation : UserControl
             var selected = item == destination;
             button.Classes.Set("selected", selected);
             AutomationProperties.SetItemStatus(button, selected ? "Current page" : null);
+            // Android's native provider does not expose ItemStatus. Keep current location in the portable name too.
+            AutomationProperties.SetName(button, selected ? $"{item}, current page" : item.ToString());
         }
     }
 

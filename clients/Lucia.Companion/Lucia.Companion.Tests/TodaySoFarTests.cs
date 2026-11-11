@@ -4,6 +4,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Lucia.Companion.App;
 using Lucia.Companion.App.Controls;
 using Lucia.Companion.App.Screens;
@@ -15,6 +16,31 @@ namespace Lucia.Companion.Tests;
 
 public sealed class TodaySoFarTests
 {
+    [AvaloniaTheory]
+    [InlineData(300, false)]
+    [InlineData(300, true)]
+    [InlineData(358, false)]
+    [InlineData(358, true)]
+    public void TheStoryActionLeavesWholeWordsReadableInTheHeading(int width, bool large)
+    {
+        CompanionTypography.Apply(size => size * (large ? 2 : 1));
+        var today = new TodaySoFar();
+        var window = new Window { Width = width, Height = 420, Content = today };
+        try
+        {
+            window.Show(); Dispatcher.UIThread.RunJobs();
+            var heading = today.GetVisualDescendants().OfType<TextBlock>().Single(text => text.Text == "Today so far");
+            var words = heading.Text!;
+            foreach (var line in heading.TextLayout.TextLines.SkipLast(1))
+            {
+                var end = line.FirstTextSourceIndex + line.Length;
+                Assert.True(end > 0 && (char.IsWhiteSpace(words[end - 1]) || end < words.Length && char.IsWhiteSpace(words[end])), "The heading splits a word to make room for Open story.");
+            }
+            NativeCapture.Save(window, $"today-readable-{width}-{large}.png");
+        }
+        finally { CompanionTypography.Apply(size => size); window.Close(); }
+    }
+
     [AvaloniaTheory]
     [InlineData(390, 844, false)]
     [InlineData(390, 844, true)]

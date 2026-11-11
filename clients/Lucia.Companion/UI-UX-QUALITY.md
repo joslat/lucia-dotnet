@@ -6,15 +6,15 @@ Updated 11 November 2026. The owner requested autonomous improvement, dynamic ve
 
 These are reviewer judgments, supported by evidence, rather than benchmark measurements. Keep the same six dimensions and equal weighting between reviews. Do not add a high-scoring dimension to raise the mean, treat a passing test count as a design score, or round a result below 9.5 up to the target.
 
-| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Cycle 7 | Cycle 8 | Cycle 9 | Evidence and remaining limit |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.2 | 9.2 | Bounded expanded editing avoids the blank master column; compact context stays visible |
-| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | 9.3 | 9.4 | 9.5 | Explicit History orientation and preserved ordinary tab reading; active filters revealed horizontally |
-| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | 9.4 | 9.5 | 9.5 | Scoped historical totals and explicit current Home attention remove place/whole-home ambiguity |
-| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | 9.0 | 9.0 | 9.0 | No outstanding mismatch established; matched current-screen reference review is next, with accepted adaptations recorded |
-| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
-| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | 9.1 | 9.2 | 9.2 | Native selection and management focus survive reflow; enlarged names and keyboard-reduced viewports verified |
-| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **9.13** | **9.22** | **9.23** | **Target not achieved** |
+| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Cycle 7 | Cycle 8 | Cycle 9 | Cycle 10 | Evidence and remaining limit |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.2 | 9.2 | 9.5 | Complete attention causes and whole Today heading words at enlarged text; retained responsive composition |
+| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | 9.3 | 9.4 | 9.5 | 9.5 | Explicit History orientation and ordinary tab reading retained; current destination named portably |
+| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | 9.4 | 9.5 | 9.5 | 9.5 | Scoped totals and retained native actions; qualified input and recovery journeys |
+| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | 9.0 | 9.0 | 9.0 | 9.5 | Matched Home/place/Bloom/Story inventory; native, truth and enlarged-text adaptations documented |
+| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 139 current software frames support finite settling and reversal; integrated Android lifecycle evidence remains open |
+| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | 9.1 | 9.2 | 9.2 | 8.0 | Four native focus actions pass; indeterminate range and missing validation relationship are confirmed P2 gaps |
+| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **9.13** | **9.22** | **9.23** | **9.17** | **Target not achieved; direct native evidence corrects the earlier accessibility estimate** |
 
 The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Cycle 3 initially scored 8.95; its confirmation review scored 9.05 after enlarged Week and rail defects were corrected. Test counts do not automatically earn points. A subsequent review must justify any increase.
 
@@ -133,3 +133,21 @@ The baseline records eight failures and two passing tab-continuity cases. Hide/d
 Android builds with zero warnings/errors. The installed record proves post-entry Today/Utility visibility, matching lower-reader anchor bounds/readout after ordinary tab return, All places after whole-home entry, and filtered Day/Week scope at enlarged tablet text. Deep scrolling is automatically asserted. The older-day precondition comes from the recorded PreviousDate input/native journey, not an absent date label in the deep XML. The immediate Tab menu probe is excluded; the passing case allows 350 ms opening focus to settle, sends Tab, observes the menu, then taps History. Exact original profile and display settings are restored and the owned emulator is closed.
 
 Confirmed mean 9.23. UX16 addresses evidence gaps before inventing another UI change. Current reviews identify no further material UI/reference defect; accepted truth/adaptive choices are not fidelity failures or a permanent score ceiling. Matched composition, finer motion and direct accessibility assessment will support the next calibration. No current-build Windows, physical touch, spoken TalkBack, hardware frame-budget or human-study claim is added. Goal active at the fixed 9.5 target.
+
+<!-- cycle10-checkpoint:start -->
+
+## Cycle 10, readable causes and native qualification
+
+Cycle 10 removes truncated attention causes, keeps focus across Home reflow, reflows the enlarged Today heading and identifies the current destination in its accessible name. Native 897/900, 3 existing skips and 20 new cases; the complete-unfold capture supplement also passes. Matched UI/fidelity review scores 9.5/9.5. The fixed six-axis mean is 9.17; the 9.5 goal remains active.
+
+Attention explanations wrap without a line cap. Home retains unmoved sections and restores displaced, visible focus immediately after reflow. Today moves Open story to another line when necessary. The portable current-page name supplements ItemStatus because Android does not expose that property.
+
+The opt-in Debug probe compares AccessibilityNodeInfo equality, requests accessibility focus, matches event sources and restores its own service flags. Invalid draft setup is explicitly seeded on the UI thread and verified in the native tree before Save. This qualifies subsequent validation feedback, not native text replacement. Busy-control sampling uses a labelled synthetic fixture. Failed probe preconditions and cleanup assumptions remain in the evidence ledger.
+
+Installed Debug instrumentation confirms one native Bloom identity per action, all four accessibility-focus actions and matching event sources, and portable current-page wording. It also confirms two P2 gaps: indeterminate progress exposes a 0?100 child range; the visible validation explanation has no native error relationship or field description. Content-change events are observed, without a spoken-delivery claim. Direct evidence corrects the earlier accessibility estimate to8.0. The complete probe succeeds and temporary service state/profile are restored.
+
+Thirteen native sequences contain 139 measured frames. PNG encoding occurs after each complete interaction. Capture overhead and isolated-control sampling prevent hardware or complete Android lifecycle claims. The offline viewer supports original timestamps, stepping and explicit playback.
+
+UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
+
+<!-- cycle10-checkpoint:end -->

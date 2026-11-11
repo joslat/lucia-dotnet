@@ -695,3 +695,11 @@ Thirty-seven new cases cover context, draft continuity, validation, responsive f
 History and Whole home story are explicit entries into today's context. They reveal the day and selected filter, while ordinary Story-tab return retains the current date, filter and reading position. Filter reveal moves only the horizontal strip. Native input and lifecycle guards prevent an obsolete entry from taking focus or resetting a later reader. Counts follow the selected historical place; current Home attention is named separately.
 
 Twenty-four new cases bring the complete native suite to 877/880 with the same 3 opt-in skips. Installed phone/expanded enlarged-text checks confirm entry, observed tab continuity and scoped Day/Week summaries. The build has zero warnings/errors. Independent confirmed mean 9.23; the fixed 9.5 target remains active. UX16 will compare current primary screens with their approved references, inspect finer current motion frames and assess accessibility identity, focus, selection descriptions and error announcements. Use evidence to justify further changes and scores; accepted truth/adaptive choices are not fidelity defects. Software evidence does not qualify physical comfort, TalkBack speech or hardware frame timing.
+
+<!-- cycle10-checkpoint:start -->
+
+## Current composition and readable causes
+
+The matched primary-screen review retains Constellation type, material, geometry and navigation with documented native, truth and accessible adaptations. Essential attention causes wrap completely. Today preserves whole heading words by moving its action below when needed. Focus and native actions retain their identity through responsive Home composition. UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
+
+<!-- cycle10-checkpoint:end -->

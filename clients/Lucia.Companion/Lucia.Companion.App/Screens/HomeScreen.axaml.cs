@@ -174,7 +174,7 @@ public sealed partial class HomeScreen : UserControl
         grid.ColumnSpacing = IsExpanded ? 16 : 0;
         var side = this.FindControl<StackPanel>("SidePanel")!;
         var main = this.FindControl<StackPanel>("MainPanel")!;
-        ArrangeSections(main, side);
+        var movedFocus = ArrangeSections(main, side);
         this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.SetOrder(State.SectionOrder);
         side.IsVisible = IsExpanded;
         this.FindControl<Border>("DesktopDetailCard")!.IsVisible = IsExpanded && State.SelectedPlace is not null;
@@ -245,6 +245,8 @@ public sealed partial class HomeScreen : UserControl
 
         actionsWereOpen = State.IsActionsOpen;
         detailWasOpen = pageOpen;
+        if (movedFocus is { IsEffectivelyVisible: true } && TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is null)
+        { movedFocus.Focus(); }
     }
 
     private void RefreshHeader()
@@ -338,7 +340,7 @@ public sealed partial class HomeScreen : UserControl
         }
     }
 
-    private void ArrangeSections(StackPanel main, StackPanel side)
+    private Control? ArrangeSections(StackPanel main, StackPanel side)
     {
         var sections = State.SectionOrder.Select(section => this.FindControl<Border>(section switch
         {
@@ -353,11 +355,23 @@ public sealed partial class HomeScreen : UserControl
         Control[] mainOrder = IsExpanded ? [sections[0], secondaryMain]
             : sections.SelectMany(section => ReferenceEquals(section, places) ? new Control[] { section, today } : [section]).ToArray();
         Control[] sideOrder = IsExpanded ? [sections.Single(section => !mainOrder.Contains(section)), today, detail] : [detail];
-        if (main.Children.SequenceEqual(mainOrder) && side.Children.SequenceEqual(sideOrder)) { return; }
-        main.Children.Clear();
-        side.Children.Clear();
-        main.Children.AddRange(mainOrder);
-        side.Children.AddRange(sideOrder);
+        if (main.Children.SequenceEqual(mainOrder) && side.Children.SequenceEqual(sideOrder)) { return null; }
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
+        foreach (var child in main.Children.Where(child => !mainOrder.Contains(child)).ToArray()) { main.Children.Remove(child); }
+        foreach (var child in side.Children.Where(child => !sideOrder.Contains(child)).ToArray()) { side.Children.Remove(child); }
+        PutInOrder(main, mainOrder);
+        PutInOrder(side, sideOrder);
+        return focused is not null && this.IsVisualAncestorOf(focused) ? focused : null;
+
+        static void PutInOrder(StackPanel panel, Control[] order)
+        {
+            for (var index = 0; index < order.Length; index++)
+            {
+                var current = panel.Children.IndexOf(order[index]);
+                if (current < 0) { panel.Children.Insert(index, order[index]); }
+                else if (current != index) { panel.Children.Move(current, index); }
+            }
+        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs args)

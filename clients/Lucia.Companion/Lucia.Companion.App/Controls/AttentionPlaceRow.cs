@@ -17,7 +17,7 @@ internal sealed class AttentionPlaceRow : Button
     private readonly Ellipse ring = new() { StrokeThickness = 1 };
     private readonly Path stateIcon = new() { Width = 24, Height = 24, Stretch = Stretch.None, StrokeThickness = 1.7, StrokeLineCap = PenLineCap.Round, StrokeJoin = PenLineJoin.Round };
     private readonly TextBlock kindText = new() { FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap, [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13") };
-    private readonly TextBlock reasonText = new() { TextWrapping = TextWrapping.Wrap, MaxLines = 3, TextTrimming = TextTrimming.CharacterEllipsis };
+    private readonly TextBlock reasonText = new() { TextWrapping = TextWrapping.Wrap };
     private readonly TextBlock readingText = new() { Classes = { "muted" }, [!TextBlock.FontSizeProperty] = new DynamicResourceExtension("TextSize13") };
 
     public AttentionPlaceRow(Action<string> invoked)
