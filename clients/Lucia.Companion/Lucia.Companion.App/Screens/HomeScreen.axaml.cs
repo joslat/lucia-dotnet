@@ -429,6 +429,27 @@ public sealed partial class HomeScreen : UserControl
 
     private void RememberPlaceInvoker(string id) => pageInvoker = this.FindControl<HomeConstellation>("Constellation")!.Orbs.FirstOrDefault(orb => Equals(orb.Tag, id));
 
+    /// <summary>Setup removed the selected place. Its old page/invoker no longer supplies a useful return position.</summary>
+    public void RevealOverviewAfterRemoval()
+    {
+        if (!IsEffectivelyVisible || IsPageVisible || State.SelectedPlace is not null) { return; }
+        pageNavigationVersion++;
+        pageInvoker = null;
+        overviewOffset = default;
+        this.FindControl<ScrollViewer>("HomeScroll")!.Offset = default;
+        this.FindControl<ScrollViewer>("ContextScroll")!.Offset = default;
+        Control target = State.Home.Places.Count == 0 ? this.FindControl<Button>("OpenEmptySetup")!
+            : this.FindControl<TextBlock>("PlacesTitle")!;
+        target.Focus();
+        TopLevel.GetTopLevel(this)?.UpdateLayout();
+        foreach (var scroll in target.GetVisualAncestors().OfType<ScrollViewer>()
+            .Where(item => item.VerticalScrollBarVisibility != ScrollBarVisibility.Disabled))
+        {
+            if (scroll.Content is Visual content && target.TranslatePoint(default, content) is { } point)
+            { scroll.Offset = new Vector(scroll.Offset.X, point.Y); }
+        }
+    }
+
     private void RestoreOverview(bool restoreFocus)
     {
         var version = ++pageNavigationVersion;

@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.App.Controls;
 using Lucia.Companion.Core;
@@ -15,6 +16,7 @@ public sealed partial class HomeEditorScreen : UserControl
     private readonly IReadOnlyList<ObservationSource> sources;
     private string? selectedId;
     private bool filling;
+    private int removalFocusVersion;
     private readonly Func<Func<HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public event Action<HomeTopology>? SaveRequested;
     public event Action? CancelRequested;
@@ -57,12 +59,16 @@ public sealed partial class HomeEditorScreen : UserControl
         };
         this.FindControl<Button>("MoveEarlier")!.Click += (_, _) => Move(-1);
         this.FindControl<Button>("MoveLater")!.Click += (_, _) => Move(1);
-        this.FindControl<Button>("RemovePlace")!.Click += (_, _) => this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible = true;
-        this.FindControl<Button>("KeepPlace")!.Click += (_, _) => this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible = false;
+        this.FindControl<Button>("RemovePlace")!.Click += (_, _) => ShowRemovalQuestion();
+        this.FindControl<Button>("KeepPlace")!.Click += (_, _) => DismissRemovalQuestion();
         this.FindControl<Button>("ConfirmRemove")!.Click += (_, _) =>
         {
             if (selectedId is null) { return; }
-            RunEdit(() => { draft.RemovePlace(selectedId); RebuildList(draft.Places.FirstOrDefault()?.Id); });
+            if (!RunEdit(() => { draft.RemovePlace(selectedId); RebuildList(draft.Places.FirstOrDefault()?.Id); })) { return; }
+            var target = selectedId is null ? this.FindControl<Button>("AddPlace")!
+                : this.FindControl<ComboBox>("PlaceChooser")!.IsVisible ? (Control)this.FindControl<ComboBox>("PlaceChooser")!
+                : (Control)this.FindControl<ListBox>("PlacesList")!.SelectedItem!;
+            QueueRemovalFocus(target, target, questionVisible: false);
         };
         this.FindControl<Button>("SaveHome")!.Click += (_, _) =>
         {
@@ -70,15 +76,17 @@ public sealed partial class HomeEditorScreen : UserControl
             RunEdit(() =>
             {
                 draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty);
+                removalFocusVersion++;
                 SaveRequested?.Invoke(draft.Build());
             });
         };
-        this.FindControl<Button>("CancelEdit")!.Click += (_, _) => CancelRequested?.Invoke();
+        this.FindControl<Button>("CancelEdit")!.Click += (_, _) => { removalFocusVersion++; CancelRequested?.Invoke(); };
         this.FindControl<Button>("StayInSetup")!.Click += (_, _) => ShowDiscardQuestion(false);
-        this.FindControl<Button>("DiscardEdits")!.Click += (_, _) => CancelRequested?.Invoke();
+        this.FindControl<Button>("DiscardEdits")!.Click += (_, _) => { removalFocusVersion++; CancelRequested?.Invoke(); };
         KeyDown += (_, args) => { if (args.Key == Key.Escape) { RequestBack(); args.Handled = true; } };
         SizeChanged += (_, _) => Adapt();
-        DetachedFromVisualTree += (_, _) => InvalidateSharedLayout();
+        DetachedFromVisualTree += (_, _) => { removalFocusVersion++; InvalidateSharedLayout(); };
+        _ = new PresentationVisibility(this, () => { if (!IsEffectivelyVisible) { removalFocusVersion++; } });
         RebuildList(draft.Places.FirstOrDefault()?.Id);
     }
 
@@ -89,18 +97,57 @@ public sealed partial class HomeEditorScreen : UserControl
         var removal = this.FindControl<StackPanel>("RemovalConfirmation")!;
         if (removal.IsVisible)
         {
-            removal.IsVisible = false;
-            this.FindControl<Button>("RemovePlace")!.Focus();
+            DismissRemovalQuestion();
             return;
         }
         if (this.FindControl<Border>("DiscardConfirmation")!.IsVisible) { ShowDiscardQuestion(false); return; }
         if (HasPendingChanges()) { ShowDiscardQuestion(true); }
-        else { CancelRequested?.Invoke(); }
+        else { removalFocusVersion++; CancelRequested?.Invoke(); }
     }
 
     public void InvalidateSharedLayout()
     {
         if (this.FindControl<ContentControl>("ImportHost")!.Content is HomeSharedLayoutScreen review) { review.Controller.Invalidate(); }
+    }
+
+    private void ShowRemovalQuestion()
+    {
+        var place = draft.Places.FirstOrDefault(item => item.Id == selectedId);
+        if (place is null) { return; }
+        var question = this.FindControl<StackPanel>("RemovalConfirmation")!;
+        this.FindControl<TextBlock>("RemovalQuestion")!.Text =
+            $"Remove {place.Name}, its connections and observation bindings from the draft? Save setup applies the change.";
+        question.IsVisible = true;
+        QueueRemovalFocus(this.FindControl<Button>("KeepPlace")!, question, questionVisible: true);
+    }
+
+    private void DismissRemovalQuestion()
+    {
+        this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible = false;
+        var remove = this.FindControl<Button>("RemovePlace")!;
+        QueueRemovalFocus(remove, remove, questionVisible: false);
+    }
+
+    private void QueueRemovalFocus(Control target, Control reveal, bool questionVisible)
+    {
+        var version = ++removalFocusVersion;
+        var placeId = selectedId;
+        var expectedFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (version != removalFocusVersion || TopLevel.GetTopLevel(this) is not { } top
+                || !IsEffectivelyVisible || selectedId != placeId
+                || this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible != questionVisible
+                || this.FindControl<ContentControl>("ImportHost")!.IsVisible
+                || this.FindControl<Border>("DiscardConfirmation")!.IsVisible
+                || !target.IsEffectivelyVisible || !target.IsEffectivelyEnabled) { return; }
+            var current = top.FocusManager?.GetFocusedElement();
+            if (!ReferenceEquals(current, expectedFocus) && !ReferenceEquals(current, target)
+                && current is Control { IsEffectivelyVisible: true, IsEffectivelyEnabled: true }) { return; }
+            reveal.BringIntoView();
+            target.Focus();
+            target.BringIntoView();
+        }, DispatcherPriority.Loaded);
     }
 
     private void OpenSharedSetup()
@@ -128,6 +175,8 @@ public sealed partial class HomeEditorScreen : UserControl
     private void OpenImport(HomeCatalog catalog)
     {
         if (!TryApplyCurrent() || !RunEdit(() => draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty))) { return; }
+        removalFocusVersion++;
+        this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible = false;
         var import = new HomeImportScreen(draft.Build(), catalog);
         import.CancelRequested += CloseImport;
         import.ApplyRequested += plan =>
@@ -229,6 +278,7 @@ public sealed partial class HomeEditorScreen : UserControl
 
     private void Populate(string? id)
     {
+        removalFocusVersion++;
         selectedId = id;
         var place = draft.Places.FirstOrDefault(candidate => candidate.Id == id);
         this.FindControl<Border>("PlaceFormCard")!.IsVisible = place is not null;

@@ -6,15 +6,15 @@ Updated 11 November 2026. The owner requested autonomous improvement, dynamic ve
 
 These are reviewer judgments, supported by evidence, rather than benchmark measurements. Keep the same six dimensions and equal weighting between reviews. Do not add a high-scoring dimension to raise the mean, treat a passing test count as a design score, or round a result below 9.5 up to the target.
 
-| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Evidence and remaining limit |
-|---|---:|---:|---:|---:|---:|---:|---|
-| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | Measured height keeps compact navigation reachable; concise recovery retains task space |
-| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | Visible mode-specific Story guidance and valid page state after setup removal |
-| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | Removed place closes its page; retained place keeps it. Confirmation visibility is the UX12 runtime follow-up |
-| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | Existing native controls, Constellation layout, palette and mapped type remain |
-| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
-| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | Visible wrapped guidance supplements named input; disclosure focus remains UX12 and TalkBack speech is deferred |
-| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **Target not achieved** |
+| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Evidence and remaining limit |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | Measured height keeps compact navigation reachable; concise recovery retains task space |
+| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | Visible mode-specific Story guidance and valid page state after setup removal |
+| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | Complete named disclosure, visible safe actions and valid Home return; surviving reading offset retained |
+| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | Existing native controls, Constellation layout, palette and mapped type remain |
+| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | Actual emulator recording establishes finite charge/unfold/action/Back/fold sequence, not hardware frame pacing |
+| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | Guarded focus, wrapped mapped text and named native controls; TalkBack speech remains deferred |
+| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **Target not achieved** |
 
 The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Cycle 3 initially scored 8.95; its confirmation review scored 9.05 after enlarged Week and rail defects were corrected. Test counts do not automatically earn points. A subsequent review must justify any increase.
 
@@ -93,3 +93,11 @@ Test-first verification covers removed and retained selections in the view model
 The current APK is also exercised through Home, place detail, Story, Week, a selected day, system Back and setup removal in the isolated emulator. The original synthetic profile is restored after the removal check. This runtime walkthrough exposed a further P2: Remove place reveals its confirmation below the fixed editor commands and requires another scroll. UX12 tracks disclosure visibility and focus. The earlier cycle-3 motion recording remains historical evidence. No physical touch feel, TalkBack speech or hardware frame budget is inferred. The 9.5 target remains active.
 
 The initial cycle-5 source/capture review scored 9.12. The final installed review scored 9.07 after observing two further P2 issues. UX12 will reveal the removal question and both choices above the command bar, focus Keep place, restore focus safely after dismissal or confirmation, and anchor Home explicitly when its selected place disappears. A surviving selected place keeps its existing page and scroll continuity.
+
+## Cycle 6 and setup orientation
+
+UX12 resolves the installed disclosure and return-context findings. The editor reveals the named question and both actions, focuses Keep place and restores visible focus after dismissal or confirmation. Its deferred work rechecks selection, visibility, disclosure state and current focus, and invalidates on context changes. Confirmation changes only the draft; Save setup remains a separate action.
+
+When setup removes Home's selected place, the shell requests an explicit overview heading or empty setup anchor. A surviving place retains its page and reading offset. Twenty new cases cover viewport-bottom input, both widths/text sizes, Keep/Back, last place, draft-only behavior and interrupted deferred work. The initial full run found that the new continuity fixture did not actually overflow; its shortened viewport now requires a nonzero reading offset. Final native verification passes 801/804 with 3 existing opt-in skips. Android builds without warnings/errors and installed confirmation is retained in the local ledger.
+
+The independent installed review mean is 9.12; test counts earn no credit. UX13 is a separate design-discovery improvement: restore the approved hold instruction beside Your places. The 9.5 target remains active. Physical touch, TalkBack speech and hardware frame timing remain deferred at the owner's request.

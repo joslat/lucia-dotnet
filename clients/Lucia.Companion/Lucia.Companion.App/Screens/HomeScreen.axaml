@@ -45,7 +45,7 @@
         <Border Name="PlacesCard" Classes="panel" Padding="12">
           <StackPanel Spacing="10">
             <WrapPanel Name="PlacesHeading" ItemSpacing="14" LineSpacing="2">
-              <TextBlock Text="Your places" Classes="section" />
+              <TextBlock Name="PlacesTitle" Text="Your places" Classes="section" Focusable="True" />
               <TextBlock Name="PlacesInstruction" Text="Tap a place for readings. Use Place actions to pin it." Classes="muted" FontSize="{DynamicResource TextSize13}" VerticalAlignment="Center" />
             </WrapPanel>
             <c:HomeConstellation Name="Constellation" />

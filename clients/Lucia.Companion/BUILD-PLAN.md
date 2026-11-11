@@ -2,13 +2,13 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. Confirmed means are 8.13, 8.67, 8.87, 9.05, 9.07 and 9.07; the target remains open.
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. The current installed review mean is 9.12; the target remains open.
 
-Cycles 1 and 2 deliver continuity, guided routes, recovery, interrupted motion, Android policy, keyboard layout and Bloom menu corrections. Cycle 3 adds reason-first Home, contextual storage with complete queued-save state, local completed-outcome confirmation, retry focus, correct Week semantics and enlarged-text Week/rail reflow. Cycle 4 adds measured-height navigation fallback, a 150 ms save-only notice delay and concise recovery with wrapping named actions. Cycle 5 adds visible Day/Week guidance and closes a full page when setup removes its selected place. Final native verification passes 781/784 with the same 3 opt-in skips and 10 new cases. Android and installed-emulator results are recorded in the private ledger.
+Cycles 1 through 5 deliver continuity, recovery, interrupted motion, Android policy/IME, enlarged layouts, truthful save feedback and Story guidance. Cycle 6 completes visible removal confirmation, safe focus and selected-place return orientation. Final native verification passes 801/804 with the same 3 opt-in skips and 20 new cases. Android and installed-emulator results are recorded in the private ledger.
 
 The owner has no physical device available and requested simulation. Continue app-only runtime interaction assessment now; hardware touch, TalkBack, predictive Back and frame timing remain deferred gates. The server/v2 hold remains in force. No review score or passing test count completes the full application or authorizes server changes.
 
-UX12 is the next app-only fix batch from installed cycle-5 evidence: reveal the removal question and choices within the editor viewport, focus Keep place, restore visible focus on dismissal/confirmation, and return Home to an explicit overview anchor when its selected place disappears. Preserve existing page and scroll continuity when that place survives. The installed review supersedes the initial 9.12 source/capture score with 9.07.
+UX12 is delivered from the installed cycle-5 findings. It reveals the named question and both choices, focuses Keep place, restores visible focus and anchors Home after its selected place disappears. Surviving-place page/scroll continuity remains. UX13 is next: restore the approved visible hold instruction beside Your places. No additional motion or folding-policy change is required.
 
 ## UI and UX refinement, 11 November 2026
 

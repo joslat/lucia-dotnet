@@ -122,3 +122,8 @@ Persistent local-save problems show a concise summary and a named Details toggle
 
 
 `HomeViewModel.ReplaceHome` retains the selected place by ID and keeps its detail/page/actions open only while that place remains. Removing it clears all three presentation flags. Story's visible interaction hint follows the actual Day/Week mode and supplements native slider, named row and chapter input.
+
+
+Editor removal owns a versioned Loaded focus handoff. It rechecks presentation, selected ID, disclosure/import/discard state and intervening focus. Selection rebuilds, import, save/cancel, ancestor hide and detach invalidate pending work. Opening focuses Keep place while revealing the question and both actions; Keep/Back return to Remove; Confirm changes only the draft and reveals the remaining-place selector or Add place. No text field receives focus merely because a place was removed.
+
+Before applying setup, the shell captures Home's selected place ID. Only its removal requests a new overview anchor. The guarded return discards the invalid invoker and offsets, then focuses Your places or the empty setup action through each active scroll ancestor. A surviving selection keeps the existing page and reading position.

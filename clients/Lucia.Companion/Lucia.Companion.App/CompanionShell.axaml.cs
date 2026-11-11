@@ -190,8 +190,9 @@ public sealed partial class CompanionShell : UserControl
         editor.SaveRequested += updated =>
         {
             var previousConfirmation = profileSession.ConfirmationVersion;
+            var selectedId = home.State.SelectedPlace?.Id;
             profileSession.ApplySetup(updated, replaceUnreadableProfile: profileSession.HasUnreadableProfile);
-            ShowHome();
+            ShowHome(revealOverview: selectedId is not null && updated.Places.All(place => place.Id != selectedId));
             if (!profileSession.IsSaving && profileSession.ConfirmationVersion > previousConfirmation)
             { home.SetSaveFeedback(profileSession.ConfirmationText); }
         };
@@ -224,7 +225,9 @@ public sealed partial class CompanionShell : UserControl
         review.FindControl<TextBlock>("ReviewTitle")!.Focus();
     }
 
-    private void ShowHome()
+    private void ShowHome() => ShowHome(revealOverview: false);
+
+    private void ShowHome(bool revealOverview)
     {
         SetStorageDetails(false);
         home.SetSaveFeedback(null);
@@ -234,9 +237,18 @@ public sealed partial class CompanionShell : UserControl
         RefreshStorageState();
         if (returningFromSetup)
         {
+            var expectedFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
                 if (!ReferenceEquals(Host.Content, home)) { return; }
+                if (revealOverview)
+                {
+                    var current = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
+                    if (ReferenceEquals(current, expectedFocus) || current is not Control { IsEffectivelyVisible: true, IsEffectivelyEnabled: true })
+                    { home.RevealOverviewAfterRemoval(); }
+                    setupInvoker = null;
+                    return;
+                }
                 if (setupInvoker is { IsEffectivelyVisible: true, IsEffectivelyEnabled: true }) { setupInvoker.Focus(); }
                 else { Navigation.ButtonFor(ShellDestination.Home).Focus(); }
                 setupInvoker = null;

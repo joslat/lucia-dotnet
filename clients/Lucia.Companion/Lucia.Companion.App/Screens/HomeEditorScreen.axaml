@@ -46,7 +46,7 @@
             </WrapPanel>
             <Button Name="RemovePlace" Content="Remove place" Classes="theme" HorizontalAlignment="Left" />
             <StackPanel Name="RemovalConfirmation" IsVisible="False" Spacing="8">
-              <TextBlock Text="Remove this place, its connections and observation bindings from the draft? You can still discard all edits with Cancel." Classes="muted" />
+              <TextBlock Name="RemovalQuestion" TextWrapping="Wrap" FontSize="{DynamicResource TextSize13}" Classes="muted" />
               <WrapPanel>
                 <Button Name="ConfirmRemove" Content="Confirm removal" Classes="theme" Margin="0,0,8,8" Foreground="{DynamicResource ProblemBrush}" />
                 <Button Name="KeepPlace" Content="Keep place" Classes="theme" />

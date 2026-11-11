@@ -6,9 +6,9 @@ Updated 11 November 2026. Read the current UI/UX refinement section and "Directi
 
 **What is next.**
 
-The active [UI/UX quality goal](UI-UX-QUALITY.md) targets a 9.5/10 mean on six fixed dimensions. Confirmed means are 8.13, 8.67, 8.87, 9.05, 9.07 and 9.07. Cycle 3 clarifies Home reasons, moves idle storage context into More/setup, tracks queued saves, keeps recovery global, confirms completed outcomes locally, repairs retry focus and corrects Day/Week semantics. Enlarged Week lanes and rail labels now reflow through native text measurement without shrinking text or replacing focused actions. Keep the goal active. The owner requested simulation and deferred physical checks.
+The active [UI/UX quality goal](UI-UX-QUALITY.md) targets a 9.5/10 mean on six fixed dimensions. Cycle 6 completes UX12: visible named removal choices, guarded focus handoffs and a clear overview anchor after selected-place removal. The installed confirmation mean is 9.12; keep the goal active. UX13 will restore the approved hold instruction beside Your places. The owner requested simulation and deferred physical checks.
 
-Current native verification passes 781/784, with 3 existing opt-in wire skips and 10 new cases. Cycle 5 adds visible Story guidance and closes invalid place-page state after setup removal. Cycle 4 fixes compact navigation reachability, quick-save footer flashes and enlarged recovery actions. Android and installed-emulator results are in the private cycle-5 ledger. Cycle 2 already qualified bounded API 36 demo behavior for phone/expanded layouts, both themes, system text 2.0, IME, system Back and live/resume/startup motion-policy changes. None of this qualifies TalkBack speech, predictive Back or hardware frame pacing. Earlier checkpoints below remain historical evidence.
+Current native verification passes 801/804, with 3 existing opt-in wire skips and 20 new cases. Android and installed results are in the private cycle-6 ledger. The suite requires a nonzero retained reading offset; disclosure checks never scroll the newly revealed choices from test code. Earlier checkpoints remain historical evidence.
 
 The next assessment should exercise pending-operation feedback, navigation/value-change motion and compact-window journeys, then fix observed problems under the same scorecard. Cycle 3's design and technical confirmation findings are resolved. Do not repeat completed findings or manufacture the remaining score.
 
@@ -97,4 +97,4 @@ Private design exports, analysis, screenshots and TRX files remain outside this 
 
 No real household access, physical controls, secrets, paid/cloud resources, model downloads, messages to people or release publication are authorized. Use synthetic data and isolated loopback hosts. Only the dedicated test emulator may be used for a bounded check; shut it down afterward. Real device, TalkBack, safe-area, installed successful networking/lifecycle, performance and Mac/Xcode/iOS/signing/distribution gates remain genuinely open. The legacy offline heartbeat stays paused.
 
-Next app-only work is UX12: visible removal confirmation and safe focus, plus an explicit overview anchor after the selected place is removed. Installed evidence exposed these gaps after the initial cycle-5 source/capture review. Final mean 9.07; keep the 9.5 goal active.
+UX12 is delivered and confirmed in native input and the installed emulator. UX13 restores the approved Home hold guidance without changing the interaction contract. Mean 9.12; physical accessibility and frame timing remain deferred and the 9.5 target stays active.

@@ -667,3 +667,10 @@ The expanded compact-window review exposed navigation and recovery defects beyon
 Story displays brief interaction guidance above its visualization. Day names the dial and slider; Week tells the user that selecting a day opens its story. It uses mapped TextSize13 and wraps at enlarged text. Removing a selected place through setup returns Home to the overview; keeping the place preserves its page. The one-second Bloom idle-fold contract stays intact.
 
 Independent review confirms 9.07 on the fixed six dimensions. All 781 native cases pass, with 3 existing opt-in skips and 10 new cases. The current installed APK walkthrough supplements this with actual demo input; physical touch, TalkBack speech and hardware frame timing remain deferred. The 9.5 target stays active.
+
+
+## Quality cycle 6, 11 November 2026
+
+Removal names the selected place and reveals its question and both choices above the fixed editor commands. Keep place receives safe initial focus. Keep/Back return to the visible initiating action; confirmation returns to the remaining-place selector or Add place. Selected-place removal returns Home to an explicit overview heading or empty setup action; surviving-place continuity remains.
+
+Twenty new cases cover the actual disclosure boundary, draft-only behavior, last place, deferred interruptions, overview anchors and a nonzero retained reading offset. Full native verification passes 801/804 with 3 existing opt-in skips. Android builds with zero warnings/errors and the actual APK confirms the changed flow. Independent installed review mean 9.12; the fixed 9.5 goal remains active. UX13 restores the approved on-screen hold guidance. Simulation does not qualify physical touch, TalkBack speech or hardware frame timing.
