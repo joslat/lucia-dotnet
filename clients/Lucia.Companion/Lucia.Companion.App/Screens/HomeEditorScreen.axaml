@@ -39,6 +39,7 @@
           </StackPanel>
         </Border>
         <TextBlock Name="HomeErrorText" IsVisible="False" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" AutomationProperties.LiveSetting="Polite" Margin="20,0" />
+        <TextBlock Name="SetupErrorText" IsVisible="False" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" AutomationProperties.LiveSetting="Polite" Margin="20,0" />
         <Border Name="PlaceFormCard" Classes="panel">
           <StackPanel Spacing="12">
             <TextBlock Text="Place setup" Classes="section" />

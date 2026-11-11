@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.VisualTree;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.App.Controls;
@@ -36,6 +37,8 @@ public sealed partial class HomeEditorScreen : UserControl
         this.sources = Array.AsReadOnly((sources ?? []).ToArray());
         this.sharedLayoutFactory = sharedLayoutFactory;
         AvaloniaXamlLoader.Load(this);
+        ClearFieldError("HomeNameInput", "HomeErrorText");
+        ClearFieldError("PlaceNameInput", "ErrorText");
         this.FindControl<Button>("ImportPlaces")!.IsVisible = importCatalog is not null;
         this.FindControl<Button>("ImportPlaces")!.Click += (_, _) => { if (importCatalog is not null) { OpenImport(importCatalog); } };
         this.FindControl<Button>("ReviewSharedSetup")!.IsVisible = sharedLayoutFactory is not null;
@@ -80,10 +83,9 @@ public sealed partial class HomeEditorScreen : UserControl
         };
         this.FindControl<Button>("SaveHome")!.Click += (_, _) =>
         {
-            if (!TryApplyCurrent()) { return; }
+            if (!TryApplyCurrent() || !TryApplyHomeName()) { return; }
             RunEdit(() =>
             {
-                draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty);
                 editorFocusVersion++;
                 SaveRequested?.Invoke(draft.Build());
             });
@@ -167,7 +169,7 @@ public sealed partial class HomeEditorScreen : UserControl
     private void OpenSharedSetup()
     {
         if (sharedLayoutFactory is null || this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible
-            || !TryApplyCurrent() || !RunEdit(() => draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty))) { return; }
+            || !TryApplyCurrent() || !TryApplyHomeName()) { return; }
         var review = new HomeSharedLayoutScreen(sharedLayoutFactory(draft.Build));
         review.CancelRequested += CloseImport;
         review.ConnectionRequested += () => ConnectionRequested?.Invoke();
@@ -188,7 +190,7 @@ public sealed partial class HomeEditorScreen : UserControl
 
     private void OpenImport(HomeCatalog catalog)
     {
-        if (!TryApplyCurrent() || !RunEdit(() => draft.SetHomeName(this.FindControl<TextBox>("HomeNameInput")!.Text ?? string.Empty))) { return; }
+        if (!TryApplyCurrent() || !TryApplyHomeName()) { return; }
         editorFocusVersion++;
         this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible = false;
         var import = new HomeImportScreen(draft.Build(), catalog);
@@ -314,6 +316,7 @@ public sealed partial class HomeEditorScreen : UserControl
     private void Populate(string? id)
     {
         editorFocusVersion++;
+        if (selectedId != id) { ClearFieldError("PlaceNameInput", "ErrorText"); }
         selectedId = id;
         var place = draft.Places.FirstOrDefault(candidate => candidate.Id == id);
         this.FindControl<Border>("PlaceFormCard")!.IsVisible = place is not null;
@@ -361,6 +364,7 @@ public sealed partial class HomeEditorScreen : UserControl
                 .Where(check => check.IsChecked == true).Select(check => (string)check.Tag!));
         }, ShowPlaceError);
         if (!applied) { RevealInvalidPlace(nativeSelectionOwner); }
+        else { ClearFieldError("PlaceNameInput", "ErrorText"); }
         return applied;
     }
 
@@ -372,8 +376,7 @@ public sealed partial class HomeEditorScreen : UserControl
         try
         {
             action();
-            this.FindControl<TextBlock>("ErrorText")!.IsVisible = false;
-            this.FindControl<TextBlock>("HomeErrorText")!.IsVisible = false;
+            this.FindControl<TextBlock>("SetupErrorText")!.IsVisible = false;
             return true;
         }
         catch (ArgumentException error) { (reportError ?? ShowError)(error.Message.Split(Environment.NewLine)[0]); return false; }
@@ -381,7 +384,7 @@ public sealed partial class HomeEditorScreen : UserControl
 
     private void ShowError(string message)
     {
-        var error = this.FindControl<TextBlock>("HomeErrorText")!;
+        var error = this.FindControl<TextBlock>("SetupErrorText")!;
         error.Text = message;
         error.IsVisible = true;
         error.BringIntoView();
@@ -389,10 +392,43 @@ public sealed partial class HomeEditorScreen : UserControl
 
     private void ShowPlaceError(string message)
     {
+        SetFieldError("PlaceNameInput", message);
         var error = this.FindControl<TextBlock>("ErrorText")!;
         error.Text = message;
         error.IsVisible = true;
         error.BringIntoView();
+    }
+
+    private bool TryApplyHomeName()
+    {
+        var name = this.FindControl<TextBox>("HomeNameInput")!.Text;
+        if (string.IsNullOrWhiteSpace(name)) { ShowHomeNameError("Enter a home name."); return false; }
+        var applied = RunEdit(() => draft.SetHomeName(name), ShowHomeNameError);
+        if (applied) { ClearFieldError("HomeNameInput", "HomeErrorText"); }
+        return applied;
+    }
+
+    private void ShowHomeNameError(string message)
+    {
+        var error = this.FindControl<TextBlock>("HomeErrorText")!;
+        error.Text = message;
+        error.IsVisible = true;
+        SetFieldError("HomeNameInput", message);
+        QueueEditorFocus(this.FindControl<TextBox>("HomeNameInput")!, this.FindControl<TextBlock>("HomeErrorText")!,
+            this.FindControl<StackPanel>("RemovalConfirmation")!.IsVisible);
+    }
+
+    private void SetFieldError(string fieldId, string message)
+    {
+        var field = this.FindControl<TextBox>(fieldId)!;
+        AutomationProperties.SetHelpText(field, $"{AutomationProperties.GetName(field)}. {message}");
+    }
+
+    private void ClearFieldError(string fieldId, string errorId)
+    {
+        this.FindControl<TextBlock>(errorId)!.IsVisible = false;
+        AutomationProperties.SetHelpText(this.FindControl<TextBox>(fieldId)!, fieldId == "HomeNameInput"
+            ? "Name shown for this home." : "Name shown for this place.");
     }
 
     private void Move(int direction)

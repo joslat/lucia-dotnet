@@ -6,15 +6,15 @@ Updated 11 November 2026. The owner requested autonomous improvement, dynamic ve
 
 These are reviewer judgments, supported by evidence, rather than benchmark measurements. Keep the same six dimensions and equal weighting between reviews. Do not add a high-scoring dimension to raise the mean, treat a passing test count as a design score, or round a result below 9.5 up to the target.
 
-| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Cycle 7 | Cycle 8 | Cycle 9 | Cycle 10 | Evidence and remaining limit |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.2 | 9.2 | 9.5 | Complete attention causes and whole Today heading words at enlarged text; retained responsive composition |
-| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | 9.3 | 9.4 | 9.5 | 9.5 | Explicit History orientation and ordinary tab reading retained; current destination named portably |
-| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | 9.4 | 9.5 | 9.5 | 9.5 | Scoped totals and retained native actions; qualified input and recovery journeys |
-| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | 9.0 | 9.0 | 9.0 | 9.5 | Matched Home/place/Bloom/Story inventory; native, truth and enlarged-text adaptations documented |
-| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 139 current software frames support finite settling and reversal; integrated Android lifecycle evidence remains open |
-| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | 9.1 | 9.2 | 9.2 | 8.0 | Four native focus actions pass; indeterminate range and missing validation relationship are confirmed P2 gaps |
-| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **9.13** | **9.22** | **9.23** | **9.17** | **Target not achieved; direct native evidence corrects the earlier accessibility estimate** |
+| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 | Cycle 5 | Cycle 6 | Cycle 7 | Cycle 8 | Cycle 9 | Cycle 10 | Cycle 11 | Evidence and remaining limit |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| UI design | 8.4 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.2 | 9.2 | 9.5 | 9.5 | Requested soft panel assembly preserves composition and reading order |
+| UX | 8.0 | 8.8 | 9.0 | 9.2 | 9.2 | 9.2 | 9.3 | 9.3 | 9.4 | 9.5 | 9.5 | 9.5 | Explicit History orientation and ordinary tab reading retained; current destination named portably |
+| Usability | 8.1 | 9.0 | 9.2 | 9.4 | 9.3 | 9.3 | 9.4 | 9.4 | 9.5 | 9.5 | 9.5 | 9.5 | Scoped totals and retained native actions; qualified input and recovery journeys |
+| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | 8.9 | 8.9 | 8.9 | 9.0 | 9.0 | 9.0 | 9.5 | 9.5 | Approved native Constellation identity and reference matrix retained |
+| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.0 | 9.3 | Native fade/rise, interruption, Android pause/resume, system policy and hold observed together; hardware pacing unqualified |
+| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | 9.0 | 9.0 | 9.1 | 9.1 | 9.2 | 9.2 | 8.0 | 9.0 | Busy range and field feedback repaired; native SetText replacement remains unresolved |
+| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **9.07** | **9.07** | **9.12** | **9.13** | **9.22** | **9.23** | **9.17** | **9.38** | **Target not achieved** |
 
 The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Cycle 3 initially scored 8.95; its confirmation review scored 9.05 after enlarged Week and rail defects were corrected. Test counts do not automatically earn points. A subsequent review must justify any increase.
 
@@ -151,3 +151,17 @@ Thirteen native sequences contain 139 measured frames. PNG encoding occurs after
 UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
 
 <!-- cycle10-checkpoint:end -->
+
+<!-- cycle11-checkpoint:start -->
+
+## Cycle 11, assembled panels and accessible feedback
+
+Cycle 11 adds the requested soft panel assembly and repairs native busy/validation semantics. The full native suite passes 907/910 with 3 existing skips and 10 new cases. Installed Android verifies focused error descriptions, retained validation, nonnumeric busy status and integrated motion/lifecycle behavior. Reviewed mean 9.38; the fixed 9.5 goal remains active.
+
+Independent design review retains UI/fidelity 9.5/9.5. Technical review scores motion 9.3 and accessibility 9.0 after native inspection. Four Bloom focus actions, two validation-field focus actions, native error retention and cleared/restored descriptions pass. The installed trace has 411 samples across navigation, Day/Week, real Android Home/resume and system animation reduction/restoration. Intermediate charge and Bloom opening follow an 800 ms injected touch hold. Paused/system-reduced panels settle to opacity 1/y 0, the final Home settles and the saved choice remains unchanged. The approximately 10 fps software recording confirms sequence, not fine frame pacing. Initial probe evidence and its overly narrow nominal-phase assertion remain preserved; the final checker follows observed pause then resume.
+
+UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
+
+<!-- cycle11-checkpoint:end -->
+
+The next native text-action check follows the pinned library's [Android value provider](https://github.com/AvaloniaUI/Avalonia/blob/2d79ba55fae1b1e71c69f93a668080c9029e6a31/src/Android/Avalonia.Android/Automation/ValueNodeInfoProvider.cs). Invalid-draft Debug seeding qualifies the later validation journey and does not establish native text replacement.

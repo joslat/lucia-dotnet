@@ -1,6 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="using:Lucia.Companion.App.Controls" x:Class="Lucia.Companion.App.Screens.StoryScreen"
-             Background="{DynamicResource CanvasBrush}">
+             Background="{DynamicResource CanvasBrush}" c:PanelArrival.Enabled="True">
   <!-- THESIS: One day, three linked ways to read its reports. No invented occupancy.
        OWN-WORLD: User-approved Constellation rings, Observatory palette, Outfit and DM Sans.
        STORY: Choose a chapter, place or time; inspect the same evidence in the orbit and lanes.
@@ -9,13 +9,13 @@
        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
   <ScrollViewer Name="StoryScroll" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="16,20" Spacing="20">
-      <StackPanel Spacing="6">
+      <StackPanel Spacing="6" c:PanelArrival.Order="0">
         <TextBlock Name="StoryTitle" Text="The story of your day" Classes="title" TextWrapping="Wrap" />
         <TextBlock Name="DayLabel" Classes="muted" FontSize="{DynamicResource TextSize14}" />
         <TextBlock Text="Sample history. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         <TextBlock Name="StatsLine" FontSize="{DynamicResource TextSize14}" TextWrapping="Wrap" IsVisible="False" />
       </StackPanel>
-      <StackPanel Name="StoryNavigation" Spacing="10" IsVisible="False">
+      <StackPanel Name="StoryNavigation" Spacing="10" IsVisible="False" c:PanelArrival.Order="0">
         <Border Classes="segments" HorizontalAlignment="Left">
           <StackPanel Orientation="Horizontal">
             <RadioButton Name="DayMode" GroupName="StoryMode" Content="Day" Classes="segment" Theme="{StaticResource SegmentButton}" IsChecked="True" />
@@ -34,8 +34,8 @@
       </StackPanel>
       <c:PlaceFilterBar Name="PlaceFilters" />
       <TextBlock Name="StoryInteractionHint" Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
-      <Grid Name="StoryGrid" ColumnDefinitions="*,0" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="20">
-        <StackPanel Name="OrbitPanel" Spacing="8">
+      <Grid Name="StoryGrid" ColumnDefinitions="*,0" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="20" c:PanelArrival.Enabled="True">
+        <StackPanel Name="OrbitPanel" Spacing="8" c:PanelArrival.Order="0">
           <Grid Name="DialFrame" Width="340" Height="340" HorizontalAlignment="Center">
             <c:StoryOrbit Name="Orbit" />
             <StackPanel Width="112" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2" IsHitTestVisible="False">
@@ -55,14 +55,14 @@
           <Slider Name="TimeScrubber" Minimum="0" Maximum="1" SmallChange="0.000694444" LargeChange="0.041666667"
                   AutomationProperties.Name="Selected time in home day" MinHeight="48" />
         </StackPanel>
-        <StackPanel Name="ChapterPanel" Grid.Row="1" Spacing="8">
+        <StackPanel Name="ChapterPanel" Grid.Row="1" Spacing="8" c:PanelArrival.Order="0">
           <TextBlock Text="Chapters" Classes="section" />
           <c:ChapterList Name="Chapters" />
           <TextBlock Text="Authored sample chapters, linked to the reports below." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         </StackPanel>
       </Grid>
-      <c:StoryWeek Name="Week" IsVisible="False" />
-      <StackPanel Name="DayDetails" Spacing="20">
+      <c:StoryWeek Name="Week" IsVisible="False" c:PanelArrival.Enabled="True" c:PanelArrival.Order="0" />
+      <StackPanel Name="DayDetails" Spacing="20" c:PanelArrival.Enabled="True" c:PanelArrival.Order="0">
       <Border Height="1" Background="{DynamicResource GraphLineBrush}" />
       <StackPanel Spacing="10">
         <TextBlock Text="Place by place" Classes="section" />

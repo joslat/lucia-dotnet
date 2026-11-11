@@ -703,3 +703,13 @@ Twenty-four new cases bring the complete native suite to 877/880 with the same 3
 The matched primary-screen review retains Constellation type, material, geometry and navigation with documented native, truth and accessible adaptations. Essential attention causes wrap completely. Today preserves whole heading words by moving its action below when needed. Focus and native actions retain their identity through responsive Home composition. UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
 
 <!-- cycle10-checkpoint:end -->
+
+<!-- cycle11-checkpoint:start -->
+
+## Soft component assembly
+
+Main Home, place, More and Story panels assemble at screen/component presentation: opacity 0.12 to 1 with a 6-unit rise,220 ms CubicEaseOut and28 ms stagger capped at 84 ms. Cleanup is bounded at 335 ms. Actual saved/visual reading order controls the sequence. Mode entry can animate its newly presented component. Ordinary values, report refresh and text reflow do not restart it. Input stays enabled; hidden/detached/reparented, paused and reduced-motion targets settle synchronously. Connection/recovery feedback remains immediate with the existing boundary settle, preserving prompt loading and error information.
+
+The explicit user-requested motion preserves Constellation geometry, type, material and reading order. State words and exact values update immediately; the existing180/200ms colour easing,360ms reading emphasis and optional280ms Story cursor remain independent of entry. Native operation feedback never claims a completion percentage. UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
+
+<!-- cycle11-checkpoint:end -->

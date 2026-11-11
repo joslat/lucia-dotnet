@@ -1,5 +1,5 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Lucia.Companion.App.Screens.MoreScreen" Background="{DynamicResource CanvasBrush}">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
+             x:Class="Lucia.Companion.App.Screens.MoreScreen" Background="{DynamicResource CanvasBrush}" c:PanelArrival.Enabled="True">
   <!-- THESIS: Everything that isn't looking at the home, in one calm list.
        OWN-WORLD: Observatory panels, Outfit headings, DM Sans rows; no new palette or motion.
        STORY: Change appearance, reorder Home, set up places, manage the connection; the demo also offers the control lab.
@@ -8,7 +8,7 @@
   <ScrollViewer Name="MoreScroll" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="16,20" Spacing="20" MaxWidth="720">
       <TextBlock Text="More" Classes="title" />
-      <Border Classes="panel">
+      <Border Classes="panel" c:PanelArrival.Order="0">
         <StackPanel Spacing="12">
           <TextBlock Text="Appearance" Classes="section" />
           <WrapPanel ItemSpacing="16" LineSpacing="4">
@@ -23,7 +23,7 @@
           <TextBlock Name="MotionStorageStatus" Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
         </StackPanel>
       </Border>
-      <Border Classes="panel">
+      <Border Classes="panel" c:PanelArrival.Order="0">
         <StackPanel Spacing="12">
           <TextBlock Text="Your home" Classes="section" />
           <TextBlock Name="HomeStorageContext" Text="Changes last for this session." Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
@@ -41,7 +41,7 @@
           </Button>
         </StackPanel>
       </Border>
-      <Border Classes="panel">
+      <Border Classes="panel" c:PanelArrival.Order="0">
         <StackPanel Spacing="12">
           <TextBlock Text="Connection" Classes="section" />
           <Button Name="OpenConnection" Classes="theme row" AutomationProperties.Name="Connection">
@@ -58,7 +58,7 @@
           </Button>
         </StackPanel>
       </Border>
-      <Border Name="DemoTools" Classes="panel">
+      <Border Name="DemoTools" Classes="panel" c:PanelArrival.Order="0">
         <StackPanel Spacing="12">
           <TextBlock Text="Demo" Classes="section" />
           <Button Name="OpenControlLab" Classes="theme row" AutomationProperties.Name="Control lab">

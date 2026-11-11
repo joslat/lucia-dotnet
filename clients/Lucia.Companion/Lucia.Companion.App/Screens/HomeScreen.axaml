@@ -1,5 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
-             x:Class="Lucia.Companion.App.Screens.HomeScreen" Background="{DynamicResource CanvasBrush}">
+             x:Class="Lucia.Companion.App.Screens.HomeScreen" Background="{DynamicResource CanvasBrush}" c:PanelArrival.Enabled="True">
   <!-- THESIS: A stable, legible home graph with truthful observations, attributed request topics, phases and qualified current target areas.
        OWN-WORLD: Constellation circles, physical-connection lines, Observatory light/dark and local Outfit/DM Sans.
        STORY: See places and attention, open readings, pin a place through accessible Bloom actions. Connected Lucia now shows reported topics/phases and current target areas, never origin guesses, physical-result claims or timer-generated progress.
@@ -42,7 +42,7 @@
       <StackPanel Name="HomeScrollContent" Spacing="12">
       <Grid Name="HomeGrid" ColumnDefinitions="*,340" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
         <StackPanel Name="MainPanel" Spacing="16">
-        <Border Name="PlacesCard" Classes="panel" Padding="12">
+        <Border Name="PlacesCard" Classes="panel" Padding="12" c:PanelArrival.Order="0">
           <StackPanel Spacing="10">
             <WrapPanel Name="PlacesHeading" ItemSpacing="14" LineSpacing="2">
               <TextBlock Name="PlacesTitle" Text="Your places" Classes="section" Focusable="True" />
@@ -52,10 +52,10 @@
             <Button Name="OpenEmptySetup" Content="Set up places" Classes="theme" HorizontalAlignment="Left" IsVisible="False" AutomationProperties.Name="Set up places in this home" />
           </StackPanel>
         </Border>
-        <Border Name="TodayCard" Classes="panel" Padding="16">
+        <Border Name="TodayCard" Classes="panel" Padding="16" c:PanelArrival.Order="0">
           <c:TodaySoFar Name="TodaySoFar" />
         </Border>
-        <Border Name="LuciaCard" Classes="panel" Padding="12">
+        <Border Name="LuciaCard" Classes="panel" Padding="12" c:PanelArrival.Order="0">
           <StackPanel Spacing="8">
             <c:LuciaNow Name="DemoLuciaNow" />
             <c:ConnectedLuciaNow Name="ConnectedLuciaNotice" IsVisible="False" />
@@ -63,7 +63,7 @@
         </Border>
         </StackPanel>
         <StackPanel Name="SidePanel" Grid.Column="1" Spacing="16">
-        <Border Name="AttentionCard" Classes="panel" Padding="16">
+        <Border Name="AttentionCard" Classes="panel" Padding="16" c:PanelArrival.Order="0">
           <c:AttentionList Name="Attention" />
         </Border>
         <Border Name="DesktopDetailCard" Classes="panel" Padding="16">
@@ -78,7 +78,7 @@
       </Expander>
       </StackPanel>
     </ScrollViewer>
-    <ScrollViewer Name="DetailScroll" Classes="arrival" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer Name="DetailScroll" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
       <c:PlacePage Name="PlacePage" />
     </ScrollViewer>
     <Border Name="BloomShade" Grid.RowSpan="2" Background="#80000000" IsVisible="False" IsHitTestVisible="False" />

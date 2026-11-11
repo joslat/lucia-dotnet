@@ -2,13 +2,13 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. Current reviewed mean 9.17; the target remains open.
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) keeps six fixed axes. Current reviewed mean 9.38; target open.
 
-Cycle 10 removes truncated attention causes, keeps focus across Home reflow, reflows the enlarged Today heading and identifies the current destination in its accessible name. Native 897/900, 3 existing skips and 20 new cases; the complete-unfold capture supplement also passes. Matched UI/fidelity review scores 9.5/9.5. The fixed six-axis mean is 9.17; the 9.5 goal remains active.
+Cycle 11 adds the requested soft panel assembly and repairs native busy/validation semantics. The full native suite passes 907/910 with 3 existing skips and 10 new cases. Installed Android verifies focused error descriptions, retained validation, nonnumeric busy status and integrated motion/lifecycle behavior. Reviewed mean 9.38; the fixed 9.5 goal remains active.
 
 The owner has no physical device available and requested simulation. Continue app-only runtime interaction assessment now; hardware touch, TalkBack, predictive Back and frame timing remain deferred gates. The server/v2 hold remains in force. No review score or passing test count completes the full application or authorizes server changes.
 
-UX12 through UX15 are delivered. Cycle 10 records UX16 comparison, motion samples and native accessibility observations. UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
+UX12 through UX18 are delivered in the reviewed app-only scope. UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
 
 ## UI and UX refinement, 11 November 2026
 

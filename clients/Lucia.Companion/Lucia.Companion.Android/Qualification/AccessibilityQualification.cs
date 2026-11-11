@@ -11,9 +11,9 @@ using NodeAction = Android.Views.Accessibility.Action;
 
 namespace Lucia.Companion.Android.Qualification;
 
-    /// <summary>Opt-in Debug instrumentation. Operates only on the synthetic demo and exercises an invalid draft.</summary>
+/// <summary>Opt-in Debug instrumentation. Operates only on the synthetic demo and exercises an invalid draft.</summary>
 [Instrumentation(Name = "org.lucia.companion.prototype.AccessibilityQualification", TargetPackage = "org.lucia.companion.prototype", FunctionalTest = true)]
-public sealed class AccessibilityQualification : Instrumentation
+public sealed partial class AccessibilityQualification : Instrumentation
 {
     public AccessibilityQualification() { }
     public AccessibilityQualification(nint handle, JniHandleOwnership transfer) : base(handle, transfer) { }
@@ -21,6 +21,7 @@ public sealed class AccessibilityQualification : Instrumentation
     private readonly List<object> snapshots = [];
     private readonly List<object> events = [];
     private readonly List<object> focusChecks = [];
+    private readonly List<object> validationFocusChecks = [];
     private readonly List<AccessibilityNodeInfo> retained = [];
     private readonly object eventGate = new();
     private UiAutomation automation = null!;
@@ -54,9 +55,9 @@ public sealed class AccessibilityQualification : Instrumentation
             {
                 originalTouchExploration = manager?.IsTouchExplorationEnabled;
                 originalServiceFlags = info.Flags;
-                info.Flags |= AccessibilityServiceFlags.RequestTouchExplorationMode;
+                if (qualificationStage != "motion") { info.Flags |= AccessibilityServiceFlags.RequestTouchExplorationMode; }
                 automation.ServiceInfo = info;
-                for (var i = 0; i < 20 && manager?.IsTouchExplorationEnabled != true; i++) { Thread.Sleep(50); }
+                for (var i = 0; qualificationStage != "motion" && i < 20 && manager?.IsTouchExplorationEnabled != true; i++) { Thread.Sleep(50); }
                 focusTouchExploration = manager?.IsTouchExplorationEnabled;
             }
             var launch = TargetContext!.PackageManager!.GetLaunchIntentForPackage(TargetContext.PackageName!)
@@ -65,6 +66,7 @@ public sealed class AccessibilityQualification : Instrumentation
             StartActivitySync(launch);
             if (qualificationStage == "busy") { QualifyBusyControl(); return; }
             Click("ExploreDemo");
+            if (qualificationStage == "motion") { QualifyMotion(); return; }
             ClickWhere(node => node.Clickable && node.ClassName == "PlaceOrb" && node.Text?.StartsWith("Porch", StringComparison.Ordinal) == true);
             Click("PageActionsButton");
             using (WaitFor(node => IsId(node, "OpenButton"))) { }
@@ -105,6 +107,32 @@ public sealed class AccessibilityQualification : Instrumentation
             using (WaitFor(node => IsId(node, "ErrorText") && node.Text?.Contains("Enter a place name", StringComparison.Ordinal) == true)) { }
             Thread.Sleep(200);
             Snapshot("invalid-place");
+            using (WaitFor(node => IsId(node, "PlaceNameInput") && node.ContentDescription?.Contains("Enter a place name.", StringComparison.Ordinal) == true)) { }
+            VerifyValidationFocus("PlaceNameInput", "Enter a place name.");
+            RunOnMainSync(() =>
+            {
+                var app = (Lucia.Companion.App.App)global::Avalonia.Application.Current!;
+                var editor = app.CreateActivityView().GetVisualDescendants().OfType<Lucia.Companion.App.Screens.HomeEditorScreen>().Single();
+                editor.FindControl<TextBox>("PlaceNameInput")!.Text = "Living room";
+            });
+            Click("AddPlace");
+            using (WaitFor(node => IsId(node, "PlaceNameInput") && node.Text == "New place"
+                && node.ContentDescription is { } description && description.Contains("this place", StringComparison.Ordinal)
+                && !description.Contains("Enter a place name.", StringComparison.Ordinal))) { }
+            Snapshot("corrected-place");
+            RunOnMainSync(() =>
+            {
+                var app = (Lucia.Companion.App.App)global::Avalonia.Application.Current!;
+                var editor = app.CreateActivityView().GetVisualDescendants().OfType<Lucia.Companion.App.Screens.HomeEditorScreen>().Single();
+                editor.FindControl<TextBox>("HomeNameInput")!.Text = "";
+            });
+            Click("SaveHome");
+            using (WaitFor(node => IsId(node, "HomeNameInput") && node.ContentDescription?.Contains("Enter a home name.", StringComparison.Ordinal) == true)) { }
+            Snapshot("invalid-home");
+            VerifyValidationFocus("HomeNameInput", "Enter a home name.");
+            Click("AddPlace");
+            using (WaitFor(node => IsId(node, "HomeNameInput") && node.ContentDescription?.Contains("Enter a home name.", StringComparison.Ordinal) == true)) { }
+            Snapshot("invalid-home-after-place-edit");
             Click("CancelEdit");
             QualifyBusyControl();
         }
@@ -131,10 +159,10 @@ public sealed class AccessibilityQualification : Instrumentation
             var report = JsonSerializer.Serialize(new { schema = 1, qualificationStage, failure, completed = failure is null,
                 scope = "Installed API36 software emulator; Android accessibility actions, not TalkBack traversal or speech",
                 dontSuppressAccessibilityServices = true, accessibilityEnabled = manager?.IsEnabled,
-                invalidDraftPreparation = "Debug-only UI-thread field seed, verified in the native tree before native Save click. This is not a native text-editing claim.",
+                invalidDraftPreparation = qualificationStage == "all" ? "Debug-only UI-thread field seed, verified in the native tree before native Save click. This is not a native text-editing claim." : "Not used in this stage.",
                 originalTouchExploration, focusTouchExploration, restoredTouchExploration,
                 touchExplorationRestored = restoredTouchExploration == originalTouchExploration,
-                snapshots, focusChecks, events = observed }, new JsonSerializerOptions { WriteIndented = true });
+                snapshots, focusChecks, validationFocusChecks, events = observed, motionSamples, motionMarkers }, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(Path.Combine(TargetContext!.FilesDir!.AbsolutePath, "accessibility-qualification.json"), report);
             foreach (var node in retained) { node.Dispose(); }
             using var result = new Bundle();
@@ -142,6 +170,18 @@ public sealed class AccessibilityQualification : Instrumentation
             result.PutString("failure", failure ?? "none");
             Finish(failure is null ? Result.Ok : Result.Canceled, result);
         }
+    }
+
+    private void VerifyValidationFocus(string id, string message)
+    {
+        using var field = WaitFor(node => IsId(node, id));
+        var accepted = field.PerformAction(NodeAction.AccessibilityFocus);
+        Thread.Sleep(120);
+        using var actual = automation.FindFocus(NodeFocus.Accessibility);
+        var same = actual?.Equals(field) == true;
+        var described = actual?.ContentDescription?.Contains(message, StringComparison.Ordinal) == true;
+        validationFocusChecks.Add(new { id, accepted, sameNativeNode = same, errorDescribedOnFocusedNode = described });
+        if (!accepted || !same || !described) { throw new InvalidOperationException("Field validation is not available on its native focused node: " + id); }
     }
 
     private void QualifyBusyControl()
@@ -237,7 +277,7 @@ public sealed class AccessibilityQualification : Instrumentation
                 uniqueId = OperatingSystem.IsAndroidVersionAtLeast(33) ? item.Node.UniqueId : null,
                 item.Node.WindowId, name = item.Node.Text, description = item.Node.ContentDescription,
                 role = item.Node.ClassName, item.Node.Clickable, item.Node.Enabled, item.Node.VisibleToUser,
-                item.Node.Selected, item.Node.Focused, item.Node.AccessibilityFocused,
+                item.Node.Selected, item.Node.Focused, item.Node.AccessibilityFocused, item.Node.HintText,
                 item.Node.StateDescription, item.Node.Error, item.Node.ContentInvalid,
                 range = range is null ? null : new { range.Min, range.Max, range.Current },
                 liveRegion = item.Node.LiveRegion.ToString(), bounds = bounds.ToShortString() };

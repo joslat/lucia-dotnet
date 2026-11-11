@@ -147,3 +147,17 @@ Installed Debug instrumentation confirms one native Bloom identity per action, a
 UX17 will remove the indeterminate numeric range, connect validation explanations to fields and record an integrated current Android motion/lifecycle journey. TalkBack traversal/speech and physical performance remain separately unqualified. No desktop control is needed for this next scope.
 
 <!-- cycle10-checkpoint:end -->
+
+<!-- cycle11-checkpoint:start -->
+
+## UX17 and requested UX18 delivery
+
+Cycle 11 adds the requested soft panel assembly and repairs native busy/validation semantics. The full native suite passes 907/910 with 3 existing skips and 10 new cases. Installed Android verifies focused error descriptions, retained validation, nonnumeric busy status and integrated motion/lifecycle behavior. Reviewed mean 9.38; the fixed 9.5 goal remains active.
+
+Main Home, place, More and Story panels assemble at screen/component presentation: opacity 0.12 to 1 with a 6-unit rise,220 ms CubicEaseOut and28 ms stagger capped at 84 ms. Cleanup is bounded at 335 ms. Actual saved/visual reading order controls the sequence. Mode entry can animate its newly presented component. Ordinary values, report refresh and text reflow do not restart it. Input stays enabled; hidden/detached/reparented, paused and reduced-motion targets settle synchronously. Connection/recovery feedback remains immediate with the existing boundary settle, preserving prompt loading and error information.
+
+OperationProgress exposes one named text/status peer and no numeric descendants while its visual bar/dots remain. Editor errors describe their actual field, persist through unrelated successful edits and clear only after that field validates or its place context changes. Correction restores normal purpose help. General setup errors have a separate region. Native accessibility focus confirms each explanation on the focused field; no spoken-delivery claim is made.
+
+UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
+
+<!-- cycle11-checkpoint:end -->

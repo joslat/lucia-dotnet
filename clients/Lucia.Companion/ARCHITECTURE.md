@@ -156,3 +156,17 @@ AttentionPlaceRow retains complete reasons with natural wrapping. HomeScreen mov
 Android/Qualification/AccessibilityQualification.cs is compiled only by the existing explicit Debug qualification flag. It probes native identities, focus and events, restores the temporary UiAutomation service request and labels synthetic invalid-draft/busy fixtures. It is excluded from ordinary builds. Native/headless and instrumentation evidence do not establish TalkBack speech or hardware frame pacing.
 
 <!-- cycle10-checkpoint:end -->
+
+<!-- cycle11-checkpoint:start -->
+
+## Panel arrival ownership and field feedback
+
+Main Home, place, More and Story panels assemble at screen/component presentation: opacity 0.12 to 1 with a 6-unit rise,220 ms CubicEaseOut and28 ms stagger capped at 84 ms. Cleanup is bounded at 335 ms. Actual saved/visual reading order controls the sequence. Mode entry can animate its newly presented component. Ordinary values, report refresh and text reflow do not restart it. Input stays enabled; hidden/detached/reparented, paused and reduced-motion targets settle synchronously. Connection/recovery feedback remains immediate with the existing boundary settle, preserving prompt loading and error information.
+
+PanelArrival owns one versioned presentation per scope. It uses finite framework transitions, bounded one-shot callbacks and temporary visibility watchers. Nested scopes own their own targets. Home responsive reparenting cancels only displaced panel motion; clearing all scopes never moves focus. The prior Place detail wrapper settle is removed to avoid double arrival.
+
+OperationProgress exposes one named text/status peer and no numeric descendants while its visual bar/dots remain. Editor errors describe their actual field, persist through unrelated successful edits and clear only after that field validates or its place context changes. Correction restores normal purpose help. General setup errors have a separate region. Native accessibility focus confirms each explanation on the focused field; no spoken-delivery claim is made.
+
+Android Debug qualification contains a separately callable motion trace. An external runner supplies genuine simulator Home/resume, policy changes and touch input; it records actual app state and restores settings. It is excluded from the ordinary APK. UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
+
+<!-- cycle11-checkpoint:end -->

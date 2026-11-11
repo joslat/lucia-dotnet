@@ -1,5 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:Lucia.Companion.App.Controls"
-             x:Class="Lucia.Companion.App.Controls.PlacePage">
+             x:Class="Lucia.Companion.App.Controls.PlacePage" c:PanelArrival.Enabled="True">
   <!-- THESIS: One place, explained: what it reports now, why it is shown this way, and (in the demo) how its day looked.
        OWN-WORLD: The Home orb at hero size, Observatory panels, Outfit title, DM Sans readings; no new palette.
        STORY: Read the status and its plain explanation, scan readings with type icons, pin the place, open its actions or the whole story.
@@ -22,7 +22,7 @@
 
     <TextBlock Name="PageSaveFeedback" Classes="muted" FontSize="{DynamicResource TextSize13}" IsVisible="False" AutomationProperties.LiveSetting="Polite" />
 
-    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="18">
+    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="18" c:PanelArrival.Order="0">
       <Grid Name="PlaceAnchor" Width="96" Height="96">
         <Ellipse Name="HeroFill" Fill="{DynamicResource ControlBrush}" />
         <Ellipse Name="HeroRing" StrokeThickness="2" />
@@ -43,7 +43,7 @@
       </StackPanel>
     </Grid>
 
-    <Border Classes="panel">
+    <Border Classes="panel" c:PanelArrival.Order="0">
       <StackPanel Spacing="10">
         <TextBlock Name="ExplanationTitle" FontWeight="SemiBold" FontSize="{DynamicResource TextSize16}" TextWrapping="Wrap" />
         <TextBlock Name="ExplanationBody" Classes="muted" FontSize="{DynamicResource TextSize14}" />
@@ -56,7 +56,7 @@
       </StackPanel>
     </Border>
 
-    <Border Classes="panel">
+    <Border Classes="panel" c:PanelArrival.Order="0">
       <StackPanel Spacing="4">
         <TextBlock Name="ReadingsTitle" Classes="section" TextWrapping="Wrap" />
         <StackPanel Name="PageObservations" />
@@ -64,7 +64,7 @@
       </StackPanel>
     </Border>
 
-    <Border Name="ChartCard" Classes="panel">
+    <Border Name="ChartCard" Classes="panel" c:PanelArrival.Order="0">
       <StackPanel Spacing="8">
         <TextBlock Name="ChartTitle" Classes="section" TextWrapping="Wrap" />
         <TextBlock Name="ChartCaption" Classes="muted" FontSize="{DynamicResource TextSize13}" />
@@ -72,7 +72,7 @@
       </StackPanel>
     </Border>
 
-    <Border Name="TimelineCard" Classes="panel">
+    <Border Name="TimelineCard" Classes="panel" c:PanelArrival.Order="0">
       <StackPanel Spacing="8">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
           <TextBlock Name="TimelineTitle" Classes="section" TextWrapping="Wrap" VerticalAlignment="Center" />

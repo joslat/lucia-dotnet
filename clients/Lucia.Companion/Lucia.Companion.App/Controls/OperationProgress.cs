@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
@@ -15,6 +16,8 @@ public sealed class OperationProgress : UserControl
     private readonly ProgressBar bar = new() { Height = 4, VerticalAlignment = VerticalAlignment.Center, ShowProgressText = false };
     private readonly StackPanel dots = new() { Orientation = Orientation.Horizontal, Spacing = 4, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Center };
     private bool attached;
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new OperationProgressAutomationPeer(this);
 
     public OperationProgress()
     {
