@@ -5,6 +5,7 @@ using Lucia.Companion.App.Screens;
 using Lucia.Companion.App.ViewModels;
 using Lucia.Companion.Connection;
 using Lucia.Companion.App.Persistence;
+using Lucia.Companion.App.Controls;
 
 namespace Lucia.Companion.App;
 
@@ -33,7 +34,7 @@ public sealed class CompanionRoot : UserControl
         connectionScreen = new(State);
         connectionScreen.DemoRequested += ShowDemo;
         connectionScreen.HomeRequested += async () => { PendingOperation = OpenConnectedHomeAsync(); await PendingOperation; };
-        host.Content = connectionScreen; Content = host;
+        host.Content = connectionScreen; Content = new InputPaneViewport { Child = host };
         AttachedToVisualTree += async (_, _) =>
         {
             topLevel = TopLevel.GetTopLevel(this);

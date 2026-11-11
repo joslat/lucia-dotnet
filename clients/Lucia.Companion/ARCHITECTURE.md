@@ -33,6 +33,8 @@ Desktop and Android use the same screens and user controls. They do not render t
 
 `CompanionRoot` starts on Connection and opens the demo only through explicit selection. A verified connection opens `ConnectedHomeWorkspace`, whose controllers read permitted data into `HomeViewModel` and the shared shell. A failed connection never substitutes sample household data.
 
+The root wraps its content in `Controls/InputPaneViewport.cs`. It observes the top level's input pane, reserves only the docked keyboard area that overlaps the existing safe-area viewport, and brings the unchanged focused field into view after layout. Detach removes the observer, clears the inset and invalidates deferred focus work. Status bars and navigation bars remain under Avalonia's existing safe-area handling.
+
 `CompanionShell` owns the four destinations, local save status and full-screen setup/conflict workflows. `ShellNavigation` changes from a bottom bar to a rail at 600 logical units. `HomeScreen` adapts its overview/detail composition at 900 units. Story has its own width and text-size adaptations. Available space and text size decide layouts rather than a phone/tablet device-name check.
 
 `HomeViewModel` owns selection, open detail/actions, pins and section order. Immutable incoming data updates existing place controls when layout identity is unchanged, preserving focus and an active hold. `HomeProfileSession` coordinates checked profile persistence. Controls request changes; they do not obtain household credentials or issue physical commands.
@@ -67,11 +69,17 @@ Story chapters cache against the actual view model as well as chapter/filter ide
 
 The pure `HoldGesture` distinguishes a quick tap, pending hold, scroll cancellation and a completed hold. `HomeConstellation` supplies elapsed time and pointer events, draws charge only while pending, and suppresses the tap after a hold. `HomeScreen` owns the popup's anchor, selected-place actions and focus return. The same actions remain reachable through named buttons and the native context menu.
 
+Android can request a context menu independently of the framework's Holding gesture. The orb consumes context requests while its Bloom hold is pending or active, preventing two menus from stacking. After release, the regular context-menu route remains available.
+
+Home records the overview scroll offset and the actual page invoker before opening a compact place page. The page starts at zero offset; return restores the overview and a visible valid invoker or deliberate fallback. A navigation version and intervening-focus guard prevent old callbacks from affecting another destination.
+
 `BloomActions` owns its presentation timers. Actions travel from the selected centre in 240 ms with a maximum 45 ms stagger; closing travels inward for 140 ms. A pointer-opened radial menu folds after one idle second. An active hold, hovered action, keyboard session or large-text list keeps choices available. Opening again cancels an old closing completion. Once folding starts, its actions stop accepting input.
 
 `InteractionFeedback` attaches to native buttons through an attached style property. State colours interpolate for 200 ms; ordinary feedback uses 120–180 ms. Place and Bloom action hover uses a 2% scale change, and pressing compresses to 97.5%. Content alignment and padding remain part of the templates. Information rows retain left-aligned text. Keyboard focus stays immediate and distinct from hover.
 
-`MotionSettings` combines the saved device preference with a temporary background pause. Windows and Android restore the preference before constructing controls. Under reduced motion, controls settle immediately and a pending hold shows a static indication. All new transitions and timers stop on detach or backgrounding. The only frame timer is the active pending hold. No polling timer drives decorative motion.
+`MotionSettings` combines the saved device preference, a separate system reduction request and a temporary background pause. Windows and Android restore the preference before constructing controls. `AndroidMotionObserver` reads the current `Settings.Global.AnimatorDurationScale` at startup/resume and observes it while foregrounded. Zero or invalid scale suppresses effects without persisting or replacing the personal setting. More reports the override. Under reduced motion, controls settle immediately and a pending hold shows a static indication. All new transitions and timers stop on detach or backgrounding. The only custom frame timer is the active pending hold. No polling timer drives decorative motion.
+
+The shell owns one `CompanionCrossFade` with native 180 ms opacity transitions and CubicEaseInOut. Each new transition starts from the painted opacity and cancels the old operation. `Stop` removes the transitions, restores opacity and settles visibility synchronously. Backgrounding or a live reduction request therefore cannot leave an old page partially visible or hide the newest page when its old completion arrives.
 
 The Story dial and straight-track cursors use the same 280 ms selection transition and the same Animate the time hand setting. Selection labels and source timestamps update immediately. Colour interpolation and cursor travel never alter observations, fabricate a lifecycle stage or infer occupancy.
 

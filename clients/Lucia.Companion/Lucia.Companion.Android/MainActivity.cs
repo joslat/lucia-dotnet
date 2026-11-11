@@ -12,22 +12,34 @@ namespace Lucia.Companion.Android;
     Exported = true, ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode | ConfigChanges.FontScale)]
 public sealed class MainActivity : AvaloniaMainActivity
 {
+    private AndroidMotionObserver? motionObserver;
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
         ApplyTextSizes();
+        if (ContentResolver is { } resolver) { motionObserver = new AndroidMotionObserver(resolver); }
     }
 
     protected override void OnPause()
     {
+        motionObserver?.Stop();
         (Avalonia.Application.Current as App.App)?.SuspendConnectionPolling();
         base.OnPause();
     }
 
     protected override void OnResume()
     {
+        motionObserver?.Start();
         base.OnResume();
         (Avalonia.Application.Current as App.App)?.VerifyConnectionForeground();
+    }
+
+    protected override void OnDestroy()
+    {
+        motionObserver?.Stop();
+        motionObserver?.Dispose();
+        motionObserver = null;
+        base.OnDestroy();
     }
 
     public override void OnConfigurationChanged(Configuration newConfig)

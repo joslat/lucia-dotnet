@@ -65,6 +65,7 @@ public sealed partial class MoreScreen : UserControl
             this.FindControl<RadioButton>("ThemeLight")!.IsChecked = current == ThemeVariant.Light;
             this.FindControl<RadioButton>("ThemeDark")!.IsChecked = current == ThemeVariant.Dark;
             this.FindControl<CheckBox>("ReduceMotion")!.IsChecked = motion.ReduceMotion;
+            this.FindControl<TextBlock>("SystemMotionStatus")!.IsVisible = motion.SystemReduceMotion;
             this.FindControl<TextBlock>("MotionStorageStatus")!.Text = motion.StorageStatus;
         }
         finally { syncingTheme = false; }

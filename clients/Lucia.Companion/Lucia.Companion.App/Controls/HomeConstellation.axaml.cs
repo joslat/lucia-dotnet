@@ -102,6 +102,12 @@ public sealed partial class HomeConstellation : UserControl
             orb.ShowSummary(PlaceCaption.Caption(place), PlaceCaption.Status(place), PlaceStateIcons.For(place.State), place.Reason);
             // The hold-and-slide gesture owns long presses; touch holds must not also open the context menu.
             orb.SetValue(InputElement.IsHoldingEnabledProperty, false);
+            // Android can request a native context menu independently of Avalonia's Holding gesture.
+            orb.AddHandler(ContextRequestedEvent, (_, args) =>
+            {
+                if (ReferenceEquals(pressedOrb, orb) && gesture.State is HoldGestureState.Pending or HoldGestureState.Holding)
+                { args.Handled = true; }
+            }, RoutingStrategies.Tunnel);
             orb.Click += (_, _) =>
             {
                 // A hold already opened Bloom; the release that ends it is not also a tap.

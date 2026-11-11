@@ -631,3 +631,14 @@ Story has no service history or history persistence. A changed Home topology reb
 - Don't announce healthy activity polls or move focus away from the user's current control.
 - Don't stage a shared setup from a stale, canceled or failed review, or silently shorten accepted names during import.
 - Don't treat shared setup metadata, a native finish verdict or headless captures as completion of shared delivery or the wider app.
+
+
+## Quality cycle 2, 11 November 2026
+
+Keep the established Constellation composition, type and semantic brushes. A compact place page starts at the top and returns to the overview's previous scroll position and visible invoker. Deferred focus work checks the current navigation version and intervening focus.
+
+Shell switching uses one owned 180 ms native opacity transition with CubicEaseInOut. A new request continues from painted opacity; cancellation, backgrounding or reduced motion settles visibility immediately. Android's current animation scale can suppress effects independently of the saved preference. More explains that override; the checkbox continues to show the person's own setting.
+
+The root reserves only the docked keyboard overlap within the existing safe-area viewport. After layout it scrolls the same focused field into view. Closing or detaching clears the reservation and invalidates deferred work. Pending and active Bloom holds consume Android's independent context request so a second native menu cannot appear behind the petals. Ordinary context actions remain available after release.
+
+The owner deferred physical checks and requested simulation. The actual APK runs in an isolated API 36 emulator with synthetic demo data. Native input/render tests and installed runtime checks establish bounded behavior; they do not qualify TalkBack speech, hardware touch feel or animation frame pacing. The fixed six-dimension mean is 8.87 against a 9.5 target. Next refinements are Home's reason-first summary, contextual storage feedback and correct Week/selected-day wording.

@@ -11,6 +11,7 @@ namespace Lucia.Companion.App;
 public sealed class MotionSettings
 {
     private bool reduceMotion;
+    private bool systemReduceMotion;
     private readonly LocalMotionPreferenceStore? store;
 
     public MotionSettings(LocalMotionPreferenceStore? store = null)
@@ -41,7 +42,19 @@ public sealed class MotionSettings
 
     public event Action? Changed;
     public bool IsPaused { get; private set; }
-    public bool IsEnabled => !ReduceMotion && !IsPaused;
+    public bool IsEnabled => !ReduceMotion && !SystemReduceMotion && !IsPaused;
+
+    /// <summary>A live platform constraint, independent of the person's stored app preference.</summary>
+    public bool SystemReduceMotion
+    {
+        get => systemReduceMotion;
+        set
+        {
+            if (systemReduceMotion == value) { return; }
+            systemReduceMotion = value;
+            Changed?.Invoke();
+        }
+    }
 
     public bool ReduceMotion
     {

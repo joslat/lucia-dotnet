@@ -14,6 +14,7 @@ public sealed class AndroidApplication(nint javaReference, JniHandleOwnership tr
     public override void OnCreate()
     {
         App.MotionSettings.UseLocalPreferences();
+        AndroidMotionObserver.ApplySystemPolicy(ContentResolver);
         App.App.ConnectionFactory = () => new CompanionConnection(new ProtectedSessionVault(
             Path.Combine(NoBackupFilesDir?.AbsolutePath ?? throw new IOException("Protected storage is unavailable."), "lucia-session"), new AndroidDeviceSecretProtector()));
         base.OnCreate();

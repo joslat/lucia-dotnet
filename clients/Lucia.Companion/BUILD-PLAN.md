@@ -2,11 +2,13 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes the six scoring dimensions and records the independent reviews. The first cycle raises the mean from 8.13 to 8.67; the goal remains active and the target is not achieved.
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions and records review means of 8.13, 8.67 and 8.87. The target remains open.
 
-Cycle 1 implements attention continuity and direct review, guided empty-home setup, retry-first connection recovery, Story date/report correctness, live Bloom focus adaptation, hidden-input cancellation and consistent native accents/targets. Final native regression, Android build and capture confirmation are recorded in the continuation handoff. Further score increases require evidence, including device motion/accessibility checks. The server/v2 hold remains unchanged.
+Cycle 1 delivers attention continuity, direct report/setup routes, recovery, Story correctness and focus. Cycle 2 adds overview/page scroll and invoker continuity, synchronous cancellation of screen fades, Android system-motion reduction, keyboard-aware root layout and suppression of duplicate native menus during Bloom holds. Full native verification passes 734/737, with 3 existing opt-in wire skips and 22 new cases in cycle 2. Android builds with zero warnings/errors.
 
-Verification: 712 native cases pass, 3 existing wire skips, 35 new cases; Android zero warnings/errors. Eight additional final Tab/viewport checks confirm the setup route across phone/tablet, themes and text sizes. Native captures and offline report are checked. This completes cycle 1 implementation, not the 9.5 scoring goal.
+The owner has no physical device available and requested simulation. Installed-APK checks run in an isolated API 36 emulator with synthetic demo data, phone/expanded layouts, light/dark, system text 2.0, a real soft keyboard, system Back and live/startup/resume animation-policy changes. Physical checks are deferred, not an obstacle to the next app-only refinement batch. Hardware touch, TalkBack, predictive Back and measured frame timing remain separate gates. The server/v2 hold remains in force.
+
+Next app-only findings are Home's reason-first summary, contextual storage feedback with complete save-state coverage, and correct Day/Week headings and selected-day accessibility text. Preserve checked writes and current data. Passing tests alone do not establish a 9.5 design score.
 
 ## UI and UX refinement, 11 November 2026
 

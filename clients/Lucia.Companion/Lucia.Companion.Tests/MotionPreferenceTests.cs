@@ -14,6 +14,60 @@ public sealed class MotionPreferenceTests : IDisposable
     private readonly string directory = Path.Combine(Path.GetTempPath(), "lucia-motion-" + Guid.NewGuid().ToString("N"));
     private string PreferencePath => Path.Combine(directory, "motion.json");
 
+    [Fact]
+    public void SystemReducedMotionDoesNotRewriteTheSavedChoice()
+    {
+        var motion = new MotionSettings(new LocalMotionPreferenceStore(PreferencePath));
+        motion.ReduceMotion = true;
+        motion.ReduceMotion = false;
+        var saved = File.ReadAllBytes(PreferencePath);
+        motion.SystemReduceMotion = true;
+        Assert.False(motion.IsEnabled);
+        Assert.False(motion.ReduceMotion);
+        Assert.Equal(saved, File.ReadAllBytes(PreferencePath));
+        motion.ReduceMotion = true;
+        motion.SystemReduceMotion = false;
+        Assert.False(motion.IsEnabled);
+        Assert.True(new MotionSettings(new LocalMotionPreferenceStore(PreferencePath)).ReduceMotion);
+    }
+
+    [Fact]
+    public void SystemMotionChangesNotifyOnceAndBackgroundResumeCannotOverrideThem()
+    {
+        var motion = new MotionSettings();
+        var changes = 0;
+        motion.Changed += () => changes++;
+        motion.SystemReduceMotion = true;
+        motion.SystemReduceMotion = true;
+        Assert.Equal(1, changes);
+        motion.Pause(); motion.Resume();
+        Assert.False(motion.IsEnabled);
+        motion.SystemReduceMotion = false;
+        Assert.True(motion.IsEnabled);
+        Assert.Equal(4, changes);
+    }
+
+    [AvaloniaFact]
+    public void MoreExplainsTheSystemPolicyWithoutChangingTheUserCheckbox()
+    {
+        var motion = new MotionSettings();
+        var screen = new MoreScreen(isDemo: true, motion);
+        var window = new Window { Width = 390, Height = 844, Content = screen };
+        try
+        {
+            window.Show();
+            motion.SystemReduceMotion = true;
+            Assert.False(screen.FindControl<CheckBox>("ReduceMotion")!.IsChecked);
+            var status = screen.FindControl<TextBlock>("SystemMotionStatus");
+            Assert.NotNull(status);
+            Assert.True(status.IsEffectivelyVisible);
+            Assert.Contains("device", status.Text);
+            motion.SystemReduceMotion = false;
+            Assert.False(status.IsVisible);
+        }
+        finally { window.Close(); }
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

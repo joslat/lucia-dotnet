@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Headless;
+using Avalonia.Controls.Presenters;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Lucia.Companion.App;
@@ -15,6 +17,63 @@ namespace Lucia.Companion.Tests;
 /// <summary>The test app starts with motion reduced so captures are deterministic; these tests turn it on deliberately.</summary>
 public sealed class MotionTests
 {
+    [AvaloniaFact]
+    public async Task ReenablingMotionAndNavigatingDoesNotLetAnOldCancellationHideTheNewPage()
+    {
+        var motion = MotionSettings.Current;
+        motion.ReduceMotion = false;
+        var shell = new CompanionShell(new HomeViewModel(SampleHome.Create()), store: null);
+        var window = new Window { Width = 390, Height = 844, Content = shell };
+        try
+        {
+            window.Show(); Dispatcher.UIThread.RunJobs();
+            shell.Navigate(ShellDestination.More); Dispatcher.UIThread.RunJobs();
+            await Task.Delay(35, TestContext.Current.CancellationToken);
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick(); Dispatcher.UIThread.RunJobs();
+            motion.SystemReduceMotion = true;
+            motion.SystemReduceMotion = false;
+            shell.Navigate(ShellDestination.Story);
+            for (var index = 0; index < 8; index++)
+            {
+                await Task.Delay(35, TestContext.Current.CancellationToken);
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick(); Dispatcher.UIThread.RunJobs();
+            }
+            var story = Assert.IsType<StoryScreen>(shell.CurrentScreen);
+            Assert.True(story.IsEffectivelyVisible);
+            Assert.All(story.GetVisualAncestors().TakeWhile(item => !ReferenceEquals(item, shell)), item => Assert.Equal(1, item.Opacity));
+        }
+        finally { motion.ReduceMotion = true; motion.SystemReduceMotion = false; window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public async Task ASystemMotionRequestSettlesANavigationFadeAlreadyInFlight()
+    {
+        var motion = MotionSettings.Current;
+        motion.ReduceMotion = false;
+        var shell = new CompanionShell(new HomeViewModel(SampleHome.Create()), store: null);
+        var window = new Window { Width = 390, Height = 844, Content = shell };
+        try
+        {
+            window.Show(); Dispatcher.UIThread.RunJobs();
+            shell.Navigate(ShellDestination.More); Dispatcher.UIThread.RunJobs();
+            var screen = Assert.IsType<MoreScreen>(shell.CurrentScreen);
+            var presenter = screen.GetVisualAncestors().OfType<ContentPresenter>().First();
+            for (var index = 0; index < 8 && (presenter.Opacity <= 0 || presenter.Opacity >= 1); index++)
+            {
+                await Task.Delay(15, TestContext.Current.CancellationToken);
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick(); Dispatcher.UIThread.RunJobs();
+            }
+            Assert.InRange(presenter.Opacity, .001, .999);
+            motion.SystemReduceMotion = true;
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick(); Dispatcher.UIThread.RunJobs();
+            Assert.Equal(1, presenter.Opacity);
+            Assert.False(screen.FindControl<CheckBox>("ReduceMotion")!.IsChecked);
+            Assert.True(screen.FindControl<TextBlock>("SystemMotionStatus")!.IsVisible);
+            Assert.Null(shell.FindControl<TransitioningContentControl>("ScreenHost")!.PageTransition);
+        }
+        finally { motion.ReduceMotion = true; motion.SystemReduceMotion = false; window.Close(); }
+    }
+
     [Fact]
     public void MotionRunsOnlyWhenNotReducedAndNotInTheBackground()
     {
@@ -47,7 +106,7 @@ public sealed class MotionTests
             var host = Assert.IsType<TransitioningContentControl>(shell.FindControl<ContentControl>("ScreenHost"));
             Assert.Null(host.PageTransition);
             motion.ReduceMotion = false;
-            var fade = Assert.IsType<CrossFade>(host.PageTransition);
+            var fade = Assert.IsType<CompanionCrossFade>(host.PageTransition);
             Assert.Equal(TimeSpan.FromMilliseconds(180), fade.Duration);
             motion.Pause();
             Assert.Null(host.PageTransition);

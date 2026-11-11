@@ -27,6 +27,9 @@ public sealed partial class HomeScreen : UserControl
     private bool actionsWereOpen;
     private bool detailWasOpen;
     private bool pointerInput;
+    private Control? pageInvoker;
+    private Vector overviewOffset;
+    private int pageNavigationVersion;
     public HomeViewModel State { get; }
     public bool IsExpanded => Bounds.Width >= 900;
     /// <summary>Phone shows the place page whenever detail is open; tablet only after the side pane's Detail.</summary>
@@ -43,10 +46,11 @@ public sealed partial class HomeScreen : UserControl
         State = state;
         AvaloniaXamlLoader.Load(this);
         var constellation = this.FindControl<HomeConstellation>("Constellation")!;
-        constellation.PlaceInvoked += State.SelectPlace;
-        constellation.ActionsRequested += State.OpenActionsFor;
-        constellation.PinRequested += id => { State.SelectPlace(id); State.TogglePin(); };
-        this.FindControl<AttentionList>("Attention")!.PlaceInvoked += State.SelectPlace;
+        constellation.PlaceInvoked += id => { RememberPlaceInvoker(id); State.SelectPlace(id); };
+        constellation.ActionsRequested += id => { RememberPlaceInvoker(id); State.OpenActionsFor(id); };
+        constellation.PinRequested += id => { RememberPlaceInvoker(id); State.SelectPlace(id); State.TogglePin(); };
+        var attention = this.FindControl<AttentionList>("Attention")!;
+        attention.PlaceInvoked += id => { pageInvoker = attention.Rows.FirstOrDefault(row => Equals(row.Tag, id)); State.SelectPlace(id); };
         this.FindControl<Button>("OpenEmptySetup")!.Click += (_, _) => SetupRequested?.Invoke();
         this.FindControl<Button>("ReviewAttention")!.Click += (_, _) =>
         {
@@ -60,13 +64,14 @@ public sealed partial class HomeScreen : UserControl
         page.ActionsRequested += State.OpenActions;
         page.StoryRequested += () => StoryRequested?.Invoke(null);
         this.FindControl<TodaySoFar>("TodaySoFar")!.StoryRequested += () => StoryRequested?.Invoke(null);
-        this.FindControl<PlaceDetail>("DesktopDetail")!.PageRequested += State.OpenPage;
+        var detail = this.FindControl<PlaceDetail>("DesktopDetail")!;
+        detail.PageRequested += () => { pageInvoker = detail.FindControl<Button>("OpenPlacePage"); State.OpenPage(); };
         this.FindControl<HomeSectionOrder>("SectionOrderEditor")!.OrderChanged += order => State.SetSectionOrder(order);
-        this.FindControl<PlaceDetail>("DesktopDetail")!.ActionsRequested += State.OpenActions;
+        detail.ActionsRequested += () => { pageInvoker = detail.FindControl<Button>("ActionsButton"); State.OpenActions(); };
 
         var actions = this.FindControl<BloomActions>("PlaceActions")!;
         actions.ActionRequested += action => Invoke(action, fromSlide: false);
-        constellation.HoldStarted += id => { pointerInput = true; actions.SetHoldActive(true); State.OpenActionsFor(id); };
+        constellation.HoldStarted += id => { RememberPlaceInvoker(id); pointerInput = true; actions.SetHoldActive(true); State.OpenActionsFor(id); };
         constellation.HoldMoved += args =>
         {
             if (this.FindControl<Popup>("ActionPopup")!.IsOpen) { actions.Arm(actions.ActionAt(args.GetPosition(actions))); }
@@ -165,6 +170,16 @@ public sealed partial class HomeScreen : UserControl
         side.IsVisible = IsExpanded;
         this.FindControl<Border>("DesktopDetailCard")!.IsVisible = IsExpanded && State.SelectedPlace is not null;
         var pageOpen = IsPageVisible;
+        if (pageOpen != detailWasOpen)
+        {
+            pageNavigationVersion++;
+            if (pageOpen)
+            {
+                overviewOffset = this.FindControl<ScrollViewer>("ContextScroll")!.Offset;
+                this.FindControl<ScrollViewer>("ContextScroll")!.Offset = default;
+            }
+            else { RestoreOverview(restoreFocus: false); }
+        }
         this.FindControl<ScrollViewer>("HomeScroll")!.IsVisible = !pageOpen;
         this.FindControl<ScrollViewer>("DetailScroll")!.IsVisible = pageOpen;
         this.FindControl<Grid>("HomeContext")!.IsVisible = !pageOpen;
@@ -207,10 +222,15 @@ public sealed partial class HomeScreen : UserControl
         }
         else if (pageOpen && !detailWasOpen)
         {
+            var version = pageNavigationVersion;
             this.FindControl<ScrollViewer>("DetailScroll")!.Offset = default;
             Dispatcher.UIThread.Post(() =>
             {
-                if (IsPageVisible && !State.IsActionsOpen) { this.FindControl<PlacePage>("PlacePage")!.FocusBack(); }
+                if (version == pageNavigationVersion && IsEffectivelyVisible && IsPageVisible && !State.IsActionsOpen)
+                {
+                    this.FindControl<ScrollViewer>("ContextScroll")!.Offset = default;
+                    this.FindControl<PlacePage>("PlacePage")!.FocusBack();
+                }
             }, DispatcherPriority.Loaded);
         }
 
@@ -388,12 +408,31 @@ public sealed partial class HomeScreen : UserControl
     private void ClosePage()
     {
         State.ClosePage();
-        this.FindControl<PlaceDetail>("DesktopDetail")!.FocusActions();
+        RestoreOverview(restoreFocus: true);
     }
 
     private void ReturnHome()
     {
         State.CloseDetail();
-        this.FindControl<HomeConstellation>("Constellation")!.FocusPlace(State.SelectedPlace?.Id);
+        RestoreOverview(restoreFocus: true);
+    }
+
+    private void RememberPlaceInvoker(string id) => pageInvoker = this.FindControl<HomeConstellation>("Constellation")!.Orbs.FirstOrDefault(orb => Equals(orb.Tag, id));
+
+    private void RestoreOverview(bool restoreFocus)
+    {
+        var version = ++pageNavigationVersion;
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (version != pageNavigationVersion || IsPageVisible || !IsEffectivelyVisible) { return; }
+            this.FindControl<ScrollViewer>("ContextScroll")!.Offset = overviewOffset;
+            if (!restoreFocus) { return; }
+            var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
+            if (focused is not null && !this.IsVisualAncestorOf(focused)) { return; }
+            if (pageInvoker is { IsEffectivelyVisible: true, IsEffectivelyEnabled: true } && this.IsVisualAncestorOf(pageInvoker))
+            { pageInvoker.Focus(); pageInvoker.BringIntoView(); }
+            else if (IsExpanded) { this.FindControl<PlaceDetail>("DesktopDetail")!.FocusActions(); }
+            else { this.FindControl<HomeConstellation>("Constellation")!.FocusPlace(State.SelectedPlace?.Id); }
+        }, DispatcherPriority.Loaded);
     }
 }

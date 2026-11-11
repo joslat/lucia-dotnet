@@ -33,6 +33,7 @@ public sealed partial class CompanionShell : UserControl
     private HomeCatalog? importCatalog;
     private bool refreshing;
     private Control? setupInvoker;
+    private readonly CompanionCrossFade pageTransition = new(TimeSpan.FromMilliseconds(180));
     private readonly Func<Func<Core.HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public HomeProfileSession ProfileSession => profileSession;
     public ShellNavigation Navigation => this.FindControl<ShellNavigation>("NavigationBar")!;
@@ -80,6 +81,7 @@ public sealed partial class CompanionShell : UserControl
             if (attachedTopLevel is not null) { attachedTopLevel.BackRequested -= OnBackRequested; }
             attachedTopLevel = null;
             MotionSettings.Current.Changed -= ApplyMotion;
+            pageTransition.Stop();
         };
         KeyDown += (_, args) =>
         {
@@ -103,8 +105,11 @@ public sealed partial class CompanionShell : UserControl
     }
 
     /// <summary>Destinations cross-fade in 180 ms; with reduced motion or in the background they switch at once.</summary>
-    private void ApplyMotion() =>
-        ((TransitioningContentControl)Host).PageTransition = MotionSettings.Current.IsEnabled ? new Avalonia.Animation.CrossFade(TimeSpan.FromMilliseconds(180)) : null;
+    private void ApplyMotion()
+    {
+        if (!MotionSettings.Current.IsEnabled) { pageTransition.Stop(); }
+        ((TransitioningContentControl)Host).PageTransition = MotionSettings.Current.IsEnabled ? pageTransition : null;
+    }
 
     private void ArrangeNavigation()
     {
