@@ -170,3 +170,15 @@ OperationProgress exposes one named text/status peer and no numeric descendants 
 Android Debug qualification contains a separately callable motion trace. An external runner supplies genuine simulator Home/resume, policy changes and touch input; it records actual app state and restores settings. It is excluded from the ordinary APK. UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
 
 <!-- cycle11-checkpoint:end -->
+
+<!-- cycle12-checkpoint:start -->
+
+## Android text actions and activity ownership
+
+Android ACTION_SET_TEXT now replaces the complete value, including empty and Unicode input. Instance-specific native identities keep repeated import rows distinct. Current-route, attachment, visibility, enabled, read-only and password checks protect editing. ACTION_FOCUS reaches the normal TextBox focus/input path and retains read-only selection access. Unrelated events, accessibility focus and other actions use the original provider/delegate. The activity restores its original delegate on teardown. Windows behavior and dependencies are unchanged.
+
+The adapter lives in Lucia.Companion.Android. [AndroidTextReplacement](Lucia.Companion.Android/AndroidTextReplacement.cs) owns the public view/delegate hook. [NativeTextFields](Lucia.Companion.Android/NativeTextFields.cs) owns eligible field identities. [TextReplacementProvider](Lucia.Companion.Android/TextReplacementProvider.cs) and [TextReplacementDelegate](Lucia.Companion.Android/TextReplacementDelegate.cs) preserve the existing native bridge. Debug-only qualification is excluded from the ordinary manifest.
+
+Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
+
+<!-- cycle12-checkpoint:end -->

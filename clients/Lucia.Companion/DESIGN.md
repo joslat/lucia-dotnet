@@ -713,3 +713,15 @@ Main Home, place, More and Story panels assemble at screen/component presentatio
 The explicit user-requested motion preserves Constellation geometry, type, material and reading order. State words and exact values update immediately; the existing180/200ms colour easing,360ms reading emphasis and optional280ms Story cursor remain independent of entry. Native operation feedback never claims a completion percentage. UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
 
 <!-- cycle11-checkpoint:end -->
+
+<!-- cycle12-checkpoint:start -->
+
+## Native text interaction qualification
+
+Android ACTION_SET_TEXT now replaces the complete value, including empty and Unicode input. Instance-specific native identities keep repeated import rows distinct. Current-route, attachment, visibility, enabled, read-only and password checks protect editing. ACTION_FOCUS reaches the normal TextBox focus/input path and retains read-only selection access. Unrelated events, accessibility focus and other actions use the original provider/delegate. The activity restores its original delegate on teardown. Windows behavior and dependencies are unchanged.
+
+The requested panel assembly remains 220 ms with a 6-unit rise and a 28 ms reading-order stagger capped at 84 ms. Reduced motion settles immediately. Review rechecked finite entry/value/Bloom motion, interruption and the retained 14-phase/159-frame native viewer plus 411 installed lifecycle samples. The software recording establishes sequence, not hardware frame pacing.
+
+Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
+
+<!-- cycle12-checkpoint:end -->

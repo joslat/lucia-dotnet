@@ -2,7 +2,7 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) keeps six fixed axes. Current reviewed mean 9.38; target open.
+The owner requested iterative UI/UX improvement and dynamic verification against six fixed axes. Cycle 12 corrects Android accessible text replacement and real input focus. Native verification passes 907/910 with 3 existing opt-in skips. Installed Android passes 31 editing checks plus native validation, busy-status and Bloom focus checks. The fixed six-axis reviewed mean is 9.50/10. The app-only quality target is achieved. Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
 
 Cycle 11 adds the requested soft panel assembly and repairs native busy/validation semantics. The full native suite passes 907/910 with 3 existing skips and 10 new cases. Installed Android verifies focused error descriptions, retained validation, nonnumeric busy status and integrated motion/lifecycle behavior. Reviewed mean 9.38; the fixed 9.5 goal remains active.
 

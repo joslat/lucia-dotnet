@@ -13,9 +13,11 @@ namespace Lucia.Companion.Android;
 public sealed class MainActivity : AvaloniaMainActivity
 {
     private AndroidMotionObserver? motionObserver;
+    private AndroidTextReplacement? textReplacement;
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+        if (Avalonia.Application.Current is App.App app) { textReplacement = AndroidTextReplacement.Attach(Window?.DecorView, app.CreateActivityView()); }
         ApplyTextSizes();
         if (ContentResolver is { } resolver) { motionObserver = new AndroidMotionObserver(resolver); }
     }
@@ -36,6 +38,8 @@ public sealed class MainActivity : AvaloniaMainActivity
 
     protected override void OnDestroy()
     {
+        textReplacement?.Dispose();
+        textReplacement = null;
         motionObserver?.Stop();
         motionObserver?.Dispose();
         motionObserver = null;

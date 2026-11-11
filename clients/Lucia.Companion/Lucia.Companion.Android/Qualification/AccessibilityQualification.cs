@@ -67,6 +67,7 @@ public sealed partial class AccessibilityQualification : Instrumentation
             if (qualificationStage == "busy") { QualifyBusyControl(); return; }
             Click("ExploreDemo");
             if (qualificationStage == "motion") { QualifyMotion(); return; }
+            if (qualificationStage == "editing") { QualifyEditing(); return; }
             ClickWhere(node => node.Clickable && node.ClassName == "PlaceOrb" && node.Text?.StartsWith("Porch", StringComparison.Ordinal) == true);
             Click("PageActionsButton");
             using (WaitFor(node => IsId(node, "OpenButton"))) { }
@@ -95,12 +96,7 @@ public sealed partial class AccessibilityQualification : Instrumentation
             Click("NavMore");
             Click("OpenHomeSetup");
             stage = "invalid-place";
-            RunOnMainSync(() =>
-            {
-                var app = (Lucia.Companion.App.App)global::Avalonia.Application.Current!;
-                var editor = app.CreateActivityView().GetVisualDescendants().OfType<Lucia.Companion.App.Screens.HomeEditorScreen>().Single();
-                editor.FindControl<TextBox>("PlaceNameInput")!.Text = "";
-            });
+            ReplaceNativeField("PlaceNameInput", "");
             using (WaitFor(node => IsId(node, "PlaceNameInput") && node.Text is { } value && string.IsNullOrWhiteSpace(value))) { }
             Snapshot("invalid-input-before-save");
             Click("SaveHome");
@@ -109,23 +105,13 @@ public sealed partial class AccessibilityQualification : Instrumentation
             Snapshot("invalid-place");
             using (WaitFor(node => IsId(node, "PlaceNameInput") && node.ContentDescription?.Contains("Enter a place name.", StringComparison.Ordinal) == true)) { }
             VerifyValidationFocus("PlaceNameInput", "Enter a place name.");
-            RunOnMainSync(() =>
-            {
-                var app = (Lucia.Companion.App.App)global::Avalonia.Application.Current!;
-                var editor = app.CreateActivityView().GetVisualDescendants().OfType<Lucia.Companion.App.Screens.HomeEditorScreen>().Single();
-                editor.FindControl<TextBox>("PlaceNameInput")!.Text = "Living room";
-            });
+            ReplaceNativeField("PlaceNameInput", "Living room");
             Click("AddPlace");
             using (WaitFor(node => IsId(node, "PlaceNameInput") && node.Text == "New place"
                 && node.ContentDescription is { } description && description.Contains("this place", StringComparison.Ordinal)
                 && !description.Contains("Enter a place name.", StringComparison.Ordinal))) { }
             Snapshot("corrected-place");
-            RunOnMainSync(() =>
-            {
-                var app = (Lucia.Companion.App.App)global::Avalonia.Application.Current!;
-                var editor = app.CreateActivityView().GetVisualDescendants().OfType<Lucia.Companion.App.Screens.HomeEditorScreen>().Single();
-                editor.FindControl<TextBox>("HomeNameInput")!.Text = "";
-            });
+            ReplaceNativeField("HomeNameInput", "");
             Click("SaveHome");
             using (WaitFor(node => IsId(node, "HomeNameInput") && node.ContentDescription?.Contains("Enter a home name.", StringComparison.Ordinal) == true)) { }
             Snapshot("invalid-home");
@@ -139,7 +125,7 @@ public sealed partial class AccessibilityQualification : Instrumentation
         catch (Exception error)
         {
             failure = error.ToString();
-            if (automation is not null) { try { Snapshot("failed-" + stage); } catch (Exception snapshotError) { failure += "\nSnapshot: " + snapshotError.Message; } }
+            if (automation is not null && qualificationStage != "editing") { try { Snapshot("failed-" + stage); } catch (Exception snapshotError) { failure += "\nSnapshot: " + snapshotError.Message; } }
         }
         finally
         {
@@ -159,10 +145,10 @@ public sealed partial class AccessibilityQualification : Instrumentation
             var report = JsonSerializer.Serialize(new { schema = 1, qualificationStage, failure, completed = failure is null,
                 scope = "Installed API36 software emulator; Android accessibility actions, not TalkBack traversal or speech",
                 dontSuppressAccessibilityServices = true, accessibilityEnabled = manager?.IsEnabled,
-                invalidDraftPreparation = qualificationStage == "all" ? "Debug-only UI-thread field seed, verified in the native tree before native Save click. This is not a native text-editing claim." : "Not used in this stage.",
+                invalidDraftPreparation = qualificationStage == "all" ? "Native ACTION_SET_TEXT replacement, verified in the native tree before native Save click." : "Not used in this stage.",
                 originalTouchExploration, focusTouchExploration, restoredTouchExploration,
                 touchExplorationRestored = restoredTouchExploration == originalTouchExploration,
-                snapshots, focusChecks, validationFocusChecks, events = observed, motionSamples, motionMarkers }, new JsonSerializerOptions { WriteIndented = true });
+                snapshots, focusChecks, validationFocusChecks, editingChecks, events = observed, motionSamples, motionMarkers }, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(Path.Combine(TargetContext!.FilesDir!.AbsolutePath, "accessibility-qualification.json"), report);
             foreach (var node in retained) { node.Dispose(); }
             using var result = new Bundle();
@@ -208,6 +194,12 @@ public sealed partial class AccessibilityQualification : Instrumentation
     {
         var change = args.Event;
         if (change is null || change.PackageName != TargetContext?.PackageName) { return; }
+        // Editing fixtures include a secure field. Retain event types only, never field contents.
+        if (qualificationStage == "editing")
+        {
+            lock (eventGate) { events.Add(new { stage, type = change.EventType.ToString() }); }
+            return;
+        }
         using var source = change.Source;
         lock (eventGate)
         {

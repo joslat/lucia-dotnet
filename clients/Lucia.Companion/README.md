@@ -14,7 +14,7 @@ Read [ARCHITECTURE.md](ARCHITECTURE.md) for project responsibilities, entry poin
 
 [UI-UX-QUALITY.md](UI-UX-QUALITY.md) records the active 9.5/10 quality target and the independent review trend. Attention buttons now survive healthy report updates, Review reports reaches Needs you directly, and empty Home opens the existing setup flow. Recovery leads with retry and discloses removal choices. Story chapters use the visible day's model; report selection and live Bloom text changes retain focus. Native appearance controls share the approved accent. Place-page Back restores the overview scroll position and invoker; disabling motion settles an active screen fade immediately. A keyboard-aware root viewport keeps setup commands above the IME. Android native context requests cannot stack a second menu during a Bloom hold.
 
-The owner deferred physical checks and requested simulation. Cycle 11 adds the requested soft panel assembly and repairs native busy/validation semantics. The full native suite passes 907/910 with 3 existing skips and 10 new cases. Installed Android verifies focused error descriptions, retained validation, nonnumeric busy status and integrated motion/lifecycle behavior. Reviewed mean 9.38; the fixed 9.5 goal remains active. UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
+The owner deferred physical checks and requested simulation. Cycle 12 corrects Android accessible text replacement and real input focus. Native verification passes 907/910 with 3 existing opt-in skips. Installed Android passes 31 editing checks plus native validation, busy-status and Bloom focus checks. The fixed six-axis reviewed mean is 9.50/10. The app-only quality target is achieved. Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
 
 Home now explains the leading report directly. Idle save guidance stays in More and setup; real saving and failures stay visible globally. Completed saves confirm locally without resurfacing after navigation. Week names its mode and selected day. Enlarged Week rows and rail labels adapt to measured text, preserving native actions and focus. Short windows use bottom navigation when a measured rail cannot fit. Save-only progress waits 150 ms before appearing; failures stay immediate. Recovery actions wrap at enlarged text, with a concise summary and complete named Details disclosure. Story explains Day and Week interactions above each visualization. Saving setup closes a removed place's full page and preserves it when the place remains.
 
@@ -407,3 +407,15 @@ Main Home, place, More and Story panels assemble at screen/component presentatio
 UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
 
 <!-- cycle11-checkpoint:end -->
+
+<!-- cycle12-checkpoint:start -->
+
+## Current UI and input checkpoint
+
+Cycle 12 corrects Android accessible text replacement and real input focus. Native verification passes 907/910 with 3 existing opt-in skips. Installed Android passes 31 editing checks plus native validation, busy-status and Bloom focus checks. The fixed six-axis reviewed mean is 9.50/10. The app-only quality target is achieved.
+
+The requested panel assembly remains 220 ms with a 6-unit rise and a 28 ms reading-order stagger capped at 84 ms. Reduced motion settles immediately. Review rechecked finite entry/value/Bloom motion, interruption and the retained 14-phase/159-frame native viewer plus 411 installed lifecycle samples. The software recording establishes sequence, not hardware frame pacing.
+
+Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
+
+<!-- cycle12-checkpoint:end -->

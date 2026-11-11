@@ -161,3 +161,15 @@ OperationProgress exposes one named text/status peer and no numeric descendants 
 UX19 will address the known Android accessibility SetText replacement limitation and qualify any remaining interaction gap. Physical touch, spoken TalkBack, traversal and hardware frame pacing remain owner-deferred, separate qualification work.
 
 <!-- cycle11-checkpoint:end -->
+
+<!-- cycle12-checkpoint:start -->
+
+## UX19 delivery and current quality target
+
+Cycle 12 corrects Android accessible text replacement and real input focus. Native verification passes 907/910 with 3 existing opt-in skips. Installed Android passes 31 editing checks plus native validation, busy-status and Bloom focus checks. The fixed six-axis reviewed mean is 9.50/10. The app-only quality target is achieved.
+
+Android ACTION_SET_TEXT now replaces the complete value, including empty and Unicode input. Instance-specific native identities keep repeated import rows distinct. Current-route, attachment, visibility, enabled, read-only and password checks protect editing. ACTION_FOCUS reaches the normal TextBox focus/input path and retains read-only selection access. Unrelated events, accessibility focus and other actions use the original provider/delegate. The activity restores its original delegate on teardown. Windows behavior and dependencies are unchanged.
+
+Physical touch, spoken TalkBack/traversal and hardware frame pacing remain owner-deferred qualification. Server/v2 work stays on hold. No desktop control was used.
+
+<!-- cycle12-checkpoint:end -->
