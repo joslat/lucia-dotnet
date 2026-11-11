@@ -41,7 +41,7 @@
             <StackPanel Width="112" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2" IsHitTestVisible="False">
               <TextBlock Name="CenterTime" TextAlignment="Center" FontFamily="{DynamicResource DisplayFont}" FontSize="{DynamicResource TextSize32}" />
               <TextBlock Name="CenterOffset" TextAlignment="Center" Classes="muted" FontSize="{DynamicResource TextSize12}" />
-              <TextBlock Name="CenterCaption" Text="Selected time" TextAlignment="Center" Classes="muted" FontSize="{DynamicResource TextSize12}" />
+              <TextBlock Name="CenterCaption" Text="Selected time" TextAlignment="Center" TextWrapping="Wrap" Classes="muted" FontSize="{DynamicResource TextSize12}" />
             </StackPanel>
             <TextBlock Name="TopTime" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="{DynamicResource TextSize12}" Classes="muted" />
             <TextBlock Name="QuarterTime" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="{DynamicResource TextSize12}" Classes="muted" />

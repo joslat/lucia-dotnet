@@ -46,7 +46,7 @@ public sealed class StoryDetailTests
             ShellNavigationTests.Navigate(shell, ShellDestination.Story);
             var story = Assert.IsType<StoryScreen>(shell.CurrentScreen);
             Assert.Equal("14:00", story.FindControl<TextBlock>("CenterTime")!.Text);
-            Assert.Equal("now · 3 need you", story.FindControl<TextBlock>("CenterCaption")!.Text);
+            Assert.Equal("now\nHome: 3 need you", story.FindControl<TextBlock>("CenterCaption")!.Text);
             Assert.True(story.FindControl<StoryOrbit>("Orbit")!.HasFuture);
 
             var lane = story.FindControl<WeekDayLane>("LuciaLane")!;
@@ -59,7 +59,7 @@ public sealed class StoryDetailTests
 
             var stats = story.FindControl<TextBlock>("StatsLine")!;
             Assert.Equal(story.IsExpanded, stats.IsVisible);
-            Assert.Equal("5 reports · 1 Lucia request · 3 reasons for attention", stats.Text);
+            Assert.Equal("5 reports · 1 Lucia request across your home · Home now: 3 need you", stats.Text);
             if (width == 834)
             {
                 Assert.True(story.IsExpanded);
@@ -76,8 +76,8 @@ public sealed class StoryDetailTests
             story.FindControl<Button>("PreviousDate")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Dispatcher.UIThread.RunJobs();
             Assert.False(story.FindControl<StoryOrbit>("Orbit")!.HasFuture);
-            Assert.NotEqual("now · 3 need you", story.FindControl<TextBlock>("CenterCaption")!.Text);
-            Assert.Equal("7 reports · 1 Lucia request", story.FindControl<TextBlock>("StatsLine")!.Text);
+            Assert.NotEqual("now\nHome: 3 need you", story.FindControl<TextBlock>("CenterCaption")!.Text);
+            Assert.Equal("7 reports · 1 Lucia request across your home", story.FindControl<TextBlock>("StatsLine")!.Text);
         }
         finally { window.Close(); }
     }

@@ -74,21 +74,27 @@ public sealed partial class StoryScreen : UserControl
         var recorded = week.Sum(day => day.ReportCount);
         var requests = week.Sum(day => day.Intervals.Count(interval => interval.Kind == StoryKind.Lucia && interval.Quality == StoryQuality.Recorded));
         var stats = this.FindControl<TextBlock>("StatsLine")!;
-        stats.Text = $"{(recorded == 1 ? "1 report" : $"{recorded} reports")} · {(requests == 1 ? "1 Lucia request" : $"{requests} Lucia requests")} this week";
+        stats.Text = $"{(recorded == 1 ? "1 report" : $"{recorded} reports")} · {(requests == 1 ? "1 Lucia request" : $"{requests} Lucia requests")} {ReportScope} this week";
         stats.IsVisible = IsExpanded;
     }
 
     /// <summary>The wide-layout summary: reports and Lucia requests in this day, and, for today only, how many places need you now.</summary>
     private void RefreshStats(int attention)
     {
-        var recorded = State.Day.Intervals.Count(interval => interval.Quality == StoryQuality.Recorded);
-        var requests = State.Day.Intervals.Count(interval => interval.Kind == StoryKind.Lucia && interval.Quality == StoryQuality.Recorded);
-        var parts = new List<string> { recorded == 1 ? "1 report" : $"{recorded} reports", requests == 1 ? "1 Lucia request" : $"{requests} Lucia requests" };
-        if (State.Day.Now is not null && attention > 0) { parts.Add(attention == 1 ? "1 reason for attention" : $"{attention} reasons for attention"); }
+        var intervals = State.VisibleIntervals;
+        var recorded = intervals.Count(interval => interval.Quality == StoryQuality.Recorded);
+        var requests = intervals.Count(interval => interval.Kind == StoryKind.Lucia && interval.Quality == StoryQuality.Recorded);
+        var parts = new List<string>
+        {
+            $"{(recorded == 1 ? "1 report" : $"{recorded} reports")} · {(requests == 1 ? "1 Lucia request" : $"{requests} Lucia requests")} {ReportScope}"
+        };
+        if (State.Day.Now is not null && attention > 0) { parts.Add($"Home now: {attention} need you"); }
         var stats = this.FindControl<TextBlock>("StatsLine")!;
         stats.Text = string.Join(" · ", parts);
         stats.IsVisible = IsExpanded;
     }
+
+    private string ReportScope => State.SelectedPlaceId is null ? "across your home" : "for this place";
 
     /// <summary>Lucia's requests across the visible places on one lane, so they can be read apart from the place tracks.</summary>
     private void RefreshLuciaLane()
@@ -103,6 +109,15 @@ public sealed partial class StoryScreen : UserControl
 
     /// <summary>Moves to today's day view when this Story can navigate dates.</summary>
     public void ShowToday() => navigator?.ShowDay(navigator.Today);
+
+    /// <summary>Explicit History entry starts at its day context. Ordinary tab return never calls this.</summary>
+    public void RevealHistoryContext()
+    {
+        var scroll = this.FindControl<ScrollViewer>("StoryScroll")!;
+        scroll.Offset = default;
+        this.FindControl<RadioButton>("DayMode")!.Focus();
+        scroll.Offset = default;
+    }
 
     private void StateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args) => Refresh();
 
@@ -182,7 +197,7 @@ public sealed partial class StoryScreen : UserControl
             var atNow = State.Day.Now is { } now && State.SelectedInstant == now;
             var attention = navigator?.AttentionCount ?? 0;
             this.FindControl<TextBlock>("CenterCaption")!.Text = largeClock ? "Time\nbelow"
-                : atNow ? attention > 0 ? $"now · {attention} need you" : "now"
+                : atNow ? attention > 0 ? $"now\nHome: {attention} need you" : "now"
                 : State.SelectedChapterId is null ? "Selected time" : "Chapter start";
             RefreshStats(attention);
             RefreshLuciaLane();

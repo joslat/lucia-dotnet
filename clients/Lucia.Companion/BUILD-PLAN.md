@@ -2,13 +2,13 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. The current installed review mean is 9.22; the target remains open.
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. Current installed review mean 9.23; the target remains open.
 
-Cycle 8 delivers UX14: a bounded places list on expanded layouts and a persistent chooser on compact layouts. Lower fields keep their editing context. Native 853/856, 3 existing skips, 37 new cases; installed APK confirmation. Mean 9.22, fixed 9.5 target active.
+Cycle 9 delivers UX15: explicit History entry reveals today and the active place; ordinary Story-tab return preserves reading position. Day/Week totals follow the selected place, with present Home attention explicitly qualified. Native 877/880, 3 existing skips and 24 new cases; installed APK confirmed. Mean 9.23, fixed 9.5 target active.
 
 The owner has no physical device available and requested simulation. Continue app-only runtime interaction assessment now; hardware touch, TalkBack, predictive Back and frame timing remain deferred gates. The server/v2 hold remains in force. No review score or passing test count completes the full application or authorizes server changes.
 
-UX12, UX13 and UX14 are delivered. UX15 will reveal today's header and the active place on explicit History entry. Reveal changed filters horizontally, preserve ordinary Story-tab reading position and retain native focus, enlarged text and All places.
+UX12 through UX15 are delivered. UX16 will compare current primary screens with their approved references, inspect finer current motion frames and assess accessibility identity, focus, selection descriptions and error announcements. Use evidence to justify further changes and scores; accepted truth/adaptive choices are not fidelity defects.
 
 ## UI and UX refinement, 11 November 2026
 

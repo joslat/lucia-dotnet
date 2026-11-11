@@ -521,13 +521,13 @@
       "scorecard": "../UI-UX-QUALITY.md",
       "targetMean": 9.5,
       "baselineMean": 8.13,
-      "reviewMean": 9.22,
+      "reviewMean": 9.23,
       "status": "Active; target not achieved",
       "controlContinuity": "Retained attention actions and day-scoped Story timelines; live Bloom action focus; hidden holds and overlays cancel.",
       "actionHierarchy": "Home leads with the actual highest-priority reason. Idle storage guidance is local; pending saves and recovery stay global.",
       "nativeAccent": "Fluent native selections share Light #8c5b0f and Dark #e2a84b with approved semantic accent brushes.",
       "limits": "Native input/render evidence does not qualify physical-device motion, screen-reader behavior or frame time.",
-      "cycle": 8,
+      "cycle": 9,
       "continuity": "Place-page entry starts at its own top; Back restores overview offset and a valid visible invoker with guarded deferred focus.",
       "switching": "Owned native opacity transitions settle synchronously when stopped; a previous cancellation cannot hide a newer destination.",
       "systemMotion": "Android reads and observes the current animator duration scale independently of the saved user preference.",
@@ -541,11 +541,13 @@
       "interactionGuidance": "Visible mode-specific Day/Week instructions precede the visualization and wrap with mapped text.",
       "removedSelection": "Setup removal of the selected place requests a clear overview anchor; surviving selection preserves page/reading position.",
       "initialSourceCaptureMean": 9.12,
-      "pendingRuntimeFindings": "UX14 resolved. UX15 orients explicit History entry and reveals active Story filters while preserving ordinary reading continuity. Fixed 9.5 target remains active.",
+      "pendingRuntimeFindings": "UX15 resolved. UX16 supplies matched primary-screen comparison, fine current motion frames and direct accessibility qualification before further design/scoring changes.",
       "removalDisclosure": "Named question and safe Keep focus; guarded after-layout reveal and return to Remove/selector/Add.",
       "holdGuidance": "Tap for readings. Hold for actions. Hidden for empty Home.",
       "holdInput": "Full transparent hit backdrop; deliberate movement measured in captured TopLevel. Stationary release invokes nothing; return to origin clears slide intent.",
-      "setupContext": "Bounded expanded master; persistent compact chooser; measured-height fallback. Native item identity, draft validation and focused management actions retained."
+      "setupContext": "Bounded expanded master; persistent compact chooser; measured-height fallback. Native item identity, draft validation and focused management actions retained.",
+      "storyEntry": "Explicit History day-context reveal guarded by navigation, lifecycle, input, semantic state and focus. Ordinary tab return preserves reading. Horizontal filter reveal never scrolls the vertical reader.",
+      "storyScope": "Day/Week report and request totals follow the place. Home now explicitly qualifies present whole-home attention."
     }
   },
   "components": [

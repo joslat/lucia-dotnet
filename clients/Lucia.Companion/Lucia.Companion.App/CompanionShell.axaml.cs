@@ -41,6 +41,7 @@ public sealed partial class CompanionShell : UserControl
     private Control? setupInvoker;
     private long observedConfirmation;
     private bool navigationLayoutQueued;
+    private int navigationVersion;
     private static readonly TimeSpan SaveNoticeDelay = TimeSpan.FromMilliseconds(150);
     private readonly DispatcherTimer saveNoticeTimer = new();
     private readonly System.Diagnostics.Stopwatch saveNoticeClock = new();
@@ -72,6 +73,7 @@ public sealed partial class CompanionShell : UserControl
         if (!state.IsDemo && connection is not null && identity is not null)
         { sharedLayoutFactory = draft => new(connection, identity, draft); }
         AvaloniaXamlLoader.Load(this);
+        Host.PropertyChanged += (_, args) => { if (args.Property == ContentControl.ContentProperty) { navigationVersion++; } };
         Host.Content = home;
         Navigation.DestinationRequested += Navigate;
         Navigation.TextMetricsChanged += RequestNavigationLayout;
@@ -115,6 +117,7 @@ public sealed partial class CompanionShell : UserControl
 
     public void Navigate(ShellDestination destination)
     {
+        navigationVersion++;
         SetStorageDetails(false);
         home.SetSaveFeedback(null);
         switch (destination)
@@ -266,7 +269,14 @@ public sealed partial class CompanionShell : UserControl
         if (!ReferenceEquals(storyHome, home.State.Home))
         {
             storyHome = home.State.Home;
-            story = new StoryScreen(SampleStory.Navigator(storyHome));
+            var screen = new StoryScreen(SampleStory.Navigator(storyHome));
+            story = screen;
+            void InterruptEntry() { if (ReferenceEquals(Host.Content, screen)) { navigationVersion++; } }
+            screen.DetachedFromVisualTree += (_, _) => InterruptEntry();
+            screen.AddHandler(PointerPressedEvent, (_, _) => InterruptEntry(), RoutingStrategies.Tunnel, handledEventsToo: true);
+            screen.AddHandler(PointerWheelChangedEvent, (_, _) => InterruptEntry(), RoutingStrategies.Tunnel, handledEventsToo: true);
+            screen.AddHandler(KeyDownEvent, (_, _) => InterruptEntry(), RoutingStrategies.Tunnel, handledEventsToo: true);
+            _ = new PresentationVisibility(screen, () => { if (!screen.IsEffectivelyVisible) { InterruptEntry(); } });
         }
         Host.Content = story;
     }
@@ -281,6 +291,23 @@ public sealed partial class CompanionShell : UserControl
         if (Host.Content is not StoryScreen screen) { return; }
         screen.ShowToday();
         if (placeId is null || screen.State.Day.Places.Any(place => place.Id == placeId)) { screen.State.SelectPlace(placeId); }
+        var version = navigationVersion;
+        var model = screen.State;
+        var filter = model.SelectedPlaceId;
+        var instant = model.SelectedInstant;
+        var chapter = model.SelectedChapterId;
+        var root = TopLevel.GetTopLevel(screen);
+        var expectedFocus = root?.FocusManager?.GetFocusedElement();
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (version != navigationVersion || !ReferenceEquals(Host.Content, screen) || !screen.IsEffectivelyVisible
+                || !ReferenceEquals(screen.State, model) || model.SelectedPlaceId != filter || model.SelectedInstant != instant
+                || model.SelectedChapterId != chapter || screen.FindControl<RadioButton>("DayMode")!.IsChecked != true
+                || root is null || !ReferenceEquals(root, TopLevel.GetTopLevel(screen))) { return; }
+            var current = root.FocusManager?.GetFocusedElement();
+            if (!ReferenceEquals(current, expectedFocus) && current is Control { IsEffectivelyVisible: true, IsEffectivelyEnabled: true }) { return; }
+            screen.RevealHistoryContext();
+        }, DispatcherPriority.Loaded);
     }
 
     private LuciaScreen LuciaDestination()

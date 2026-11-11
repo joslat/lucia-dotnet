@@ -145,7 +145,7 @@ public sealed class ReviewRegressionTests
             Dispatcher.UIThread.RunJobs();
             var week = view.FindControl<StoryWeek>("Week")!;
             var expected = SampleStory.Dates.Sum(date => SampleStory.Day(SampleHome.Create(), date).Intervals.Count(interval => interval.Quality == StoryQuality.Recorded));
-            Assert.Equal($"{expected} reports · 7 Lucia requests this week", view.FindControl<TextBlock>("StatsLine")!.Text);
+            Assert.Equal($"{expected} reports · 7 Lucia requests across your home this week", view.FindControl<TextBlock>("StatsLine")!.Text);
             var first = week.Rows[0];
             MotionSettings.Current.ReduceMotion = false;
             MotionSettings.Current.ReduceMotion = true;
