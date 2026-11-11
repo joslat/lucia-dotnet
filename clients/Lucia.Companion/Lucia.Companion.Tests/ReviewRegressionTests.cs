@@ -44,7 +44,7 @@ public sealed class ReviewRegressionTests
         try
         {
             window.Show();
-            Assert.Equal("Utility first. 1 of the other 3 places has nothing to report.", view.FindControl<TextBlock>("AttentionSummary")!.Text);
+            Assert.Equal("Utility. A sample water sensor reports a leak.", view.FindControl<TextBlock>("AttentionSummary")!.Text);
         }
         finally { window.Close(); }
     }

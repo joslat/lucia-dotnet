@@ -6,17 +6,17 @@ Updated 11 November 2026. The owner requested autonomous improvement, dynamic ve
 
 These are reviewer judgments, supported by evidence, rather than benchmark measurements. Keep the same six dimensions and equal weighting between reviews. Do not add a high-scoring dimension to raise the mean, treat a passing test count as a design score, or round a result below 9.5 up to the target.
 
-| Dimension | Baseline | Cycle 1 | Cycle 2 | Evidence and remaining limit |
-|---|---:|---:|---:|---|
-| UI design | 8.4 | 8.7 | 8.7 | Constellation composition, typography, themes and native accent alignment; idle storage text still takes reading space |
-| UX | 8.0 | 8.8 | 9.0 | Direct attention/setup routes, recovery and place-page return continuity; Home summary could lead with the actual reason |
-| Usability | 8.1 | 9.0 | 9.2 | Native input establishes retained actions, correct Story dates, scroll return and cancellation; Week wording still needs refinement |
-| Design fidelity | 8.5 | 8.7 | 8.7 | Approved identity and saved section order remain; emulator phone and expanded layouts use the shared native controls |
-| Motion and switching | 8.0 | 8.3 | 8.7 | In-flight fades settle immediately, newer navigation wins, and Android system motion policy applies live; hardware frame pacing remains unmeasured |
-| Accessibility | 7.8 | 8.5 | 8.9 | Focus continuity, large text, keyboard-aware viewport and 48-unit targets; TalkBack traversal and speech remain unqualified |
-| **Mean** | **8.13** | **8.67** | **8.87** | **Target not achieved** |
+| Dimension | Baseline | Cycle 1 | Cycle 2 | Cycle 3 | Evidence and remaining limit |
+|---|---:|---:|---:|---:|---|
+| UI design | 8.4 | 8.7 | 8.7 | 9.0 | Clearer Home reason, contextual storage and readable enlarged Week/rail |
+| UX | 8.0 | 8.8 | 9.0 | 9.2 | Local confirmations, global recovery and explicit setup drafts; navigation does not replay old success |
+| Usability | 8.1 | 9.0 | 9.2 | 9.4 | Queued saves, retry focus, conflict choices and live text reflow retain working actions |
+| Design fidelity | 8.5 | 8.7 | 8.7 | 8.9 | Constellation, saved order, type and semantic brushes remain; rail grows through native measurement |
+| Motion and switching | 8.0 | 8.3 | 8.7 | 8.7 | Prior interruption and motion-policy evidence remains; cycle 3 supplies no new frame-pacing qualification |
+| Accessibility | 7.8 | 8.5 | 8.9 | 9.1 | Written selected day, correct mode title, whole report words, separated ruler ticks and enlarged rail labels; TalkBack remains deferred |
+| **Mean** | **8.13** | **8.67** | **8.87** | **9.05** | **Target not achieved** |
 
-The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Later emulator corrections and test confirmation do not automatically earn additional points. A subsequent review must justify any increase.
+The cycle-1 scores were recorded at the first combined visual inspection. Cycle 2 records the next independent review. Cycle 3 initially scored 8.95; its confirmation review scored 9.05 after enlarged Week and rail defects were corrected. Test counts do not automatically earn points. A subsequent review must justify any increase.
 
 Baseline Assessment A and technical Assessment B ran independently. The technical reviewer found a real Story cache-identity bug; native input reproduced it before the fix. The web detector returned no findings because it supports neither AXAML nor C#. It scanned zero applicable native files and provides no native quality claim. A second source review found no further concrete P0/P1/P2 regression in the implemented changes.
 
@@ -45,6 +45,20 @@ The native suite passes 734 of 737 cases, with 3 existing opt-in wire skips and 
 
 Runtime checks include phone and expanded layouts, light/dark appearance, Android system text at 2.0, real IME visibility, draft retention/discard, system Back, consecutive Story dates, Week navigation and system animation policy changes. Screenshots, accessibility XML and runtime settings are retained. The hierarchy exposes named actions; it does not prove spoken TalkBack output. Software-rendered emulator startup and sparse framework frame samples do not qualify the app's animation frame budget.
 
+## Cycle 3 and context clarity
+
+Home leads with the highest-priority place's actual report reason. Counts, saved section order, source labels and the no-attention safety qualification remain intact. Story's title follows Day or Week, and its selected day is written in the accessible action name.
+
+Idle storage guidance lives under Your home in More. Setup identifies its draft and names Save setup explicitly. The global notice appears for actual loading or saving, failures, conflicts and unreadable files. Queued saves remain busy until the final checked snapshot settles; intermediate writes still advance the revision. Conflict review cannot overtake a draining queue. Ordinary saves keep navigation and editing available.
+
+Only the latest completed outcome produces a local Home or place-page confirmation. Navigation consumes it without replaying it later. Both conflict choices confirm their actual outcome when returning from the same review. Retry repairs keyboard focus to the current status, then to the selected navigation action when recovery disappears. Session-only changes never claim a durable save.
+
+The review found fixed-width Week text and rail labels breaking at enlarged text. Week now measures its text, keeps report words whole and places the lane on a second row when necessary. Ruler tick density follows available space. The rail retains an 88-unit minimum and grows through native measurement with one-line labels. Live reflow retains focused day actions.
+
+Final native verification passes 754 of 757 cases, with the same 3 opt-in wire skips and 20 new cases. Twelve initial clarity failures and further retry/page/conflict/reflow failures were recorded before their corrections. The first full run hit an existing 100 ms hidden-hold test failure; its isolated run passed. That test now uses the production 450 ms threshold, checks charge clearing immediately on hide, and waits 600 ms beyond the threshold. The final full run passes. Android and installed-emulator results are recorded in the local ledger.
+
+The design confirmation resolved its two material findings, and the technical confirmation found no concrete P0/P1/P2 issue in that fix batch. The review covers the inspected changes; it does not prove the entire goal complete.
+
 ## Implemented in cycle 1
 
 - Retain uniquely identified attention buttons and their internal text controls. Healthy report changes preserve focus and a press in progress. Removed focused entries use a deliberate remaining-row or heading fallback.
@@ -58,6 +72,6 @@ Runtime checks include phone and expanded layouts, light/dark appearance, Androi
 
 ## Next review
 
-Continue the same scorecard with the concrete findings from cycle 2. Lead Home's summary with the highest-priority place's actual reason, move idle storage context into More/setup while keeping progress and failures visible, and make Story's Day/Week heading and selected-day accessibility text match the active mode. Preserve checked saves, current data and saved section order. Physical touch, TalkBack, broader safe areas, predictive Back and hardware frame timing remain owner-deferred checks. Keep the goal active; do not replace missing evidence with decorative animation or a manufactured 9.5 score.
+Continue app-only runtime assessment against the same scorecard, including pending-operation feedback, navigation/value-change motion and compact-window journeys. The cycle-2 findings and cycle-3 confirmation fixes are implemented. Further changes should address observed problems, not add decoration to chase a number. Physical touch, TalkBack, broader safe areas, predictive Back and hardware frame timing remain owner-deferred. Keep the 9.5 goal active until evidence supports it.
 
 Connected history, richer service stages, Engine room and the v2 identity port remain separately gated. This quality goal does not authorize changing those dependencies.

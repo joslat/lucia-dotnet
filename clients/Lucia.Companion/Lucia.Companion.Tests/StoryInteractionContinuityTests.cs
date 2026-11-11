@@ -95,16 +95,21 @@ public sealed class StoryInteractionContinuityTests
         {
             window.Show(); Dispatcher.UIThread.RunJobs();
             var constellation = home.FindControl<HomeConstellation>("Constellation")!;
-            constellation.HoldDelay = TimeSpan.FromMilliseconds(100);
+            // Use the production threshold: the headless press helper may flush a rendered frame before returning.
+            constellation.HoldDelay = TimeSpan.FromMilliseconds(450);
             var opened = 0;
-            constellation.HoldStarted += _ => opened++;
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            double? openedAt = null;
+            constellation.HoldStarted += _ => { opened++; openedAt = watch.Elapsed.TotalMilliseconds; };
             var orb = constellation.Orbs.First();
             var center = orb.TranslatePoint(new Point(orb.Bounds.Width / 2, orb.Bounds.Height / 2), window)!.Value;
             window.MouseMove(center); window.MouseDown(center, MouseButton.Left);
+            var hiddenAt = watch.Elapsed.TotalMilliseconds;
             parent.IsVisible = false;
-            await Task.Delay(180, TestContext.Current.CancellationToken);
+            Assert.Equal(0, orb.HoldProgress);
+            await Task.Delay(600, TestContext.Current.CancellationToken);
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(0, opened);
+            Assert.True(opened == 0, $"Hold opened at {openedAt:0} ms; ancestor hid at {hiddenAt:0} ms.");
             Assert.Equal(0, orb.HoldProgress);
             Assert.False(constellation.IsHolding);
             Assert.False(home.FindControl<Popup>("ActionPopup")!.IsOpen);

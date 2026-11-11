@@ -4,7 +4,7 @@
   <DockPanel Name="ShellLayout">
     <c:ShellNavigation Name="NavigationBar" DockPanel.Dock="Bottom" />
     <StackPanel Name="StorageFooter" DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="8">
-      <TextBlock Name="StorageStatus" Classes="muted" FontSize="{DynamicResource TextSize13}" />
+      <TextBlock Name="StorageStatus" Classes="muted" FontSize="{DynamicResource TextSize13}" Focusable="True" AutomationProperties.LiveSetting="Polite" />
       <c:OperationProgress Name="LocalProfileOperationProgress" />
       <Button Name="RetrySaveButton" Content="Retry save" Classes="theme" IsVisible="False" HorizontalAlignment="Left" />
       <Button Name="ReviewSaveConflict" Classes="theme" IsVisible="False" HorizontalAlignment="Left" AutomationProperties.Name="Review save conflict, both versions are preserved">

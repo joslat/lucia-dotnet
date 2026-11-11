@@ -20,6 +20,8 @@
       </ToggleButton>
     </Grid>
 
+    <TextBlock Name="PageSaveFeedback" Classes="muted" FontSize="{DynamicResource TextSize13}" IsVisible="False" AutomationProperties.LiveSetting="Polite" />
+
     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="18">
       <Grid Name="PlaceAnchor" Width="96" Height="96">
         <Ellipse Name="HeroFill" Fill="{DynamicResource ControlBrush}" />

@@ -38,6 +38,15 @@ public sealed partial class HomeScreen : UserControl
     public event Action<string?>? StoryRequested;
     public event Action? SetupRequested;
     public void SetSetupAvailable(bool available) => this.FindControl<Button>("OpenEmptySetup")!.IsEnabled = available;
+    public void SetSaveFeedback(string? text)
+    {
+        var feedback = this.FindControl<TextBlock>("HomeSaveFeedback")!;
+        feedback.Text = text;
+        feedback.IsVisible = !string.IsNullOrWhiteSpace(text);
+        var pageFeedback = this.FindControl<PlacePage>("PlacePage")!.FindControl<TextBlock>("PageSaveFeedback")!;
+        pageFeedback.Text = text;
+        pageFeedback.IsVisible = feedback.IsVisible;
+    }
 
     public HomeScreen() : this(new HomeViewModel(SampleHome.Create())) { }
 
@@ -245,8 +254,9 @@ public sealed partial class HomeScreen : UserControl
         var review = this.FindControl<Button>("ReviewAttention")!;
         review.IsVisible = attention.Count > 0;
         AutomationProperties.SetName(review, $"Review Needs you, {attention.Count} {(attention.Count == 1 ? "place" : "places")}");
-        this.FindControl<TextBlock>("AttentionSummary")!.Text = HomeAttention.Subline(attention.FirstOrDefault()?.Name, attention.Count, State.Home.Places.Count, State.IsDemo,
-            State.Home.Places.Count(place => place.State == PlaceState.Quiet));
+        this.FindControl<TextBlock>("AttentionSummary")!.Text = attention.FirstOrDefault() is { } leading
+            ? $"{leading.Name}. {leading.Reason}"
+            : HomeAttention.Subline(null, 0, State.Home.Places.Count, State.IsDemo, State.Home.Places.Count(place => place.State == PlaceState.Quiet));
         var date = this.FindControl<TextBlock>("HomeDate")!;
         date.IsVisible = State.ReportTime is not null;
         date.Text = State.ReportTime is { } time ? time.UtcDateTime.ToString("dddd d MMM · HH:mm 'UTC'", CultureInfo.InvariantCulture) : null;
@@ -269,7 +279,7 @@ public sealed partial class HomeScreen : UserControl
         var date = this.FindControl<TextBlock>("HomeDate")!;
         var name = this.FindControl<TextBlock>("HomeName")!;
         var badge = this.FindControl<Border>("DemoBadge")!;
-        var notice = this.FindControl<TextBlock>("SourceNotice")!;
+        var notice = this.FindControl<StackPanel>("SourceContext")!;
         var divider = this.FindControl<Border>("HeaderDivider")!;
         var title = this.FindControl<TextBlock>("AttentionHeadline")!;
         var expanded = IsExpanded;

@@ -35,7 +35,7 @@ public sealed class HomeHeaderTests
             var home = Assert.IsType<HomeScreen>(shell.CurrentScreen);
             Assert.Equal("Saturday 24 Oct · 12:00 UTC", home.FindControl<TextBlock>("HomeDate")!.Text);
             Assert.Equal("3 things need you", home.FindControl<TextBlock>("AttentionHeadline")!.Text);
-            Assert.Equal("Utility first. 1 of the other 3 places has nothing to report.", home.FindControl<TextBlock>("AttentionSummary")!.Text);
+            Assert.Equal("Utility. A sample water sensor reports a leak.", home.FindControl<TextBlock>("AttentionSummary")!.Text);
             Assert.Equal("Offline demo", home.FindControl<TextBlock>("HomeModeLabel")!.Text);
             Assert.False(home.FindControl<Control>("LiveDot")!.IsVisible);
             Assert.Contains("Synthetic", home.FindControl<TextBlock>("SourceNotice")!.Text, StringComparison.Ordinal);

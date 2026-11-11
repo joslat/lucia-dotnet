@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 
 namespace Lucia.Companion.App.Controls;
 
@@ -74,9 +75,13 @@ public sealed partial class ShellNavigation : UserControl
             Grid.SetRow(button, rail ? index : 0);
             Grid.SetColumn(button, rail ? 0 : index);
             button.Classes.Set("rail", rail);
+            foreach (var label in ((StackPanel)button.Content!).Children.OfType<TextBlock>())
+            { label.TextWrapping = rail ? TextWrapping.NoWrap : TextWrapping.Wrap; }
         }
         this.FindControl<Border>("LuciaMark")!.IsVisible = rail;
         this.FindControl<Border>("NavigationFrame")!.BorderThickness = rail ? new Thickness(0, 0, 1, 0) : new Thickness(0, 1, 0, 0);
-        Width = rail ? 88 : double.NaN;
+        // Native measurement can widen the rail for mapped text without shrinking or splitting its labels.
+        Width = double.NaN;
+        MinWidth = rail ? 88 : 0;
     }
 }

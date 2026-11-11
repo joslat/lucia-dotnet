@@ -521,18 +521,20 @@
       "scorecard": "../UI-UX-QUALITY.md",
       "targetMean": 9.5,
       "baselineMean": 8.13,
-      "reviewMean": 8.87,
+      "reviewMean": 9.05,
       "status": "Active; target not achieved",
       "controlContinuity": "Retained attention actions and day-scoped Story timelines; live Bloom action focus; hidden holds and overlays cancel.",
-      "actionHierarchy": "Direct report review, guided empty setup and retry-first recovery with disclosed removal.",
+      "actionHierarchy": "Home leads with the actual highest-priority reason. Idle storage guidance is local; pending saves and recovery stay global.",
       "nativeAccent": "Fluent native selections share Light #8c5b0f and Dark #e2a84b with approved semantic accent brushes.",
       "limits": "Native input/render evidence does not qualify physical-device motion, screen-reader behavior or frame time.",
-      "cycle": 2,
+      "cycle": 3,
       "continuity": "Place-page entry starts at its own top; Back restores overview offset and a valid visible invoker with guarded deferred focus.",
       "switching": "Owned native opacity transitions settle synchronously when stopped; a previous cancellation cannot hide a newer destination.",
       "systemMotion": "Android reads and observes the current animator duration scale independently of the saved user preference.",
       "keyboard": "Root reserves only docked keyboard overlap inside the existing safe-area viewport; unchanged focused field scrolls into view.",
-      "simulation": "Owner deferred physical checks. Real API 36 APK runs in an isolated emulator with demo data; no hardware or TalkBack speech claim."
+      "simulation": "Owner deferred physical checks. Real API 36 APK runs in an isolated emulator with demo data; no hardware or TalkBack speech claim.",
+      "storageFeedback": "Queued-save count and versioned completed outcomes preserve checked revisions, local confirmation and retry focus.",
+      "responsiveText": "Week text is measured; lanes stack where needed, ruler ticks stay separated and the rail grows for one-line labels without shrinking text."
     }
   },
   "components": [

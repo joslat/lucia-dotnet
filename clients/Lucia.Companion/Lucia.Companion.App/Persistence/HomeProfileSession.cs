@@ -13,8 +13,13 @@ public sealed class HomeProfileSession
     private string? savedRevision;
     private bool hasBaseline;
     private long saveRequest;
+    private int pendingSaves;
     public event Action? Changed;
     public bool IsLoading { get; private set; }
+    public bool IsSaving => pendingSaves > 0;
+    public bool RequiresGlobalNotice => IsLoading || IsSaving || CanRetry || HasConflict || HasUnreadableProfile;
+    public long ConfirmationVersion { get; private set; }
+    public string? ConfirmationText { get; private set; }
     public bool HasUnreadableProfile { get; private set; }
     public bool CanReplaceUnreadableProfile => HasUnreadableProfile && hasBaseline;
     public bool HasConflict { get; private set; }
@@ -45,11 +50,11 @@ public sealed class HomeProfileSession
         state.ReplaceHome(home);
     }
 
-    public void RetrySave() => QueueSave();
+    public void RetrySave() { if (!IsSaving) { QueueSave(); } }
 
     public async Task ReviewConflictAsync()
     {
-        if (store is null || !HasConflict || IsLoading) { return; }
+        if (store is null || !HasConflict || IsLoading || IsSaving) { return; }
         IsLoading = true;
         SetStatus("Reading the saved setup for review...");
         try
@@ -67,7 +72,7 @@ public sealed class HomeProfileSession
 
     public async Task<bool> ResolveConflictAsync(bool keepSessionChanges)
     {
-        if (store is null || !HasConflict || IsLoading || ConflictSnapshot is not { } reviewed) { return false; }
+        if (store is null || !HasConflict || IsLoading || IsSaving || ConflictSnapshot is not { } reviewed) { return false; }
         if (!keepSessionChanges && !CanUseSavedSetup) { return false; }
         IsLoading = true;
         SetStatus("Checking the reviewed setup...");
@@ -86,7 +91,8 @@ public sealed class HomeProfileSession
             HasUnreadableProfile = false;
             CanRetry = false;
             ConflictSnapshot = null;
-            SetStatus(keepSessionChanges ? "Your changes are saved on this device." : "Using the saved setup. Previous session changes were discarded.");
+            Confirm(keepSessionChanges ? "Home setup saved on this device." : "Using the saved setup.",
+                keepSessionChanges ? "Your changes are saved on this device." : "Using the saved setup. Previous session changes were discarded.");
             return true;
         }
         catch (HomeSaveConflictException)
@@ -143,21 +149,26 @@ public sealed class HomeProfileSession
     private void QueueSave()
     {
         if (store is null || !hasBaseline || HasUnreadableProfile || HasConflict || IsLoading) { return; }
+        var snapshot = CurrentProfile();
         var request = ++saveRequest;
-        PendingSave = SaveAfterAsync(PendingSave, CurrentProfile(), request);
+        pendingSaves++;
+        CanRetry = false;
+        PendingSave = SaveAfterAsync(PendingSave, snapshot, request);
+        SetStatus("Saving local setup...");
     }
 
     private async Task SaveAfterAsync(Task previous, HomeProfile snapshot, long request)
     {
-        await previous;
-        if (HasConflict) { return; }
-        SetStatus("Saving local setup...");
         try
         {
+            // Publish the queued task before status observers can enqueue another preference change.
+            await Task.Yield();
+            await previous;
+            if (HasConflict) { return; }
             savedRevision = await store!.SaveAsync(snapshot, savedRevision);
             if (request != saveRequest) { return; }
             CanRetry = false;
-            SetStatus("Setup saved on this device. No readings or task history are stored.");
+            Confirm("Home setup saved on this device.", "Setup saved on this device. No readings or task history are stored.");
         }
         catch (HomeSaveConflictException)
         {
@@ -172,6 +183,14 @@ public sealed class HomeProfileSession
             CanRetry = true;
             SetStatus("Could not save on this device. Your changes still work in this session. Retry when storage is available.");
         }
+        finally { pendingSaves--; Changed?.Invoke(); }
+    }
+
+    private void Confirm(string confirmation, string status)
+    {
+        ConfirmationText = confirmation;
+        ConfirmationVersion++;
+        SetStatus(status);
     }
 
     private void SetStatus(string text) { StatusText = text; Changed?.Invoke(); }

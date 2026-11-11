@@ -33,7 +33,10 @@
           <TextBlock Name="HomeModeLabel" Text="Offline demo" FontSize="{DynamicResource TextSize13}" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
         </StackPanel>
       </Border>
-      <TextBlock Name="SourceNotice" Text="Synthetic readings. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+      <StackPanel Name="SourceContext" Spacing="4">
+        <TextBlock Name="SourceNotice" Text="Synthetic readings. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
+        <TextBlock Name="HomeSaveFeedback" Classes="muted" FontSize="{DynamicResource TextSize13}" IsVisible="False" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
     </Grid>
     <ScrollViewer Name="HomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Name="HomeScrollContent" Spacing="12">

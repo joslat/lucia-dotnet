@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.VisualTree;
 using Lucia.Companion.App.Screens;
 using Lucia.Companion.App.Configuration;
 using Lucia.Companion.App.Controls;
@@ -33,6 +34,7 @@ public sealed partial class CompanionShell : UserControl
     private HomeCatalog? importCatalog;
     private bool refreshing;
     private Control? setupInvoker;
+    private long observedConfirmation;
     private readonly CompanionCrossFade pageTransition = new(TimeSpan.FromMilliseconds(180));
     private readonly Func<Func<Core.HomeTopology>, SharedLayoutAdoptionController>? sharedLayoutFactory;
     public HomeProfileSession ProfileSession => profileSession;
@@ -93,6 +95,7 @@ public sealed partial class CompanionShell : UserControl
 
     public void Navigate(ShellDestination destination)
     {
+        home.SetSaveFeedback(null);
         switch (destination)
         {
             case ShellDestination.Home: ShowHome(); return;
@@ -144,8 +147,11 @@ public sealed partial class CompanionShell : UserControl
         editor.CancelRequested += ShowHome;
         editor.SaveRequested += updated =>
         {
+            var previousConfirmation = profileSession.ConfirmationVersion;
             profileSession.ApplySetup(updated, replaceUnreadableProfile: profileSession.HasUnreadableProfile);
             ShowHome();
+            if (!profileSession.IsSaving && profileSession.ConfirmationVersion > previousConfirmation)
+            { home.SetSaveFeedback(profileSession.ConfirmationText); }
         };
         Host.Content = editor;
         RefreshStorageState();
@@ -162,11 +168,13 @@ public sealed partial class CompanionShell : UserControl
         review.FindControl<Button>("ReadSavedAgain")!.Click += async (_, _) => await profileSession.ReviewConflictAsync();
         review.FindControl<Button>("KeepSessionChanges")!.Click += async (_, _) =>
         {
-            if (await profileSession.ResolveConflictAsync(keepSessionChanges: true)) { ShowHome(); }
+            if (await profileSession.ResolveConflictAsync(keepSessionChanges: true) && ReferenceEquals(Host.Content, review))
+            { ShowHome(); home.SetSaveFeedback(profileSession.ConfirmationText); }
         };
         review.FindControl<Button>("UseSavedSetup")!.Click += async (_, _) =>
         {
-            if (await profileSession.ResolveConflictAsync(keepSessionChanges: false)) { ShowHome(); }
+            if (await profileSession.ResolveConflictAsync(keepSessionChanges: false) && ReferenceEquals(Host.Content, review))
+            { ShowHome(); home.SetSaveFeedback(profileSession.ConfirmationText); }
         };
         Host.Content = review;
         RefreshStorageState();
@@ -176,6 +184,7 @@ public sealed partial class CompanionShell : UserControl
 
     private void ShowHome()
     {
+        home.SetSaveFeedback(null);
         var returningFromSetup = Host.Content is HomeEditorScreen;
         Host.Content = home;
         Navigation.Select(ShellDestination.Home);
@@ -253,15 +262,32 @@ public sealed partial class CompanionShell : UserControl
         {
             review.Refresh(Core.HomeProfile.From(home.State.Home, home.State.PinnedPlaceIds, home.State.SectionOrder), profileSession);
         }
-        this.FindControl<StackPanel>("StorageFooter")!.IsVisible = !reviewing;
+        var footer = this.FindControl<StackPanel>("StorageFooter")!;
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
+        var footerHadFocus = focused is not null && footer.IsVisualAncestorOf(focused);
+        footer.IsVisible = !reviewing && profileSession.RequiresGlobalNotice;
         this.FindControl<TextBlock>("StorageStatus")!.Text = profileSession.StatusText;
-        this.FindControl<OperationProgress>("LocalProfileOperationProgress")!.IsBusy = profileSession.IsLoading && !reviewing;
+        this.FindControl<OperationProgress>("LocalProfileOperationProgress")!.IsBusy = (profileSession.IsLoading || profileSession.IsSaving) && !reviewing;
         this.FindControl<Button>("RetrySaveButton")!.IsVisible = profileSession.CanRetry;
+        this.FindControl<Button>("RetrySaveButton")!.IsEnabled = !profileSession.IsLoading && !profileSession.IsSaving;
         this.FindControl<Button>("ReviewSaveConflict")!.IsVisible = profileSession.HasConflict;
-        this.FindControl<Button>("ReviewSaveConflict")!.IsEnabled = !editing && !profileSession.IsLoading;
+        this.FindControl<Button>("ReviewSaveConflict")!.IsEnabled = !editing && !profileSession.IsLoading && !profileSession.IsSaving;
         Host.IsEnabled = !profileSession.IsLoading;
         Navigation.IsVisible = !editing && !reviewing;
         Navigation.IsEnabled = !profileSession.IsLoading;
+        more?.SetStorageContext(profileSession.StatusText);
+        if (profileSession.IsLoading || profileSession.IsSaving) { home.SetSaveFeedback(null); }
+        else if (profileSession.ConfirmationVersion != observedConfirmation)
+        {
+            observedConfirmation = profileSession.ConfirmationVersion;
+            if (ReferenceEquals(content, home)) { home.SetSaveFeedback(profileSession.ConfirmationText); }
+        }
+        if (footerHadFocus && (!footer.IsVisible || !focused!.IsEffectivelyVisible || !focused.IsEffectivelyEnabled))
+        {
+            if (footer.IsVisible) { this.FindControl<TextBlock>("StorageStatus")!.Focus(); }
+            else if (content is HomeEditorScreen editor) { editor.FindControl<TextBox>("HomeNameInput")!.Focus(); }
+            else if (!reviewing) { Navigation.ButtonFor(Navigation.Selected).Focus(); }
+        }
         home.SetSetupAvailable(!profileSession.IsLoading && (!profileSession.HasUnreadableProfile || profileSession.CanReplaceUnreadableProfile));
         more?.SetAvailability(
             canCustomize: !profileSession.IsLoading,

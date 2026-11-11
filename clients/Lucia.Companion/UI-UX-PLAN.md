@@ -99,6 +99,8 @@ Installed-APK simulation now covers phone/expanded layouts, both themes, system 
 
 Connected historical Story/Week, richer conversation stages, Engine room and the member API port remain gated on v2 and their existing owner decisions. Local-time presentation remains an owner decision. The plan does not introduce an iOS launcher or claim iOS qualification.
 
+Cycle 3 clarifies Home and Day/Week wording, makes local save feedback follow machine-readable queued-operation state, retains global recovery, and adapts Week/rail layouts to measured text. It passes 754/757 native cases with 3 existing opt-in skips. The confirmed mean is 9.05; the 9.5 goal stays active.
+
 Any future new control must state its data truth, identity key, empty/error/recovery behavior, input equivalents, motion trigger and stop conditions. Loading, rendering and source updates are separate events; an attractive transition must not blur those distinctions.
 
 Implementation references: [Avalonia control transitions](https://docs.avaloniaui.net/docs/graphics-animation/control-transitions) and [indeterminate progress](https://docs.avaloniaui.net/controls/feedback/progressbar).

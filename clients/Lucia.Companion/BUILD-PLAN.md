@@ -2,13 +2,11 @@
 
 ## Quality goal, 11 November 2026
 
-The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions and records review means of 8.13, 8.67 and 8.87. The target remains open.
+The owner requested iterative UI/UX improvement and dynamic verification until an evidence-backed mean reaches 9.5/10. [UI-UX-QUALITY.md](UI-UX-QUALITY.md) fixes six dimensions. Confirmed means are 8.13, 8.67, 8.87 and 9.05; the target remains open.
 
-Cycle 1 delivers attention continuity, direct report/setup routes, recovery, Story correctness and focus. Cycle 2 adds overview/page scroll and invoker continuity, synchronous cancellation of screen fades, Android system-motion reduction, keyboard-aware root layout and suppression of duplicate native menus during Bloom holds. Full native verification passes 734/737, with 3 existing opt-in wire skips and 22 new cases in cycle 2. Android builds with zero warnings/errors.
+Cycles 1 and 2 deliver continuity, guided routes, recovery, interrupted motion, Android policy, keyboard layout and Bloom menu corrections. Cycle 3 adds reason-first Home, contextual storage with complete queued-save state, local completed-outcome confirmation, retry focus, correct Week semantics and enlarged-text Week/rail reflow. Final native verification passes 754/757 with the same 3 opt-in skips and 20 new cases. Android and installed-emulator results are recorded in the private ledger.
 
-The owner has no physical device available and requested simulation. Installed-APK checks run in an isolated API 36 emulator with synthetic demo data, phone/expanded layouts, light/dark, system text 2.0, a real soft keyboard, system Back and live/startup/resume animation-policy changes. Physical checks are deferred, not an obstacle to the next app-only refinement batch. Hardware touch, TalkBack, predictive Back and measured frame timing remain separate gates. The server/v2 hold remains in force.
-
-Next app-only findings are Home's reason-first summary, contextual storage feedback with complete save-state coverage, and correct Day/Week headings and selected-day accessibility text. Preserve checked writes and current data. Passing tests alone do not establish a 9.5 design score.
+The owner has no physical device available and requested simulation. Continue app-only runtime interaction assessment now; hardware touch, TalkBack, predictive Back and frame timing remain deferred gates. The server/v2 hold remains in force. No review score or passing test count completes the full application or authorizes server changes.
 
 ## UI and UX refinement, 11 November 2026
 

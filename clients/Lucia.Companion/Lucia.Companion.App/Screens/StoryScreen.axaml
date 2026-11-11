@@ -10,7 +10,7 @@
   <ScrollViewer Name="StoryScroll" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="16,20" Spacing="20">
       <StackPanel Spacing="6">
-        <TextBlock Text="The story of your day" Classes="title" TextWrapping="Wrap" />
+        <TextBlock Name="StoryTitle" Text="The story of your day" Classes="title" TextWrapping="Wrap" />
         <TextBlock Name="DayLabel" Classes="muted" FontSize="{DynamicResource TextSize14}" />
         <TextBlock Text="Sample history. No live household data." Classes="muted" FontSize="{DynamicResource TextSize13}" />
         <TextBlock Name="StatsLine" FontSize="{DynamicResource TextSize14}" TextWrapping="Wrap" IsVisible="False" />

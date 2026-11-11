@@ -35,7 +35,7 @@ Desktop and Android use the same screens and user controls. They do not render t
 
 The root wraps its content in `Controls/InputPaneViewport.cs`. It observes the top level's input pane, reserves only the docked keyboard area that overlaps the existing safe-area viewport, and brings the unchanged focused field into view after layout. Detach removes the observer, clears the inset and invalidates deferred focus work. Status bars and navigation bars remain under Avalonia's existing safe-area handling.
 
-`CompanionShell` owns the four destinations, local save status and full-screen setup/conflict workflows. `ShellNavigation` changes from a bottom bar to a rail at 600 logical units. `HomeScreen` adapts its overview/detail composition at 900 units. Story has its own width and text-size adaptations. Available space and text size decide layouts rather than a phone/tablet device-name check.
+`CompanionShell` owns the four destinations, local save status and full-screen setup/conflict workflows. `ShellNavigation` changes from a bottom bar to a rail at 600 logical units. The rail has an 88-unit minimum and grows through native label measurement; bottom navigation retains its wrapping rules. `HomeScreen` adapts its overview/detail composition at 900 units. Story has its own width and text-size adaptations. Available space and text size decide layouts rather than a phone/tablet device-name check.
 
 `HomeViewModel` owns selection, open detail/actions, pins and section order. Immutable incoming data updates existing place controls when layout identity is unchanged, preserving focus and an active hold. `HomeProfileSession` coordinates checked profile persistence. Controls request changes; they do not obtain household credentials or issue physical commands.
 
@@ -88,6 +88,14 @@ Reading rows are retained by unique label/role only inside an unchanged place an
 `OperationProgress` reads no services and owns no progress clock. Views feed their existing busy flags for Connection, Home, activity, shared review, local-profile loading and conflict review. The native progress bar is indeterminate, with no percentage text. Three static dots replace it under reduced motion. `PresentationVisibility` observes ancestor visibility and stops activity immediately when the containing view is hidden.
 
 `SurfaceEntrance` is enabled only on transform-free presentation containers for Connection stages, verified Home readiness and the place page. It keeps text fully visible while translating four logical units to rest over 220 ms. Data refresh, keyboard focus and preference changes do not replay it. Existing shell navigation owns the other screen transitions. Charts render their actual evidence and unknown coverage immediately, with no invented intermediate readings or simulated loading for absent history.
+
+## Local save feedback
+
+`HomeProfileSession.IsSaving` counts the entire serial queue, including snapshots waiting for older writes. `RequiresGlobalNotice` combines actual loading/saving with recovery flags. The shell never infers state by matching status strings. Each completed intermediate write advances the checked revision; only the latest request confirms success. Review and resolution cannot overtake pending writes.
+
+The shell keeps progress and failure/conflict recovery global, but moves idle context into More. Setup explains its draft and explicit apply action. Versioned completed-outcome text appears on the current Home overview or place page. Navigation consumes it without replay, and conflict handlers recheck their originating view before returning. Retry focus moves to status while pending and to the current destination when the notice closes. A memory-only session publishes no durable-save confirmation.
+
+`StoryWeek` measures date/count/ruler text at the mapped font sizes. It reserves text columns or moves the lane below its header, reducing tick density when necessary. Font changes are coalesced after layout and retain the native action controls. This adaptation does not infer extra reports or change their times.
 
 ## Persistence and service boundary
 

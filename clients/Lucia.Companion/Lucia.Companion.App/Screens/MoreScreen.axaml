@@ -26,6 +26,7 @@
       <Border Classes="panel">
         <StackPanel Spacing="12">
           <TextBlock Text="Your home" Classes="section" />
+          <TextBlock Name="HomeStorageContext" Text="Changes last for this session." Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
           <Button Name="CustomizeHome" Classes="theme row" AutomationProperties.Name="Customize Home">
             <StackPanel Spacing="2">
               <TextBlock Text="Customize Home" TextWrapping="Wrap" />

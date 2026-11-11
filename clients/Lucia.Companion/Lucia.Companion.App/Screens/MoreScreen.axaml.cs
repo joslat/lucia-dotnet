@@ -55,6 +55,8 @@ public sealed partial class MoreScreen : UserControl
         this.FindControl<Button>("RefreshHomeReports")!.IsEnabled = canRefresh;
     }
 
+    public void SetStorageContext(string text) => this.FindControl<TextBlock>("HomeStorageContext")!.Text = text;
+
     private void SyncTheme()
     {
         var current = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;

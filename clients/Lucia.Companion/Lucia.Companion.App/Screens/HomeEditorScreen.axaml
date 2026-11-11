@@ -6,6 +6,7 @@
     <StackPanel Spacing="8">
       <TextBlock Text="Build your home" Classes="title" TextWrapping="Wrap" />
       <TextBlock Text="Names, icons and physical connections. Local setup only, no device control." Classes="muted" />
+      <TextBlock Name="DraftSaveNotice" Text="This is a draft. Choose Save setup to apply it." Classes="muted" FontSize="{DynamicResource TextSize13}" TextWrapping="Wrap" />
       <TextBlock Name="ReplacementWarning" IsVisible="False" Text="The saved setup could not be read. Saving replaces that file. Cancel leaves it untouched." TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
       <TextBlock Name="ErrorText" IsVisible="False" TextWrapping="Wrap" Foreground="{DynamicResource ProblemBrush}" />
     </StackPanel>
